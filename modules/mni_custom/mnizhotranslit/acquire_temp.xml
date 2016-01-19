@@ -1,0 +1,35 @@
+<document>
+	<nitf>
+		<head>
+			<title>{$~title~}</title>
+		</head>
+		<body>
+			<body.head>
+				<hedline>
+					<hl1>{$~title~}</hl1>
+				</hedline>
+				<distributor>Market News International</distributor>
+			</body.head>
+			<body.content>
+				<pre>{$~body~}</pre>
+			</body.content>
+		</body>
+	</nitf>
+	<xn:Resource xmlns:xn="http://www.xmlnews.org/namespaces/meta#">
+		<xn:providerName>Market News International</xn:providerName>
+		<xn:providerCode>1</xn:providerCode>
+		<xn:serviceName>Chinese Mainwire</xn:serviceName>
+		<xn:serviceCode>1</xn:serviceCode>
+		<xn:resourceID>0</xn:resourceID>
+		<xn:rendition>0</xn:rendition>
+		<xn:creator>{$~translator~}</xn:creator>
+		<xn:vendorData>MKTNEWS_:Editor={$~editor~}</xn:vendorData>
+		{$~lang~}
+		<xn:publicationTime>{$~time.updated~}</xn:publicationTime>
+		<xn:receivedTime>{$~time.created~}</xn:receivedTime>
+		<xn:title>{$~title~}</xn:title>
+		{$~blogTags~}
+		<!-- # @author Jeremy Cerda -->
+		<!-- # @version $Id: acquire_temp.xml 2383 2011-07-28 16:23:02Z jcerda $ -->
+	</xn:Resource>
+</document>

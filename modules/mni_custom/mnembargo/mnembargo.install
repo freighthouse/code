@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * Installs our schema and drupal variables
+ */
+function mnembargo_install()
+{
+	drupal_install_schema('mnembargo');
+}
+
+/**
+ * Removes our schema and drupal variables
+ */
+function mnembargo_uninstall()
+{
+	drupal_uninstall_schema('mnembargo');
+	$types = node_get_types();
+	foreach($types as &$t){
+		variable_del("mnembargo_publish_action_".$t->type);
+		variable_del("mnembargo_workflow_cfg_state_".$t->type);
+		variable_del("mnembargo_workflow_cfg_force_".$t->type);
+	}
+}
+
+/**
+ * Database schema for mnembargo, include the core and script tables
+ */
+function mnembargo_schema()
+{
+	//--------------------------------------------------------------------------
+	//  Core Data Table
+	//--------------------------------------------------------------------------
+	$cd_fields  = array(
+		'nid'			=> array('type' => 'int', 'unsigned' => TRUE,
+							'not null' => TRUE, 'default' => 0,
+							'disp-width' => '10'),
+		'time_to_pub'	=> array('type' => 'int', 'unsigned' => FALSE,
+							'not null' => TRUE, 'default' => -1,
+							'disp-width' => '10'),
+	);
+	// Table itself
+	$schema['mnembargo'] = array(
+		'fields'		=> $cd_fields,
+		'primary key'	=> array('nid')
+	);
+
+	return $schema;
+}

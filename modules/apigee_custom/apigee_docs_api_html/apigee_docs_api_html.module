@@ -1,0 +1,119 @@
+<?php
+
+/**
+ * Implements hook_feeds_plugins().
+ */
+function apigee_docs_api_html_feeds_plugins() {
+  $info = array();
+
+  $path = drupal_get_path('module', 'apigee_docs_api_html') . '/feeds_plugins';
+
+  $info['ApigeeDocsFileFetcher'] = array(
+    'name' => 'Apigee MKTG file fetcher',
+    'description' => 'Fetches local html files.',
+    'handler' => array(
+      'parent' => 'FeedsFileFetcher',
+      'class' => 'ApigeeDocsFileFetcher',
+      'file' => 'ApigeeDocsFileFetcher.inc',
+      'path' => $path,
+    ),
+  );
+
+  $info['ApigeeDocsHTMLParser'] = array(
+    'name' => 'Apigee MKTG HTML parser',
+    'description' => t('Parse HTML using XPath.'),
+    'handler' => array(
+      'parent' => 'FeedsXPathParserHTML',
+      'class' => 'ApigeeDocsHTMLParser',
+      'file' => 'ApigeeDocsHTMLParser.inc',
+      'path' => $path,
+    ),
+  );
+
+  return $info;
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function apigee_docs_api_html_ctools_plugin_api($module = '', $api = '') {
+  if ($module == 'feeds' && $api == 'feeds_importer_default') {
+    // The current API version is 1.
+    return array('version' => 1);
+  }
+  if ($module == 'feeds_tamper' && $api == 'feeds_tamper_default') {
+    return array('version' => 2);
+  }
+}
+
+/**
+ * Implements hook_feeds_processor_targets_alter().
+ */
+function apigee_docs_api_html_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
+  if (module_exists('menu') && $entity_type == 'node') {
+    $targets['menu:menu_name'] = array(
+      'name' => t('Menu: id'),
+      'description' => t('The id of the menu.'),
+      'callback' => 'apigee_docs_api_html_set_target',
+    );
+    $targets['menu:link_title'] = array(
+      'name' => t('Menu: title'),
+      'description' => t('The id of the menu.'),
+      'callback' => 'apigee_docs_api_html_set_target',
+    );
+    $targets['menu:plid'] = array(
+      'name' => t('Menu: parent link id'),
+      'description' => t('The parent id of the menu.'),
+      'callback' => 'apigee_docs_api_html_set_target',
+    );
+    $targets['menu:enabled'] = array(
+      'name' => t('Menu: enabled'),
+      'description' => t('The parent id of the menu.'),
+      'callback' => 'apigee_docs_api_html_set_target',
+    );
+  }
+}
+
+function apigee_docs_api_html_set_target($source, $node, $target, $value) {
+  list( , $attr) = explode(':', $target, 2);
+
+  if (!isset($node->menu) || empty($node->menu['inited'])) {
+    $node->menu = isset($node->menu) ? $node->menu : array();
+    $node->menu['inited'] = TRUE;
+    $node->menu['enabled'] = TRUE;
+    $node->menu['plid'] = 0;
+  }
+
+  if ($attr == 'plid') {
+    $value = trim($value);
+
+    if (empty($value)) {
+      $node->menu['enabled'] = FALSE;
+      return;
+    }
+    else {
+      $link_title = $value;
+			$table_id = variable_get('feeds_import_table_id', '');
+      $value = db_query("SELECT mlid FROM {menu_links} WHERE menu_name= :tab_id AND link_title = :value", array(':tab_id' => $table_id, ':value' => $value))->fetchField();
+
+      if ($value === FALSE) {
+        $parent_link = array(
+          'menu_name' => $table_id,
+          'link_title' => $link_title,
+          'link_path' => '<front>',
+          'plid' => 0,
+        );
+        $value = menu_link_save($parent_link);
+      }
+    }
+  }
+  elseif ($attr == 'link_title') {
+    $value = trim($value);
+    if (!$value) {
+      $node->menu['enabled'] = FALSE;
+      return;
+    }
+  }
+
+  $node->menu[$attr] = $value;
+}

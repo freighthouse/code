@@ -1,0 +1,9 @@
+; $Id
+name = MNI Coremetrics
+description = Integrates the Coremetrics system with an MNI website.
+core = 6.x
+package = MNI
+php = 5.2
+
+; # @author: Jeremy Cerda
+; # @version: $Id: mncoremetrics.info 2381 2011-07-28 16:10:12Z jcerda $

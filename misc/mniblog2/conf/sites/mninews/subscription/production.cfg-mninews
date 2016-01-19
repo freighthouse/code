@@ -1,0 +1,258 @@
+# @author Jeremy Cerda
+# @version $Id: production.cfg-mninews 2748 2011-10-11 15:29:50Z jcerda $
+
+# E: Embargo Time, D: Death Time, P: Price
+#
+# Product Name                     	Code       	E	D	P	Taxonomies
+
+Tabular Data                     	MTABLE     	0	0	0.0	txttbl
+
+Basic Headlines                    	A0000000  	0	0	0	mainwire
+Agencies                           	M$$AG$    	0	0	0	mainwire agencies
+Agencies                           	MN$AG$    	0	0	0	mainwire agencies
+All Europe                         	M$B$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$BDS$    	0	0	0	mainwire alleurope
+All Europe                         	M$F$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$G$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$I$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$S$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$X$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$X$$$    	0	0	0	mainwire alleurope
+All Europe                         	M$XDS$    	0	0	0	mainwire alleurope
+Asia News Events Calendar          	F-GEXSHI  	0	0	0	credit asianewseventscalendar
+Asia News Events Calendar          	F-GEXSHI  	0	0	0	fibullets asianewseventscalendar
+Asia News Events Calendar          	F-GEXSHI  	0	0	0	fxbullets asianewseventscalendar
+Asia News Events Calendar          	F-GEXSHI  	0	0	0	mainwire asianewseventscalendar
+Asia Including Japan               	M$A$$$    	0	0	0	mainwire asiaincludingjapan
+Australia                          	M$L$$$    	0	0	0	mainwire australia
+Australia Data Stories             	MALDS$    	0	0	0	mainwire australiadatastories
+Australia Data Tables             	MALDA$    	0	0	0	mainwire australiadatatables txttbl
+Australia Data Tables             	MALDT$    	0	0	0	mainwire australiadatatables txttbl
+Australia Economic Data Calendar   	F-GERCAL  	0	0	0	mainwire australiaeconomicdatacalendar
+BOE State of Play                  	F-BOEPLY  	0	0	0	credit boestateofplay frontpage
+BOE State of Play                  	F-BOEPLY  	0	0	0	fibullets boestateofplay frontpage
+BOE State of Play                  	F-BOEPLY  	0	0	0	fxbullets boestateofplay frontpage
+BOE State of Play                  	F-BOEPLY  	0	0	0	mainwire boestateofplay
+BOE State of Play                  	F-BULBOE  	0	0	0	mainwire boestateofplay
+BOJ State of Play                  	F-GEISHI  	0	0	0	credit bojstateofplay
+BOJ State of Play                  	F-GEISHI  	0	0	0	fibullets bojstateofplay
+BOJ State of Play                  	F-GEISHI  	0	0	0	fxbullets bojstateofplay
+BOJ State of Play                  	F-GEISHI  	0	0	0	mainwire bojstateofplay
+Bank of England                    	M$$BE$    	0	0	0	mainwire bankofengland
+Bank of England Comments           	F-UKSVHI  	0	0	0	mainwire bankofenglandcomments
+Bank of Japan                      	MMJBJ$    	0	0	0	mainwire bankofjapan
+Bank of Japan State of Play        	F-GEISHI  	0	0	0	mainwire bankofjapanstateofplay
+Canada                             	M$C$$$    	0	0	0	mainwire canada
+Canada Data Stories                	MACDS$    	0	0	0	mainwire canadadatastories
+Canada Data Tables                 	MACDA$    	0	0	0	mainwire canadadatatables txttbl
+Canada Data Tables                 	MACDT$    	0	0	0	mainwire canadadatatables txttbl
+Canada Economic Data Calendar      	F-CANCAL  	0	0	0	mainwire canadaeconomicdatacalendar
+Canada/Mexico Data Calendar        	F-CAICAL  	0	0	0	credit canadamexicodatacalendar
+Canada/Mexico Data Calendar        	F-CAICAL  	0	0	0	fibullets canadamexicodatacalendar
+Canada/Mexico Data Calendar        	F-CAICAL  	0	0	0	fxbullets canadamexicodatacalendar
+Central Bank Rate Actions          	F-CENACT  	0	0	0	credit centralbankrateactions
+Central Bank Rate Actions          	F-CENACT  	0	0	0	fibullets centralbankrateactions
+Central Bank Rate Actions          	F-CENACT  	0	0	0	fxbullets centralbankrateactions
+Central Bank Rate Actions          	F-CENACT  	0	0	0	mainwire centralbankrateactions
+China                              	M$Q$$$    	0	0	0	mainwire china
+China Data Calendar                	F-ITALHI  	0	0	0	fibullets chinadatacalendar
+China Data Calendar                	F-ITALHI  	0	0	0	fxbullets chinadatacalendar
+China Data Calendar                	F-SPASUR  	0	0	0	credit chinadatacalendar
+China Data Stories                 	MAQDS$    	0	0	0	mainwire chinadatastories
+China Data Tables                  	MAQDA$    	0	0	0	mainwire chinadatatables txttbl
+China Data Tables                  	MAQDT$    	0	0	0	mainwire chinadatatables txttbl
+China Economic Data Calendar       	F-ITALHI  	0	0	0	mainwire chinaeconomicdatacalendar
+China Money Week                   	F-EUTEST  	0	0	0	mainwire chinamoneyweek
+Commodities Bullets                	F-BULLED  	0	0	0	cobullets cobulletsp
+Congress Watch                     	F-CAPWTC  	0	0	0	mainwire congresswatch frontpage
+Corporate Bond Chatter             	F-AWATCH  	0	0	0	credit corporatebondchatter	frontpage
+Corporate Bond Chatter             	F-AWATCH  	0	0	0	mainwire corporatebondchatter frontpage
+Corporate Bond Chatter             	F-DATWTC  	0	0	0	mainwire corporatebondchatter frontpage
+Credit Bullets                     	F-BULLCR  	0	0	0	credit crbulletsp
+Credit Crisis                      	M$$CR$    	0	0	0	mainwire creditcrisis
+Credit Default Swaps               	F-GILTS0  	0	0	0	credit creditdefaultswaps frontpage
+Credit Default Swaps               	F-GILTS0  	0	0	0	mainwire creditdefaultswaps	frontpage
+Credit Market                      	F-DERINS  	0	0	0	mainwire creditmarket frontpage
+Credit Market                      	F-EMUBON  	0	0	0	mainwire creditmarket frontpage mainwirep
+Credit Market                      	F-USTSYU  	0	0	0	mainwire creditmarket frontpage mainwirep
+Credit Market                      	M$$CO$    	0	0	0	mainwire creditmarket frontpage
+Credit Market                      	M$$FI$    	0	0	0	mainwire creditmarket frontpage
+Credit Market                      	MN$$AG$   	0	0	0	mainwire creditmarket frontpage
+Credit Market                      	MN$CO$    	0	0	0	mainwire creditmarket frontpage
+Credit Market Focus                	F-BULF10  	0	0	0	credit creditmarketfocus
+Credit Market Focus                	F-BULF10  	0	0	0	fibullets creditmarketfocus
+ECB Comments                       	F-BUNCOM  	0	0	0	mainwire ecbcomments
+ECB State of Play                  	F-BUNPLY  	0	0	0	credit ecbstateofplay
+ECB State of Play                  	F-BUNPLY  	0	0	0	fibullets ecbstateofplay
+ECB State of Play                  	F-BUNPLY  	0	0	0	fxbullets ecbstateofplay
+ECB State of Play                  	F-BUNPLY  	0	0	0	mainwire ecbstateofplay
+ECB Update                         	F-TOPSTY  	0	0	0	mainwire ecbupdate frontpage
+Economic Data Review               	F-BULWC2  	0	0	0	fibullets economicdatareview
+Economic Data Review               	F-BULWC2  	0	0	0	fxbullets economicdatareview
+Equities Bullets                   	F-BULLEE  	0	0	0	eqbullets eqbulletsp
+Euro Credit                        	F-DATWTC  	0	0	0	credit eurocredit europe
+Euro Credit Supply Pipeline        	F-WASWAT  	0	0	0	credit eurocreditsupplypipeline
+Euro Credit Supply Pipeline        	F-WASWAT  	0	0	0	fibullets eurocreditsupplypipeline
+European Central Bank              	M$$EC$    	0	0	0	mainwire europeancentralbank mainwirep
+European News Event Calendar       	F-EUECAL  	0	0	0	credit europeannewseventcalendar
+European News Event Calendar       	F-EUECAL  	0	0	0	fibullets europeannewseventcalendar
+European News Event Calendar       	F-EUECAL  	0	0	0	fxbullets europeannewseventcalendar
+European News Event Calendar       	F-EUECAL  	0	0	0	mainwire europeannewseventcalendar
+Eurozone                           	M$X$$$    	0	0	0	mainwire eurozone
+Eurozone                           	M$XDS$    	0	0	0	mainwire eurozone
+Eurozone Bond Technicals           	F-EUTECH  	0	0	0	fibullets eurozonebondtechnicals
+Eurozone Data Stories              	M$XDS$    	0	0	0	mainwire eurozonedatastories
+Eurozone Data Stories              	MAFDS$    	0	0	0	mainwire eurozonedatastories
+Eurozone Data Stories              	MAGDS$    	0	0	0	mainwire eurozonedatastories
+Eurozone Data Stories              	MAIDS$    	0	0	0	mainwire eurozonedatastories
+Eurozone Data Stories              	MASDS$    	0	0	0	mainwire eurozonedatastories
+Eurozone Summary Data Tables       	MAXDA$    	0	0	0	mainwire eurozonesummarydatatables txttbl
+Eurozone Detailed Data Tables      	MAXDT$    	0	0	0	mainwire eurozonedetaileddatatables  txttbl
+Eurozone Key Indicators Summary    	F-EUDSTA  	0	0	0	mainwire eurozonekeyindicatorssummary
+Eurozone/UK Bond Calendar          	F-EBNCAL  	0	0	0	mainwire eurozoneukbondcalendar
+Eurozone/UK Bond Calendar          	F-EZBCAL  	0	0	0	fibullets eurozoneukbondcalendar
+Exclusives                         	MX$$$$    	0	0	0	mainwire exclusives mainwirep
+FX Expectations Survey             	F-EUWFEX  	0	0	0	fxbullets fxexpectationssurvey
+FX Market                          	F-ETRENC  	0	0	0	mainwire fxmarket frontpage
+FX Market                          	F-EUFXEX  	0	0	0	mainwire fxmarket frontpage
+FX Market                          	F-FXDOLU  	0	0	0	mainwire fxmarket frontpage mainwirep
+FX Market                          	F-FXEURU  	0	0	0	mainwire fxmarket frontpage mainwirep
+FX Market                          	M$$FX$    	0	0	0	mainwire fxmarket frontpage
+#FX Options                         	F-GERSHI  	0	0	0	mainwire fxoptions
+Fed State of Play                  	F-BULWC3  	0	0	0	credit fedstateofplay
+Fed State of Play                  	F-BULWC3  	0	0	0	fibullets fedstateofplay
+Fed State of Play                  	F-BULWC3  	0	0	0	fxbullets fedstateofplay
+Fed State of Play                  	F-BULWC3  	0	0	0	mainwire fedstateofplay
+Federal Reserve                    	MMUFE$    	0	0	0	mainwire federalreserve mainwirep
+Fixed Income Bullets               	F-BULLET  	0	0	0	fibullets fibulletsp
+Foreign Exchange Bullets           	F-BULLEF  	0	0	0	fxbullets fxbulletsp
+France                             	M$F$$$    	0	0	0	mainwire france
+France Data Stories                	MAFDS$    	0	0	0	mainwire francedatastories
+France Data Tables                 	MAFDA$    	0	0	0	mainwire francedatatables txttbl
+France Data Tables                 	MAFDT$    	0	0	0	mainwire francedatatables txttbl
+France Key Indicators Summary      	F-FRACDT  	0	0	0	mainwire francekeyindicatorssummary
+Germany                            	M$G$$$    	0	0	0	mainwire germany
+Germany Data Stories               	MAGDS$    	0	0	0	mainwire germanydatastories
+Germany Data Tables                	MAGDA$    	0	0	0	mainwire germanydatatables txttbl
+Germany Data Tables                	MAGDT$    	0	0	0	mainwire germanydatatables txttbl
+Germany Key Indicators Summary     	F-GERCDT  	0	0	0	mainwire germanykeyindicatorssummary
+Global News Event Calendar         	F-CALGBL  	0	0	0	credit globalnewseventcalendar
+Global News Event Calendar         	F-CALGBL  	0	0	0	fibullets globalnewseventcalendar
+Global News Event Calendar         	F-CALGBL  	0	0	0	fxbullets globalnewseventcalendar
+Global News Event Calendar         	F-GBLCAL  	0	0	0	mainwire globalnewseventcalendar
+Government Bond Focus              	F-EUSPRD  	0	0	0	fibullets governmentbondfocus
+Government Bond Focus              	F-EUSPRX  	0	0	0	fibullets governmentbondfocus
+International Economy              	MI$$$$    	0	0	0	mainwire internationaleconomy frontpage
+International Economy              	MI$OI$    	0	0	0	mainwire internationaleconomy frontpage
+Italy                              	M$I$$$    	0	0	0	mainwire italy
+Italy Data Calendar                	F-ITACAL  	0	0	0	fibullets italydatacalendar
+Italy Data Calendar                	F-ITACAL  	0	0	0	fxbullets italydatacalendar
+Italy Data Stories                 	MAIDS$    	0	0	0	mainwire italydatastories
+Italy Data Tables                  	MAIDA$    	0	0	0	mainwire italydatatables txttbl
+Italy Data Tables                  	MAIDT$    	0	0	0	mainwire italydatatables txttbl
+Japan                              	M$J$$$    	0	0	0	mainwire japan
+Japan Data Calendar                	F-JPICOR  	0	0	0	credit japandatacalendar
+Japan Data Stories                 	MAJDS$    	0	0	0	mainwire japandatastories
+Japan Data Tables                  	MAJDA$    	0	0	0	mainwire japandatatables txttbl
+Japan Data Tables                  	MAJDT$    	0	0	0	mainwire japandatatables txttbl
+Japan Economic Data Calendar       	F-JPXCOR  	0	0	0	mainwire japaneconomicdatacalendar
+Japanese Data Calendar             	F-JPICOR  	0	0	0	fibullets japanesedatacalendar
+Japanese Data Calendar             	F-JPICOR  	0	0	0	fxbullets japanesedatacalendar
+Key FX Levels                      	F-FXPAIR  	0	0	0	fxbullets keyfxlevels
+Latam Watch                        	F-LAWTCH  	0	0	0	mainwire latamwatch frontpage
+Latin America                      	M$T$$$    	0	0	0	mainwire latinamerica
+Latin America                      	MFT$$$    	0	0	0	mainwire latinamerica
+Latin America                      	MGT$$$    	0	0	0	mainwire latinamerica
+MNI Capital Goods Index            	MDUCG$    	0	0	0	mainwire mnicapitalgoodsindex
+MNI China Business Sentiment Survey	MDQCB$    	0	0	0	mainwire mnichinabusinesssentimentsurvey frontpage
+MNI Proprietary Economic Indexes   	MDUCG$    	0	0	0	mainwire mniproprietaryeconomicindexes frontpage
+MNI Proprietary Economic Indexes   	MDURE$    	0	0	0	mainwire mniproprietaryeconomicindexes frontpage
+MNI Retail Sales Index             	MDURE$    	0	0	0	mainwire mniretailsalesindex
+Market Glance                      	F-BULMKT  	0	0	0	fibullets marketglance
+Mergers And Acquisitions           	F-MERGER  	0	0	0	fxbullets mergersandacquisitions
+Mexico                             	M$M$$$    	0	0	0	mainwire mexico
+Mexico                             	MAMDS$    	0	0	0	mainwire mexico
+Mexico Data Tables              	MAMDA$    	0	0	0	mainwire mexicodatatables txttbl
+Mexico Data Tables              	MAMDT$    	0	0	0	mainwire mexicodatatables txttbl
+New Zealand                        	M$N$$$    	0	0	0	mainwire newzealand
+New Zealand Data Stories           	MANDS$    	0	0	0	mainwire newzealanddatastories
+New Zealand Data Tables            	MANDA$    	0	0	0	mainwire newzealanddatatables txttbl
+New Zealand Data Tables            	MANDT$    	0	0	0	mainwire newzealanddatatables txttbl
+New Zealand Economic Data Calendar 	F-GERCAL  	0	0	0	mainwire newzealandeconomicdatacalendar
+People's Bank of China             	MMQPB$    	0	0	0	mainwire peoplesbankofchina pboc
+Portfolios                         	F-MNPORT  	0	0	0	mainwire portfolios
+Reality Check                      	F-MNREAL  	0	0	0	mainwire realitycheck frontpage mainwirep
+Reality Check                      	F-MNREAL  	0	0	0	mainwire realitycheck frontpage mainwirep
+Reality Check                      	MABRC$    	0	0	0	mainwire realitycheck frontpage
+Reality Check                      	MAJRC$    	0	0	0	mainwire realitycheck frontpage
+Reality Check                      	MAQRC$    	0	0	0	mainwire realitycheck frontpage
+Reality Check                      	MAURC$    	0	0	0	mainwire realitycheck frontpage
+Reality Check                      	MAURC$    	0	0	0	mainwire realitycheck frontpage
+Reality Check                      	MAXRC$    	0	0	0	mainwire realitycheck frontpage
+Spain Data Stories                 	MASDS$    	0	0	0	mainwire spaindatastories
+Spain Data Tables                  	MASDA$    	0	0	0	mainwire spaindatatables txttbl
+Spain Data Tables                  	MASDT$    	0	0	0	mainwire spaindatatables txttbl
+Stories By Steve Beckner           	M$$BR$    	0	0	0	mainwire storiesbystevebeckner
+Talk from the Trenches             	F-TRENCH  	0	0	0	mainwire talkfromthetrenches
+The FX Spot                        	F-ETRENC  	0	0	0	mainwire thefxspot
+Top News Stories                   	MT$$$$    	0	0	0	mainwire topnewsstories mainwirep
+UK                                 	M$B$$$    	0	0	0	mainwire uk
+UK Data Stories                    	MABDS$    	0	0	0	mainwire ukdatastories
+UK Data Tables                     	MABDA$    	0	0	0	mainwire ukdatatables txttbl
+UK Data Tables                     	MABDT$    	0	0	0	mainwire ukdatatables txttbl
+UK Economic Data Calendar          	F-UKECAL  	0	0	0	credit ukeconomicdatacalendar
+UK Economic Data Calendar          	F-UKECAL  	0	0	0	fibullets ukeconomicdatacalendar
+UK Economic Data Calendar          	F-UKECAL  	0	0	0	fxbullets ukeconomicdatacalendar
+UK Economic Data Calendar          	F-UKECAL  	0	0	0	mainwire ukeconomicdatacalendar
+UK Economic Data Calendar          	F-UKICAL  	0	0	0	mainwire ukeconomicdatacalendar
+UK Forecast Survey                 	F-UKSFC1  	0	0	0	mainwire ukforecastsurvey
+UK Forecast Survey                 	F-UKSFC2  	0	0	0	mainwire ukforecastsurvey
+UK Forecast Survey                 	F-UKSFC3  	0	0	0	mainwire ukforecastsurvey
+UK Forecast Highlights             	F-UKXVHI  	0	0	0	mainwire credit fibullets fxbullets ukforecasthighlights
+UK Forecast Highlights             	F-UKIVHI  	0	0	0	mainwire credit fibullets fxbullets ukforecasthighlights
+#UK Forecast Highlights             	F-UKSVHI  	0	0	0	mainwire credit fibullets fxbullets ukforecasthighlights
+#US Agency Spreads                  	F-BULIDE  	0	0	0	credit usagencyspreads
+#US Agency Spreads                  	F-BULIDE  	0	0	0	fibullets usagencyspreads
+#US Agency Spreads                  	F-BULIDE  	0	0	0	mainwire usagencyspreads
+US Bond Technicals                 	F-BULTEC  	0	0	0	fibullets usbondtechnicals
+US Companies                       	M$UEQ$    	0	0	0	mainwire uscompanies
+US Companies                       	MNUEQ$    	0	0	0	mainwire uscompanies
+US Data Stories                    	MAUDS$    	0	0	0	mainwire usdatastories
+US Data Tables                     	MAUDA$    	0	0	0	mainwire usdatatables txttbl
+US Data Tables                     	MAUDT$    	0	0	0	mainwire usdatatables txttbl
+US Economic Data Calendar          	F-USECOR  	0	0	0	credit useconomicdatacalendar
+US Economic Data Calendar          	F-USECOR  	0	0	0	fibullets useconomicdatacalendar
+US Economic Data Calendar          	F-USECOR  	0	0	0	fxbullets useconomicdatacalendar
+US Economic Data Calendar          	F-USECOR  	0	0	0	mainwire useconomicdatacalendar
+US Economic Data Calendar          	F-USICOR  	0	0	0	mainwire useconomicdatacalendar
+US Forecast Highlights             	F-EFORHI  	0	0	0	fibullets usforecasthighlights
+US Forecast Highlights             	F-EFORHI  	0	0	0	fxbullets usforecasthighlights
+US Forecast Highlights             	F-EFORHI  	0	0	0	mainwire usforecasthighlights
+US Forecast Survey                 	F-EFORC1  	0	0	0	mainwire usforecastsurvey
+US Forecast Survey                 	F-EFORC2  	0	0	0	mainwire usforecastsurvey
+US Forecast Survey                 	F-EFORC3  	0	0	0	mainwire usforecastsurvey
+US Interest Rate Swaps             	F-USREPO  	0	0	0	mainwire usinterestrateswaps frontpage
+US Key Indicators Summary          	F-6MRUSD  	0	0	0	mainwire uskeyindicatorssummary
+US Markets Calendar                	F-BULDEX  	0	0	0	credit usmarketscalendar
+US Markets Calendar                	F-BULDEX  	0	0	0	fibullets usmarketscalendar
+US Markets Calendar                	F-BULDEX  	0	0	0	fxbullets usmarketscalendar
+US News Briefs                     	MBU$$$    	0	0	0	mainwire usnewsbriefs
+US News Event Calendar             	F-USACAL  	0	0	0	credit usnewseventcalendar
+US News Event Calendar             	F-USACAL  	0	0	0	fibullets usnewseventcalendar
+US News Event Calendar             	F-USACAL  	0	0	0	fxbullets usnewseventcalendar
+US News Event Calendar             	F-USACAL  	0	0	0	mainwire usnewseventcalendar
+US News Event Calendar             	F-USICAL  	0	0	0	mainwire usnewseventcalendar
+US Repo Market Rates               	F-USTORR  	0	0	0	mainwire usrepomarketrates
+US Treasury Options Volatilities   	F-BULWC4  	0	0	0	fibullets ustreasuryoptionsvolatilities
+US Treasury/Agency Auction Calendar	F-TSYCAL  	0	0	0	fibullets ustreasuryagencyauctioncalendar
+US Treasury/Agency Auction Calendar	F-TSYCAL  	0	0	0	mainwire ustreasuryagencyauctioncalendar
+US Weekly Economic Data Roundup    	F-WKRUSD  	0	0	0	mainwire usweeklyeconomicdataroundup
+US$ Credit Supply Pipeline         	F-BULWC1  	0	0	0	credit uscreditsupplypipeline
+US$ Credit Supply Pipeline         	F-BULWC1  	0	0	0	fibullets uscreditsupplypipeline
+United States                      	M$U$$$    	0	0	0	mainwire unitedstates
+Washington                         	MFU$$$    	0	0	0	mainwire washington
+Washington                         	MGU$$$    	0	0	0	mainwire washington
+World News Roundup                 	F-EUMORN  	0	0	0	mainwire worldnewsroundup
+Japanese Government                	MGJ$$$    	0	0	0	japanesegovernment
+Chicago Report                     	MAUCS$    	0	0	0	chicagoreport
+China Forecast Survey              	F-WLDWTC   	0	0	0	chinaforecastsurvey

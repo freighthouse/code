@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# @author Jeremy Cerda
+# @version $Id: startblog.sh-marketnews 2644 2011-09-20 16:15:38Z jcerda $
+
+SCRIPT_NAME=`basename $0`
+DIRNAME=$(cd `dirname $0` && pwd)
+PROG_HOME=${DIRNAME/\/bin/}
+source $PROG_HOME/conf/runconfig.sh
+USER=`id|cut -d"(" -f2|cut -d")" -f1`
+
+if [ ${USER} != ${PROCESSUSER} ] && [ ${USER} != "root" ]; then
+	echo "ERROR: Must be run as root or ${PROCESSUSER}"
+	exit 2
+fi
+
+pushd ${BLOGDIR} &> /dev/null
+CMD1="/usr/bin/python ${BLOGDIR}/mnadapt.py ${BLOGDIR}/conf/production.cfg ${BLOGDIR}/conf/pub.production.cfg"
+#CMD2="/usr/bin/python ${BLOGDIR}/mnrichwatch.py ${BLOGDIR}/conf/rich.production.cfg ${BLOGDIR}/conf/pub.production.cfg"
+CMD3="/usr/bin/python ${BLOGDIR}/mnemb.py ${BLOGDIR}/conf/production.cfg"
+CMD4="/usr/bin/python ${BLOGDIR}/mniblogpub.py ${BLOGDIR}/conf/pub.production.cfg"
+
+case "${USER}" in
+${PROCESSUSER})
+	${CMD1} >> ${BLOGDIR}/log/mnadapt.log 2>&1 &
+	#${CMD2} >> ${BLOGDIR}/log/mnrichwatch.log 2>&1 &
+	${CMD3} >> ${BLOGDIR}/log/mnemb.log 2>&1 &
+	${CMD4} >> ${BLOGDIR}/log/mniblogpub.log 2>&1 &
+	;;
+root)
+	/bin/su - ${PROCESSUSER} -c "${CMD1} >> ${BLOGDIR}/log/mnadapt.log 2>&1 &"
+	#/bin/su - ${PROCESSUSER} -c "${CMD2} >> ${BLOGDIR}/log/mnrichwatch.log 2>&1 &"
+	/bin/su - ${PROCESSUSER} -c "${CMD3} >> ${BLOGDIR}/log/mnemb.log 2>&1 &"
+	/bin/su - ${PROCESSUSER} -c "${CMD4} >> ${BLOGDIR}/log/mniblogpub.log 2>&1 &"
+	;;
+*)
+	echo "ERROR: Must be run as root or ${PROCESSUSER}"
+	exit 2
+esac
+popd &> /dev/null

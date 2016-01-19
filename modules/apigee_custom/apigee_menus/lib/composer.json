@@ -1,0 +1,23 @@
+{
+    "authors": [
+        {
+            "homepage": "http://apigee.com/",
+            "name": "Apigee Corporation"
+        }
+    ],
+    "description": "Apigee API Library is a set of objects abstracting various internal REST API calls.",
+    "homepage": "http://apigee.com/",
+    "keywords": [
+        "http",
+        "rest",
+        "web service",
+        "curl"
+    ],
+    "license": "unknown",
+    "name": "apigee/apilib",
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/yaml": ">=2.1"
+    },
+    "type": "library"
+}

@@ -1,0 +1,24 @@
+<?php
+// $Id$
+
+/**
+ * @file
+	* Assigns priorities to nodes queued for translation to identify importance to 
+	* translators.
+	*/
+
+function mnipriority_block($op = 'view', $delta = 0, $edit = array()) {
+	switch ($op) {
+		case 'list':
+			$blocks[0]['info'] = t('MNI Priority');
+			return $blocks;
+	
+		case 'view':			
+			drupal_add_js(drupal_get_path('module', 'mnipriority') . '/js/atrader.js');
+			drupal_add_js(drupal_get_path('module', 'mnipriority') . '/js/atrader-static.js');
+			$block['subject'] = "";
+			$block['content'] = "";
+			
+			return $block;
+	}
+}

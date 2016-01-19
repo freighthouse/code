@@ -1,0 +1,8 @@
+name = IHA SSO
+description = Slingshot to Google Apps to verify identity
+core = 7.x
+package = "IHA"
+version = "7.x-1.0"
+
+dependencies[] = openid
+dependencies[] = iha_sso_ui

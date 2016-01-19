@@ -1,0 +1,8 @@
+/* Admin Theme CSS */
+#edit-field-product-intro-und-0,
+#edit-field-product-feature{
+  border: 1px solid #0074BD;
+}
+.fieldset-legend{
+  font-weight: bold;
+}

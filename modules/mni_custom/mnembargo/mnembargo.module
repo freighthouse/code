@@ -1,0 +1,251 @@
+<?php
+
+//------------------------------------------------------------------------------
+//  Menu and Path Control
+//------------------------------------------------------------------------------
+function mnembargo_menu() {
+	$items = array();
+
+	$items['admin/settings/mnembargo/embargoes'] = array(
+		'title' => 'Upcoming Embargoes',
+		'description' => 'View upcoming embargoes.',
+		'page callback' => 'mnembargo_admin_embargoes',
+		'access arguments' => array('view mni node embargoes'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mnembargo.admin.inc'
+	);
+
+	$items['admin/settings/mnembargo'] = array(
+		'title' => 'MNI Embargoes Settings',
+		'description' => 'Administer settings for how and when Nodes will ' .
+				'change Node types.',
+		'page callback' => 'mnembargo_admin_main',
+		'access arguments' => array('administer mni node embargoes'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mnembargo.admin.inc'
+	);
+
+	return $items;
+}
+
+//------------------------------------------------------------------------------
+//  The CRON!
+//------------------------------------------------------------------------------
+function mnembargo_cron()
+{
+	global $user;
+	$orig_user = $user;
+	$old_state = session_save_session();
+	session_save_session(false);
+	$user = user_load(1);
+
+	$q = "SELECT m.nid FROM {mnembargo} m ".
+		"LEFT JOIN {node} n ON n.nid = m.nid ".
+		"WHERE (n.created + m.time_to_pub) < UNIX_TIMESTAMP(NOW())";
+	$results = db_query($q);
+	while($row = db_fetch_array($results)) {
+
+		$node = node_load($row['nid']);
+		
+		if (module_exists('rules')) {
+			rules_invoke_event('mnembargo_event_prior_to_embargo_publish',
+				$node);
+		}
+		
+		$pub_method = variable_get('mnembargo_publish_action_'.$node->type, 0);
+		$pub_method_name = null;
+		$result = -1;
+		if($pub_method == 1 && module_exists('workflow')) {
+			$sid = variable_get('mnembargo_workflow_cfg_state_'.$node->type, 0);
+			$force = variable_get('mnembargo_workflow_cfg_force_'.
+				$node->type, 0);
+			$result = _mnembargo_publish_workflow($node, $sid, $force);
+			$pub_method_name = "workflow";
+		} else {
+			$result = _mnembargo_publish_status($node);
+			$pub_method_name = "status";
+		}
+		
+		if($result) {
+			watchdog("mnembargo", 'Node published (@nid, @title) using '
+			.'@method.', array("@nid"=>$node->nid,"@title"=>$node->title,
+			"@method"=>$pub_method_name), WATCHDOG_INFO);
+			_mnembargo_node_remove($node->nid);
+		}
+		
+	}
+
+	$user = $orig_user;
+	session_save_session($old_state);
+}
+
+function _mnembargo_publish_workflow($node, $sid, $force)
+{
+	$nsid = workflow_execute_transition($node, $sid, NULL, $force);
+	if($nsid != $sid) {
+		watchdog('mnembargo', "Error occured while publishing node ".
+			"(workflow). Will remain in embargo queue for republish. ".
+			"nid:%d time_to_pub:%d", array($node->nid, $node->time_to_pub),
+			WATCHDOG_ERROR);
+		return false;
+	}
+	return true;
+}
+
+function _mnembargo_publish_status($node)
+{
+	$node->status = 1;
+	node_save($node);
+	$n = node_load($node->nid, NULL, TRUE);
+	if ($n->status != 1) {
+		watchdog('mnembargo', "Error occured while publishing node. (status) ".
+			"Will remain in embargo queue for republish. ".
+			"nid:@nid time_to_pub:@pub status:@stat", 
+			array('@nid' => $n->nid, '@pub' => $n->time_to_pub,
+			'@stat' => $n->status),
+			WATCHDOG_ERROR);
+		return false;
+	}
+	return true;
+}
+
+//------------------------------------------------------------------------------
+//  Nodeapi, Database Control, and Embargo Data Loading
+//------------------------------------------------------------------------------
+function mnembargo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL)
+{
+	switch($op)
+	{
+		case "insert":
+			if($node->nid)
+				_mnembargo_node_add($node);
+			break;
+		case "update":
+			if($node->nid)
+				_mnembargo_node_update($node);
+			break;
+		case "delete":
+			if($node->nid)
+				_mnembargo_node_remove($node->nid);
+			break;
+		case "load":
+			if($node->nid)
+				return _mnembargo_node_load(&$node);
+			break;
+	}
+}
+
+/**
+ * Handles removing a node from the mnembargo system
+ *
+ * nid - Node id of the record to delete
+ */
+function _mnembargo_node_remove($nid)
+{
+	$q = "DELETE FROM {mnembargo} WHERE nid = " . $nid;
+	db_query($q);
+	/*if(!db_affected_rows()) {
+		watchdog('mnembargo', "There was an error deleting " .
+			"embargo information. nid:%d", array($nid), WATCHDOG_ERROR);
+	}*/
+}
+
+/**
+ * Handles adding a new node to the system. Will not add a node with no
+ * embargo information
+ *
+ * node - Node object containing all necessary information
+ */
+function _mnembargo_node_add($node)
+{
+	$time_to_pub = $node->time_to_pub;
+	if($time_to_pub) {
+		$q = "INSERT INTO {mnembargo} (nid, time_to_pub) VALUES (%d, %d)";
+		db_query($q, $node->nid, $time_to_pub);
+		if(!db_affected_rows()) {
+			watchdog('mnembargo', "There was an error inserting " .
+				"embargo information. nid:%d time_to_pub:%d",
+				array($node->nid, $time_to_pub),
+				WATCHDOG_ERROR);
+		}
+	}
+}
+
+/**
+ * Handles updating a node's embargo information. If not in the system,
+ * will call insert function to handle. If mnembargo section empty, will
+ * call remove function to handle.
+ *
+ * node - Node object containing mnembargo array with necessary information
+ */
+function _mnembargo_node_update($node)
+{
+	$time_to_pub = $node->time_to_pub;
+	$results = db_query("SELECT * FROM {mnembargo} WHERE nid = " .
+		$node->nid);
+	if(db_affected_rows()) {
+		if($time_to_pub) {
+			$r = db_fetch_array($results);
+			if($time_to_pub != $r['time_to_pub']) {
+				// UPDATE TABLE
+				$q = db_query("UPDATE {mnembargo} SET time_to_pub = %d " .
+					"WHERE nid = %d", $time_to_pub, $node->nid);
+				if(!db_affected_rows()) {
+					watchdog('mnembargo', "There was an error " .
+						"updating embargo information. nid:%d " .
+						"time_to_pub:%d", array($node->nid,
+						$time_to_pub), WATCHDOG_ERROR);
+				}
+			}
+		} else {
+			_mnembargo_node_remove($node->nid);
+		}
+	} else {
+		_mnembargo_node_add($node);
+	}
+	
+	
+}
+
+/**
+ * Adds any relevant mnembargo data to a node object.
+ *
+ * node - Node object containing all necessary information
+ */
+function _mnembargo_node_load(&$node)
+{
+	$ret = array();
+	$results = db_query("SELECT time_to_pub FROM {mnembargo} ".
+		"WHERE nid = %d", $node->nid);
+	if(db_affected_rows()) {
+		$r = db_fetch_array($results);
+		$ret['time_to_pub'] = $r['time_to_pub'];
+	}
+
+	return $ret;
+}
+
+//------------------------------------------------------------------------------
+//  Actions, Rules, and Triggers
+//------------------------------------------------------------------------------
+function mnembargo_rules_event_info() {
+	return array(
+		'mnembargo_event_prior_to_embargo_publish' => array(
+			'label' => t('Prior to Embargo Publish'),
+			'module' => 'mnembargo',
+			'arguments' => array(
+				'node' => array(
+					'type' => 'node',
+					'label' => t('The node being published.')
+				),
+			),
+	    ),
+	);
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function mnembargo_perm() {
+	return array('view mni node embargoes', 'administer mni node embargoes');
+}

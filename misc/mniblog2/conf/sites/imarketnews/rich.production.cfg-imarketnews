@@ -1,0 +1,73 @@
+# @author Jeremy Cerda
+# @version $Id: rich.production.cfg-imarketnews 2337 2011-07-08 15:25:32Z jcerda $
+
+# PROBABLY SHOULD NOT USE INTERVALS SUB 90 seconds..
+
+# SPECIAL CODES
+
+Free Web                 	MWEB00     	0	none        	QUICK
+Free Web2                	MWEB01     	0	frontpage   	QUICK
+Tabular Information      	MTABLE     	-1	none        	QUICK
+Exclusives               	40000     	-1	none        	QUICK
+
+# NO LAG
+
+The FX Spot              	20223   	0	foreignexchange frontpage fxspot
+FX Features              	40015     	0	foreignexchange frontpage fxfeatures
+Latam Watch              	20221   	0	latinamerica frontpage latamwatch
+Latin America            	40106     	0	latinamerica frontpage
+Canada                   	40054     	0	northamerica frontpage canada
+CongressWatch            	20224   	0	northamerica frontpage uscongress
+FX Market Updates        	20003   	0	foreignexchange northamerica frontpage fxupdatenorthamerica
+FX Market Updates        	20028   	0	foreignexchange europe frontpage fxupdateeurope
+Unstructured Finance     	20283   	0	investing northamerica frontpage unstructuredfinance
+MNI Capital Goods Index  	40544     	0	macroeconomy northamerica  frontpage capitalgoods
+MNI Retail Trade Index   	40533     	0	macroeconomy northamerica frontpage retailsales
+MNI China Business       	40547     	0	china macroeconomy frontpage mnichinaindex
+Euro-Dollar Techs        	30094   	0	eurodollartechs
+Euro-Yen Techs           	30097   	0	euroyentechs
+Dollar-Yen Techs         	30092   	0	dollaryentechs
+Euro-Sterling Techs      	30095   	0	eurosterlingtechs
+Bund Techs               	30089   	0	bundtechs
+Cable Techs              	30090   	0	cabletechs
+#Equity Bullets          	F=BULLEQ   	0	investing
+#Equity Bullets          	F=BULLEE   	0	investing
+Equities                 	40050     	0	investing frontpage
+American Equities        	40043     	0	investing northamerica usequities frontpage
+Ratings                  	40027     	0	investing ratings frontpage
+Credit Crisis            	M$$CR$     	0	investing frontpage creditcrisis
+# Aussie Techs, Gilt Techs, Kiwi
+
+# TEN MINUTES
+
+Economic Data Stories    	40014     	600	macroeconomy northamerica frontpage usdata
+Economic Data Stories    	40007     	600	macroeconomy europe frontpage europedata
+Economic Data Stories    	40055     	600	macroeconomy latinamerica frontpage latamdata
+Economic Data Stories    	40154     	600	macroeconomy europe frontpage ukdata
+Economic Data Stories    	40558     	600	macroeconomy china frontpage chinadata
+Economic Data Stories    	40554     	600	macroeconomy japan frontpage japandata
+Economic Data Stories    	40560     	600	macroeconomy northamerica frontpage canadadata
+US Government Policy     	40011     	600	northamerica governmentpolicy frontpage usgov
+US Government Policy     	40010     	600	northamerica governmentpolicy frontpage usgov
+UK Government Policy     	MGB$$$     	600	governmentpolicy frontpage ukgov
+Eurozone Gov't Policy    	MGX$$$     	600	europe governmentpolicy frontpage eurogov
+China Gov't Policy       	MGQ$$$     	600	foreignexchange china governmentpolicy frontpage chinagov
+Japan Gov't Policy       	MGJ$$$     	600	foreignexchange japan governmentpolicy frontpage japangov
+Fed State of Play        	20220   	600	centralbanks northamerica frontpage fedstateofplay
+ECB Update               	20272   	600	centralbanks europe frontpage ecbupdate
+BOJ State of Play        	20081   	600	centralbanks japan frontpage bojstateofplay
+ECB State of Play        	20089   	600	centralbanks europe frontpage ecbstateofplay
+
+# TWENTY MINUTES
+
+Federal Reserve          	40021     	1200	centralbanks northamerica frontpage federalreserve
+ECB Stories              	40013     	1200	centralbanks europe frontpage ecb
+BOJ Stories              	MMJBK$     	1200	centralbanks japan frontpage boj
+BOE Stories              	40023     	1200	centralbanks europe frontpage boe
+PBOC Stories             	MMQPB$     	1200	centralbanks china frontpage pboc
+
+# ONE HOUR
+
+Portfolios               	20236   	3600	investing northamerica frontpage portfolios
+Portfolios               	MP$$$$     	3600	investing northamerica frontpage portfolios
+Reality Check            	20068   	3600	macroeconomy northamerica frontpage realitycheck

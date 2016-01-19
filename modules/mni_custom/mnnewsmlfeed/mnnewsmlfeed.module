@@ -1,0 +1,302 @@
+<?php
+# @author Jeremy Cerda
+# @version $Id: mnnewsmlfeed.module 2526 2011-08-24 14:11:56Z jcerda $
+
+function _mnnewsmlfeed_format_date($date, $format) {
+	$date_format_data = preg_split('/T/', $format);
+	$ret = "";
+	for($j = 0; $j < count($date_format_data); $j++) {
+		$ret .= date($date_format_data[$j], $date).'T';
+	}
+	return substr($ret, 0, -1);
+}
+
+function mnnewsmlfeed_action_info() {
+	return array(
+		"mnnewsmlfeed_push_action" => array(
+			'description' => t('Push NewsML Content'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		)/*,
+		"mnnewsmlfeed_archive_action" => array(
+			'description' => t('Archive NewsML Content'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		)*/
+	);
+}
+
+function mnnewsmlfeed_push_action(&$object, $context = array()) {
+	$n = $object;
+	if(!$n) {
+		watchdog("mnnewsmlfeed", "Could not load node for NewsML ".
+			"push action. - @nid", array("@nid"=>$object->nid),
+			WATCHDOG_ERROR, null);
+		return;
+	}
+
+	// Check path for our files
+	$dataDir = file_create_path("mnnewsmlfeed_data");
+	if(!file_check_directory($dataDir, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($dataDir, FILE_MODIFY_PERMISSIONS)) {
+			watchdog("mnnewsmlfeed", "Could not create mnnewsmlfeed_data dir.",
+				null, WATCHDOG_ERROR, null);
+			return;
+		}
+	}
+
+	_mnnewsmlfeed_output_node($n, $dataDir);
+
+	watchdog("mnnewsmlfeed", "Added node @nid to NewsML Feed.",
+		array("@nid" => $n->nid), WATCHDOG_INFO, null);
+}
+
+/*function mnnewsmlfeed_archive_action(&$object, $context = array()) {
+	$n = node_load($object->nid);
+	if(!$n) {
+		watchdog("mnnewsmlfeed", "Could not load node for NewsML ".
+			"archive action. - @nid", array("@nid"=>$object->nid),
+			WATCHDOG_ERROR, null);
+		return;
+	}
+
+	// Create archive in tmp dir
+	$archDir = file_directory_temp() . "/mnnewsmlfeed_archive";
+	if(!is_dir($archDir)) {
+		if(!mkdir($archDir)) {
+			watchdog("mnnewsmlfeed", "Could not create archive dir. - @archDir",
+				array("@archDir" => $archDir), WATCHDOG_ERROR, null);
+			return;
+		}
+	}
+
+	_mnnewsmlfeed_output_node($n, $archDir);
+
+	watchdog("mnnewsmlfeed", "Added node @nid to NewsML Archive.",
+		array("@nid" => $n->nid), WATCHDOG_INFO, null);
+}*/
+
+function _mnnewsmlfeed_load_ini($relative_path)
+{
+	$p = drupal_get_path('module', 'mnnewsmlfeed');
+
+	if(!file_exists($p.$relative_path)) {
+		watchdog("mnnewsmlfeed", "Could not load ".$p.$relative_path.".",
+			null, WATCHDOG_ERROR, null);
+		return null;
+	}
+
+	return parse_ini_file($p.$relative_path, true);
+}
+
+function _mnnewsmlfeed_mapterm($term)
+{
+	$prod = _mnnewsmlfeed_load_ini("/conf/vendorData.production.cfg");
+	return ($prod['all'][$term] ? $prod['all'][$term] : false);
+}
+
+function _mnnewsmlfeed_output_node($node, $dir) {
+	// Load template
+	$template = NULL;
+	if(!file_exists($dir."/template.xml")) {
+		/*$s = drupal_get_path('module', 'mnnewsmlfeed')."/conf/template.xml";
+		if(!file_copy($s, $dir."/template.xml", FILE_EXISTS_REPLACE)) {
+			watchdog("mnnewsmlfeed", "Could not copy template file to ".$dir,
+				null, WATCHDOG_ERROR, null);
+			return;
+		}*/
+		$template = file_get_contents(drupal_get_path('module', 'mnnewsmlfeed')
+			."/conf/template.xml");
+	} else {
+		$template = file_get_contents($dir."/template.xml");
+	}
+
+	$files = array();
+	$lang_ini = _mnnewsmlfeed_load_ini("/conf/lang.production.cfg");
+	foreach($lang_ini as $lang) {
+		if(isset($lang['types']) && !in_array($node->type,
+		preg_split(",",$lang['types']))) {
+			// If we find this node's type is not listed
+			// for this language, skip it
+			continue;
+		}
+
+		$encodings = array("utf8");
+		if(isset($lang['encodings']) && $lang['encodings'] != NULL)
+			$encodings = preg_split(",", $lang['encodings']);
+
+		// Generate files
+		foreach($encodings as $enc) {
+			$data = _mnnewsmlfeed_generate_xml_data($node, $template, $lang, $enc);
+
+			if($data != NULL) {
+				$files[] = file_save_data($data[1], $dir."/".$data[0],
+					FILE_EXISTS_REPLACE);
+			}
+		}
+	}
+
+	// Move files into place
+	foreach($files as $f)
+		rename($f, substr($f, 0, -3));
+}
+
+function _mnnewsmlfeed_generate_xml_data($node, $template, $lang_data, $encoding) {
+	$oa = get_object_vars($node);
+
+	// Using utf8?
+	$toUTF8 = mb_strtolower($encoding);
+	$toUTF8 = ($toUTF8 == "utf8") || ($toUTF8 == "utf-8");
+
+	// Load title
+	$title = NULL;
+	if(isset($lang_data['title_field'])) {
+		if($lang_data['title_field'] == NULL ||
+		!isset($oa[$lang_data['title_field']])) {
+			watchdog("mnnewsmlfeed", "Invalid title_field. - @title_field",
+				array("@title_field" => $lang_data['title_field']),
+				WATCHDOG_ERROR, null);
+			return NULL;
+		}
+		$title = $oa[$lang_data['title_field']][0]["value"];
+	} else {
+		$title = $node->title;
+	}
+
+	// Load body
+	$body = NULL;
+	if(isset($lang_data['body_field'])) {
+		if($lang_data['body_field'] == NULL ||
+		!isset($oa[$lang_data['body_field']])) {
+			watchdog("mnnewsmlfeed", "Invalid body_field. - @body_field",
+				array("@body_field" => $lang_data['body_field']),
+				WATCHDOG_ERROR, null);
+			return NULL;
+		}
+		$body = $oa[$lang_data['body_field']][0]["value"];
+	} else {
+		$body = $node->body;
+	}
+
+	// If either is NULL, exit. Can't push yet, no content
+	if($title == NULL || $body == NULL) {
+		watchdog("mnnewsmlfeed", "Node not pushed using NewsML. ".
+			"Title or body not filled. - @nid", array("@nid"=>$node->nid),
+			WATCHDOG_ALERT, null);
+		return NULL;
+	}
+
+	// Clean up the title and body data
+	$title = htmlspecialchars($title);
+	$body = htmlspecialchars($body);
+
+	// Load ISO
+	$iso = NULL;
+	if(isset($lang_data['iso'])) {
+		$iso = $lang_data['iso'];
+	} else {
+		watchdog("mnnewsmlfeed", "Invalid iso. - @iso",
+			array("@iso" => $lang_data['iso']),
+			WATCHDOG_ERROR, null);
+		return NULL;
+	}
+
+	// Load suffix
+	$suffix = NULL;
+	if(isset($lang_data['suffix'])) {
+		$suffix = $lang_data['suffix'];
+	} else {
+		watchdog("mnnewsmlfeed", "Invalid suffix. - @suffix",
+			array("@suffix" => $lang_data['suffix']),
+			 WATCHDOG_ERROR, null);
+		return NULL;
+	}
+
+	// Load LangSub
+	$langsub = NULL;
+	if(isset($lang_data['langsub'])) {
+		$langsub = $lang_data['langsub'];
+	}
+
+	// Load Service Name
+	$service = "";
+	if(isset($lang_data['service']) && $lang_data['service'] != NULL) {
+		$service = $lang_data['service'];
+	}
+
+	// Load Service Code
+	$service_code = "1";
+	if(isset($lang_data['service.code']) && $lang_data['service.code'] != NULL){
+		$service_code = $lang_data['service.code'];
+	}
+
+	// Load date format if available
+	$date_format = "YmdTHisO";
+	if(isset($lang_data['date.format']) && $lang_data['date.format'] != NULL){
+		$date_format = $lang_data['date.format'];
+	}
+
+	// Combine lang data
+	$lang_data = "<xn:language>".$iso."</xn:language>";
+	if($langsub != NULL) {
+		$lang_data .= "\n                <xn:vendorData>MKTNEWS_:LangSub=".
+			$langsub."</xn:vendorData>";
+	}
+
+	// Load Author information
+	$translator = "";
+	if(isset($node->field_translator[0]["uid"])) {
+		$translator = htmlspecialchars(user_load(
+			$node->field_translator[0]["uid"])->name);
+	}
+	$editor = "";
+	if(isset($node->field_translator[0]["uid"])) {
+		$editor = htmlspecialchars(user_load(
+			$node->field_editor[0]["uid"])->name);
+	}
+
+	// Load taxonomy data
+	$terms = taxonomy_node_get_terms($node);
+	foreach($terms as $t) {
+		$tax .= "<xn:vendorData>MKTNEWS_:Blog Tag=" .
+			htmlspecialchars($t->description) .
+			"</xn:vendorData>\n                ";
+		$map_term = _mnnewsmlfeed_mapterm($t->description);
+		if($map_term === false){}else{
+			$tax .= "<xn:vendorData>MKTNEWS_:Special Code=".$map_term.
+				"</xn:vendorData>\n                ";
+		}
+	}
+	$tax = trim($tax);
+
+	// Template and finalize data
+	$final = str_replace("{\$~title~}", $title, $template);
+	$final = str_replace("{\$~body~}", $body, $final);
+	$final = str_replace("{\$~blogTags~}", $tax, $final);
+	$final = str_replace("{\$~lang~}", $lang_data, $final);
+	$final = str_replace("{\$~translator~}", $translator, $final);
+	$final = str_replace("{\$~editor~}", $editor, $final);
+	$final = str_replace("{\$~service~}", $service, $final);
+	$final = str_replace("{\$~service.code~}", $service_code, $final);
+
+	$time_created = _mnnewsmlfeed_format_date($node->created, $date_format);
+	$time_changed = _mnnewsmlfeed_format_date($node->changed, $date_format);
+
+	$final = str_replace("{\$~time.created~}", $time_created, $final);
+	$final = str_replace("{\$~time.updated~}", $time_changed, $final);
+
+	// Encode
+	if($toUTF8)
+		$final = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" .
+			$final;
+	else
+		$final = "<?xml version=\"1.0\" encoding=\"".$encoding."\"?>\n" .
+			mb_convert_encoding($final, $encoding, "utf8");
+
+	// Generate filename
+	$filename = "n".$node->nid."_".$suffix."_".$encoding.".xml.NR";
+
+	return array($filename, $final);
+}

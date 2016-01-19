@@ -1,0 +1,520 @@
+<?php
+//if ( function_exists('curl_init') ) {
+include('eloqua_example/class/class.eloquaLookup.php');
+//}
+$eloqua_data;
+
+/**
+ * Implements hook_menu().
+ */
+function turn_gating_menu() {
+  $items['g'] = array(
+    'title' => 'Loading...',
+    'description' => 'The page callback can use the arguments provided after the path used as key',
+    'page callback' => 'turn_gating_page_callback',
+    'page arguments' => array(t('This page demonstrates using arguments in the path (portions of the path after "turn_gating/". For example, access it with <a href="!link1">!link1</a> or <a href="!link2">!link2</a>', array('!link1' => url('turn_gating/firstarg'), '!link2' => url('turn_gating/2751')))),
+    'access callback' => TRUE,
+    'weight' => 40,
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback for use with most of the menu entries. The arguments it
+ * receives determine what it outputs.
+ *
+ * @param $content
+ *   The base content to output.
+ * @param $arg1
+ *   First additional argument from the path used to access the menu
+ */
+function turn_gating_page_callback($content = NULL, $arg1 = NULL) {
+	global $eloqua_data;
+
+	if ( empty($arg1) ) {
+		$oot =  '<p>' . $content . '</p>';
+	} else {
+		$oot = '';
+
+		if ( is_numeric($arg1) == false ) {
+			// basic arg check
+			$oot .= '<h2>Loading...</h2>';
+			$oot .= "<p>\"$arg1\" does not appear to be a number. try to load it with a <a href='". url('turn_gating/2751') ."'>numeric arg</a></p>";
+		} else {
+			//$oot .= "<p>$arg1 is a number! so we can try and load node/$arg1...</p>";
+			$nod = node_load($arg1);
+			if ( $nod != false ) {
+				// check if node can be Gated or not
+				if ( isset( $nod->field_gated ) ) {
+					if ( $nod->field_gated['und'][0]['value'] == 1 ) {
+
+						//$oot .= '<h2>GATED!</h2>';
+
+						/*echo 'Cookie Check: ' . turn_gating_okcookiecheck() . '<br/>';
+						echo 'Eloqua Data: ';
+						var_dump($eloqua_data);*/
+
+						// check if already passed Gating
+						if ( turn_gating_okcookiecheck() ) {
+							//$oot .= '<h3>ALREADY SHOULD HAVE ACCESS TO GATED CONTENT?!</h3>';
+
+                            // blind submission
+                            turn_gating_blind_submit($nod);
+
+							$oot .= turn_gating_okredirect( $nod->nid, $nod );
+						} else {
+							// has not passed gating yet, trying to view gated content
+							// redirect to insights#g____ to launch the form inside a popup
+							$oot .= turn_gating_popcheck( $nod->nid );
+							// now we can assume we're already launched in the popup
+							$oot .= '<p class="gatedintro">'. $nod->field_gated_blurb['und'][0]['value'] .'</p>';
+
+							if ( turn_gating_formsuccess() ) {
+								//$oot .= '<p>BAZING</p>';
+								if ( function_exists('watchdog') ) {
+									watchdog('gating', 'gating contact form submission success!');
+								}
+								// cookie moved to turn_eloqua module...
+								//setcookie( 't_tguk', 1,  time()+60*60*24*365, '/' );
+								$oot .= turn_gating_okredirect( $nod->nid, $nod );
+							}
+							//$oot .= '<pre>'. print_r($msgs, true) .'</pre>';
+
+							// load CONTACT SALES form
+							$block = module_invoke('webform', 'block_view', 'client-block-24');
+							$contactform = $block['content'];
+							$contactform = str_replace('action="/contact-sales"', 'action="/contact-sales?destination=g/'. $nod->nid .'"', $contactform);
+
+							//$oot .= '<pre style="display:none">'. $block['content'] .'</pre>';
+							$oot .= render($contactform);
+
+							$oot .= '<script type="text/javascript">
+jQuery(function() {
+	jQuery("#header,#footer_outer,#breadcrumb,#page-title,#content_bottom,#admin-menu").hide();
+	jQuery("#webform-client-form-24").submit(function() {
+		var ret = true;
+		jQuery(this).find("input.required, select.required").each(function() {
+			if ( jQuery(this).val() == "" ) ret = false;
+		});
+		if ( ret == false ) {
+			alert("Please fill out all the Required fields (*)");
+		} else {
+			/* Insights_Submit floodlight */
+			var axel = Math.random() + "";
+			var a = axel * 10000000000000;
+			var fm = jQuery("<iframe />");
+			fm.attr("src","http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig289;ord=" + a);
+			fm.width(1).height(1).attr("frameborder",0).hide().prependTo("body");
+		}
+		return ret;
+	});
+})</script>';
+							$oot .= '<style type="text/css">#admin-menu { display:none !important }</style>';
+						}
+					} else {
+						//$oot .= '<h2>nid '. $nod->nid .' able to be Gated, but unlocked...</h2>';
+						if ( function_exists('watchdog') ) {
+							watchdog('gating', 'nid '. $nod->nid .' able to be Gated, but unlocked...');
+						}
+//						$oot .= turn_gating_okredirect( $nod->nid, $nod );
+						drupal_goto('node/'. $nod->nid);
+					}
+				} else {
+						if ( function_exists('watchdog') ) {
+							watchdog('gating', 'nid '. $nod->nid .' not able to be gated?');
+						}
+//						$oot .= turn_gating_okredirect( $nod->nid, $nod );
+						drupal_goto('node/'. $nod->nid);
+					//$oot .= '<h2>this node '. $nod->nid .' of type "'. $nod->type .'" does not seem to support Gating</h2>';
+				}
+
+				//$oot .= '<pre style="display:none">'. print_r($nod,true) .'</pre>';
+			}
+		}
+	}
+	return $oot;
+}
+
+function turn_gating_okcookiecheck() {
+    global $eloqua_data;
+	global $eloqua_data_wesent;
+	$ret = false;
+
+	if ( function_exists('watchdog') ) {
+		watchdog('gating', 'okcookiecheck : eloqua_data is '. (is_object($eloqua_data) ? '' : 'NOT ') .'an object :<br /><pre>'. print_r($eloqua_data, true) .'</pre>');
+	}
+	if ( is_object($eloqua_data) ) {
+		// first, check if eloqua_data has already been set by a prior call here, and return accordingly..
+		if ( is_array($eloqua_data->data) ) {
+			if( $eloqua_data->data['C_FirstName'] != null &&
+				$eloqua_data->data['C_LastName'] != null &&
+				$eloqua_data->data['C_EmailAddress'] != null &&
+				$eloqua_data->data['C_BusPhone'] != null &&
+				$eloqua_data->data['C_Country'] != null &&
+				$eloqua_data->data['C_State_Prov'] != null &&
+				$eloqua_data->data['C_Company'] != null &&
+				$eloqua_data->data['C_Industry1'] != null &&
+				$eloqua_data->data['C_Job_Role1'] != null &&
+				$eloqua_data->data['C_Department1'] != null &&
+				$eloqua_data->data['C_Company_Type1'] != null
+			) {
+				return true;
+			}
+		}
+	}
+
+	// just return false if we don't have CURL for the Eloqua lookup... (localhost dev)
+	$oktocurl = true;
+	if ( !function_exists('curl_init') ) {
+		if ( function_exists('watchdog') ) {
+			watchdog('gating', 'need curl extension for Eloqua lookups!');
+		}
+		$oktocurl = false;
+		//return false;
+	}
+
+	// else...
+	$siteID = 1852860672; //Turn's Eloqua Instance ID
+	$lookupKey = '4fa29caf6d2f4ab7a0e580995e1dada3'; //Eloqua Data Lookup Key for Visitor Lookup
+	$email = null;
+
+	if ( isset ( $_COOKIE['ELOQUA'] ) && $oktocurl ) {
+		$elqGUID = $_COOKIE['ELOQUA']; //Eloqua Visitor Cookie GUID (used as criteria for querying visitors from Eloqua)
+		$wdcheck = 'EloquaVisitorLookup for elqGUID '. $elqGUID;
+		$visitor = new EloquaVisitorLookup($siteID, $lookupKey, $elqGUID);
+		//check email
+		$email = $visitor->data['V_ElqEmailAddress'];
+	} else {
+		$wdcheck = 'ELOQUA cookie (or php curl extension?) not found : time for a drupal webform lookup instead?';
+		// and then...
+	}
+
+	if($email == null) {
+		$wdcheck .= '<br />V_ElqEmailAddress = null ?';
+		// return $ret;
+	} else {
+		//use email to query for contact
+		$lookupKey = '7e71589ad53d42d094eacfc104258ec1'; //Eloqua Data Lookup Key for Contact Lookup
+		$criteria = array('C_EmailAddress' => $email);
+		$contact = new EloquaContactLookup($siteID, $lookupKey, $criteria);
+
+		$wdcheck .= '<br />new EloquaContactLookup for '. $email;
+
+		//check if all contact data is filled
+		if( $contact->data['C_FirstName'] != null &&
+			$contact->data['C_LastName'] != null &&
+			$contact->data['C_EmailAddress'] != null &&
+			$contact->data['C_BusPhone'] != null &&
+			$contact->data['C_Country'] != null &&
+			$contact->data['C_State_Prov'] != null &&
+			$contact->data['C_Company'] != null &&
+			$contact->data['C_Industry1'] != null &&
+			$contact->data['C_Job_Role1'] != null &&
+			$contact->data['C_Department1'] != null &&
+			$contact->data['C_Company_Type1'] != null
+		) {
+			//return eloqua contact data
+			$eloqua_data = $contact;
+			$ret = true;
+			$wdcheck .= '<br />** contact found ! **<br /><pre>'. print_r($contact->data,true) .'</pre>';
+		} else {
+			$wdcheck .= '<br />!! contact NOT found, for email address '. $email .' ??';
+		}
+	}
+
+	if ( $ret == false ) {
+		// check for webform submitted cookie as a backup?
+		if ( isset( $_COOKIE['t_tguk'] ) ) {
+			$prevsid = $_COOKIE['t_tguk'];
+			if ( $prevsid > 1 ) {
+				$wdcheck .= '<br />previous CONTACT GATING WEBFORM SUBMISSION found! : '. $prevsid;
+				$contact = new EloquaFakeLookup( $prevsid );
+
+				if ( function_exists('watchdog') ) watchdog('gating', 'EloquaFakeLookup : '. $prevsid .' <br /><pre>'. print_r($contact->data,true) .'</pre>');
+
+				$eloqua_data = $contact;
+				$ret = true;
+			}
+		}
+	}
+
+	if ( function_exists('watchdog') )  watchdog('gating', $wdcheck);
+
+	return $ret;
+}
+
+function turn_gating_blind_submit( $gnode ) {
+	global $eloqua_data;
+
+	$url = 'http://s1852860672.t.eloqua.com/e/f2';
+
+	$cmpid = (isset($_GET['cmpid']) && !empty($_GET['cmpid'])) ? $_GET['cmpid'] : '***';
+	if ( $cmpid == '***' ) {
+		// check previously set taken from a $_GET , otherwise use the node's value
+		$cmpid = (isset($_COOKIE['t_cmpid']) && !empty($_COOKIE['t_cmpid'])) ? $_COOKIE['t_cmpid'] : $gnode->field_cmpid['und'][0]['value'];
+	}
+	$ecid = (isset($_GET['ecid']) && !empty($_GET['ecid'])) ? $_GET['ecid'] : '***';
+	if ( $ecid == '***' ) {
+		// check previously set taken from a $_GET , otherwise use the node's value
+		$ecid = (isset($_COOKIE['t_ecid']) && !empty($_COOKIE['t_ecid'])) ? $_COOKIE['t_ecid'] : $gnode->field_eloqua_campaign_id['und'][0]['value'];
+	}
+
+	// check these two fields as they are set also in turn_eloqua > turn_eloqua_set_cookie_fields.js , for Contact Sales form
+	$retouchcmpid = (isset($_COOKIE['s_ev2']) && !empty($_COOKIE['s_ev2'])) ? $_GET['s_ev2'] : '';
+	$turnuserid = (isset($_COOKIE['uid']) && !empty($_COOKIE['uid'])) ? $_COOKIE['uid'] : '';
+
+	if ( function_exists('watchdog') ) {
+		watchdog('gating_blind_submit', 'cmpid: '. $cmpid .'<br />ecid: '. $ecid .'<br />retouchcmpid: '. $retouchcmpid .'<br />turnuserid: '. $turnuserid);
+		// '<br /><br /><pre>'. print_r($gnode,true) .'</pre>' );
+	}
+
+	$post_fields = 'elqFormName=Insights&elqSiteID=1852860672&elqCookieWrite=0&elqCustomerGUID=' . (isset($_COOKIE['ELOQUA']) ? $_COOKIE['ELOQUA'] : '');
+	$post_fields .= '&cmpid=' . $cmpid;
+	$post_fields .= '&elqCampaignId=' . $ecid;
+	$post_fields .= '&retouchcmpid=' . $retouchcmpid;
+	$post_fields .= '&intcmpid='; // still not sure about this one ??
+	$post_fields .= '&turnuserid=' . $turnuserid;
+
+	$post_fields .= '&firstName=' . $eloqua_data->data['C_FirstName'];
+	$post_fields .= '&lastName=' . $eloqua_data->data['C_LastName'];
+	$post_fields .= '&emailAddress=' . $eloqua_data->data['C_EmailAddress'];
+	$post_fields .= '&businessPhone=' . $eloqua_data->data['C_BusPhone'];
+	$post_fields .= '&country=' . $eloqua_data->data['C_Country'];
+	$post_fields .= '&stateOrProvince=' . $eloqua_data->data['C_State_Prov'];
+	$post_fields .= '&company=' . $eloqua_data->data['C_Company'];
+	$post_fields .= '&industry=' . $eloqua_data->data['C_Industry1'];
+	$post_fields .= '&jobRank=' . $eloqua_data->data['C_Job_Role1'];
+	$post_fields .= '&department=' . $eloqua_data->data['C_Department1'];
+	$post_fields .= '&companyType=' . $eloqua_data->data['C_Company_Type1'];
+	$post_fields .= '&submitType=' . 'Blind Submit';
+
+	if ( function_exists('watchdog') ) {
+		watchdog('gating_blind_submit', $post_fields);
+	}
+
+	if ( function_exists('curl_init') ) {
+		$ch = curl_init();
+
+		$header[] = 'Referer: ' . $_SERVER['HTTP_REFERER'];
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
+		curl_setopt($ch, CURLOPT_FAILONERROR, FALSE);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, FALSE);  // disallow redirects
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+		$server_output = curl_exec($ch);
+		curl_close($ch);
+	}
+
+	// unset our stored t_cmpid & t_ecid after the first submission
+	setcookie('t_cmpid', NULL, -1);
+	setcookie('t_ecid', NULL, -1);
+}
+
+function turn_gating_okredirect( $nid, $tnode = null ) {
+	/*
+	 * probably want to node_load here and redirect to actual FILE url if its a DOC node,
+	 * but in the mean time
+	 */
+	$red = true;
+	$oot = '';
+	if ( $tnode ) {
+		if ( in_array($tnode->type, array( 'docs', 'highlight', 'white-paper', 'white_paper', 'case-study', 'case_study', 'proof_digital_audience_report' ) ) ) {
+			// redirect to pdf instead ?
+
+			$pdf = $tnode->field_doc['und'][0]['uri'];
+			$pdf = file_create_url($pdf);
+			//$pdf = str_replace('public://', '', $pdf);
+
+			$red = false;
+
+			drupal_add_js("//www.turn.com/sites/default/files/s_code.js", 'external', array(
+				'type'=>'external',
+				'scope'=>'footer',
+				'weight'=>90
+			));
+
+			switch ( $tnode->type ) {
+				case 'white_paper':
+					$ntype = 'white papers';
+					break;
+				case 'docs':
+					$ntype = 'docs';
+					break;
+				case 'case_study':
+					$ntype = 'case studies';
+					break;
+				case 'highlight':
+					$ntype = 'highlights';
+					break;
+				case 'proof_digital_audience_report':
+					$ntype = 'proof digital audience report';
+					break;
+			}
+
+			$dlname = isset( $tnode->field_download_name['und'] ) ? $tnode->field_download_name['und'][0]['value'] : $tnode->title;
+
+			if ( function_exists('watchdog') ) {
+				watchdog('gating', 'dl info : '. $dlname .'<br /><pre>'. print_r($tnode->field_download_name,true) .'</pre>');
+			}
+drupal_add_js(
+				'if(s){
+s.pageName = "us: insights center: '. $dlname .' download";
+s.channel = "us: insights center";
+s.prop1="form confirmation";
+s.prop2="us: insights: '. $ntype .'";
+s.events="event1"
+s.eVar8="'. $tnode->field_doc['und'][0]['filename'] .'"
+s.t()
+}',
+				array(
+					'type' => 'inline',
+					'scope' => 'footer',
+					'weight' => 91
+				)
+			  );
+
+			$oot = '';
+			/*
+			// these other floodlight events are actually just triggered via onclick on the /insights landing page now...
+			$floodlightcode = turn_gating_floodlightcheck( $nid );
+			if ( $floodlightcode !== false ) {
+				$oot .= $floodlightcode;
+			}
+			*/
+			// and finally, launch the pdf...
+			$urlstart =  'http://'. $_SERVER['SERVER_NAME'] .'/insights';
+			if ( in_array( $_SERVER['HTTP_REFERER'], array( $urlstart, $urlstart .'/white-papers', $urlstart .'/case-studies') ) ) {
+				$oot .= '<p>Your PDF should load automatically. If you are not redirected in a few seconds, <a href="'. $pdf .'" target="_blank" id="turnpdfredirect">Click Here</a> to view the asset.</p>';
+				drupal_add_js('jQuery(function () { jQuery("#footer_outer").hide(); try{ var _elqQ = _elqQ || []; _elqQ.push(["elqTrackPageView", "'. $pdf .'"]); } catch(err) { /* err */ } setTimeout( function() { window.document.title="Turn Insights Center"; window.location="'. $pdf .'"; }, 900); if ( window.parent.frames.length > 0 ) { /*nada*/ } else { jQuery("body").removeClass("page-g"); }});',
+				array(
+					'type' => 'inline',
+					'scope' => 'footer',
+					'weight' => 99
+				)
+			  );
+			} else {
+				$oot .= '<p><a href="'. $pdf .'" target="_blank" id="turnpdfredirect">Click Here</a> to view the asset. After, you will be redirected to the Insights Center</p>';
+				drupal_add_js('jQuery(function () { jQuery("#footer_outer").hide(); jQuery("#turnpdfredirect").click(function() { setTimeout(function() { if (window.parent.frames.length > 0) { window.parent.location="/insights"; } else { window.location="/insights"; } }, 500); }); jQuery("#webform-client-form-24").hide(); if(window.parent.frames.length > 0) { jQuery("#header,#breadcrumb,#page-title,#content_bottom,#admin-menu").hide(); } else { jQuery("body").removeClass("page-g"); } });',
+				array(
+					'type' => 'inline',
+					'scope' => 'footer',
+					'weight' => 99
+				)
+			  );
+			}
+			return $oot;
+		}
+	}
+	if ( $red ) drupal_goto('node/'. $nid);
+
+	return $oot;
+}
+
+function turn_gating_init(){
+// 	drupal_add_js(drupal_get_path('module', 'turn_gating') .'/turn_gating.js', array(
+// 		'every_page' => TRUE,
+// 		'scope' => 'footer',
+// 		'group' => JS_THEME,
+// 		'weight' => 10,
+// 	));
+}
+
+function turn_gating_popcheck($nid) {
+	$oot = '<script type="text/javascript">
+/*checkifinpopup otherwise*/
+if (window.parent.frames.length > 0) {
+	//window.parent.location="/insights";
+} else {
+	var exDate = new Date()
+	exDate.setDate(exDate.getDate() + 365);
+	';
+	// check for url args http://74.120.141.16/g/2750?cmpid=70180000000SZOl&ecid=291
+	if ( (isset($_GET['cmpid']) && !empty($_GET['cmpid'])) ) {
+		$oot .= 'document.cookie = "t_cmpid=" + "'. $_GET['cmpid'] .'" + "; expires=" + exDate.toUTCString();';
+	}
+	if ( (isset($_GET['ecid']) && !empty($_GET['ecid'])) ) {
+		$oot .= 'document.cookie = "t_ecid=" + "'. $_GET['ecid'] .'" + "; expires=" + exDate.toUTCString();';
+	}
+	// and then ...
+	$oot .= '
+	jQuery("body").removeClass("page-g");
+	window.location="/insights#g'. $nid .'";
+}
+</script>';
+	return $oot;
+}
+
+function turn_gating_formsuccess() {
+	$ret = false;
+	// check if it was just submitted and redirected back here?!
+	$msgtype = 'status';
+	$msgreset = false;
+	$msgs = drupal_get_messages( $msgtype, $msgreset );
+	if ( count( $msgs ) > 0 ) {
+		foreach ( $msgs as $m ) {
+			foreach ( $m as $m0 ) {
+				if ( strpos( $m0, 'class="contactthx"' ) ) {
+					$ret = true;
+				}
+			}
+		}
+	}
+	return $ret;
+}
+
+function turn_gating_floodlightcheck( $nid ) {
+	$isrc = '';
+	$oot = '';
+
+	$nid = ''. $nid;
+
+	//watchdog('floodlight', 'turn_gating_floodlightcheck 1:: '. $nid .' : <br /><br />'. $oot);
+	switch ( $nid ) {
+		case 2756: // 5 Reasons whitepaper
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig007;ord=';
+			break;
+		case 2757: // 3 Keys whitepaper
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig374;ord=';
+			break;
+		case 2758: // How to Use whitepaper
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig631;ord=';
+			break;
+		case 2797: // Global highlight
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig723;ord=';
+			break;
+		case 2798: // Forrester highlight
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig241;ord=';
+			break;
+		case 2807: // Bridging case study
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig602;ord=';
+			break;
+		case 2153: // Turn Camp case study
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig879;ord=';
+			break;
+		case 1072: // Harnessing case study
+			$isrc = 'http://3718076.fls.doubleclick.net/activityi;src=3718076;type=turn2108;cat=insig892;ord=';
+			break;
+	}
+
+	if ( $isrc != '' ) {
+		$oot = '<!--
+Start of DoubleClick Floodlight Tag: Please do not remove
+-->
+<script type="text/javascript">
+var axel = Math.random() + "";
+var a = axel * 10000000000000;
+document.write(\'<iframe src="'. $isrc .'\' + a + \'?" width="1" height="1" frameborder="0" style="display:none"></iframe>\');
+</script>
+<noscript>
+<iframe src="'. $isrc .'1?" width="1" height="1" frameborder="0" style="display:none"></iframe>
+</noscript>
+<!-- End of DoubleClick Floodlight Tag: Please do not remove -->';
+	}
+
+	//watchdog('floodlight', 'turn_gating_floodlightcheck 2:: '. $nid .' : <br /><br />'. $oot);
+	return $oot;
+}

@@ -1,0 +1,70 @@
+#!/bin/bash -x
+
+# @author Jeremy Cerda
+# @version $Id: newsmap.sh-imarketnews 2394 2011-08-01 18:54:47Z jcerda $
+
+MYSQL=/usr/bin/mysql
+GAWK=/usr/bin/gawk
+PYTHON=/usr/bin/python
+GREP=/bin/grep
+DATE=/bin/date
+SORT=/usr/bin/sort
+
+# Here's my sql query..
+
+MYT=`${DATE} +"%z"`
+#MYT="-0410"
+
+MYTZ=$(( 60 * ${MYT:3:2} + 60 * 60 * ${MYT:1:2} ))
+
+if [ "${MYT:0:1}" == "+" ]; then
+	MYTZ=$(( 0 - $MYTZ))
+fi
+
+echo '
+select node.nid, node.created, term_data.name from term_node inner join node on term_node.nid = node.nid and term_node.vid = node.vid inner join term_data on term_node.tid = term_data.tid where node.status = 1 and node.promote = 1 and unix_timestamp(now()) - node.created < 60 * 60 * 72;
+' | ${MYSQL} imarketnews | ${SORT} -n | ${GAWK} -F'\t' -vmytz=${MYTZ} '
+{ if (int(oldnid) != int($1))
+    { print oldnid, strftime("%Y-%m-%dT%H:%M:%SZ",oldtime+mytz), tids; oldnid=$1; oldtime=$2; tids=$3 }
+    else { oldtime=$2; tids=tids" "$3 }
+}
+END { print oldnid, strftime("%Y-%m-%dT%H:%M:%SZ",oldtime+mytz), tids }' | ${GREP} frontpage | ${PYTHON} -c '
+
+import sys
+
+siteprefix="http://imarketnews.com/node/"
+
+print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+print "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\">"
+
+mylines = sys.stdin.readlines()
+
+for xmylines in mylines:
+        sxmylines = xmylines.split(" ")
+        topics = list()
+
+        for xt in sxmylines[2:]:
+                xt = xt.replace("\r","").replace("\n","").strip()
+                if xt == "frontpage":
+                        continue
+                topics.append(xt)
+
+	topics.append("business")
+
+        topics = ", ".join(topics)
+
+        if len(sxmylines) < 3:
+                continue
+
+        print "\t<url>\n"\
+              "\t\t<loc>"+siteprefix+sxmylines[0]+"</loc>\n"\
+              "\t\t<news:news>\n"\
+              "\t\t\t<news:publication_date>"+sxmylines[1]+"</news:publication_date>\n"\
+              "\t\t\t<news:keywords>"+topics+"</news:keywords>\n"\
+              "\t\t</news:news>\n"\
+              "\t</url>"
+
+
+print "</urlset>"
+
+'

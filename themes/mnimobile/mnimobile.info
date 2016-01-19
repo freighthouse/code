@@ -1,0 +1,16 @@
+name = MNIMobile
+version = 1.0
+core = 6.x
+engine = phptemplate
+
+stylesheets[all][] = css/all.css
+stylesheets[all][] = css/style.css
+
+regions[top_menu] = Top menu
+regions[main_menu] = Main menu
+regions[above_content] = Above Content
+regions[content] = Content
+regions[product_form] = Product Form
+regions[below_content] = Below Content
+regions[left] = Left admin sidebar
+

@@ -1,0 +1,49 @@
+<?php
+
+/**
+* Gets previous and next node.
+*/
+function apigee_blog_pager_node_sibling($node, $dir = 'next', $prepend_text = '', $append_text = '', $next_node_text = NULL) {
+    $query = 'SELECT n.nid, n.title, n.created, n.uid FROM {node} n WHERE '
+           . 'n.created ' . ($dir == 'prev' ? '<' : '>') . ' :created AND n.type = :type AND n.status = 1 '
+           . "AND language IN (:lang, 'und') "
+           . 'ORDER BY n.created ' . ($dir == 'prev' ? 'DESC' : 'ASC') . ' LIMIT 1';
+    //use fetchObject to fetch a single row
+    $row = db_query($query, array(':created' => $node->created, ':type' => $node->type, ':lang' => $node->language))->fetchObject();
+
+  if ($row) {
+    drupal_add_html_head_link(array(
+      'rel' => $dir,
+      'type' => 'text/html',
+      'title' => $row->title,
+      // Force the URL to be absolute, for consistency with other <link> tags
+      // output by Drupal.
+      'href' => url('node/' . $row->nid, array('absolute' => TRUE)),
+    ));
+    // get authors name
+    $author_details = user_load($row->uid);
+
+    if (!empty($author_details->field_screen_name)) {
+      $name = $author_details->field_screen_name['und'][0]['safe_value'];
+    }
+    else {
+      $name = $author_details->name;
+    }
+
+    // Add some date variables
+    $month = format_date($row->created, 'custom', 'M');
+    $custom = drupal_strtoupper($month) . format_date($row->created, 'custom', ' d, Y');
+    $text = $next_node_text ? t($next_node_text) : $row->title;
+
+    $text = t($prepend_text) . l($text, 'node/' . $row->nid, array('attributes' => array('rel' => array($dir)))) . t($append_text);
+    $text .= "<div class='submitted'>";
+    if ($name) {
+      $text .= "by $name ";
+    }
+    $text .= "$custom</div>";
+    return $text;
+  }
+  else {
+    return FALSE;
+  }
+}

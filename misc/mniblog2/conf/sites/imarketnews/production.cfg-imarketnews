@@ -1,0 +1,79 @@
+# @author Jeremy Cerda
+# @version $Id: production.cfg-imarketnews 2337 2011-07-08 15:25:32Z jcerda $
+
+# PROBABLY SHOULD NOT USE INTERVALS SUB 90 seconds..
+
+# SPECIAL CODES
+
+Free Web                 	MWEB00     	0	none         	QUICK
+Free Web2                	MWEB01     	0	frontpage    	QUICK
+Tabular Information      	MTABLE     	-1	none        	QUICK
+Exclusives               	MX$$$$     	-1	none        	QUICK
+
+# NO LAG
+
+The FX Spot              	F=ETRENC   	0	foreignexchange frontpage fxspot
+FX Features              	M$$FX$     	0	foreignexchange frontpage fxfeatures
+Latam Watch              	F=LAWTCH   	0	latinamerica frontpage latamwatch
+Latin America            	M$T$$$     	0	latinamerica frontpage
+Canada                   	M$C$$$     	0	northamerica frontpage canada
+CongressWatch            	F=CAPWTC   	0	northamerica frontpage uscongress
+FX Market Updates        	F=FXDOLU   	0	foreignexchange northamerica frontpage fxupdatenorthamerica
+FX Market Updates        	F=FXEURU   	0	foreignexchange europe frontpage fxupdateeurope
+Unstructured Finance     	F=WLDWTC   	0	investing northamerica frontpage unstructuredfinance
+MNI Capital Goods Index  	MDUCG$     	0	macroeconomy northamerica  frontpage capitalgoods
+MNI Retail Trade Index   	MDURE$     	0	macroeconomy northamerica frontpage retailsales
+MNI China Business       	MDQCB$     	0	china macroeconomy frontpage mnichinaindex
+Euro-Dollar Techs        	S=X10094   	0	eurodollartechs
+Euro-Yen Techs           	S=X10097   	0	euroyentechs
+Dollar-Yen Techs         	S=X10092   	0	dollaryentechs
+Euro-Sterling Techs      	S=X10095   	0	eurosterlingtechs
+Bund Techs               	S=X10089   	0	bundtechs
+Cable Techs              	S=X10090   	0	cabletechs
+#Equity Bullets          	F=BULLEQ   	0	investing
+#Equity Bullets          	F=BULLEE   	0	investing
+Equities                 	M$$EQ$     	0	investing frontpage
+American Equities        	MNUEQ$     	0	investing northamerica usequities frontpage
+Ratings                  	MR$$$$     	0	investing ratings frontpage
+Credit Crisis            	M$$CR$     	0	investing frontpage creditcrisis
+# Aussie Techs, Gilt Techs, Kiwi
+
+
+# TEN MINUTES
+
+Economic Data Stories    	MAUDS$     	600	macroeconomy northamerica frontpage usdata
+Economic Data Stories    	M$XDS$     	600	macroeconomy europe frontpage europedata
+Economic Data Stories    	MAMDS$     	600	macroeconomy latinamerica frontpage latamdata
+Economic Data Stories    	MABDS$     	600	macroeconomy europe frontpage ukdata
+Economic Data Stories    	MAQDS$     	600	macroeconomy china frontpage chinadata
+Economic Data Stories    	MAJDS$     	600	macroeconomy japan frontpage japandata
+Economic Data Stories    	MACDS$     	600	macroeconomy northamerica frontpage canadadata
+US Government Policy     	MFU$$$     	600	northamerica governmentpolicy frontpage usgov
+US Government Policy     	MGU$$$     	600	northamerica governmentpolicy frontpage usgov
+UK Government Policy     	MGB$$$     	600	governmentpolicy frontpage ukgov
+Eurozone Gov't Policy    	MGX$$$     	600	europe governmentpolicy frontpage eurogov
+China Gov't Policy       	MGQ$$$     	600	foreignexchange china governmentpolicy frontpage chinagov
+Japan Gov't Policy       	MGJ$$$     	600	foreignexchange japan governmentpolicy frontpage japangov
+Fed State of Play        	F=BULWC3   	600	centralbanks northamerica frontpage fedstateofplay
+ECB Update               	F=TOPSTY   	600	centralbanks europe frontpage ecbupdate
+BOJ State of Play        	F=GEISHI   	600	centralbanks japan frontpage bojstateofplay
+ECB State of Play        	F=BUNPLY   	600	centralbanks europe frontpage ecbstateofplay
+
+# TWENTY MINUTES
+
+Federal Reserve          	MMUFE$     	1200	centralbanks northamerica frontpage federalreserve
+ECB Stories              	M$$EC$     	1200	centralbanks europe frontpage ecb
+BOJ Stories              	MMJBK$     	1200	centralbanks japan frontpage boj
+BOE Stories              	M$$BE$     	1200	centralbanks europe frontpage boe
+PBOC Stories             	MMQPB$     	1200	centralbanks china frontpage pboc
+
+# ONE HOUR
+
+Portfolios               	F=MNPORT   	3600	investing northamerica frontpage portfolios
+Portfolios               	MP$$$$     	3600	investing northamerica frontpage portfolios
+Reality Check            	F=MNREAL   	3600	macroeconomy northamerica frontpage realitycheck
+Reality Check            	MAURC$     	3600	macroeconomy northamerica frontpage realitycheck
+Reality Check            	MAXRC$     	3600	macroeconomy europe frontpage realitycheck
+Reality Check            	MABRC$     	3600	macroeconomy europe frontpage realitycheck
+Reality Check            	MAQRC$     	3600	macroeconomy china frontpage realitycheck
+Reality Check            	MAJRC$     	3600	macroeconomy japan frontpage realitycheck

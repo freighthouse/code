@@ -1,0 +1,8 @@
+name = Turn TV Screen
+description = Module to create URL + more for Turn Lobby Screen
+package = Custom Turn Modules
+core = 7.x
+version = 1.0
+
+dependencies[] = turn_home_js
+dependencies[] = twitter

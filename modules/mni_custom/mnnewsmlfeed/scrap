@@ -1,0 +1,630 @@
+# @author Jeremy Cerda
+# @version $Id: scrap 2649 2011-09-20 21:18:02Z jcerda $
+
+function _mnnewsmlfeed_read_config() {
+	$p = drupal_get_path('module', 'mnnewsmlfeed');
+	return parse_ini_file($p."/conf/mod.production.cfg", true);
+}
+
+function _mnnewsmlfeed_load_languages() {
+	$p = drupal_get_path('module', 'mnnewsmlfeed');
+	return parse_ini_file($p."/conf/lang.production.cfg", true);
+}
+
+function mnnewsmlfeed_push_action(&$object, $context = array()) {
+	// Grab translation and push acquire xml
+	$n = node_load($object->nid);
+
+	$data = mnewsmlfeed_generate_xml_data($n);
+
+	//mnnewsmlfeed_create_acquire_files($n);
+	// TODO: Start here and recreate the process of generating NewsML files
+	// w/o known languages to guide me.
+}
+
+function mnnewsmlfeed_archive_action(&$object, $context = array()) {
+	$n = node_load($object->nid);
+
+	// If these aren't set, jump out because there isn't anything to archive
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	// We'll archive in drupal's tmp dir, but drupal doesn't like us
+	// using this dir. So we have to use php error checking here instead.
+	$archDir = file_directory_temp() . "/mnnewsmlfeed_archive";
+	if(!is_dir($archDir)) {
+		if(!mkdir($archDir)) {
+			drupal_set_message("Error archiving NewsML content. " .
+					"Please contact technology.",'error', FALSE);
+			return;
+		}
+	}
+
+	// For now we'll just use the template
+	$acqXml = file_create_path("mnnewsmlfeed_data");
+	if(!file_check_directory($acqXml, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($acqXml, FILE_MODIFY_PERMISSIONS)) {
+			drupal_set_message("Error archiving NewsML content. " .
+					"Please contact technology.",'error', FALSE);
+			return;
+		}
+	}
+	static $template = "";
+	if($template == "")
+		$template = file_get_contents($acqXml."/template.xml");
+
+	// Only archiving utf8
+	$files = array();
+	mnnewsmlfeed_generateXmlFile($n, $archDir, "simplified_zho",
+		"utf8", $template);
+	mnnewsmlfeed_generateXmlFile($n, $archDir, "traditional_zho",
+		"utf8", $template);
+}
+
+/*function mnnewsmlfeed_translit_action(&$object, $context = array()) {
+	// Translate and store traditional zho
+	$n = node_load($object->nid, NULL, TRUE);
+	mnnewsmlfeed_transliterate($n);
+	$n = node_load($object->nid, NULL, TRUE);
+
+	// Because triggers are lazy, we need to modify the object param
+	// as well, or workflow will overwrite our changes.
+	$object->field_chinese_title_trad[0]["value"] =
+		$n->field_chinese_title_trad[0]["value"];
+	$object->field_chinese_body_trad[0]["value"] =
+		$n->field_chinese_body_trad[0]["value"];
+	$object->field_chinese_body_trad[0]["format"] =
+		$n->field_chinese_body_trad[0]["format"];
+}*/
+
+function mnnewsmlfeed_action_info() {
+	return array(
+		/*"mnnewsmlfeed_translit_action" => array(
+			'description' => t('Generate Traditional Chinese'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		),*/
+		"mnnewsmlfeed_push_action" => array(
+			'description' => t('Push NewsML Content'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		),
+		"mnnewsmlfeed_archive_action" => array(
+			'description' => t('Archive NewsML Content'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		)
+	);
+}
+
+function mnnewsmlfeed_mapterm($term)
+{
+	$p = drupal_get_path('module', 'mnnewsmlfeed');
+	$prod = parse_ini_file($p."/vendorData.production.cfg", true);
+	return ($prod['all'][$term] ? $prod['all'][$term] : false);
+}
+
+/*
+ * Generates an xml file with the given character encoding, in the appropriate
+ * folder. Returns the generated filename.
+ *
+ * NOTE: XML will not be consumed until file is moved into position.
+ * This should be done after all XML is generated.
+ *
+ * NOTE: Valid encodings include utf8, big5, and gb2312. utf8 is
+ * used as default.
+ */
+function mnnewsmlfeed_generateXmlFile($node, $path, $encoding, $template)
+{
+	//$lang_type = mb_strtolower($lang_type);
+	$lang_type = "";
+
+	// Using utf8?
+	$toUTF8 = mb_strtolower($encoding);
+	$toUTF8 = ($toUTF8 == "utf8") || ($toUTF8 == "utf-8");
+
+	// Grab data
+	switch($lang_type) {
+		/*case "zho":case "zho_simp":case "simplified":
+		case "simplified_chinese":case "simplified_zho":
+		case "zho_simplified":
+			$lang = "<xn:language>zh</xn:language>\n                ".
+				"<xn:vendorData>MKTNEWS_:LangSub=Hans</xn:vendorData>";
+			$body = $node->field_chinese_body[0]["value"];
+			$title = $node->field_chinese_title[0]["value"];
+			$suffix = "s";
+			//$suffix = "zho-s";
+			break;*/
+		/*case "zho_trad":case "traditional":
+		case "traditional_chinese": case "traditional_zho":
+		case "zho_traditional":
+			$lang = "<xn:language>zh</xn:language>\n                ".
+				"<xn:vendorData>MKTNEWS_:LangSub=Hant</xn:vendorData>";
+			$body = $node->field_chinese_body_trad[0]["value"];
+			$title = $node->field_chinese_title_trad[0]["value"];
+			$suffix = "t";
+			//$suffix = "zho-t";
+			break;*/
+		case "en":case "eng":
+		case "english":default:
+			$lang = "<xn:language>en</xn:language>\n";
+			$body = $node->body;
+			$title = $node->title;
+			$suffix = "eng";
+			break;
+	}
+
+	// Author information
+	$translator = user_load($node->field_translator[0]["uid"])->name;
+	$editor = user_load($node->field_editor[0]["uid"])->name;
+
+	// Grab Taxonomy Data
+	$terms = taxonomy_node_get_terms($node);
+	foreach($terms as $t) {
+		//$v = taxonomy_vocabulary_load($t-vid);
+		//$d = ($v->name == 'MNI Terms' ? $t->name : $t->description);
+		$tax .= "<xn:vendorData>MKTNEWS_:Blog Tag=" . $t->description .
+			"</xn:vendorData>\n                ";
+		$map_term = mnnewsmlfeed_mapterm($t->description);
+		if($map_term === false){}else{
+			$tax .= "<xn:vendorData>MKTNEWS_:Special Code=".$map_term.
+				"</xn:vendorData>\n                ";
+		}
+	}
+	$tax = trim($tax);
+
+	// Template and finalize data
+	$final = str_replace("{\$~title~}", $title, $template);
+	$final = str_replace("{\$~body~}", $body, $final);
+	$final = str_replace("{\$~blogTags~}", $tax, $final);
+	$final = str_replace("{\$~lang~}", $lang, $final);
+	$final = str_replace("{\$~translator~}", $translator, $final);
+	$final = str_replace("{\$~editor~}", $editor, $final);
+
+	$time_created = date("Ymd", $node->created) .'T'
+		. date("HisO", $node->created);
+	$time_changed = date("Ymd", $node->changed) .'T'
+		. date("HisO", $node->created);
+	$final = str_replace("{\$~time.created~}", $time_created, $final);
+	$final = str_replace("{\$~time.updated~}", $time_changed, $final);
+
+	if($toUTF8)
+		$final = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" .
+			$final;
+	else
+		$final = "<?xml version=\"1.0\" encoding=\"".$encoding."\"?>\n" .
+			mb_convert_encoding($final, $encoding, "utf8");
+
+	// Write out results
+	return file_save_data($final, $path."/n".$node->nid."_" .
+		$suffix . "_" . $encoding . ".xml.NR",
+		FILE_EXISTS_REPLACE);
+}
+
+/*function mnnewsmlfeed_transliterate($n)
+{
+	// If these aren't set, jump out
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	$title = $n->field_chinese_title[0]["value"];
+	$body = $n->field_chinese_body[0]["value"];
+
+	$title = zho_simp_to_trad($title);
+	$body = zho_simp_to_trad($body);
+
+	$n->field_chinese_title_trad[0]["value"] = $title;
+	$n->field_chinese_body_trad[0]["value"] = $body;
+	$n->field_chinese_body_trad[0]["format"] = 1;
+
+	node_save($n);
+}*/
+
+function mnnewsmlfeed_create_newsml_files($n)
+{
+	// If these aren't set, jump out
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	// Check our path
+	$p = file_create_path("mnnewsmlfeed_data");
+	if(!file_check_directory($p, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($p, FILE_MODIFY_PERMISSIONS)) {
+			drupal_set_message("Error generating NewsML xml. Please contact " .
+					"technology.",'error', FALSE);
+			return;
+		}
+	}
+
+	// Lazy load template
+	static $template = "";
+	if($template == "")
+		$template = file_get_contents($p."/template.xml");
+
+	// Generate files
+	$files = array();
+	/*array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "traditional_zho",
+		"utf8", $template));
+	array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "traditional_zho",
+		"big5", $template));
+	array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "simplified_zho",
+		"utf8", $template));
+	array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "simplified_zho",
+		"gb2312", $template));*/
+	//array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "english",
+	//	"utf8"), $template);
+
+	// Move them into place
+	foreach($files as $f)
+		rename($f, substr($f, 0, -3));
+}
+/*function mnnewsmlfeed_archive_action(&$object, $context = array()) {
+	$n = node_load($object->nid);
+
+	// If these aren't set, jump out because there isn't anything to archive
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	// We'll archive in drupal's tmp dir, but drupal doesn't like us
+	// using this dir. So we have to use php error checking here instead.
+	$archDir = file_directory_temp() . "/mnnewsmlfeed_archive";
+	if(!is_dir($archDir)) {
+		if(!mkdir($archDir)) {
+			drupal_set_message("Error archiving NewsML content. " .
+					"Please contact technology.",'error', FALSE);
+			return;
+		}
+	}
+
+	// For now we'll just use the template
+	$acqXml = file_create_path("mnnewsmlfeed_data");
+	if(!file_check_directory($acqXml, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($acqXml, FILE_MODIFY_PERMISSIONS)) {
+			drupal_set_message("Error archiving NewsML content. " .
+					"Please contact technology.",'error', FALSE);
+			return;
+		}
+	}
+	static $template = "";
+	if($template == "")
+		$template = file_get_contents($acqXml."/template.xml");
+
+	// Only archiving utf8
+	$files = array();
+	mnnewsmlfeed_generateXmlFile($n, $archDir, "simplified_zho",
+		"utf8", $template);
+	mnnewsmlfeed_generateXmlFile($n, $archDir, "traditional_zho",
+		"utf8", $template);
+}*/
+
+/*function mnnewsmlfeed_translit_action(&$object, $context = array()) {
+	// Translate and store traditional zho
+	$n = node_load($object->nid, NULL, TRUE);
+	mnnewsmlfeed_transliterate($n);
+	$n = node_load($object->nid, NULL, TRUE);
+
+	// Because triggers are lazy, we need to modify the object param
+	// as well, or workflow will overwrite our changes.
+	$object->field_chinese_title_trad[0]["value"] =
+		$n->field_chinese_title_trad[0]["value"];
+	$object->field_chinese_body_trad[0]["value"] =
+		$n->field_chinese_body_trad[0]["value"];
+	$object->field_chinese_body_trad[0]["format"] =
+		$n->field_chinese_body_trad[0]["format"];
+}*/
+
+/*
+ * Generates an xml file with the given character encoding, in the appropriate
+ * folder. Returns the generated filename.
+ *
+ * NOTE: XML will not be consumed until file is moved into position.
+ * This should be done after all XML is generated.
+ *
+ * NOTE: Valid encodings include utf8, big5, and gb2312. utf8 is
+ * used as default.
+ */
+/*function mnnewsmlfeed_generateXmlFile($node, $path, $encoding, $template)
+{
+	//$lang_type = mb_strtolower($lang_type);
+	$lang_type = "";
+
+	// Using utf8?
+	$toUTF8 = mb_strtolower($encoding);
+	$toUTF8 = ($toUTF8 == "utf8") || ($toUTF8 == "utf-8");
+
+	// Grab data
+	switch($lang_type) {
+		//case "zho":case "zho_simp":case "simplified":
+		//case "simplified_chinese":case "simplified_zho":
+		//case "zho_simplified":
+		//	$lang = "<xn:language>zh</xn:language>\n                ".
+		//		"<xn:vendorData>MKTNEWS_:LangSub=Hans</xn:vendorData>";
+		//	$body = $node->field_chinese_body[0]["value"];
+		//	$title = $node->field_chinese_title[0]["value"];
+		//	$suffix = "s";
+		//	//$suffix = "zho-s";
+		//	break;
+		//case "zho_trad":case "traditional":
+		//case "traditional_chinese": case "traditional_zho":
+		//case "zho_traditional":
+		//	$lang = "<xn:language>zh</xn:language>\n                ".
+		//		"<xn:vendorData>MKTNEWS_:LangSub=Hant</xn:vendorData>";
+		//	$body = $node->field_chinese_body_trad[0]["value"];
+		//	$title = $node->field_chinese_title_trad[0]["value"];
+		//	$suffix = "t";
+		//	//$suffix = "zho-t";
+		//	break;
+		case "en":case "eng":
+		case "english":default:
+			$lang = "<xn:language>en</xn:language>\n";
+			$body = $node->body;
+			$title = $node->title;
+			$suffix = "eng";
+			break;
+	}
+
+	// Author information
+	$translator = user_load($node->field_translator[0]["uid"])->name;
+	$editor = user_load($node->field_editor[0]["uid"])->name;
+
+	// Grab Taxonomy Data
+	$terms = taxonomy_node_get_terms($node);
+	foreach($terms as $t) {
+		//$v = taxonomy_vocabulary_load($t-vid);
+		//$d = ($v->name == 'MNI Terms' ? $t->name : $t->description);
+		$tax .= "<xn:vendorData>MKTNEWS_:Blog Tag=" . $t->description .
+			"</xn:vendorData>\n                ";
+		$map_term = _mnnewsmlfeed_mapterm($t->description);
+		if($map_term === false){}else{
+			$tax .= "<xn:vendorData>MKTNEWS_:Special Code=".$map_term.
+				"</xn:vendorData>\n                ";
+		}
+	}
+	$tax = trim($tax);
+
+	// Template and finalize data
+	$final = str_replace("{\$~title~}", $title, $template);
+	$final = str_replace("{\$~body~}", $body, $final);
+	$final = str_replace("{\$~blogTags~}", $tax, $final);
+	$final = str_replace("{\$~lang~}", $lang, $final);
+	$final = str_replace("{\$~translator~}", $translator, $final);
+	$final = str_replace("{\$~editor~}", $editor, $final);
+
+	$time_created = date("Ymd", $node->created) .'T'
+		. date("HisO", $node->created);
+	$time_changed = date("Ymd", $node->changed) .'T'
+		. date("HisO", $node->created);
+	$final = str_replace("{\$~time.created~}", $time_created, $final);
+	$final = str_replace("{\$~time.updated~}", $time_changed, $final);
+
+	if($toUTF8)
+		$final = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" .
+			$final;
+	else
+		$final = "<?xml version=\"1.0\" encoding=\"".$encoding."\"?>\n" .
+			mb_convert_encoding($final, $encoding, "utf8");
+
+	// Write out results
+	return file_save_data($final, $path."/n".$node->nid."_" .
+		$suffix . "_" . $encoding . ".xml.NR",
+		FILE_EXISTS_REPLACE);
+}*/
+
+/*function mnnewsmlfeed_transliterate($n)
+{
+	// If these aren't set, jump out
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	$title = $n->field_chinese_title[0]["value"];
+	$body = $n->field_chinese_body[0]["value"];
+
+	$title = zho_simp_to_trad($title);
+	$body = zho_simp_to_trad($body);
+
+	$n->field_chinese_title_trad[0]["value"] = $title;
+	$n->field_chinese_body_trad[0]["value"] = $body;
+	$n->field_chinese_body_trad[0]["format"] = 1;
+
+	node_save($n);
+}*/
+
+/*function mnnewsmlfeed_create_newsml_files($n)
+{
+	// If these aren't set, jump out
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	// Check our path
+	$p = file_create_path("mnnewsmlfeed_data");
+	if(!file_check_directory($p, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($p, FILE_MODIFY_PERMISSIONS)) {
+			drupal_set_message("Error generating NewsML xml. Please contact " .
+					"technology.",'error', FALSE);
+			return;
+		}
+	}
+
+	// Lazy load template
+	static $template = "";
+	if($template == "")
+		$template = file_get_contents($p."/template.xml");
+
+	// Generate files
+	$files = array();
+	//array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "traditional_zho",
+	//	"utf8", $template));
+	//array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "traditional_zho",
+	//	"big5", $template));
+	//array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "simplified_zho",
+	//	"utf8", $template));
+	//array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "simplified_zho",
+	//	"gb2312", $template));
+	//array_push($files, mnnewsmlfeed_generateXmlFile($n, $p, "english",
+	//	"utf8"), $template);
+
+	// Move them into place
+	foreach($files as $f)
+		rename($f, substr($f, 0, -3));
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+Install fails
+################################################################################
+
+   # vim /etc/php5/cli/php.ini
+   // Change memory_limit to: memory_limit = 64
+
+R  # cd /usr/local
+R  # svn checkout http://10.1.1.40/svn/jcerda/sites/mniblog2-[lang#]
+
+R  # useradd mniblog2-[lang#]
+R  # passwd mniblog2-[lang#]
+R  # usermod -a -G www-data mniblog2-[lang#]
+R  # usermod -d /usr/local/mniblog2-[lang#] mniblog2-[lang#]
+
+R  # cd /usr/local/mniblog2-[lang#]
+R  # vim ./conf/pub.production.cfg
+R  // Modify bloghome to point to /usr/local/mniblog2-[lang#]
+R  # vim ./conf/runconfig.sh
+R  // Modify BLOGDIR to point to /usr/local/mniblog2-[lang#]
+R  // Modify PROCESSUSER to equal mniblog2-[lang#]
+
+R  # ./mniblog2-[lang#]/bin/setup.sh -l [lang#] mni6
+
+R  # ./bin/startblog.sh
+
+
+
+
+R  // If the modules dir below doesn't exist, please create it.
+OR # cd /var/www/mni6/sites/[lang#].mni6.com/modules
+IR # cd /var/www/mni6/sites/mni6.com.[lang#]/modules
+
+R  # svn checkout http://10.1.1.40/svn/jcerda/sites/modules/mnnewsmlfeed .
+R  # chown -R 1080:mni6 mnnewsmlfeed
+R  # chmod -R g+rw mnnewsmlfeed
+R  # chmod -R g+x mnnewsmlfeed/.ssh
+R  # chmod -R g-w mnnewsmlfeed/.ssh
+
+OR # useradd -s /bin/bash -d /var/www/mni6/sites/[lang#].mni6.com/modules/mnnewsmlfeed feedpush-[lang#]
+IR # useradd -s /bin/bash -d /var/www/mni6/sites/mni6.com.[lang#]/modules/mnnewsmlfeed feedpush-[lang#]
+
+R  # passwd feedpush-[lang#]
+R  # usermod -a -G www-data feedpush-[lang#]
+R  # usermod -a -G mni6 feedpush-[lang#]
+
+R  - Go to admin/settings/file-system
+R  - If either directories are showing errors, correct them.
+R     - Defaults are:
+OR       - File System Path -> sites/[lang#].mni6.com/files
+IR       - File System Path -> sites/mni6.com.[lang#]/files
+R        - Temporary Dir    -> tmp_[lang#]
+R  - Adjust the data and archive paths in
+R    sites/[language dir]/modules/mnnewsmlfeed/conf/pushConfig.cfg
+R    w/ the full path versions of the above two directories
+
+R  - Go to admin/build/modules
+R  - Enable the "MNI NewsML Feed" module
+R  - Click "Save" at the bottom
+R  - Adjust the permissions on both of the file directories, now that we have
+R    made changes, to allow group rw access
+R       - Defaults would be something like this:
+OR           # chmod -R g+rw /var/www/mni6/sites/[lang#].mni6.com/files
+IR           # chmod -R g+rw /var/www/mni6/sites/mni6.com.[lang#]/files
+R            # chmod -R g+rw /var/www/mni6/tmp_[lang#]
+
+R  - Go to admin/rules/trigger
+R  - Select the rule "After news item is edited, publish to the feed"
+R  - Select "Add an action"
+R  - Select the "Push NewsML Content" action
+R  - Continue through the menus, w/ the default settings for everything
+
+OR  # cd /var/www/mni6/sites/[lang#].mni6.com/modules/mnnewsmlfeed
+IR  # cd /var/www/mni6/sites/mni6.com.[lang#]/modules/mnnewsmlfeed
+
+R   // To Start
+R   # ./bin/start_push.sh
+
+R   // To Stop
+R   # ./bin/stop_push.sh
+
+R   // To setup new Reciepients, please follow the below steps:
+# cd /var/www/mni6/sites/all/modules/mnnewsmlfeed
+# su - newsmlfeed
+$ ssh [new user]@[new host]
+// Answer 'yes' to add this to known hosts, then CTRL-C out
+$ scp .ssh/id_dsa.pub [new user]@[new host]:~/.ssh/
+$ ssh [new user]@[new host]
+$ cd .ssh
+$ cat id_dsa.pub >> authorized_keys2
+$ exit
+$ ssh [new user]@[new host]
+// You should not be prompted for your password at this point.
+// If you are prompted, please begin troubleshooting.
+
+// To begin pushing files to this host, add new hosts to the
+// mnnewsmlfeed/conf/pushHosts.cfg file and restart the push scripts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                # And make sure we clear out double archives
+                                #try:
+                                #        if(os.path.exists(arc_dir+f)):
+                                #                if(os.path.exists(zho_dir+f)):
+                                #                        os.remove(zho_dir+f)
+                                #                elif(os.path.exists(zho_dir+f+\
+                                #                ".NR")):
+                                #                        os.remove(zho_dir+f+\
+                                #                        ".NR")
+                                #except:
+                                #        print "WARN: Could not clear out " +\
+                                #        "old archives for " + f
+
+                # Sleep so we don't make our server or aquire's server cry
+                sys.stdout.flush()
+                if allfails > 4:
+                        time.sleep(5)
+                else:
+                        time.sleep(0.5)

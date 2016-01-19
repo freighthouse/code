@@ -1,0 +1,81 @@
+<?php
+
+define('APIGEE_DOCS_SALESFORCE_WEBFORM_NID', 98);
+define('APIGEE_DOCS_SALESFORCE_URL', 'https://www.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8');
+
+/**
+ * Implements hook_webform_submission_insert().
+ */
+function apigee_docs_salesforce_webform_submission_insert($node, $submission) {
+
+  if ($node->nid != APIGEE_DOCS_SALESFORCE_WEBFORM_NID) {
+    return;
+  }
+
+  $data = $submission->data;
+
+  $salesforce_data = array(
+    'orgid' => '00D7000000092Xz',
+    'retURL' => url(current_path()),
+    'name' => $data[2]['value'][0],
+    'company' => $data[9]['value'][0],
+    'email' => $data[6]['value'][0],
+    'phone' => $data[7]['value'][0],
+    '00N70000002sXMc' => $data[10]['value'][0], // Services
+    '00N70000002sXMh' => $data[11]['value'][0], // Feature
+    'type' => $data[3]['value'][0],
+    'priority' => $data[8]['value'][0],
+    'subject' => $data[4]['value'][0],
+    'description' => $data[5]['value'][0],
+    'external' => 0,
+    'origin' => 'Free',
+  );
+
+  $result = _apigee_docs_salesforce_post_data($salesforce_data);
+
+  // Log result.
+  watchdog('apigee_docs_salesforce', var_export($result, TRUE));
+}
+
+/**
+ * Helper function to send the data to Salesforce.
+ */
+function _apigee_docs_salesforce_post_data($fields) {
+//  $fields['encoding'] = 'UTF-8';
+  $result = new stdClass();
+  if (count($fields) > 0) {
+    $data = array();
+    foreach ($fields as $key => $value) {
+      $data[] = urlencode($key) . '=' . urlencode($value);
+    }
+    $options = array(
+      'headers' => array(
+        'Content-Type' => 'application/x-www-form-urlencoded',
+      ),
+      'method' => 'POST',
+      'data' => implode('&', $data),
+    );
+    $result = drupal_http_request(APIGEE_DOCS_SALESFORCE_URL, $options);
+  }
+  return $result;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alter webform Support.
+ */
+function apigee_docs_salesforce_form_webform_client_form_98_alter(&$form, $form_state) {
+
+  $form['submitted']['request_details']['service']['#empty_option'] = t('Select a Service');
+  $form['submitted']['request_details']['feature']['#empty_option'] = t('Select a Feature');
+  $form['submitted']['request_details']['category']['#empty_option'] = t('Select a Request Type');
+  $form['submitted']['request_details']['priority']['#empty_option'] = t('Select a Priority');
+
+  $form['#attached']['js'][] = drupal_get_path('module', 'apigee_docs_salesforce') . '/apigee_docs_salesforce.js';
+
+  // Buttons.
+  $form['actions']['submit']['#attributes']['class'] = array('btn-submit');
+  $form['actions']['submit']['#prefix'] = '<div class="actions-wrapper"><a href="' . base_path() . '" class="cancel-button">' . t('Cancel') . '</a>';
+  $form['actions']['submit']['#suffix'] = '</div>';
+}

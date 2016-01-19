@@ -1,0 +1,9 @@
+; $Id
+name = MNI Chinese Transliteration
+package = "MNI"
+description = Transliterates simplified Chinese once a node has been updated with the translation.
+core = 6.x
+php = 5.2
+
+; # @author Jeremy Cerda
+; # @version $Id: mnizhotranslit.info 2383 2011-07-28 16:23:02Z jcerda $

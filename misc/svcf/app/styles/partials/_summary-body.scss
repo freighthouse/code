@@ -1,0 +1,174 @@
+section.section {
+  .summary-bodies {
+    position: relative;
+    width: 100%;
+    padding: 0 !important;
+    color: $white;
+    z-index: 100;
+    button {
+      position: absolute;
+      margin-top: -20px;
+      top: 50%;
+      background-color: transparent;
+      border: 0;
+      border-radius: 0;
+      color: inherit;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.11);
+      z-index: 1;
+      &:before {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        line-height: 24px;
+        overflow: visible;
+        color: inherit;
+        font-family: FontAwesome;
+      }
+      &[aria-label="Previous"] {
+        @media screen and (max-width: $screen-xs-max) {
+          left: 5px;
+        }
+        @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+          left: 5px;
+        }
+        @media screen and (min-width: $screen-md-min) {
+          left: -25px;
+        }
+
+        &:before {
+          content: "\f053" !important;
+        }
+      }
+      &[aria-label="Next"] {
+        @media screen and (max-width: $screen-xs-max) {
+          right: 5px;
+        }
+        @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+          right: 5px;
+        }
+        @media screen and (min-width: $screen-md-min) {
+          right: -25px;
+        }
+        &:before {
+          content: "\f054" !important;
+        }
+      }
+    }
+    .slick-list {
+      .slick-track {
+        margin: 0 auto;
+      }
+    }
+    padding: 0;
+    .summary-body-container {
+      position: relative;
+      width: 100%;
+      max-width: 992px;
+      overflow: visible;
+      padding: 0 35px;
+    }
+    .summary-body {
+      width: 20%;
+      height: 100%;
+      float: left;
+      background-color: $light-blue;
+      color: $dark-blue;
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      @media screen and (max-width: $screen-xs-max) {
+        @include make-xs-column(1);
+        padding: 0;
+        a {
+          max-width: 300px;
+          margin: 0 auto;
+        }
+      }
+      @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+        @include make-sm-column(2);
+        a {
+          max-width: 300px;
+          margin: 0 auto;
+        }
+      }
+      @media screen and (min-width: $screen-md-min) {
+        a {
+          max-width: 300px;
+          margin: 0 auto;
+        }
+      }
+      .summary-body-image {
+        @include make-xs-column(6);
+        @include make-sm-column(6);
+        @include make-md-column(4);
+        @include make-lg-column(4);
+        img {
+          margin: 10px 0;
+          width: 100%;
+          height: auto;
+        }
+      }
+      .summary-body-cta {
+        color: inherit;
+        a {
+          color: inherit;
+        }
+      }
+      .summary-body-text {
+        @include make-xs-column(6);
+        @include make-sm-column(6);
+        @include make-md-column(8);
+        @include make-lg-column(8);
+        padding-left: 0;
+        color: inherit;
+        .summary-body-text-container {
+          position: relative;
+          width: 100%;
+          height: inherit;
+          padding: 0 5px;
+          text-decoration: none;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          height: 100%;
+          color: inherit;
+          &:before {
+            display: block;
+            font-size: 20px;
+            padding: 5px 0;
+          }
+          textarea {
+            width: 100%;
+            height: 50%;
+            background-color: transparent;
+            border: 0;
+          }
+          p {
+            font-size: 12px;
+            line-height: 18px;
+            margin: 10px 0;
+            color: inherit;
+            @media screen and (max-width: $screen-xs-max) {
+              font-size: 10px;
+              margin: 5px 0 5px 0;
+              &:last-child {
+                display: none;
+              }
+            }
+            @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+              font-size: 11px;
+            }
+            @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max) {
+              font-size: 13px;
+            }
+            @media screen and (min-width: $screen-lg-min) {
+              font-size: 15px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

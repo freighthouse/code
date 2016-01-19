@@ -1,0 +1,7 @@
+; $Id$
+package = Menu
+name = Tree Menus
+description = Make drop down menus for site navigation and admin menus
+version = "6.x-1.5-dev"
+core = 6.x
+dependencies[] = menu

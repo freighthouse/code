@@ -1,0 +1,1 @@
+<div class="form-ask"><?php print $block->content ?></div>

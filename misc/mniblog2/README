@@ -1,0 +1,62 @@
+# @author: Jeremy Cerda
+# @version: $Id: README 2363 2011-07-22 15:13:04Z jcerda $
+
+WARN: This README file has not been updated in some time. Please be careful
+      when using any information provided here. - jcerda 3/29/12
+
+This is the mniblog2 software used for posting stories from the mni legacy
+feed to mni drupal websites. For install and troubleshooting instructions see
+the INSTALL file.
+
+################################################################################
+  Quick Historical Data Import
+################################################################################
+These are quick instructions, for detailed instructions, please see
+importing_missing_stories.txt in the doc dir.
+
+Importing historical data is done manually, via the below described process.
+
+// Move your Legacy Data log files into the /usr/local/mniblog2 dir.
+
+# su - mniblog2
+$ svn update
+
+// Determine the Unix Timestamp of the last story you will be importing.
+// Various online tools are available for this, or Drupal stores all node
+// creation dates as Unix Timestamps, if this is more convenient.
+
+// Run the following command once for every node type you wish to remove:
+
+$ d=1; while [ $d != 0 ]; do php drupal_del_nodes_x.php -y <node type> -t <timestamp> -l 100; d=$?; done
+
+// When finished, run the following command to import the logged data:
+
+// MNINEWS:
+$ python mnadapt.py -m ./conf/multipub.cfg -i < [log file]
+// MARKETNEWS:
+$ python mnadapt.py ./conf/production.cfg ./conf/pub.production.cfg -i < [log file]
+
+################################################################################
+  Tools
+################################################################################
+The tools directory contains several tool scripts for filling out data.
+
+- mngenerate.py [config file] [appended year] < [data file]
+	- DEPRECATED
+    - Generates xml files by reading a file via stdin.
+    - Data is then translated and converted into usable data for the site.
+    - The appended year will be attached to all date data.
+
+- mniblogpub-import.py [config file]
+	- DEPRECATED
+    - Runs through data in the delivery folder one time.
+    - Contains more data checks to avoid overloading the normal blogpub.
+
+- filter_nmainwire.py [config file] [appended year] < [data file]
+    - Generates only A0000000 stories (also known as "naked" headlines)
+
+- mnpdfripper.py [data file]
+    - Takes an xml from richup and outputs the pdf from it
+
+- prodcfgtrans.py [map file] [data file]
+    - Uses the map file to translate legacy codes to product numbers

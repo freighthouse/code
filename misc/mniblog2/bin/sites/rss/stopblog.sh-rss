@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# @author Jeremy Cerda
+# @version $Id: stopblog.sh-marketnews 2337 2011-07-08 15:25:32Z jcerda $
+
+SCRIPT_NAME=`basename $0`
+DIRNAME=$(cd `dirname $0` && pwd)
+PROG_HOME=${DIRNAME/\/bin/}
+source $PROG_HOME/conf/runconfig.sh
+USER=`id|cut -d"(" -f2|cut -d")" -f1`
+
+if [ ${USER} != ${PROCESSUSER} ] && [ ${USER} != "root" ]; then
+	echo "ERROR: Must be run as root or ${PROCESSUSER}"
+	exit 2
+fi
+
+pushd ${BLOGDIR} &> /dev/null
+pkill -f ${BLOGDIR}/mnadapt.py
+pkill -f ${BLOGDIR}/mnrichwatch.py
+pkill -f ${BLOGDIR}/mnemb.py
+pkill -f ${BLOGDIR}/mnirsspub.py
+popd &> /dev/null

@@ -1,0 +1,6 @@
+tr.mnemb_red 				{ background-color:#FFC0CB; }
+tr.mnemb_red td.active		{ background-color:#F5B6C1; }
+tr.mnemb_yellow 			{ background-color:#FFF5C2; }
+tr.mnemb_yellow td.active	{ background-color:#F5EAB8; }
+
+label { font-weight:bold; }

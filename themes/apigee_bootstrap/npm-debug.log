@@ -1,0 +1,146 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'node',
+1 verbose cli   '/usr/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'watch-lescsnpm',
+1 verbose cli   'install',
+1 verbose cli   'watch-lessc' ]
+2 info using npm@1.4.7
+3 info using node@v0.10.24
+4 verbose readDependencies using package.json deps
+5 verbose cache add [ 'watch-lescsnpm', null ]
+6 verbose cache add name=undefined spec="watch-lescsnpm" args=["watch-lescsnpm",null]
+7 verbose parsed url { protocol: null,
+7 verbose parsed url   slashes: null,
+7 verbose parsed url   auth: null,
+7 verbose parsed url   host: null,
+7 verbose parsed url   port: null,
+7 verbose parsed url   hostname: null,
+7 verbose parsed url   hash: null,
+7 verbose parsed url   search: null,
+7 verbose parsed url   query: null,
+7 verbose parsed url   pathname: 'watch-lescsnpm',
+7 verbose parsed url   path: 'watch-lescsnpm',
+7 verbose parsed url   href: 'watch-lescsnpm' }
+8 verbose cache add [ 'install', null ]
+9 verbose cache add name=undefined spec="install" args=["install",null]
+10 verbose parsed url { protocol: null,
+10 verbose parsed url   slashes: null,
+10 verbose parsed url   auth: null,
+10 verbose parsed url   host: null,
+10 verbose parsed url   port: null,
+10 verbose parsed url   hostname: null,
+10 verbose parsed url   hash: null,
+10 verbose parsed url   search: null,
+10 verbose parsed url   query: null,
+10 verbose parsed url   pathname: 'install',
+10 verbose parsed url   path: 'install',
+10 verbose parsed url   href: 'install' }
+11 warn install Refusing to install watch-lessc as a dependency of itself
+12 silly lockFile 2a875ac4-watch-lescsnpm watch-lescsnpm
+13 verbose lock watch-lescsnpm /root/.npm/2a875ac4-watch-lescsnpm.lock
+14 silly lockFile 89fb511f-install install
+15 verbose lock install /root/.npm/89fb511f-install.lock
+16 silly lockFile 2a875ac4-watch-lescsnpm watch-lescsnpm
+17 silly lockFile 2a875ac4-watch-lescsnpm watch-lescsnpm
+18 silly lockFile 89fb511f-install install
+19 silly lockFile 89fb511f-install install
+20 verbose addNamed [ 'watch-lescsnpm', '' ]
+21 verbose addNamed [ null, '*' ]
+22 silly lockFile 5fe0b4c0-watch-lescsnpm watch-lescsnpm@
+23 verbose lock watch-lescsnpm@ /root/.npm/5fe0b4c0-watch-lescsnpm.lock
+24 verbose addNamed [ 'install', '' ]
+25 verbose addNamed [ null, '*' ]
+26 silly lockFile cadb329f-install install@
+27 verbose lock install@ /root/.npm/cadb329f-install.lock
+28 silly addNameRange { name: 'watch-lescsnpm', range: '*', hasData: false }
+29 silly addNameRange { name: 'install', range: '*', hasData: false }
+30 verbose url raw watch-lescsnpm
+31 verbose url resolving [ 'https://registry.npmjs.org/', './watch-lescsnpm' ]
+32 verbose url resolved https://registry.npmjs.org/watch-lescsnpm
+33 info trying registry request attempt 1 at 11:38:30
+34 http GET https://registry.npmjs.org/watch-lescsnpm
+35 verbose url raw install
+36 verbose url resolving [ 'https://registry.npmjs.org/', './install' ]
+37 verbose url resolved https://registry.npmjs.org/install
+38 info trying registry request attempt 1 at 11:38:30
+39 http GET https://registry.npmjs.org/install
+40 http 200 https://registry.npmjs.org/install
+41 silly registry.get cb [ 200,
+41 silly registry.get   { date: 'Mon, 30 Jun 2014 18:38:30 GMT',
+41 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R14B04)',
+41 silly registry.get     etag: '"CQAP2GMDM44DTZWNHOJZ5ZO4C"',
+41 silly registry.get     'content-type': 'application/json',
+41 silly registry.get     'cache-control': 'max-age=30',
+41 silly registry.get     'content-length': '27648',
+41 silly registry.get     'accept-ranges': 'bytes',
+41 silly registry.get     via: '1.1 varnish',
+41 silly registry.get     age: '213',
+41 silly registry.get     'x-served-by': 'cache-lax1435-LAX',
+41 silly registry.get     'x-cache': 'HIT',
+41 silly registry.get     'x-cache-hits': '1',
+41 silly registry.get     'x-timer': 'S1404153510.489609,VS0,VE0',
+41 silly registry.get     vary: 'Accept',
+41 silly registry.get     'keep-alive': 'timeout=10, max=50',
+41 silly registry.get     connection: 'Keep-Alive' } ]
+42 silly addNameRange number 2 { name: 'install', range: '*', hasData: true }
+43 silly addNameRange versions [ 'install',
+43 silly addNameRange   [ '0.1.1', '0.1.2', '0.1.3', '0.1.4', '0.1.5', '0.1.6', '0.1.7' ] ]
+44 verbose addNamed [ 'install', '0.1.7' ]
+45 verbose addNamed [ '0.1.7', '0.1.7' ]
+46 silly lockFile b58c0e47-install-0-1-7 install@0.1.7
+47 verbose lock install@0.1.7 /root/.npm/b58c0e47-install-0-1-7.lock
+48 silly lockFile d4a08d30-js-org-install-install-0-1-7-tgz https://registry.npmjs.org/install/-/install-0.1.7.tgz
+49 verbose lock https://registry.npmjs.org/install/-/install-0.1.7.tgz /root/.npm/d4a08d30-js-org-install-install-0-1-7-tgz.lock
+50 verbose addRemoteTarball [ 'https://registry.npmjs.org/install/-/install-0.1.7.tgz',
+50 verbose addRemoteTarball   '30a90982c625506cb60c33f2a002db979a09b0ea' ]
+51 info retry fetch attempt 1 at 11:38:30
+52 verbose fetch to= /root/tmp/npm-4502-sFOOCqL0/1404153510544-0.43663037894293666/tmp.tgz
+53 http GET https://registry.npmjs.org/install/-/install-0.1.7.tgz
+54 http 404 https://registry.npmjs.org/watch-lescsnpm
+55 verbose headers { date: 'Mon, 30 Jun 2014 18:38:30 GMT',
+55 verbose headers   server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+55 verbose headers   'content-type': 'application/json',
+55 verbose headers   'cache-control': 'max-age=0',
+55 verbose headers   'content-length': '52',
+55 verbose headers   'accept-ranges': 'bytes',
+55 verbose headers   via: '1.1 varnish',
+55 verbose headers   age: '0',
+55 verbose headers   'x-served-by': 'cache-lax1427-LAX',
+55 verbose headers   'x-cache': 'MISS',
+55 verbose headers   'x-cache-hits': '0',
+55 verbose headers   'x-timer': 'S1404153510.471367,VS0,VE75',
+55 verbose headers   'keep-alive': 'timeout=10, max=50',
+55 verbose headers   connection: 'Keep-Alive' }
+56 silly registry.get cb [ 404,
+56 silly registry.get   { date: 'Mon, 30 Jun 2014 18:38:30 GMT',
+56 silly registry.get     server: 'CouchDB/1.5.0 (Erlang OTP/R16B03)',
+56 silly registry.get     'content-type': 'application/json',
+56 silly registry.get     'cache-control': 'max-age=0',
+56 silly registry.get     'content-length': '52',
+56 silly registry.get     'accept-ranges': 'bytes',
+56 silly registry.get     via: '1.1 varnish',
+56 silly registry.get     age: '0',
+56 silly registry.get     'x-served-by': 'cache-lax1427-LAX',
+56 silly registry.get     'x-cache': 'MISS',
+56 silly registry.get     'x-cache-hits': '0',
+56 silly registry.get     'x-timer': 'S1404153510.471367,VS0,VE75',
+56 silly registry.get     'keep-alive': 'timeout=10, max=50',
+56 silly registry.get     connection: 'Keep-Alive' } ]
+57 silly lockFile 5fe0b4c0-watch-lescsnpm watch-lescsnpm@
+58 silly lockFile 5fe0b4c0-watch-lescsnpm watch-lescsnpm@
+59 error 404 404 Not Found: watch-lescsnpm
+59 error 404
+59 error 404 'watch-lescsnpm' is not in the npm registry.
+59 error 404 You should bug the author to publish it
+59 error 404 It was specified as a dependency of 'watch-lessc'
+59 error 404
+59 error 404 Note that you can also install from a
+59 error 404 tarball, folder, or http url, or git url.
+60 error System Linux 2.6.32-220.2.1.el6.x86_64
+61 error command "node" "/usr/bin/npm" "install" "watch-lescsnpm" "install" "watch-lessc"
+62 error cwd /home/wpdev/sites/apigee.launchbrigade.com/apigee.com/docroot/sites/all/themes/apigee_themes/apigee_bootstrap
+63 error node -v v0.10.24
+64 error npm -v 1.4.7
+65 error code E404
+66 verbose exit [ 1, true ]

@@ -1,0 +1,102 @@
+<?php
+/**
+ * Adding classes to exposed IHA Resources form
+*/
+// function iha_misc_functions_form_alter(&$form, &$form_state, $form_id)
+// {
+
+//   // Alter view page with system name "example-view" to add a class
+//   if($form['#id'] == "views-exposed-form-resources-block"){
+
+//     if (isset($form['DOB'])) {
+//        $form['keyword']['#attributes'] = array('class' => array('resources_keyword'));
+//     }
+//     if (isset($form['DATE'])) {
+//        $form['type']['#attributes'] = array('class' => array('resources_type'));
+//     }
+//     if (isset($form['DATE'])) {
+//        $form['topic']['#attributes'] = array('class' => array('resources_topic'));
+//     }
+//   }
+// }
+
+/**
+ * Implements hook_menu_attribute_info().
+ */
+function iha_misc_functions_menu_attribute_info() {
+  $info['data-toggle'] = array(
+    'label' => t('Data toggle attribute'),
+    'description' => t('Specifies my data toggle attribute for bootstrappiness.'),
+  );
+  $info['data-parent'] = array(
+    'label' => t('Data parent attribute'),
+    'description' => t('Specifies my data parent attribute for bootstrappiness.'),
+  );
+  $info['data-target'] = array(
+    'label' => t('Data target attribute'),
+    'description' => t('Specifies my data target attribute for bootstrappiness.'),
+  );
+
+  return $info;
+}
+
+//User profile edit form tweaks by Freighthouse.nyc
+// function iha_misc_functions_form_alter(&$form, $form_state, $form_id)  {
+//   switch ($form_id)  {
+//     case 'user_profile_form' :
+//     //add the profile 2 fields to the user account edit page
+//     $types = profile2_get_types();
+//       if (!empty($types)){
+//           foreach ($types as $type) {
+//             $profile = profile2_load_by_user($form['#user'], $type->type);
+//             if (!empty($profile)) {
+//             $form_state['profiles'][$profile->type] = $profile;
+
+//                 profile2_attach_form($form, $form_state);
+//             }
+//           }
+//         }
+//         //remove profile2 submit handler and add custom handler
+//         if(($key = array_search('profile2_form_submit_handler', $form['#submit'])) !== false) {
+//             unset($form['#submit'][$key]);
+//         }
+//         $form['#submit'][] = 'iha_misc_functions_profile2_submit_handler';
+//     break;
+//   }
+// }
+// function iha_misc_functions_profile2_submit_handler($form, &$form_state){
+// $types = profile2_get_types();
+//   if (!empty($types)){
+//     foreach ($types as $type) {
+//       $profile = profile2_load_by_user($form['#user'], $type->type);
+//       if (!empty($profile)) {
+//         foreach($form_state['values']['profile_' . $profile->type] as $field => $value){
+//             if($value['und'] != '_none'){
+//                 $profile->$field = $value;
+//             }
+//         }
+//         profile2_save($profile);
+//       }
+//     }
+//   }
+// }
+/**
+ * Implements hook_form_alter().
+ */
+
+function iha_form_views_exposed_form_alter(&$form, &$form_state) {
+  // ------------------------------------------------------------
+  // Add my own reset button to all views exposed forms. The reason behind is,
+  // that the default Drupal reset button doesn't play nice with AJAX
+  // and jumps back to the front page because of URL problems. So it's unusable for us.
+  //
+  // Add class to make it better selectable in JS and CSS
+  $form['submit']['#attributes'] = array('class' => array('resources-filter-submit'));
+  $submit_btn_id = $form['submit']['#id'];
+  if (!empty($submit_btn_id) && !empty($form['reset'])) {
+    // Add own reset button
+    $form['submit']['#suffix'] = '<button onclick="javascript:jQuery(this.form).clearForm();jQuery(this.form).find(\'#' . $submit_btn_id . '\').trigger(\'click\');return false;" id="edit-reset" class="btn btn-default form-submit resources-filter-submit">' . t('Clear') . '</button>';
+    // Remove the original RESET button.
+    unset($form['reset']);
+  }
+}

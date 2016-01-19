@@ -1,0 +1,7 @@
+name = Apigee Menu System
+description = Provides menu links for Apigee menus for themes that can take advantage of it
+
+core = 7.x
+package = DOCS
+
+dependencies[] = d8cmi

@@ -1,0 +1,12 @@
+; $Id: mni_mobile_functions.info,v 1 2011/02/28 14:41:03 jc Exp $
+name = mni mobile functions
+description = MNI Miscellaneous functionality for mobile site
+
+package = MNI
+core = 6.x
+version = "6.x-1"
+core = "6.x"
+project = "mni_mobile_functions"
+datestamp = "1232468755"
+
+mni_mobile_functions

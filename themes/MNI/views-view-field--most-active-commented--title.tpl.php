@@ -1,0 +1,1 @@
+<div class="txt"><?php print $output; ?></div>

@@ -1,0 +1,258 @@
+<?php
+# @author Jeremy Cerda
+# @version $Id: mnizhotranslit.module 2383 2011-07-28 16:23:02Z jcerda $
+
+module_load_include('inc', 'mnizhotranslit', 'zho_translit');
+
+function mnizhotranslit_push_action(&$object, $context = array()) {
+	// Grab translation and push acquire xml
+	$n = node_load($object->nid);
+	mnizhotranslit_create_acquire_files($n);
+}
+
+function mnizhotranslit_archive_action(&$object, $context = array()) {
+	$n = node_load($object->nid);
+
+	// If these aren't set, jump out because there isn't anything to archive
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	// We'll archive in drupal's tmp dir, but drupal doesn't like us
+	// using this dir. So we have to use php error checking here instead.
+	$archDir = file_directory_temp() . "/zho_archive";
+	if(!is_dir($archDir)) {
+		if(!mkdir($archDir)) {
+			drupal_set_message("Error archiving translated content. " .
+					"Please contact technology.",'error', FALSE);
+			return;
+		}
+	}
+
+	// For now we'll just use the acquire template
+	$acqXml = file_create_path("acquire_zho_xml");
+	if(!file_check_directory($acqXml, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($acqXml, FILE_MODIFY_PERMISSIONS)) {
+			drupal_set_message("Error archiving translated content. " .
+					"Please contact technology.",'error', FALSE);
+			return;
+		}
+	}
+	static $template = "";
+	if($template == "")
+		$template = file_get_contents($acqXml."/acquire_temp.xml");
+
+	// I'm only archiving utf8 for now.
+	$files = array();
+	mnizhotranslit_generateXmlFile($n, $archDir, "simplified_zho",
+		"utf8", $template);
+	mnizhotranslit_generateXmlFile($n, $archDir, "traditional_zho",
+		"utf8", $template);
+}
+
+function mnizhotranslit_translit_action(&$object, $context = array()) {
+	// Translate and store traditional zho
+	$n = node_load($object->nid, NULL, TRUE);
+	mnizhotranslit_transliterate($n);
+	$n = node_load($object->nid, NULL, TRUE);
+
+	// Because triggers are lazy, we need to modify the object param
+	// as well, or workflow will overwrite our changes.
+	$object->field_chinese_title_trad[0]["value"] =
+		$n->field_chinese_title_trad[0]["value"];
+	$object->field_chinese_body_trad[0]["value"] =
+		$n->field_chinese_body_trad[0]["value"];
+	$object->field_chinese_body_trad[0]["format"] =
+		$n->field_chinese_body_trad[0]["format"];
+}
+
+function mnizhotranslit_action_info() {
+	return array(
+		"mnizhotranslit_translit_action" => array(
+			'description' => t('Generate Traditional Chinese'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		),
+		"mnizhotranslit_push_action" => array(
+			'description' => t('Push Acquire XML'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		),
+		"mnizhotranslit_archive_action" => array(
+			'description' => t('Archive Translated Content'),
+			'type' => 'node',
+			'configurable' => FALSE,
+			'hooks' => array('any' => TRUE)
+		)
+	);
+}
+
+function mnizhotranslit_mapterm($term)
+{
+	$p = drupal_get_path('module', 'mnizhotranslit');
+	$prod = parse_ini_file($p."/vendorData.production.cfg", true);
+	return ($prod['all'][$term] ? $prod['all'][$term] : false);
+}
+
+/*
+ * Generates an xml file with the given chinese writing style, and the
+ * given character encoding, in the appropriate folder. Returns the
+ * generated filename.
+ *
+ * NOTE: XML will not be consumed until file is moved into position.
+ * This should be done after all XML is generated.
+ *
+ * NOTE: Valid writing styles include traditional and simplified.
+ * Simplified is used as default.
+ *
+ * NOTE: Valid encodings include utf8, big5, and gb2312. utf8 is
+ * used as default.
+ */
+function mnizhotranslit_generateXmlFile($node, $path, $lang_type,
+	$encoding, $template)
+{
+	$lang_type = mb_strtolower($lang_type);
+
+	// Using utf8?
+	$toUTF8 = mb_strtolower($encoding);
+	$toUTF8 = ($toUTF8 == "utf8") || ($toUTF8 == "utf-8");
+
+	// Grab data
+	switch($lang_type) {
+		case "zho":case "zho_simp":case "simplified":
+		case "simplified_chinese":case "simplified_zho":
+		case "zho_simplified":
+			$lang = "<xn:language>zh</xn:language>\n                ".
+				"<xn:vendorData>MKTNEWS_:LangSub=Hans</xn:vendorData>";
+			$body = $node->field_chinese_body[0]["value"];
+			$title = $node->field_chinese_title[0]["value"];
+			$suffix = "s";
+			//$suffix = "zho-s";
+			break;
+		case "zho_trad":case "traditional":
+		case "traditional_chinese": case "traditional_zho":
+		case "zho_traditional":
+			$lang = "<xn:language>zh</xn:language>\n                ".
+				"<xn:vendorData>MKTNEWS_:LangSub=Hant</xn:vendorData>";
+			$body = $node->field_chinese_body_trad[0]["value"];
+			$title = $node->field_chinese_title_trad[0]["value"];
+			$suffix = "t";
+			//$suffix = "zho-t";
+			break;
+		case "en":case "eng":
+		case "english":default:
+			$lang = "<xn:language>en</xn:language>\n";
+			$body = $node->body;
+			$title = $node->title;
+			$suffix = "eng";
+			break;
+	}
+
+	// Author information
+	$translator = user_load($node->field_translator[0]["uid"])->name;
+	$editor = user_load($node->field_editor[0]["uid"])->name;
+
+	// Grab Taxonomy Data
+	$terms = taxonomy_node_get_terms($node);
+	foreach($terms as $t) {
+		//$v = taxonomy_vocabulary_load($t-vid);
+		//$d = ($v->name == 'MNI Terms' ? $t->name : $t->description);
+		$tax .= "<xn:vendorData>MKTNEWS_:Blog Tag=" . $t->description .
+			"</xn:vendorData>\n                ";
+		$map_term = mnizhotranslit_mapterm($t->description);
+		if($map_term === false){}else{
+			$tax .= "<xn:vendorData>MKTNEWS_:Special Code=".$map_term.
+				"</xn:vendorData>\n                ";
+		}
+	}
+	$tax = trim($tax);
+
+	// Template and finalize data
+	$final = str_replace("{\$~title~}", $title, $template);
+	$final = str_replace("{\$~body~}", $body, $final);
+	$final = str_replace("{\$~blogTags~}", $tax, $final);
+	$final = str_replace("{\$~lang~}", $lang, $final);
+	$final = str_replace("{\$~translator~}", $translator, $final);
+	$final = str_replace("{\$~editor~}", $editor, $final);
+
+	$time_created = date("Ymd", $node->created) .'T'
+		. date("HisO", $node->created);
+	$time_changed = date("Ymd", $node->changed) .'T'
+		. date("HisO", $node->changed);
+	$final = str_replace("{\$~time.created~}", $time_created, $final);
+	$final = str_replace("{\$~time.updated~}", $time_changed, $final);
+
+	if($toUTF8)
+		$final = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" .
+			$final;
+	else
+		$final = "<?xml version=\"1.0\" encoding=\"".$encoding."\"?>\n" .
+			mb_convert_encoding($final, $encoding, "utf8");
+
+	// Write out results
+	return file_save_data($final, $path."/n".$node->nid."_" .
+		$suffix . "_" . $encoding . ".xml.NR",
+		FILE_EXISTS_REPLACE);
+}
+
+function mnizhotranslit_transliterate($n)
+{
+	// If these aren't set, jump out
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	$title = $n->field_chinese_title[0]["value"];
+	$body = $n->field_chinese_body[0]["value"];
+
+	$title = zho_simp_to_trad($title);
+	$body = zho_simp_to_trad($body);
+
+	$n->field_chinese_title_trad[0]["value"] = $title;
+	$n->field_chinese_body_trad[0]["value"] = $body;
+	$n->field_chinese_body_trad[0]["format"] = 1;
+
+	node_save($n);
+}
+
+function mnizhotranslit_create_acquire_files($n)
+{
+	// If these aren't set, jump out
+	if($n->field_chinese_body[0]["value"] == NULL ||
+	$n->field_chinese_title[0]["value"] == NULL)
+		return;
+
+	// Check our path
+	$p = file_create_path("acquire_zho_xml");
+	if(!file_check_directory($p, FILE_CREATE_DIRECTORY)) {
+		if(!file_check_directory($p, FILE_MODIFY_PERMISSIONS)) {
+			drupal_set_message("Error generating xml. Please contact " .
+					"technology.",'error', FALSE);
+			return;
+		}
+	}
+
+	// Lazy load template
+	static $template = "";
+	if($template == "")
+		$template = file_get_contents($p."/acquire_temp.xml");
+
+	// Generate files
+	$files = array();
+	array_push($files, mnizhotranslit_generateXmlFile($n, $p, "traditional_zho",
+		"utf8", $template));
+	array_push($files, mnizhotranslit_generateXmlFile($n, $p, "traditional_zho",
+		"big5", $template));
+	array_push($files, mnizhotranslit_generateXmlFile($n, $p, "simplified_zho",
+		"utf8", $template));
+	array_push($files, mnizhotranslit_generateXmlFile($n, $p, "simplified_zho",
+		"gb2312", $template));
+	//array_push($files, mnizhotranslit_generateXmlFile($n, $p, "english",
+	//	"utf8"), $template);
+
+	// Move them into place
+	foreach($files as $f)
+		rename($f, substr($f, 0, -3));
+}

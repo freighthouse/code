@@ -1,0 +1,5 @@
+- mnirichwatch.py:     	Multi-node, Single File
+- mnirichwatch.py:     	Move config to multipub
+- mnirichwatch.py:     	Rewrite body to work with new site
+- mnirichwatch.py:     	Decide how to handle teaser
+- mnirichwatch.py:     	Folder structure

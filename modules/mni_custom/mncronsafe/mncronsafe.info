@@ -1,0 +1,5 @@
+;$Id$
+name = MNI Cron Safe
+description = Disabled dangerous modules when system ip addresses do not match list
+core = 6.x
+package = MNI

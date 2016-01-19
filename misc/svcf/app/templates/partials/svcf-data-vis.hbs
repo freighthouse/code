@@ -1,0 +1,32 @@
+{{#each svcf_datavis.sections}}
+  {{> section this}}
+{{/each}}
+<section class="section index">
+  <div class="panel" data-id="description">
+    {{#each svcf_datavis.description}}
+      <p>{{this}}</p>
+    {{/each}}
+    <a class="btn" data-id="local">
+      <svg version="1.1" id="button-chevron-down" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+         x="0px" y="0px" viewBox="0 0 1280 720" enable-background="new 0 0 1280 720" xml:space="preserve">
+      <g id="button-fold-back">
+        <text transform="matrix(1 0 0 1 420.9283 301.6842)" fill="#FFFFFF" font-family="'Ubuntu'" font-size="166.7954">NEXT</text>
+        <path fill="#FFFFFF" d="M640,10.3c93.4,0,181.3,36.4,247.4,102.6S990,266.9,990,360.3s-36.4,181.3-102.6,247.4
+          S733.4,710.3,640,710.3s-181.3-36.4-247.4-102.6S290,453.7,290,360.3S326.4,179,392.6,112.9S546.6,10.3,640,10.3 M640,0
+          C441.2,0,280,161.2,280,360s161.2,360,360,360s360-161,360-360S839,0,640,0L640,0z"/>
+      </g>
+      <g id="button-fold-down">
+        <path id="button-fold-down-solid" fill="#FFFFFF" d="M1000,360c0,198.8-161.2,360-360,360S280,559,280,360
+          C519.1,360,781.5,360,1000,360z"/>
+        <polyline id="button-fold-down-chevron" fill="none" stroke="rgba(115, 152, 73, 1)" stroke-width="25" stroke-miterlimit="10" points="
+          771.2,464.2 640,600.5 508.8,464.2   "/>
+      </g>
+      <g id="button-fold-overlay">
+        <path fill="#FFFFFF" d="M640,10.3c93.4,0,181.3,36.4,247.4,102.6S990,266.9,990,360.3s-36.4,181.3-102.6,247.4
+          S733.4,710.3,640,710.3s-181.3-36.4-247.4-102.6S290,453.7,290,360.3S326.4,179,392.6,112.9S546.6,10.3,640,10.3 M640,0
+          C441.2,0,280,161.2,280,360s161.2,360,360,360s360-161,360-360S839,0,640,0L640,0z"/>
+      </g>
+      </svg>
+    </a>
+  </div>
+</section>

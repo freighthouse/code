@@ -1,0 +1,66 @@
+<?php
+// $Id: mni_mobile_functions.module,v 1 2011/04/12 14:41:03 jc Exp $
+
+/**
+ * @file
+ * put here anything that needs to be in a module
+ *TODO the webform id will be different in the live site so replace all instances of 529903!
+ */
+
+/**
+ * Implementation of hook_form_alter().
+ */
+ /*
+function mni_mobile_functions_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+  case 'webform_client_form_529903':
+		_mni_mobile_functions_webform_client_form_529903_form_alter($form, $form_state, $form_id);
+    break;
+   }
+}*/
+
+
+/**
+ * webform
+ */
+
+/**
+ * Modify a Webform submission, prior to saving it in the database.
+ *
+ * @param $node
+ *   The Webform node on which this submission was made.
+ * @param $submission
+ *   The Webform submission that is about to be saved to the database.
+ */
+function mni_mobile_functions_webform_submission_presave($node, &$submission) {
+  if($node->nid==529903){
+		//changing the values to make the email more readable
+	  /*
+	  $component_id = 8;
+	  if(!isset($submission->data[$component_id]['value'][0])){
+	  	$submission->data[$component_id]['value'][0] = 'No free trial requested.';
+	  } else {
+	  	$submission->data[$component_id]['value'][0] = 'Free trial requested.';
+	  }
+	  //if they didn't click any products
+	  $component_id = 10;
+	  if(!isset($submission->data[$component_id]['value'][0])){
+	  	$submission->data[$component_id]['value'][0] = '(No products selected.)';
+	  }
+	  */
+	  //show the product info page they were on
+	  $component_id = 3;
+	  //if they are on standalone form, the product they clicked is in querystring instead of arg
+	  $raw_url=$submission->data[$component_id]['value'][0];
+
+	  $submission->data[$component_id]['value'][0] = str_replace("-"," ",str_replace("http://m.mninews.com/mprod/","",$raw_url));
+	}
+}
+
+/*
+function _mni_mobile_functions_webform_client_form_529903_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'webform_client_form_529903') {
+		$form['submitted']['testbill']['#value']="testtsuccess";
+  }
+}
+*/

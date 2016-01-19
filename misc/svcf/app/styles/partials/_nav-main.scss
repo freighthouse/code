@@ -1,0 +1,98 @@
+div.module-nav-main {
+  position: absolute;
+  width: 50px;
+  height: 100%;
+  max-height: 50%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 500;
+  pointer-events: none;
+
+  ul {
+    position: relative;
+    margin: 0;
+    top: 75px;
+    margin-top: -100%;
+    padding: 0;
+    li {
+      display: block;
+      margin: 20px 0;
+      padding: 0;
+      text-align: center;
+      a {
+        display: inline-block;
+        line-height: 0;
+        vertical-align: middle;
+        pointer-events: auto;
+        cursor: pointer;
+        svg {
+          filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.14));
+          cursor: inherit;
+          g {
+            path {
+              fill: inherit;
+              stroke: inherit;
+            }
+          }
+        }
+        &:first-child {
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: $screen-md-min) {
+
+div.module-nav-main {
+  width: 50px;
+  ul {
+    top: 150px;
+    li {
+      a {
+        svg {
+          //
+        }
+      }
+    }
+  }
+}
+
+}
+@media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+
+div.module-nav-main {
+  width: 50px;
+  ul {
+    top: 125px;
+    li {
+      a {
+        svg {
+          //
+        }
+      }
+    }
+  }
+}
+
+}
+@media (max-width: $screen-xs-max) {
+
+div.module-nav-main {
+  width: 35px;
+  ul {
+    top: 75px;
+    li {
+      a {
+        svg {
+          width: 20px;
+        }
+      }
+    }
+  }
+}
+
+}

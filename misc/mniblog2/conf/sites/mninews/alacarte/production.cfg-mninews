@@ -1,0 +1,59 @@
+# @author Jeremy Cerda
+# @version $Id: production.cfg-mninews 2748 2011-10-11 15:29:50Z jcerda $
+
+## E: Embargo Time, D: Death Time, P: Price
+
+MNI China Business Sentiment Survey	MDQCB$     	-1 	1  	0.0    	none          	QUICK
+
+Tabular Data                      	MTABLE     	0	0	0	txttbl	    SLOW
+Australia Data Tables              	MALDA$    	0	0	0	txttbl	    SLOW
+Australia Data Tables              	MALDT$    	0	0	0	txttbl	    SLOW
+Canada Data Tables                 	MACDA$    	0	0	0	txttbl	    SLOW
+Canada Data Tables                 	MACDT$    	0	0	0	txttbl	    SLOW
+China Data Tables                  	MAQDA$    	0	0	0	txttbl	    SLOW
+China Data Tables                  	MAQDT$    	0	0	0	txttbl	    SLOW
+Eurozone Summary Data Tables       	MAXDA$    	0	0	0	txttbl	    SLOW
+Eurozone Detailed Data Tables      	MAXDT$    	0	0	0	txttbl	    SLOW
+France Data Tables                 	MAFDA$    	0	0	0	txttbl	    SLOW
+France Data Tables                 	MAFDT$    	0	0	0	txttbl	    SLOW
+Germany Data Tables                	MAGDA$    	0	0	0	txttbl	    SLOW
+Germany Data Tables                	MAGDT$    	0	0	0	txttbl	    SLOW
+Italy Data Tables                  	MAIDA$    	0	0	0	txttbl	    SLOW
+Italy Data Tables                  	MAIDT$    	0	0	0	txttbl	    SLOW
+Japan Data Tables                  	MAJDA$    	0	0	0	txttbl	    SLOW
+Japan Data Tables                  	MAJDT$    	0	0	0	txttbl	    SLOW
+Mexico Data Tables                 	MAMDA$    	0	0	0	txttbl	    SLOW
+Mexico Data Tables                 	MAMDT$    	0	0	0	txttbl	    SLOW
+New Zealand Data Tables            	MANDA$    	0	0	0	txttbl	    SLOW
+New Zealand Data Tables            	MANDT$    	0	0	0	txttbl	    SLOW
+Spain Data Tables                  	MASDA$    	0	0	0	txttbl	    SLOW
+Spain Data Tables                  	MASDT$    	0	0	0	txttbl	    SLOW
+UK Data Tables                     	MABDA$    	0	0	0	txttbl	    SLOW
+UK Data Tables                     	MABDT$    	0	0	0	txttbl	    SLOW
+US Data Tables                     	MAUDA$    	0	0	0	txttbl	    SLOW
+US Data Tables                     	MAUDT$    	0	0	0	txttbl	    SLOW
+Chicago Report                     	MAUCS$     	0  	0  	0.0    	chicagoreport 	SLOW
+
+The FX Spot                        	F-ETRENC  	300	0	5.00	mainwirealacarte thefxspot frontpage
+Latam Watch                        	F-LAWTCH  	300	0	5.00	mainwirealacarte latamwatch frontpage
+Fed State of Play                  	F-BULWC3  	300	0	5.00	mainwirealacarte creditalacarte fibulletsalacarte fxbulletsalacarte fedstateofplay frontpage
+ECB Update                         	F-TOPSTY  	300	0	5.00	mainwirealacarte ecbupdate frontpage europeancentralbank
+BOJ State of Play                  	F-GEISHI  	300	0	5.00	mainwirealacarte creditalacarte fibulletsalacarte fxbulletsalacarte bojstateofplay japan asia frontpage
+ECB State of Play                  	F-BUNPLY  	300	0	5.00	mainwirealacarte creditalacarte fibulletsalacarte fxbulletsalacarte ecbstateofplay frontpage europeancentralbank
+Reality Check                      	F-MNREAL  	300	0	5.00	mainwirealacarte realitycheck frontpage mainwirep
+Reality Check                      	MABRC$    	300	0	5.00	mainwirealacarte realitycheck frontpage
+Reality Check                      	MAJRC$    	300	0	5.00	mainwirealacarte realitycheck frontpage
+Reality Check                      	MAQRC$    	300	0	5.00	mainwirealacarte realitycheck frontpage
+Reality Check                      	MAURC$    	300	0	5.00	mainwirealacarte realitycheck frontpage
+Reality Check                      	MAURC$    	300	0	5.00	mainwirealacarte realitycheck frontpage
+Reality Check                      	MAXRC$    	300	0	5.00	mainwirealacarte realitycheck frontpage
+
+Portfolios                         	F-MNPORT  	300	0	5.00	mainwirealacarte portfolios frontpage
+
+Talk from the Trenches             	F-TRENCH  	300	0	5.00	mainwirealacarte talkfromthetrenches frontpage
+Corporate Bond Chatter             	F-AWATCH  	300	0	5.00	mainwirealacarte creditalacarte corporatebondchatter frontpage
+Corporate Bond Chatter             	F-DATWTC  	300	0	5.00	mainwirealacarte corporatebondchatter frontpage
+Credit Default Swaps               	F-GILTS0  	300	0	5.00	mainwirealacarte creditalacarte creditalacartedefaultswaps frontpage
+US Interest Rate Swaps             	F-USREPO  	300	0	5.00	mainwirealacarte usinterestrateswaps frontpage
+
+Exclusives                         	MX$$$$    	1200	0	5.00	mainwirealacarte exclusives mainwirep frontpage

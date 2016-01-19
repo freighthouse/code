@@ -1,0 +1,129 @@
+#wrapper {
+	margin: 0 auto;
+	padding: 10px 0 0;
+	width: 100%;
+}
+.print-logo {display: block;}
+#header {display: none;}
+#main {
+	padding: 0 0 12px;
+	width: 100%;
+}
+.main-sep {background: none;}
+#content {
+	float: none;
+	width: 100%;
+}
+.main-heading img {display: none;}
+.nav {
+	width: 100%;
+	background: url('images/separator.gif') repeat-x;
+}
+.nav-drop {width: auto;}
+.nav-drop ul {
+	overflow: hidden;
+	margin: 0;
+	padding: 4px 0;
+	width: 100%;
+	list-style: none;
+}
+.nav-drop ul li {
+	display: inline;
+	margin: 0;
+	padding: 3px 10px;
+}
+.index-block .visual {width: 70%;}
+.index-block .visual .graph img {width: 100%;}
+.index-block .box {width: 25%;}
+.post .content .img {width: 100%;}
+.dashboard .block {
+	margin: 0;
+	width: 74%;
+	background: none;
+}
+.dashboard .block .list {width: 25%;}
+.dashboard .block .list li a {width: auto;}
+.dashboard .block .area {
+	float: right;
+	margin: 1px 0 0;
+	padding: 5px 0 4px;
+	width: 72%;
+	background: none;
+}
+.dashboard .block .area .frame {
+	overflow: auto;
+	height: auto;
+}
+.dashboard .block .area2 .frame {height: auto;}
+.dashboard .box {
+	margin: 0;
+	width: 25%;
+}
+.key-list2 ul {
+	padding: 0 2% 0 0;
+	width: 30%;
+	list-style: none;
+}
+#sidebar {display: none;}
+.personal-list {
+	padding: 0 2% 0 0;
+	width: 30%;
+}
+.notify-block .box,
+.notify-block .box1 {
+	margin: 0 2% 0 0;
+	padding: 15px 0 0;
+	width: 31%;
+}
+.form-notify,
+.box1 .form-notify {
+	padding: 10px 0 0;
+	color: #000;
+}
+.form-notify label {width: 80%;}
+.product-block {width: 66%;}
+
+.product-block .box {
+	display: inline;
+	float: left;
+	margin: 0 3% 0 0;
+	width: 45%;
+}
+.product-block .box1 {float: right;}
+.product-list {width: auto;}
+.product-list li a.sub {
+	float: right;
+	width: 30%;
+}
+.pay-box {
+	margin: 0;
+	padding: 19px 0 0;
+	width: 32%;
+}
+.form-register {
+	padding: 14px 0 0;
+	width: 100%;
+}
+.form-register .box {width: 40%;}
+.form-register label {
+	padding: 1% 5% 0 0;
+	width: 34%;
+}
+#footer {height: auto !important;}
+#footer .frame {
+	float: none;
+	width: auto;
+}
+#footer .frame .txt {
+	overflow: visible;
+	padding: 0;
+	width: auto;
+	height: auto !important;
+	text-align: left;
+}
+.chat-box {display: none;}
+.bottom-nav {display: none;}
+.lightbox {display: none;}
+.lightbox2 {display: none;}
+.field-field-form-subscribe {display: none;}
+.field-field-top-image {display: none;}

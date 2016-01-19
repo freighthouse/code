@@ -1,0 +1,296 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function apigee_mktg_custom_menu() {
+
+  $items['mktg_weather'] = array(
+      'page callback' => 'apigee_mktg_custom_weather_xml',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+  );
+  $items['mktg_json'] = array(
+      'page callback' => 'apigee_mktg_custom_weather_json',
+      'access callback' => TRUE,
+      'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function apigee_mktg_custom_weather_xml() {
+  print '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <rss version="2.0" xmlns:yweather="http://xml.weather.yahoo.com/ns/rss/1.0" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+      <channel>
+
+<title>Yahoo! Weather - Sunnyvale, CA</title>
+<link>http://us.rd.yahoo.com/dailynews/rss/weather/Sunnyvale__CA/*http://weather.yahoo.com/forecast/USCA1116_f.html</link>
+<description>Yahoo! Weather for Sunnyvale, CA</description>
+<language>en-us</language>
+<lastBuildDate>Tue, 21 Aug 2012 7:55 pm PDT</lastBuildDate>
+<ttl>60</ttl>
+<yweather:location city="Sunnyvale" region="CA"   country="United States"></yweather:location>
+<yweather:units temperature="F" distance="mi" pressure="in" speed="mph"></yweather:units>
+<yweather:wind chill="64"   direction="10"   speed="9" ></yweather:wind>
+<yweather:atmosphere humidity="78"  visibility="10"  pressure="29.9"  rising="1" ></yweather:atmosphere>
+<yweather:astronomy sunrise="6:29 am"   sunset="7:51 pm"></yweather:astronomy>
+<image>
+<title>Yahoo! Weather</title>
+<width>142</width>
+<height>18</height>
+<link>http://weather.yahoo.com</link>
+<url>http://l.yimg.com/a/i/brand/purplelogo//uh/us/news-wea.gif</url>
+</image>
+<item>
+<title>Conditions for Sunnyvale, CA at 7:55 pm PDT</title>
+<geo:lat>37.37</geo:lat>
+<geo:long>-122.04</geo:long>
+<link>http://us.rd.yahoo.com/dailynews/rss/weather/Sunnyvale__CA/*http://weather.yahoo.com/forecast/USCA1116_f.html</link>
+<pubDate>Tue, 21 Aug 2012 7:55 pm PDT</pubDate>
+<yweather:condition  text="Fair"  code="33"  temp="64"  date="Tue, 21 Aug 2012 7:55 pm PDT" ></yweather:condition>
+<description><![CDATA[
+<img src="http://l.yimg.com/a/i/us/we/52/33.gif"/><br />
+<b>Current Conditions:</b><br />
+Fair, 64 F<BR />
+<BR /><b>Forecast:</b><BR />
+Tue - Mostly Clear. High: 70 Low: 57<br />
+Wed - Partly Cloudy. High: 70 Low: 57<br />
+<br />
+<a href="http://us.rd.yahoo.com/dailynews/rss/weather/Sunnyvale__CA/*http://weather.yahoo.com/forecast/USCA1116_f.html">Full Forecast at Yahoo! Weather</a><BR/><BR/>
+(provided by <a href="http://www.weather.com" >The Weather Channel</a>)<br/>
+]]></description>
+<yweather:forecast day="Tue" date="21 Aug 2012" low="57" high="70" text="Mostly Clear" code="33" ></yweather:forecast>
+<yweather:forecast day="Wed" date="22 Aug 2012" low="57" high="70" text="Partly Cloudy" code="30" ></yweather:forecast>
+<guid isPermaLink="false">USCA1116_2012_08_22_7_00_PDT</guid>
+</item>
+</channel>
+</rss>
+
+<!-- api6.weather.ch1.yahoo.com Wed Aug 22 03:27:02 PST 2012 -->
+';
+
+  die();
+}
+
+function apigee_mktg_custom_weather_json() {
+
+  print '{
+  "location": {
+    "lat": 37.37,
+    "long": -122.04,
+    "name": "Sunnyvale, CA"
+  },
+  "timestamp": "Tue, 21 Aug 2012 6:56 pm PDT",
+  "temp": 66,
+  "text": "Fair",
+  "url": "http://weather.yahoo.com/forecast/USCA1116_f.html",
+  "forecast": [
+    {
+      "date": "21 Aug 2012",
+      "day": "Tue",
+      "high": 70,
+      "low": 57,
+      "text": "Mostly Clear"
+    },
+    {
+      "date": "22 Aug 2012",
+      "day": "Wed",
+      "high": 70,
+      "low": 57,
+      "text": "Partly Cloudy"
+    }
+  ]
+}';
+  die();
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function apigee_mktg_custom_ctools_plugin_directory($module, $plugin) {
+  if ($module === 'ctools' && in_array($plugin, array('content_types', 'contexts', 'arguments'))) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function apigee_mktg_custom_entity_info_alter(&$entity_info) {
+
+  // Unset the standard bundle.
+  unset($entity_info['fieldable_panels_pane']['bundles']['fieldable_panels_pane']);
+
+  // Upcoming webcast.
+  $entity_info['fieldable_panels_pane']['bundles']['upcoming_webcast'] = array(
+      'label' => t('Add upcoming webcast'),
+      'pane category' => t('Custom'),
+      'pane top level' => TRUE,
+      // 'pane icon' => drupal_get_path('module', 'apigee_mktg_api_best_practices') . '/images/icon_file.png',
+      'admin' => array(
+          'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+          'bundle argument' => 4,
+          'real path' => 'admin/structure/fieldable-panels-panes/manage/upcoming-webcast',
+          'access arguments' => array('administer fieldable panels panes'),
+      ),
+  );
+
+  $entity_info['fieldable_panels_pane']['bundles']['leadgen'] = array(
+      'label' => t('Add leadgen banner'),
+      'pane category' => t('Custom'),
+      'pane top level' => TRUE,
+      // 'pane icon' => drupal_get_path('module', 'apigee_mktg_api_best_practices') . '/images/icon_file.png',
+      'admin' => array(
+          'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+          'bundle argument' => 4,
+          'real path' => 'admin/structure/fieldable-panels-panes/manage/leadgen',
+          'access arguments' => array('administer fieldable panels panes'),
+      ),
+  );
+
+  // Basic text field.
+  $entity_info['fieldable_panels_pane']['bundles']['text'] = array(
+      'label' => t('Add text'),
+      'pane category' => t('Custom'),
+      'pane top level' => TRUE,
+      // 'pane icon' => drupal_get_path('module', 'apigee_mktg_api_best_practices') . '/images/icon_file.png',
+      'admin' => array(
+          'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+          'bundle argument' => 4,
+          'real path' => 'admin/structure/fieldable-panels-panes/manage/text',
+          'access arguments' => array('administer fieldable panels panes'),
+      ),
+  );
+
+  $entity_info['fieldable_panels_pane']['bundles']['slider'] = array(
+      'label' => t('Add slider'),
+      'pane category' => t('Custom'),
+      'pane top level' => TRUE,
+      // 'pane icon' => drupal_get_path('module', 'apigee_mktg_api_best_practices') . '/images/icon_file.png',
+      'admin' => array(
+          'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+          'bundle argument' => 4,
+          'real path' => 'admin/structure/fieldable-panels-panes/manage/slider',
+          'access arguments' => array('administer fieldable panels panes'),
+      ),
+  );
+}
+
+/**
+ * Implements hook_init().
+ */
+function apigee_mktg_custom_init() {
+  // I apologize to everyone for the following code.
+  $args = arg();
+  $request_path = request_path();
+  if ($args[0] == 'api-best-practices' && empty($args[1])) {
+    drupal_add_js(drupal_get_path('module', 'apigee_mktg_custom') . '/cover.js');
+  } elseif ($request_path == 'plans') {
+    drupal_add_js(drupal_get_path('module', 'apigee_mktg_custom') . '/pricing.js');
+    drupal_add_css(drupal_get_path('module', 'apigee_mktg_custom') . '/pricing.css');
+  } elseif ($request_path == 'developers') {
+    drupal_add_js(drupal_get_path('module', 'apigee_mktg_custom') . '/developers.js');
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function apigee_mktg_custom_permission() {
+  return array(
+      'edit authored by node field' => array(
+          'title' => t('Edit Authored By node property'),
+          'description' => t('Enables editors to edit Authored By and time of creation of the nodes.'),
+          'restrict access' => TRUE,
+      ),
+  );
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Set new permission for Author fieldset.
+ */
+function apigee_mktg_custom_form_alter(&$form, $form_state, $form_id) {
+  if (strpos($form_id, '_node_form') !== FALSE) {
+    $form['author']['#access'] = user_access('edit authored by node field');
+  }
+}
+
+/**
+ * Implements hook_apachesolr_index_document_build_ENTITY_TYPE().
+ *
+ * Add different node images as preview image in solr document.
+ */
+function apigee_mktg_custom_apachesolr_index_document_build_node($document, $node, $env_id) {
+  $content_type_image = array(
+      'news' => 'field_newsimg',
+      'ebook' => 'field_image',
+  );
+
+  if (isset($content_type_image[$node->type]) && !empty($node->{$content_type_image[$node->type]})) {
+    $image_field = $node->{$content_type_image[$node->type]};
+    $document->addField('ss_preview_image', $image_field[LANGUAGE_NONE][0]['uri']);
+  }
+}
+
+/**
+ * Implements hook_apachesolr_query_alter().
+ *
+ * Retrieve field ss_preview_image in the search.
+ */
+function apigee_mktg_custom_apachesolr_query_alter($query) {
+  $fields = $query->getParam('fl');
+  $fields[] = 'ss_preview_image';
+  $query->replaceParam('fl', $fields);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function apigee_mktg_custom_preprocess_field_slideshow(&$variables) {
+  foreach ($variables['items'] as $delta => $item) {
+    $attributes = array('class' => array('apigee-slideshow-link'));
+    $title = $item['field_link']['und'][0]['title'] . '<span class="white-arrow"></span>';
+    $url = $item['field_link']['und'][0]['url'];
+    if (drupal_is_front_page()) {
+      $variables['items'][$delta]['classes'] .= ' empty-desc';
+    }
+    $variables['items'][$delta]['caption'] .= l($title, $url, array('attributes' => $attributes, 'html' => TRUE));
+    $class_attr = preg_match('/img.*class=["\'](.*?)["\']/', $item['image'], $matches);
+    $attributes = array(
+        'path' => $item['field_slide_image']['und'][0]['uri'],
+        'title' => $item['field_image_title_text']['und'][0]['value'],
+        'alt' => $item['field_image_alt_text']['und'][0]['value'],
+        'attributes' => array(
+            'class' => @$matches[1],
+        ),
+    );
+    $variables['items'][$delta]['image'] = theme('image', $attributes);
+  }
+}
+
+
+/**
+ * Implements hook_page_build().
+ */
+function apigee_mktg_custom_page_build(&$page) {
+  // Don't render on edit page.
+  if (!empty($page['content']['system_main']['#node_edit_form'])) {
+    return;
+  }
+  // hook_entity_view() doesn't get called for panels node pages because we
+  // don't use the 'node content' pane.
+  if (($node = menu_get_object()) && module_exists('metatag')) {
+    metatag_entity_view($node, 'node', 'default', LANGUAGE_NONE);
+  }
+}
+
+/**
+ * Implements hook_oembed_request_alter().
+ *
+ * Force oembed format to be xml. Slideshare returns invalid JSON sometimes.
+ */
+function apigee_mktg_custom_oembed_request_alter(&$attributes, &$provider, &$url) {
+  $attributes['format'] = 'xml';
+}

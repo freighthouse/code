@@ -1,0 +1,138 @@
+<?php
+
+// By Jeremy Cerda @freighthousenyc for Mediacurrent
+
+/**
+ * Implements hook_menu(). Because...
+ */
+function hello_world_menu() {
+  $items['hello'] = array(
+    'title' => 'My Hello World Articles',
+    'page callback' => 'hello_world_page_content',
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+* Create the block.
+*/
+function hello_world_block_info() {
+  $blocks['hello_world_block'] = array(
+    'info' => t('Hello World Block for Mediacurrent'),
+    'status' => TRUE,
+    'theme' => 'bartik',
+    'region' => 'sidebar_second',
+    'pages' => '',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+/**
+* Build it.
+*/
+function hello_world_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'hello_world_block':
+      $block = hello_world_block_content();
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Generate page content. This is extra...
+ */
+
+function hello_world_page_content($state = NULL, $node_types = 'hello_world_article') {
+  // instantiate the query using our extended query object
+  $query = new NodeEntityFieldQuery();
+  // set up some basic parameters
+  $query
+    ->entityCondition('bundle', $node_types);
+  // if $state is defined, add that fieldCondition to the query
+  if (!empty($section)) {
+    $query->fieldCondition('field_sections', 'taxonomy_term', $section);
+  }
+  // execute the query
+  $result = $query->execute();
+  $output = array();
+  // return nodes as teasers
+  if (!empty($result['node'])) {
+    $output['nodes'] = node_view_multiple(node_load_multiple(array_keys($result['node'])), 'teaser');
+    $output['pager']['#markup'] = theme('pager', $query->pager);
+  }
+  else {
+    $output['status']['#markup'] = t('No results were returned.');
+  }
+  return $output;
+}
+
+/**
+ * Generate block content, based on the Section term value of the host node.
+ */
+
+function hello_world_block_content() {
+  $block = array();
+  // check available nodes
+  if ($node = menu_get_object()) {
+    // get the Section value
+    $field_name = "field_sections";
+    if (!empty($node->$field_name)) {
+      $items = field_get_items('node', $node, $field_name);
+      $section = $items[0]['tid'];
+    }
+    // only continue if we have a Section term
+    if (isset($section)) {
+      $query = new NodeEntityFieldQuery();
+      // add the Section term
+      $query->fieldCondition($field_name, 'tid', 'NULL', '!=');
+      // prevent the current node from displaying in the block
+      $query->propertyCondition('nid', $node->nid, '<>');
+      // remove the current node from the query
+      $query->excludeNode();
+      // execute the query
+      $result = $query->execute();
+      $nodes = array();
+      if (isset($result['node'])) {
+        $nids = array_keys($result['node']);
+        $nodes = node_load_multiple($nids);
+      }
+      $list = array();
+      foreach ($nodes as $node) {
+        $options = array('absolute' => TRUE);
+        $url = url('node/' . $node->nid, $options);
+        $list[] = '<a href='.$url.'>'.$node->title.'</a>';
+      }
+      $theme_args = array('items' => $list, 'type' => 'ul');
+      $content = theme('item_list', $theme_args);
+      $block = array(
+        'subject' => t('Hello World!'),
+        'content' => $content,
+      );
+    }
+  }
+  return $block;
+}
+
+// Add custom text above $content for each HW Article node in full view mode
+function hello_world_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'hello_world_article' && $view_mode == 'full') {
+  $strBody = $node->content['body'][0]['#markup'];
+  $node->content['body'][0]['#markup'] = '<p class="intro_text">Content starts here!</p>' . $strBody;
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function hello_world_theme($existing, $type, $theme, $path) {
+  // Custom template for that overrides the default block.tpl.php (to add attr.)
+  $themes['block__hello_world'] = array(
+    'template' => 'block--hello-world',
+    'original hook' => 'block',
+    'path' => drupal_get_path('module', 'hello_world') . '/template',
+  );
+  return $themes;
+}

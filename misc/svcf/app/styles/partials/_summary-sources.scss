@@ -1,0 +1,192 @@
+section.section {
+  .summary-sources {
+    position: relative !important;
+    width: 100%;
+    padding: 0;
+    z-index: 1000;
+    .summary-attribution {
+      padding: 0 40px 5px 40px;
+      text-align: center;
+      color: $white;
+      p {
+        text-shadow: 0px 0px 2px rgba(0, 0, 0, 0.67);
+        font-size: 12px;
+        font-weight: 800;
+        margin-bottom: 0;
+        color: inherit;
+      }
+    }
+    .summary-sources-container {
+      position: relative !important;
+      color: inherit;
+      height: 100%;
+      margin: {
+        left: 0;
+        right: 0;
+      }
+      padding: 0 25px;
+    }
+    button {
+      position: absolute;
+      margin-top: -40px;
+      top: 50%;
+      background-color: transparent;
+      border: 0;
+      border-radius: 0;
+      color: inherit;
+      z-index: 1;
+      &:before {
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        line-height: 24px;
+        overflow: visible;
+        color: inherit;
+        font-family: FontAwesome;
+        text-shadow: 0 0 3px rgba(0, 0, 0, 0.11);
+      }
+      &[aria-label="Previous"] {
+        left: -5px;
+        &:before {
+          content: "\f053" !important;
+        }
+      }
+      &[aria-label="Next"] {
+        right: -5px;
+        &:before {
+          content: "\f054" !important;
+        }
+      }
+    }
+    .slick-track {
+      position: relative !important;
+      margin: 0 20px;
+      display: block;
+      margin: 0 auto;
+    }
+    .summary-source {
+      width: 20%;
+      float: left;
+      padding: 10px;
+      &:after {
+        content: "+";
+        color: white;
+        float: right;
+        position: relative;
+        font-size: 36px;
+        margin-top: -50%;
+        top: -36px;
+        right: -27px;
+      }
+      &:last-child {
+        &:after {
+          display: none;
+        }
+      }
+
+      .summary-source-container {
+        position: relative;
+        color: $white;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 100%;
+        background-color: $dark-blue;
+        border: 5px solid $light-blue;
+        padding: 15px;
+        text-align: center;
+        margin: 0 auto;
+        & > * {
+          color: inherit;
+        }
+        & > p {
+          margin: 3px 0;
+        }
+        .summary-source-label {
+          text-align: center;
+          font-size: 11px;
+          font-weight: 500;
+        }
+        .summary-source-value {
+          font-size: 16px;
+          font-weight: 800;
+          margin-top: 5px;
+        }
+        .summary-source-percentage {
+          display: none;
+        }
+      }
+    }
+  }
+}
+/* and (max-width: $screen-md-max) */
+@media (min-width: $screen-md-min) {
+section.section {
+  .summary-sources {
+    width: 100%;
+    .summary-attribution {
+      p {
+        font-size: 18px;
+      }
+    }
+    .summary-sources-container {
+      padding: 0 25px;
+    }
+    .summary-source {
+      .summary-source-container {
+        & > p {
+          margin-top: 10px 0;
+        }
+        .summary-source-label {
+          font-size: 16px;
+          font-weight: 200;
+        }
+        .summary-source-value {
+          font-size: 28px;
+          margin-top: 15px;
+        }
+        .summary-source-percentage {
+          display: none;
+          font-size: 32px;
+          font-weight: 800;
+        }
+      }
+    }
+  }
+}
+}
+@media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+section.section {
+  .summary-sources {
+    width: 100%;
+    .summary-attribution {
+      p {
+        font-size: 16px;
+      }
+    }
+    .summary-sources-container {
+      padding: 0 50px;
+    }
+    .summary-source {
+      .summary-source-container {
+        & > p {
+          margin-top: 10px 0;
+        }
+        .summary-source-label {
+          font-size: 13px;
+          font-weight: 200;
+          padding: 0 5px;
+        }
+        .summary-source-value {
+          font-size: 22px;
+          font-weight: 500;
+          margin-top: 10px;
+        }
+        .summary-source-percentage {
+          display: none;
+        }
+      }
+    }
+  }
+}
+}

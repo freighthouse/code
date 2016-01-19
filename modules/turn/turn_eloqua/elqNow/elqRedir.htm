@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+        <meta http-equiv="Expires" content="Mon, Jan 1 2001 12:00:00 GMT">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <script type="text/javascript" src="/sites/all/modules/turn_eloqua/elqNow/elqDLst.js"> </script>
+        <script type="text/javascript"> <!--//
+        // Copyright Eloqua Corporation.
+        function elqGo(strURL) {
+            if (document.images) {
+                location.replace(strURL);
+            } else {
+                location.href = strURL;
+            }
+        }
+
+        function elqReplace(string, text, by) {
+            var strLength = string.length, txtLength = text.length;
+            if ((strLength == 0) || (txtLength == 0)) return string;
+            var i = string.indexOf(text);
+            if ((!i) && (text != string.substring(0, txtLength))) return string;
+            if (i == -1) return string;
+            var newstr = string.substring(0, i) + by;
+            if (i + txtLength < strLength)
+                newstr += elqReplace(string.substring(i + txtLength, strLength), text, by);
+            return newstr;
+        }
+
+        function elqQString(strVariable, strDefault, intUnencode) {
+            var strSearchString = strVariable.toLowerCase() + '=';
+            var strQString = location.search + '&';
+            var strQStringLower = strQString.toLowerCase();
+            var intStart = strQStringLower.indexOf(strSearchString);
+            if (intStart != -1) {
+                strQString = strQString.substring(intStart);
+                strQString = strQString ? strQString.substring(strQString.indexOf('=') + 1, strQString.indexOf('&')) : '';
+            }
+            if ((intStart == -1) || (strQString == '')) {
+                strQString = strDefault;
+            }
+            if (intUnencode == 1) {
+                strQString = elqReplace(strQString, '%26', '&');
+            } else if (intUnencode == 2) {
+                strQString = elqReplace(elqReplace(strQString, '%26', '&'), '%23', '#');
+            }
+            return encodeURI(strQString);
+        }
+
+        function elqCUrl(strUrl) {
+            if (typeof elqIC != 'undefined') {
+                if (elqIC) {
+                    var elqFound = false;
+                    if (typeof elqDL != 'undefined') {
+                        if (typeof elqReplace != 'undefined') {
+                            var elqDLtp = elqReplace(elqDL, 'http://', '');
+                            elqDLtp = elqReplace(elqDLtp, 'https://', '');
+                            var elqDA = elqDLtp.split('#');
+                            var elqStrUrlCpy = elqReplace(strUrl, 'http://', '');
+                            elqStrUrlCpy = elqReplace(elqStrUrlCpy, 'https://', '');
+                            for (var x = 0; x < elqDA.length; x++) {
+                                if (elqDA[x] != '') {
+                                    if (elqStrUrlCpy.indexOf(elqDA[x]) == 0) {
+                                        elqFound = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (elqFound) {
+                        elqGo(strUrl);
+                    } else {
+                        if (typeof elqDURL != 'undefined') {
+                            elqGo(elqDURL);
+                        } else {
+                            elqGo('elqNoRedir.htm');
+                        }
+                    }
+                } else {
+                    elqGo(strUrl);
+                }
+            } else {
+                elqGo(strUrl);
+            }
+        }
+
+        function elqSafeRedir() {
+            if (typeof elqQString != 'undefined') {
+                elqCUrl(elqQString('ref', '/', 2));
+            } else {
+                elqCUrl('/');
+            }
+        }
+
+        window.onerror = elqSafeRedir;
+
+        var _elqQ = _elqQ || [];
+        _elqQ.push(['elqSetSiteId', '1852860672']);
+        _elqQ.push(['elqRedirect', elqQString('ref', '', 0), elqQString('elq', '', 0)]);
+
+        (function () {
+            function async_load() {
+                var s = document.createElement('script'); s.type = 'text/javascript'; s.async = true;
+                s.src = '/sites/all/modules/turn_eloqua/elqNow/elqCfg.min.js';
+                var x = document.getElementsByTagName('script')[0]; x.parentNode.insertBefore(s, x);
+            }
+            if (window.addEventListener) window.addEventListener('DOMContentLoaded', async_load, false);
+            else if (window.attachEvent) window.attachEvent('onload', async_load);
+        })();
+
+        //-->
+    </script>
+    </head>
+</html>

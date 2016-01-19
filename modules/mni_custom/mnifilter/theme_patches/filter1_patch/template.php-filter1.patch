@@ -1,0 +1,35 @@
+--- themes/MNI/template.php	2011-09-06 18:07:24.000000000 -0400
++++ /var/www/mninews/sites/all/themes/MNI/template.php	2011-09-30 15:13:12.000000000 -0400
+@@ -80,6 +80,18 @@
+ 
+ /* Allow for templates by content type */
+ function MNI_preprocess_page(&$variables) {
++  $path = $_GET['q'];
++  if (module_exists('path')) 
++    $path = drupal_get_path_alias($path);
++
++  switch($path) {
++    case (preg_match('/^home$/',$path) ? true : false):
++    case (preg_match('/^sector\/.*/',$path) ? true : false):
++      drupal_add_js(path_to_theme().'/js/show_teasers.js','theme');
++      drupal_add_js(path_to_theme().'/js/reorder_toplines.js','theme');
++      break;
++  }
++
+   if ($variables['node']->type != "") {
+     $variables['template_files'][] = "page-" . $variables['node']->type;
+   }
+@@ -589,4 +601,13 @@
+   $variables['info'] = "$t - $d";
+ }
+ 
++/*function MNI_preprocess_search_results(&$vars) {
++  $totalSearchResults = 0;
++  if (apachesolr_has_searched() && ($response = apachesolr_static_response_cache())) {
++    $totalSearchresults = $response->response->numFound;
++  }
++  
++  drupal_add_js(array('MNI' => array('totalSearchResults' => $totalSearchResults)), 'setting');
++}*/
++
+ ?>

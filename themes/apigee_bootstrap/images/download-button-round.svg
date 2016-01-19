@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="38px" height="38.006px" viewBox="0 0 38 38.006" enable-background="new 0 0 38 38.006" xml:space="preserve">
+<symbol  id="download_button_2" viewBox="-19 -19.003 38 38.005">
+	<g>
+		<path fill="none" stroke="#FFFFFF" stroke-miterlimit="10" d="M-0.009-18.479C-10.205-17.892-18.5-10.2-18.5,0.012
+			c0,10.212,8.278,18.491,18.491,18.491c10.212,0,18.969-8.29,18.491-18.491C17.987-10.512,9.35-19.017-0.009-18.479z"/>
+		<polyline fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-miterlimit="10" points="7.5,5.607 -0.124,-3.393 
+			-8.5,5.607 		"/>
+		<polyline fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-miterlimit="10" points="-10,-3.393 -10,-8.893 10,-8.893 
+			10,-3.393 		"/>
+		<line fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-miterlimit="10" x1="0" y1="-2.393" x2="0" y2="12.607"/>
+	</g>
+</symbol>
+<use xlink:href="#download_button_2"  width="38" height="38.005" x="-19" y="-19.003" transform="matrix(1 0 0 -1 19 19.0029)" overflow="visible"/>
+</svg>

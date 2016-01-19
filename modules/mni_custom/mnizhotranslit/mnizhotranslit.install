@@ -1,0 +1,44 @@
+<?php
+# @author Jeremy Cerda
+# @version $Id: mnizhotranslit.install 2383 2011-07-28 16:23:02Z jcerda $
+
+function mnizhotranslit_install() {
+	// Create directory for normal files
+	$p = file_create_path("acquire_zho_xml");
+	if(!file_check_directory($p, FILE_CREATE_DIRECTORY)) {
+		file_check_directory($p, FILE_MODIFY_PERMISSIONS);
+	}
+
+	// Create directory for archive files
+	try {
+		mkdir(file_directory_temp()."/acquire_archive");
+	} catch(Excetion $e) {
+		drupal_set_message("Error creating archive directory for ".
+			"acquire files.", 'error', TRUE);
+	}
+
+	$d = $p."/acquire_temp.xml";
+	$s = drupal_get_path('module', 'mnizhotranslit')."/acquire_temp.xml";
+	if(!file_copy($s, $d, FILE_EXISTS_REPLACE)) {
+		$temp_data = '<document><nitf><head><title>{$~title~}</title></head>'.
+    		'<body><body.head><hedline><hl1>{$~title~}</hl1></hedline>'.
+        	'<distributor>Market News International</distributor></body.head>'.
+      		'<body.content><pre>{$~body~}</pre></body.content></body></nitf>'.
+  			'<xn:Resource xmlns:xn="http://www.xmlnews.org/namespaces/meta#">'.
+    		'<xn:providerName>Market News International</xn:providerName>'.
+    		'<xn:providerCode>1</xn:providerCode>'.
+    		'<xn:serviceName>Blogs</xn:serviceName>'.
+    		'<xn:serviceCode>1</xn:serviceCode>'.
+    		'<xn:resourceID>0</xn:resourceID>'.
+    		'<xn:publicationTime>0</xn:publicationTime>'.
+    		'<xn:receivedTime>0</xn:receivedTime>'.
+    		'<xn:title>{$~title~}</xn:title>'.
+    		'<xn:rendition>0</xn:rendition>'.
+    		'{$~blogTags~}</xn:Resource></document>';
+		file_save_data($temp_data, $d, FILE_EXISTS_REPLACE);
+	}
+}
+
+function mnizhotranslit_enable() {
+	mnizhotranslit_install();
+}

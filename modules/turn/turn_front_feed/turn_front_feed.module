@@ -1,0 +1,94 @@
+<?php
+
+
+/**
+ * Implementation of hook_block_info().
+ */
+function turn_front_feed_block_info() {
+  $blocks['turn-front-feed'] = array(
+    'info' => t('Front Page Feed Block'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implementation of hook_block_view().
+ */
+function turn_front_feed_block_view($delta='') {
+  $block = array();
+  switch ($delta) {
+    case 'turn-front-feed':
+      $block['subject'] = l(t('Headlines'), 'company/news');
+      $block['content'] = turn_front_feed_contents();
+      break;
+  }
+  return $block;
+}
+ 
+/**
+ * custom html block
+ * @return string
+ */
+function turn_front_feed_contents() {
+  //Create query for news items from the nodes table
+  $node_query = db_select('node', 'node')
+          ->condition('node.status', 1)
+          ->condition('node.type', 'article');
+  $node_query->addField('node', 'title', 'title');
+  $node_query->addField('node', 'created', 'created');
+  $node_query->addField('node', 'uid', 'screen_name');
+  $node_query->addField('node', 'nid', 'link_id');
+  $node_query->addField('node', 'sticky', 'stickied');
+  $node_query->addExpression("'Turn News'", 'type');
+  $node_query->orderBy('stickied', 'DESC');
+  $node_query->orderBy('created', 'DESC');
+  $node_query->range(0, 2);//LIMIT to 2 records
+  
+  //Create query for tweets from the twitter table
+  $twitter_query = db_select('twitter', 'twitter');
+  $twitter_query->addField('twitter', 'text', 'title');
+  $twitter_query->addField('twitter', 'created_time', 'created');
+  $twitter_query->addField('twitter', 'screen_name', 'screen_name');
+  $twitter_query->addField('twitter', 'twitter_id', 'link_id');
+  $twitter_query->addExpression("0", 'stickied');
+  $twitter_query->addExpression("'Twitter'", 'type');
+  $twitter_query->orderBy('created', 'DESC');
+  
+  //Limit to 3 total items
+  $twitter_query->range(0, 3);
+  
+  //Combine news and twitter queries and execute the resulting query
+  //$node_query->union($twitter_query, 'UNION ALL');
+  $node_result = $node_query->execute();
+  $twitter_result = $twitter_query->execute();
+  //display the data
+  $content = '<ul class="nostick">';
+  $stickies = '';
+  foreach(array($node_result, $twitter_result) as $result){
+    foreach($result as $record) {
+      $itemclass = 'news';
+      if($record->type == 'Twitter'){
+        $itemclass = 'tw';
+        //the "posted" and "posted to" links are only different for tweets
+        $link_out = 'http://twitter.com/#!/'.$record->screen_name;
+        $item_link = $link_out.'/status/'.$record->link_id;
+      }else{ // news
+        $link_out = $item_link = 'node/'.$record->link_id;
+      }
+      $item_content = '<div style="float:right">' .l(t('read more'), $item_link). '</div>' . l($record->title, $item_link);
+      if ( $record->stickied ) {
+        $stickies .= '<li class="'. $itemclass .' sticky">'.$item_content .'</li>';
+      } else {
+        $content_items[$record->created.' '.$record->link_id] = '<li class="'. $itemclass .'">'.$item_content .'</li>';
+      }
+      //.'<br />Posted to '.l($record->type, $link_out).'</li>';
+    }
+  }
+  ksort($content_items);
+  $content .= implode($content_items);
+  if ( $stickies != '' ) {
+    $content = '<ul class="stickies">'. $stickies .'</ul>'. $content;
+  }
+  $content .= '</ul>';
+  return $content;
+}

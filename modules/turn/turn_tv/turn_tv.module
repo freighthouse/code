@@ -1,0 +1,62 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function turn_tv_menu() {
+  $items['lobby'] = array(
+    'title' => 'Turn TV',
+    'description' => 'The page callback can use the arguments provided after the path used as key',
+    'page callback' => 'turn_tv_page_callback',
+    'page arguments' => array(t('This page demonstrates creating a page. What up')),
+    'access callback' => TRUE,
+    'weight' => 40,
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback for use with most of the menu entries. The arguments it
+ * receives determine what it outputs.
+ *
+ * @param $content
+ *   The base content to output.
+ */
+function turn_tv_page_callback($content = NULL) {
+	/*
+	drupal_add_js(drupal_get_path('module', 'turn_tv') .'/js/jquery-ui-1.7.2.custom.min.js', array(
+		'every_page' => TRUE,
+		'scope' => 'footer',
+		'group' => JS_THEME,
+		'weight' => 10,
+	));
+	drupal_add_js(drupal_get_path('module', 'turn_tv') .'/js/jquery.flip.min.js', array(
+		'every_page' => TRUE,
+		'scope' => 'footer',
+		'group' => JS_THEME,
+		'weight' => 12,
+	));
+	*/
+	drupal_add_js(drupal_get_path('module', 'turn_tv') .'/js/jquery.shuffleLetters.js', array(
+		'every_page' => TRUE,
+		'scope' => 'footer',
+		'group' => JS_THEME,
+		'weight' => 11,
+	));
+	drupal_add_js(drupal_get_path('module', 'turn_tv') .'/js/tv.js', array(
+		'every_page' => TRUE,
+		'scope' => 'footer',
+		'group' => JS_THEME,
+		'weight' => 15,
+	));
+	drupal_add_js('http://player.ooyala.com/v3/5969ee0af87c4b41a25741e0431c62c5', 'external');
+
+	//$oot =  '<p>' . $content . '</p>';
+	$oot = '<div id="tvid"></div>';//<div id="tvtemp"></div>';
+	$oot .= '<div class="tvblock dps"><div id="rtqps">847,734 </div><div class="d">Decisions </div><div class="es">Every Second</div></div>';
+	$oot .= '<div class="tvblock stat"><h2>System Status</h2><div id="tvstats"></div></div>';
+	$oot .= '<div class="tvblock twit"><h2>Twitter</h2><div id="twfx"></div><div id="twqr"></div><div id="tweetshere"></div><div id="twfx2"></div></div>';
+	$oot .= '<div id="tvticker"><div id="tix"></div></div>';
+	return $oot;
+}

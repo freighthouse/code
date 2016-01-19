@@ -1,0 +1,6 @@
+; $Id
+name = MNI Node Evolution
+description = Moves MNI nodes between different content types based on information given by the mniblog software.
+core = 6.x
+package = MNI
+php = 5.2

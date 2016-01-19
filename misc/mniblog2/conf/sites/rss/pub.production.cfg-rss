@@ -1,0 +1,30 @@
+[mniblogpub.shared]
+bloghome = /usr/local/mniblog2
+delivery = delivery
+archive  = archive
+
+[mnirsspub.py]
+rss.file           = /var/www/mninews/rss/mninews-free.xml
+rss.dir.delivery   = delivery
+rss.dir.archive    = archive
+rss.dir.live       = rss/live
+rss.managingEditor = rss-editor@marketnews.com
+rss.webMaster      = rss-admin@marketnews.com
+rss.atomlink       = https://mninews.deutsche-boerse.com/rss/mninews-free.xml
+rss.html.include   = true
+loopdelay = 0.5
+
+[mnadapt.py]
+ser.host = 10.1.1.135
+ser.port = 7002
+#ser.host = localhost
+#ser.port = 9802
+
+[mnrichwatch.py]
+loopdelay = 0.5
+dir.scp.delivery = data
+dir.scp.archive = archive/scp
+looplimit  = 1000
+
+; # @author Jeremy Cerda
+; # @version $Id: pub.production.cfg-rss 3304 2012-03-13 15:21:05Z jcerda $

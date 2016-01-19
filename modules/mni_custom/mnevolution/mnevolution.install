@@ -1,0 +1,69 @@
+<?php
+
+/**
+ * Installs our schema and drupal variables
+ */
+function mnevolution_install()
+{
+	drupal_install_schema('mnevolution');
+	variable_set('mnevolution_global_evotype', 0);
+}
+
+/**
+ * Removes our schema and drupal variables
+ */
+function mnevolution_uninstall()
+{
+	drupal_uninstall_schema('mnevolution');
+	variable_del('mnevolution_global_evotype');
+}
+
+/**
+ * Database schema for mnevolution, include the core and script tables
+ */
+function mnevolution_schema()
+{
+	//--------------------------------------------------------------------------
+	//  Core Data Table
+	//--------------------------------------------------------------------------
+	$cd_fields  = array(
+		//'mnevoid'		=> array('type' => 'serial', 'not null' => TRUE),
+		'nid'			=> array('type' => 'int', 'unsigned' => TRUE,
+							'not null' => TRUE, 'default' => 0,
+							'disp-width' => '10'),
+		//'start_type'	=> array('type' => 'varchar', 'length' => 32,
+		//					'not null' => TRUE),
+		'end_type'		=> array('type' => 'varchar', 'length' => 32,
+							'not null' => TRUE),
+		'time_to_evo'	=> array('type' => 'int', 'unsigned' => FALSE,
+							'not null' => TRUE, 'default' => -1,
+							'disp-width' => '10'),
+	);
+	// Table itself
+	$schema['mnevolution'] = array(
+		'fields'		=> $cd_fields,
+		'primary key'	=> array('nid', 'end_type')
+	);
+
+	//--------------------------------------------------------------------------
+	//  Code Lookup Table
+	//--------------------------------------------------------------------------
+	$cl_fields = array(
+		//'mnevosid 	=> array('type' => 'serial', 'not null' => TRUE),
+		'start_type'	=> array('type' => 'varchar', 'length' => 32,
+							'not null' => TRUE),
+		'end_type'		=> array('type' => 'varchar', 'length' => 32,
+							'not null' => TRUE),
+		'script'		=> array('type' => 'text', 'size' => 'big',
+							'not null' => TRUE),
+		'evo_type'		=> array('type' => 'int', 'unsigned' => FALSE,
+							'not null' => TRUE, 'default' => 0,
+							'disp-width' => '3')
+	);
+	$schema['mnevolution_scripts'] = array(
+		'fields' => $cl_fields,
+		'primary key' => array('start_type', 'end_type'),
+	);
+
+	return $schema;
+}

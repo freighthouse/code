@@ -1,0 +1,603 @@
+<?php
+
+function turn_translation_alert_menu(){
+  $items['admin/translation_alerts'] = array(
+    'title' => 'Content for Translation',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'turn_translation_alert_list',
+    'access arguments' => array('access content overview'),
+  );
+  $items['admin/translation_alerts/translate/%turn_translation_alert'] = array(
+    'title callback' => 'turn_translation_alert_content_title',
+    'title arguments' => array(3),
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'turn_translation_alert_content',
+    'page arguments' => array(3),
+    'access arguments' => array('access content overview'),
+  );
+  $items['admin/translation_alerts/translate/%turn_translation_alert/%turn_translation_alert_language'] = array(
+    'title callback' => 'turn_translation_alert_content_language_title',
+    'title arguments' => array(3, 4),
+    'type' => MENU_NORMAL_ITEM,
+    //'page callback' => 'turn_translation_alert_content_language',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('turn_translation_alert_content_form', 3, 4),
+    //'page arguments' => array(3, 4),
+    'access arguments' => array('access content overview'),
+  );
+  $items['admin/translation_alerts/settings'] = array(
+    'title' => 'Translation Alert Settings',
+    'type' => MENU_NORMAL_ITEM,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('turn_translation_alert_settings_form'),
+    'access arguments' => array('access content overview')
+  );
+  $items['admin/translation_alerts/delete/%turn_translation_alert/%turn_translation_alert_language'] = array(
+    'title' => 'Remove Translation Request',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('turn_translation_alert_delete_language_confirm', 3, 4),
+    'access arguments' => array('access content overview'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/translation_alerts/delete/%turn_translation_alert'] = array(
+    'title' => 'Remove Translation Request',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('turn_translation_alert_delete_confirm', 3),
+    'access arguments' => array('access content overview'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+function turn_translation_alert_delete_language_confirm($form, &$form_state, $ttid, $lang){
+  $valid_rows = db_select('turn_translation_alert_content', 'ttac')
+    ->fields('ttac')
+    ->condition('ttid', $ttid)
+    ->condition('language', $lang['code'])
+    ->condition('original', 0)
+    ->execute()
+    ->rowCount();
+  if(!empty($valid_rows)){
+    $form['process'] = array('#type' => 'hidden', '#value' => 'true');
+    $form['lang'] = array('#type' => 'hidden', '#value' => $lang);
+    $form['ttid'] = array('#type' => 'hidden', '#value' => $ttid);
+    $form['delete_language'] = array('#type' => 'hidden', '#value' => TRUE);
+    return confirm_form($form, 'Are you sure?', 'admin/translation_alerts/translate/'.$ttid['ttid'], 'Are you sure you want to remove the '.$lang['name'].' translation request for "'.$ttid['name'].'"?  This cannot be undone.', 'Remove', 'Cancel');
+  }else{
+    drupal_goto('admin/translation_alerts/translate');
+  }
+}
+function turn_translation_alert_delete_language_confirm_submit($form, &$form_state){
+  $num_deleted = db_delete('turn_translation_alert_content')
+    ->condition('ttid', $form_state['values']['ttid']['ttid'])
+    ->condition('language', $form_state['values']['lang']['code'])
+    ->execute();
+  drupal_set_message('The '.$form_state['values']['lang']['name'].' translation request has been removed.  Please be sure to alert the translator(s) if necessary.');
+  turn_translation_alert_update_ttac_status($form_state['values']['ttid']['ttid'], $form_state['values']['ttid']['status']);
+  drupal_goto('admin/translation_alerts/translate/'.$form_state['values']['ttid']['ttid']);
+}
+
+function turn_translation_alert_delete_confirm($form, &$form_state, $ttid){
+  $valid_rows = db_select('turn_translation_alert', 'tta')
+    ->fields('tta')
+    ->condition('ttid', $ttid)
+    ->execute()
+    ->rowCount();
+  if(!empty($valid_rows)){
+    $form['process'] = array('#type' => 'hidden', '#value' => 'true');
+    $form['ttid'] = array('#type' => 'hidden', '#value' => $ttid);
+    $form['delete_language'] = array('#type' => 'hidden', '#value' => TRUE);
+    return confirm_form($form, 'Are you sure?', 'admin/translation_alerts/translate', 'Are you sure you want to remove the translation request for "'.$ttid['name'].'"?  This cannot be undone.', 'Remove', 'Cancel');
+  }else{
+    drupal_goto('admin/translation_alerts/translate');
+  }
+}
+function turn_translation_alert_delete_confirm_submit($form, &$form_state){
+  db_delete('turn_translation_alert_content')
+    ->condition('ttid', $form_state['values']['ttid']['ttid'])
+    ->execute();
+  db_delete('turn_translation_alert')
+    ->condition('ttid', $form_state['values']['ttid']['ttid'])
+    ->execute();
+  drupal_set_message('The translation request has been removed.  Please be sure to alert the translator(s) if necessary.');
+  drupal_goto('admin/translation_alerts/translate');
+}
+
+function turn_translation_alert_settings_form($form, $form_state){
+  $form = array();
+  $languages = language_list();
+  $language_settings_rows = db_select('turn_translation_alert_emails', 'ttae')
+    ->fields('ttae')
+    ->execute();
+  $settings = array();
+  $arr = array_reverse($languages, true);
+  $arr['alert']->name = 'Alert Emails';
+  $languages = array_reverse($arr, true);
+  while($s = $language_settings_rows->fetchAssoc()){
+    if(isset($languages[$s['language']])){
+      $languages[$s['language']]->translate_email = $s['emails'];
+    }
+  }
+  $form['instructions'] = array(
+    '#type' => 'item',
+    '#title' => 'Note:',
+    '#markup' => 'Please enter email addresses seperated by commas for each language.'
+  );
+  $form['emails'] = array(
+    '#tree' => 1
+  );
+  foreach($languages as $lang_code => $lang_info){
+    $form['emails'][$lang_code] = array(
+      '#type' => 'textarea',
+      '#default_value' => (isset($lang_info->translate_email) ? $lang_info->translate_email : ''),
+      '#title' => $lang_info->name,
+      '#required' => TRUE
+    );
+  }
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit Translation'
+  );
+  $form['#validate'] = array('turn_translation_alert_settings_validate');
+  $form['#submit'] = array('turn_translation_alert_settings_submit');
+  return $form;
+}
+
+function turn_translation_alert_settings_validate($form, &$form_state){
+  $languages = language_list();
+  foreach($form_state['values']['emails'] as $lang => $content){
+    $content = trim(str_replace(' ', '', $content));
+    $bad_emails = array();
+    if(!empty($content)){
+      $emails = explode(',', $content);
+      foreach($emails as $eid => $e){
+        if(empty($e)){
+          unset($emails[$eid]);
+        }else{
+          if(!valid_email_address($e)){
+            $bad_emails[$lang][] = $e;
+          }
+        }
+      }
+      if(empty($bad_emails[$lang])){
+        $form_state['values']['emails'][$lang] = implode(',', $emails);
+      }else{
+        if($lang == 'alert'){
+          $name = 'Alert Emails';
+        }else{
+          $name = $languages[$lang]->name;
+        }
+        form_set_error('emails]['.$lang, t('Please correct the following email(s) for '.$name.': '.implode(', ', $bad_emails[$lang])));
+      }
+    }
+  }
+}
+
+function turn_translation_alert_settings_submit($form, &$form_state){
+  $cur_settings_rows = db_select('turn_translation_alert_emails', 'ttae')
+    ->fields('ttae')
+    ->execute();
+  while($setting = $cur_settings_rows->fetchAssoc()){
+    $settings[$setting['language']] = $setting;
+  }
+  foreach($form_state['values']['emails'] as $lang => $content){
+    if(isset($settings[$lang])){
+      db_update('turn_translation_alert_emails')
+        ->fields(array(
+          'emails' => $content
+        ))
+        ->condition('language', $lang)
+        ->execute();
+    }else{
+      db_insert('turn_translation_alert_emails')
+        ->fields(array(
+          'language' => $lang,
+          'emails' => $content,
+        ))
+        ->execute();
+    }
+  }
+  drupal_set_message('The translation settings have been saved.');
+}
+
+function turn_translation_alert_content_form($form, &$form_state, $ttid, $lang){
+  $original = db_select('turn_translation_alert_content', 'ttac')
+    ->fields('ttac')
+    ->condition('ttid', $ttid['ttid'])
+    ->condition('original', 1)
+    ->execute()
+    ->fetchAssoc();
+  $translation = db_select('turn_translation_alert_content', 'ttac')
+    ->fields('ttac')
+    ->condition('language', $lang['code'])
+    ->condition('ttid', $ttid['ttid'])
+    ->condition('original', 0)
+    ->execute()
+    ->fetchAssoc();
+  $form = array();
+  $form['link_to_original'] = array(
+    '#type' => 'item',
+    '#markup' => 'You can edit the original '.$ttid['id_type'].' '.l('here', ($ttid['id_type'] == 'node' ? 'node/'.$ttid['id'].'/edit' : 'admin/structure/block/manage/'.$ttid['module'].'/'.$ttid['id'].'/configure')).'.'
+  );
+  if($ttid['id_type'] == 'node'){
+    $node_translations = translation_node_get_translations($ttid['id']);
+    if(isset($node_translations[$lang['code']])){
+      $form['link_to_translated'] = array(
+        '#type' => 'item',
+        '#markup' => 'You can edit the '.$lang['name'].' translated '.$ttid['id_type'].' '.l('here', 'node/'.$node_translations[$lang['code']]->nid.'/edit').'.'
+      );
+    }
+  }else{
+    $form['link_to_translated'] = array(
+        '#type' => 'item',
+        '#markup' => 'You can edit the '.$lang['name'].' translated '.$ttid['id_type'].' '.l('here', 'admin/structure/block/manage/'.$ttid['module'].'/'.$ttid['id'].'/translate/'.$lang['code']).'.'
+      );
+  }
+  $form['original_text'] = array(
+    '#type' => 'textarea',
+    '#value' => $original['content'],
+    '#title' => 'Original Text',
+    '#attributes' => array('readonly' => 'readonly')
+  );
+  $form['language'] = array(
+    '#type' => 'value',
+    '#value' => $lang['code'],
+  );
+  $form['ttcid'] = array(
+    '#type' => 'value',
+    '#value' => $translation['ttcid'],
+  );
+  $form['ttid'] = array(
+    '#type' => 'value',
+    '#value' => $ttid['ttid'],
+  );
+  $form['content'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Enter Translated Text Here',
+    '#default_value' => $translation['content'],
+    '#required' => TRUE
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit Translation'
+  );
+  $form['#validate'] = array('turn_translation_alert_content_validate');
+  $form['#submit'] = array('turn_translation_alert_content_submit');
+  return $form;
+}
+
+function turn_translation_alert_content_validate($form, &$form_state){
+}
+
+function turn_translation_alert_content_submit($form, &$form_state){
+  global $user;
+  $test = db_update('turn_translation_alert_content')
+    ->fields(array(
+      'content' => $form_state['values']['content'],
+      'uid' => $user->uid,
+      'status' => 1,
+      'modified' => REQUEST_TIME
+    ))
+    ->condition('ttcid', $form_state['values']['ttcid'])
+    ->execute();
+  drupal_set_message('The translation has been saved');
+  $emails = db_select('turn_translation_alert_emails', 'ttae')
+    ->fields('ttae')
+    ->condition('language', 'alert')
+    ->execute()
+    ->fetchAssoc();
+  $ttid = turn_translation_alert_load($form_state['values']['ttid']);
+  if(!empty($emails) && !empty($emails['emails'])){
+    $content_url = url('admin/translation_alerts/translate/'.$ttid['ttid'].'/'.$form_state['values']['language'], array('absolute' => TRUE));
+    $lang = turn_translation_alert_language_load($form_state['values']['language']);
+    $mail_params = array(
+      'language' => $lang['name'],
+      'link' => $content_url,
+      'title' => $ttid['name'],
+      'type' => $ttid['id_type']
+    );
+    drupal_mail('turn_translation_alert', 'translation_complete', $emails['emails'], 'en', $mail_params, 'translation_alerts@turn.com', TRUE);
+  }else{
+    drupal_set_message('There was an error emailing the alert confirmation.');
+  }
+  turn_translation_alert_update_ttac_status($ttid['ttid'], $ttid['status']);
+}
+
+function turn_translation_alert_update_ttac_status($ttid, $status){
+  $incomplete_langs = db_select('turn_translation_alert_content', 'ttac')
+    ->fields('ttac')
+    ->condition('ttid', $ttid)
+    ->condition('original', 0)
+    ->condition('status', 0)
+    ->execute()
+    ->rowCount();
+  $ttid_status = (int) empty($incomplete_langs);
+  if($ttid_status != $status){
+    $test = db_update('turn_translation_alert')
+      ->fields(array(
+        'status' => $ttid_status,
+        'modified' => REQUEST_TIME
+      ))
+      ->condition('ttid', $ttid)
+      ->execute();
+  }
+}
+
+function turn_translation_alert_mail($key, &$message, $params){
+  switch($key){
+    case 'translation_needed':
+      $message['subject'] = $params['language'].' translation needed for Turn';
+      $message['body'][] = 'A '.$params['lang'].' translation has been requested for the following text:';
+      $message['body'][] = '';
+      $message['body'][] = $params['text'];
+      $message['body'][] = '';
+      $message['body'][] = 'Please submit the translation at the following link: '.$params['link'];
+      if(isset($params['missing_emails'])){
+        $message['body'][] = 'There were no translator emails listed for this language.  Please forward this request to the correct people.';
+      }
+      break;
+    case 'translation_complete':
+      $message['subject'] = $params['language'].' translation complete for "'.$params['title'].'"';
+      $message['body'][] = 'The '.$params['language'].' translation for the '.$params['type'].' "'.$params['title'].'" has been completed and is available to view at '.$params['link'];
+      break;
+  }
+}
+
+function turn_translation_alert_language_load($lang){
+  $languages = language_list();
+  return array('code' => $lang, 'name' => $languages[$lang]->name);
+}
+
+function turn_translation_alert_load($ttid){
+  $row = db_select('turn_translation_alert', 'tta')
+    ->fields('tta')
+    ->condition('ttid', $ttid)
+    ->execute()
+    ->fetchAssoc();
+  if($row['id_type'] == 'node'){
+    $content = node_load($row['id']);
+    $row['name'] = $content->title;
+  }else{
+    $row['name'] = 'Block';
+    $content = block_load($row['module'], $row['id']);
+    if(!empty($content->title)){
+      $row['name'] = $content->title;
+    }else{
+      $block_info = module_invoke($row['module'], 'block_info');
+      if(isset($block_info[$row['id']])){
+        $row['name'] = $block_info[$row['id']]['info'];
+      }
+    }
+  }
+  return $row;
+}
+
+function turn_translation_alert_list(){
+  $rows = array();
+  $block_types = array();
+  $query = db_select('turn_translation_alert', 'tta')
+    ->fields('tta')
+    ->orderBy('created', 'DESC')
+    ->execute();
+  while($alert = $query->fetchAssoc()){
+    if($alert['id_type'] == 'node'){
+      $node = node_load($alert['id']);
+      $name = $node->title;
+    }else{
+      $name = 'Block';
+      $block = block_load($alert['module'], $alert['id']);
+      if(!empty($block->title)){
+        $name = $block->title;
+      }else{
+        if(!isset($block_types[$alert['module']])){
+          $block_types[$alert['module']] = module_invoke($alert['module'], 'block_info');
+        }
+        if(isset($block_types[$alert['module']][$alert['id']])){
+          $name = $block_types[$alert['module']][$alert['id']]['info'];
+        }
+      }
+    }
+    $user = user_load($alert['uid']);
+    $row = array(
+      'name' => $name,
+      'type' => ucfirst($alert['id_type']),
+      'status' => ($alert['status'] == 0 ? 'Incomplete' : 'Complete'),
+      'uid' => $user->name,
+      'created' => date('M j, Y', $alert['created']),
+      'action' => l('View', 'admin/translation_alerts/translate/'.$alert['ttid']).' | '.l('Remove', 'admin/translation_alerts/delete/'.$alert['ttid'])
+    );
+    $rows[] = $row;
+  }
+  $header = array('Name', 'Type', 'Status', 'Requested By', 'Requested On', 'Actions');
+  return theme('table', array('header' => $header, 'rows' => $rows));
+}
+
+function turn_translation_alert_content_title($ttid){
+    return 'Translate Content For "'.$ttid['name'].'"';
+}
+
+function turn_translation_alert_content($ttid){
+  $languages = language_list();
+  $rows = array();
+  $query = db_select('turn_translation_alert_content', 'ttac')
+    ->fields('ttac')
+    ->condition('ttid', $ttid['ttid'])
+    ->orderBy('original', 'DESC')
+    ->orderBy('created', 'DESC')
+    ->execute();
+  while($alert = $query->fetchAssoc()){
+    if(!empty($alert['uid'])){
+      $user = user_load($alert['uid']);
+      $username = $user->name;
+    }else $username = '';
+    $language = $languages[$alert['language']]->name;
+    if($alert['original'] == 1){
+      $status = 'ORIGINAL';
+      $action = l('Edit Original '.ucfirst($ttid['id_type']), ($ttid['id_type'] == 'node' ? 'node/'.$ttid['id'].'/edit' : 'admin/structure/block/manage/'.$ttid['module'].'/'.$ttid['id'].'/configure'));
+      $modified = $alert['modified'];
+      $original_modified = $alert['modified'];
+    }else{
+      $status = $alert['status'] == 0 ? 'Incomplete' : 'Complete';
+      $action = l('Edit', 'admin/translation_alerts/translate/'.$alert['ttid'].'/'.$alert['language']);
+      $action .= ' | '.l('Remove', 'admin/translation_alerts/delete/'.$alert['ttid'].'/'.$alert['language']);
+      $modified = ($alert['modified'] == $original_modified ? 'Not Translated' : $alert['modified']);
+    }
+    $row = array(
+      'language' => $languages[$alert['language']]->name,
+      'status' => $status,
+      'uid' => $username,
+      'modified' => ($modified == 'Not Translated' ? $modified : date('M j, Y', $alert['modified'])),
+      'action' => $action
+    );
+    $rows[] = $row;
+  }
+  $header = array('Language', 'Status', 'Translated By', 'Translated On', 'Actions');
+  return theme('table', array('header' => $header, 'rows' => $rows));
+}
+
+function turn_translation_alert_content_language_title($ttid, $language){
+  return $language['name'];
+}
+
+function turn_translation_alert_content_language($ttid, $language){
+  $query = db_select('turn_translation_alert_content', 'ttac')
+    ->fields('ttac')
+    ->condition('ttid', $ttid)
+    ->orderBy('original', 'DESC')
+    ->orderBy('created', 'DESC')
+    ->execute();
+  return 'hi';
+}
+
+function turn_translation_alert_form_alter(&$form, $form_state){
+  if($form['#form_id'] == 'block_admin_configure' || (isset($form['#entity_type']) && $form['#entity_type'] == 'node')){
+    $language_list = language_list();
+    $languages = array_map(create_function('$value', 'return $value->name;'), $language_list);
+    $form['visibility_title']['#weight'] = 99;
+    $form['visibility']['#weight'] = 100;
+    $form['translation_alert'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Send Translation Alert',
+      '#access' => 1,
+      '#collapsible' => 1,
+      '#collapsed' => 1,
+      '#tree' => 1,
+      '#weight' => 30,
+      'translation_alert_text' => array(
+        '#type' => 'textarea',
+        '#title' => 'Text to be translated',
+        '#default_value' => '',
+        '#description' => 'Enter the text you would like sent for translation.'
+      ),
+      'translation_alert_languages' => array(
+        '#type' => 'select',
+        '#multiple' => TRUE,
+        '#title' => 'Languages for translation',
+        '#options' => $languages,
+        //'#description' => 'Check this box to confirm that this text should be sent for translation.  If you do not check this box, the text you enter above will not be sent.'
+      ),
+      'translation_alert_confirm' => array(
+        '#type' => 'checkbox',
+        '#title' => 'Send this text to be translated',
+        '#default_value' => 0,
+        '#description' => 'Check this box to confirm that this text should be sent for translation.  If you do not check this box, the text you enter above will not be sent.'
+      ),
+    );
+    $form['#validate'][] = 'turn_translation_alert_add_settings_validate';
+    $form['#submit'][] = 'turn_translation_alert_add_settings';
+  }
+}
+
+function turn_translation_alert_add_settings_validate($form, &$form_state){
+  if(isset($form_state['values']['translation_alert']) && $form_state['values']['translation_alert']['translation_alert_confirm'] == 1){
+    $content = trim($form_state['values']['translation_alert']['translation_alert_text']);
+    if(empty($content)){
+      form_set_error('translation_alert][translation_alert_text', t('Please enter text to be translated.'));
+    }
+    if(empty($form_state['values']['translation_alert']['translation_alert_languages'])){
+      form_set_error('translation_alert][translation_alert_languages', t('Please select at least one language for the text to be translated into.'));
+    }
+  }
+}
+
+function turn_translation_alert_add_settings($form, &$form_state){
+  if(isset($form_state['values']['translation_alert']) && $form_state['values']['translation_alert']['translation_alert_confirm'] == 1 && !empty($form_state['values']['translation_alert']['translation_alert_languages'])){
+    global $user;
+    if($form['#form_id'] == 'block_admin_configure'){
+      $id_type = 'block';
+      $id = $form_state['values']['delta'];
+      $module = $form_state['values']['module'];
+    }else{
+      $id_type = 'node';
+      $id = $form_state['values']['nid'];
+      $module = NULL;
+    }
+    $translation_text = trim($form_state['values']['translation_alert']['translation_alert_text']);
+    $creation_time = REQUEST_TIME;
+    if(!empty($translation_text)){
+      $ttid = db_insert('turn_translation_alert')
+        ->fields(array(
+          'id_type' => $id_type,
+          'id' => $id,
+          'module' => $module,
+          'uid' => $user->uid,
+          'status' => 0,
+          'created' => $creation_time,
+          'modified' => $creation_time,
+        ))
+        ->execute();
+      $ttcid = db_insert('turn_translation_alert_content')
+        ->fields(array(
+          'ttid' => $ttid,
+          'language' => (isset($form_state['values']['language']) ? $form_state['values']['language'] : 'en'),
+          'content' => $translation_text,
+          'uid' => $user->uid,
+          'original' => 1,
+          'status' => 1,
+          'created' => $creation_time,
+          'modified' => $creation_time,
+        ))
+        ->execute();
+      $alert_email = db_select('turn_translation_alert_emails', 'ttae')
+        ->fields('ttae')
+        ->condition('language', 'alert')
+        ->execute()
+        ->fetchAssoc();
+      $languages = language_list();
+      $language_settings_rows = db_select('turn_translation_alert_emails', 'ttae')
+        ->fields('ttae')
+        ->condition('language', array_values($form_state['values']['translation_alert']['translation_alert_languages']))
+        ->execute();
+      $emails = array();
+      while($email = $language_settings_rows->fetchAssoc()){
+        $emails[$email['language']] = $email;
+      }
+      foreach($form_state['values']['translation_alert']['translation_alert_languages'] as $lang){
+        $email_params = array(
+          'lang' => $languages[$lang]->name,
+          'text' => $translation_text,
+          'link' => url('admin/translation_alerts/translate/'.$ttid.'/'.$lang, array('absolute' => TRUE))
+        );
+        if(isset($emails[$lang]) && !empty($emails[$lang]['emails'])){
+          $to = $emails[$lang]['emails'];
+        }else{
+          $to = $alert_email['emails'];
+          $email_params['missing_emails'] = TRUE;
+        }
+        drupal_mail('turn_translation_alert', 'translation_needed', $to, 'en', $email_params, 'translation_alerts@turn.com', TRUE);
+        db_insert('turn_translation_alert_content')
+          ->fields(array(
+            'ttid' => $ttid,
+            'language' => $lang,
+            'content' => '',
+            'uid' => NULL,
+            'original' => 0,
+            'status' => 0,
+            'created' => $creation_time,
+            'modified' => $creation_time,
+          ))
+          ->execute();
+      }
+    }
+  }
+}

@@ -1,0 +1,230 @@
+# @author: Jeremy Cerda
+# @version: $Id: INSTALL 2473 2011-08-10 14:14:28Z jcerda $
+
+These are the install and troubleshooting instructions for the mniblog2
+software. For further details, configuration options, and available tools,
+please see the README file.
+
+################################################################################
+  Quick Install
+################################################################################
+#  - Root Instructions
+$  - Non-root Instructions
+>  - SQL Instructions
+// - Verbal Instructions (to be followed, not run in shell)
+--------------------------------------------------------------------------------
+// NOTE: These instructions are explicit for mninews.com only. Small
+// adjustments to the site path may be necessary for other sites. You should
+// also look to the Advanced Install section for any additional instructions
+// when using an alternate site.
+
+# apt-get install subversion
+# apt-get install php5-cli
+# apt-get install python2.5
+# apt-get install gawk
+
+# vim /etc/php5/cli/php.ini
+// Change memory_limit to: memory_limit = 64M
+
+# cd /usr/local
+# svn checkout http://10.1.1.40/svn/trunk/sites/mniblog2
+
+# useradd mniblog2
+# passwd mniblog2
+# usermod -a -G www-data mniblog2
+# usermod -a -G mninews mniblog2
+# usermod -d /usr/local/mniblog2 mniblog2
+
+# ./mniblog2/bin/setup.sh mninews
+
+// NOTE: The following is for mninews ONLY. Add the following line to your cron.
+# crontab -e
+* * * * * /usr/local/mniblog2/bin/newsmap.sh > /var/www/mninews/sitemap-news.xml
+
+// NOTE: For rss functionality, please see section 7 of the Advanced Install
+// instructions for further details.
+
+// NOTE: For richPDF functionality, please see section 1 of the Advanced
+// Install instructions section for further details.
+
+// NOTE: If creating a non-production copy of mniblog2, please adjust the
+// pub.production.cfg file to use the 7001 port instead of 7002.
+
+# ./bin/startblog.sh
+
+################################################################################
+  Advanced Install
+################################################################################
+--------------------------------------------------------------------------------
+-- 1.) RichPDF and SCP Setup ---------------------------------------------------
+--------------------------------------------------------------------------------
+
+CURRENT KEY IS SETUP FOR RICH CONTENT FROM: 10.1.1.63
+If receiving from elsewhere, see Advanced Install section.
+
+-- 1.a.) Website ---------------------------------------------------------------
+
+These instructions should be done from the drupal website.
+
+1.) From the drupal site, to to:
+        http://www.marketnews.deutsche-boerse.com/admin/content/node-type/story
+2.) Under "Workflow settings"->"Attachments", ensure that this is set to Enabled.
+
+-- 1.b.) RichPDF ---------------------------------------------------------------
+
+These instructions should be done from the richPDF server.
+
+1.) ssh into mniblog2@[drupal site ip]
+        - This will add the drupal site to the known_hosts file.
+2.) Edit the [tomcat root]/webapps/richPDF/WEB-INF/web.xml file, adding the
+    following values:
+
+    <param-name>scpUserName</param-name>
+    <param-value>...,mniblog2</param-value>
+
+    <param-name>scpKeyLocation</param-name>
+    <param-value>...,[key location]</param-value>
+    This is most likely [richPDF user home]/.ssh/id_dsa
+
+    <param-name>scpDestination</param-name>
+    <param-value>...,[your ip]:data/</param-value>
+
+3.) Reload the richPDF webapp. This can be done from tomcat manager page or by
+    restarting tomcat.
+
+--------------------------------------------------------------------------------
+-- 2.) Alternate Site Configurations -------------------------------------------
+--------------------------------------------------------------------------------
+
+Under conf/sites are several pre-built configurations for our various sites.
+When installing for a site other than marketnews.com, you should use the
+following commands to modify the configuration:
+
+$ cd /usr/local/mniblog2/conf
+$ rm production.cfg pub.production.cfg rich.production.cfg
+$ ln -s ./sites/production.cfg-imarketnews production.cfg
+$ ln -s ./sites/pub.production.cfg-imarketnews pub.production.cfg
+$ ln -s ./sites/rich.production.cfg-imarketnews rich.production.cfg
+
+--------------------------------------------------------------------------------
+-- 3.) Alternate Directories ---------------------------------------------------
+--------------------------------------------------------------------------------
+
+Should you need to install mniblog2 in any directory other than the standard
+/usr/local or use a different username than mniblog2, please edit the following
+files with the new information:
+
+- [mniblog root]/conf/pub.production.cfg
+- [mniblog root]/conf/runconfig.sh
+
+--------------------------------------------------------------------------------
+-- 4.) Updating richPDF SCP Key ------------------------------------------------
+--------------------------------------------------------------------------------
+
+If you are receiving rich content from some location other than the default
+stated above, please follow these instructions to update your keys.
+
+- Obtain the .pub file from the richPDF server and copy it to:
+  /usr/local/mniblog2/.ssh
+- If you wish to only receive from this server:
+    - cat file.pub > authorized_keys2
+  otherwise:
+    - cat file.pub >> authorized_keys2
+- Continue with the rest of the directions under Richup and SCP Setup
+
+--------------------------------------------------------------------------------
+-- 5.) Cron Jobs for imarketnews Installs --------------------------------------
+--------------------------------------------------------------------------------
+
+* * * * * /usr/local/mniblog2/bin/imagefetch.py
+* * * * * /usr/local/mniblog2/bin/newsmap.sh > /var/www/imarketnews/sitemap-news.xml
+
+--------------------------------------------------------------------------------
+-- 6.) mnembargo and mnexpire for mninews --------------------------------------
+--------------------------------------------------------------------------------
+
+mninews requires two additional modules in order to get the embargo and expire
+functionality to work. Here are instructions for making this work:
+
+# cd /var/www/mninews/sites/all/modules
+# svn checkout http://10.1.1.40/svn/trunk/sites/modules/mnembargo
+# svn checkout http://10.1.1.40/svn/trunk/sites/modules/mnexpire
+# chown 1080:mninews ./mnembargo
+# chown 1080:mninews ./mnexpire
+
+// Manually enable these modules via the Drupal administration interface
+
+--------------------------------------------------------------------------------
+-- 7.) Details for rss Installs ------------------------------------------------
+--------------------------------------------------------------------------------
+
+The following cron job should be added to control the size of the generated
+rss file. Please replace the path, with the valid path for the live directory.
+
+0 0 * * * find /usr/local/mniblog2/rss/live -name "*.xml" -type l -mmin +1440 -delete
+
+The following are important details of an rss site install of mniblog2.
+
+1.) Configuration: The following options in pub.production.cfg should be
+modified to accomodate specific installation requirements
+
+rss.file     - The full path of the generated rss file.
+rss.atomlink - The full web link for the live rss file.
+
+2.) Permissions: The mniblog2 user must be able to write to the target location,
+both the directory and the resulting file. If the file does not yet exist,
+the program will generate it and change the perms to 640. To have proper
+protection for a production website, the following instructions should be
+used to create and permission the rss location.
+
+# chown -R mniblog2:www-data /var/www/mninews/rss
+# chmod 6750 /var/www/mninews/rss
+
+This will cause all newly created files to retain the mniblog2 user and
+www-data group, allowing read but not write access to this directory from
+apache.
+
+################################################################################
+  Troubleshooting
+################################################################################
+>>> Starting and Stopping
+* Running either of the following commands should tell you if any of the
+  processes associated with mniblog are currently running.
+      - pgrep -f [mniblogpub | mnadapt | mnemb | mnrichwatch]
+      - ps -ae v | grep [mniblogpub | mnadapt | mnemb | mnrichwatch]
+
+>>> File Problems
+* Please ensure that your blog home variables are set correctly in the following
+  files:
+      - runconfig.sh
+      - conf/pub.production.cfg
+* Ensure all files have correct ownership (ie NOT root).
+* Ensure the mniblog user has rwx access to all directories and rw to all files
+  under [site root]/sites/default/files.
+* Ensure all files have correct privileges:
+      - archive should be 2755
+      - delivery should be 2755
+      - queue should be 2755
+      - pdfs should be 2755
+
+>>> Publish Problems
+* Please ensure all 5 links have been made in the [mniblog root] folder. Older
+  sites such as imarketnews may not require the CAS link.
+      - includes
+      - sites
+      - modules
+      - themes
+      - CAS
+
+>>> PDF Problems
+* If getting an Upload Failure from richPDF server
+    - Ensure the correct .pub file is added on the website server
+    - Ensure the PDF server has the website server in it's known_hosts file
+        - Login as the user that is running the server (usually tomcat or root)
+          and ssh into the website server
+    - Ensure the [site root]/sites/default/files/mni_pdf folder is made,
+      owned by www-data, and has g+rw permissions
+
+>>> Empty Sitemap
+* Check the conf/scriptconfig.sh file. Ensure that the db user, pass, and name
+  are all correctly set.

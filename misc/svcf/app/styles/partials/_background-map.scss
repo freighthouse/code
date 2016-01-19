@@ -1,0 +1,65 @@
+.iePaddingFix {
+  width: 100%;
+  height: 0;
+  /* apply a padding using the following formula */
+  /* this formula makes sure the aspect ratio of the container equals that of the svg graphic */
+  /* padding-top: (svg height / svg width) * width-value; */
+  /* tympanus.net/codrops/2014/08/19/making-svgs-responsive-with-css/ */
+  padding-top: 42%;
+  position: relative;
+  display: block;
+}
+
+.background-map {
+  position: relative;
+  width: 100%;
+  height: auto;
+  z-index: -1;
+  svg {
+    width: 100%;
+    max-width: 992px;
+    position: relative;
+    margin: 0 auto;
+    display: block;
+    &:not(:root), &:root {
+      overflow: visible;
+      width: 100%;
+      max-width: 992px;
+      position: relative;
+      margin: 0 auto;
+      display: block;
+    }
+    #world-map-countries {
+      stroke: $dark-blue;
+      stroke-width: 0.1px;
+      fill: $white;
+      & > * {
+        fill: inherit;
+        stroke: inherit;
+        stroke-width: inherit;
+        path, polyline, polygon {
+          fill: inherit;
+          stroke: inherit;
+          stroke-width: inherit;
+        }
+      }
+    }
+  }
+  #us-map-state-55 {
+    fill: $light-green;
+    stroke: $dark-green;
+  }
+  #us-map-state-55 > *  {
+    fill: inherit;
+  }
+  #us-map-hawaii, #us-map-alaska, #us-map-california {
+    stroke: $dark-blue;
+    stroke-width: 0.1px;
+    fill: $white;
+    path, polyline, polygon {
+      fill: inherit;
+      stroke: inherit;
+      stroke-width: inherit;
+    }
+  }
+}

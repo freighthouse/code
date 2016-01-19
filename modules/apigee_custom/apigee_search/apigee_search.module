@@ -1,0 +1,187 @@
+<?php
+
+/**
+ * Implements hook_apachesolr_query_alter().
+ *
+ * Adds condition to retrieve im_field_product and im_field_topic_area
+ * fields from solr index.
+ */
+function apigee_search_apachesolr_query_alter($query) {
+  $query->addParam('fl', 'im_field_product');
+  $query->addParam('fl', 'im_field_topic_area');
+}
+
+/**
+ * Implements hook_preprocuess_search_result().
+ *
+ * Adds message about product term and topic area.
+ */
+
+function apigee_search_preprocess_search_result(&$variables) {
+  global $language;
+
+  // $fields = $variables['result']['fields'];
+  // $variables['topic_area_term'] = '';
+  // $variables['product_term'] = '';
+  // // Build message about Category.
+  // if (isset($fields['im_field_topic_area'][0])) {
+  //   $topic_term = taxonomy_term_load($fields['im_field_topic_area'][0]);
+  //   $variables['topic_area_term'] = t('Category: @topic_term_name', array('@topic_term_name' => $topic_term->name));
+  // }
+  // // Build message about Product.
+  // if (isset($fields['im_field_product'][0])) {
+  //   $product_term = taxonomy_term_load($fields['im_field_product'][0]);
+  //   $variables['product_term'] = t('Product: @topic_term_name', array('@topic_term_name' => $product_term->name));
+  // }
+
+  $replacements = array(
+    'http://edit.apigee.net/' => '//apigee.com/',
+    'https://edit.apigee.net/' => '//apigee.com/',
+    'http://blog.edit.apigee.net/' => 'http://blog.apigee.com/',
+    'https://blog.edit.apigee.net/' => 'http://blog.apigee.com/',
+    'http://edit.docs.jupiter.apigee.net/' => '//docs.jupiter.apigee.net/',
+    'https://edit.docs.jupiter.apigee.net/' => '//docs.jupiter.apigee.net/',
+    'http://edit.mktg.jupiter.apigee.net/' => '//mktg.jupiter.apigee.net/',
+    'https://edit.mktg.jupiter.apigee.net/' => '//mktg.jupiter.apigee.net/',
+    'http://edit.blog.jupiter.apigee.net/' => '//blog.jupiter.apigee.net/',
+    'https://edit.blog.jupiter.apigee.net/' => '//blog.jupiter.apigee.net/',
+    'http://edit.devl.jupiter.apigee.net/' => '//devel.jupiter.apigee.net/',
+    'https://edit.devl.jupiter.apigee.net/' => '//devel.jupiter.apigee.net/',
+  );
+  $variables['url'] = strtr($variables['url'], $replacements);
+
+  if (strpos($variables['result']['link'],'apigee.com/docs') !== false) {
+    $variables['classes_array'][] = 'docs';
+  }
+  if (strpos($variables['result']['link'],'apigee.com/about') !== false) {
+    $variables['classes_array'][] = 'mktg';
+  }
+  if (strpos($variables['result']['link'],'blog.apigee.com') !== false) {
+    $variables['classes_array'][] = 'blog';
+  }
+  if (strpos($variables['result']['link'],'developers.apigee.com') !== false) {
+    $variables['classes_array'][] = 'devl';
+  }
+
+  // Show/Hide search results based on the language prefix in the URL.
+  $result_url = explode('/', $variables['result']['link']);
+
+  if ($result_url['4'] == 'ja') {
+    $variables['classes_array'][] = 'docs-japanese';
+  } else {
+    $variables['classes_array'][] = 'docs-english';
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function apigee_search_preprocess_html(&$variables) {
+  $url = $_SERVER['HTTP_HOST'] . request_uri();
+  $parse = parse_url($url);
+  $path = ltrim($parse['path'], '/');
+  $elements = explode('/', $path);
+
+  if ($elements['1'] == 'ja') {
+    $variables['classes_array'][] = 'japanese';
+  } else {
+    $vars['classes_array'][] = 'english';
+  }
+}
+
+/**
+ *  implmemtation of hook_form_alter for search forms
+ *
+ * general guidelines for search forms:
+ * put the form class attribute on the form element
+ * and the "apigee-search-keys" attribute on the text
+ * input and the "onsubmit" should work with
+ * just about any search form.
+ *
+ * @param string $form
+ * @param string $form_state
+ * @param string $form_id
+ * @return void
+ * @author Tom Stovall
+ */
+function apigee_search_form_alter(&$form, &$form_state, $form_id) {
+  global $base_path;
+  $url = $_SERVER['HTTP_HOST'] . request_uri();
+  $parse = parse_url($url);
+  $path = ltrim($parse['path'], '/');
+  $elements = explode('/', $path);
+
+  $textfield_attributes = array(
+    "title" => "Enter the terms you wish to search for.",
+    "placeholder" => "Search",
+    "autocapitalize" => "off",
+    "autocorrect" => "off",
+    "class" => array("apigee-search-keys", "unprocessed", 'apachesolr-autocomplete')
+  );
+
+
+  switch ($form_id) {
+    case "search_block_form":
+      $form["#attributes"]["class"][] = "apigee-search-form";
+      $form['#attributes']['onsubmit'] = 'document.location.href=this.action+"/"+jQuery(".apigee-search-keys", this).get(0).value; return false;';
+      unset($form['search_block_form']['#title']);
+      $form['search_block_form']['#default_value'] = "";
+      $form['search_block_form']['#attributes'] = $textfield_attributes;
+      if (arg(0) == 'search') {
+        $form['search_block_form']['#access'] = FALSE;
+      }
+      if ($elements['1'] == 'ja') {
+        $form['#action'] = $GLOBALS['base_path']."ja/search/site";
+      } else {
+        $form['#action'] = $GLOBALS['base_path']."search/site";
+      }
+      $form['#submit'] = array("apachesolr_search_form_search_submit");
+      $form['actions']['submit']['#type'] = "hidden";
+      break;
+
+    case "search_form":
+      $form["#attributes"]["class"][] = "apigee-search-form";
+      $form['#attributes']['onsubmit'] = 'document.location.href=this.action+"/"+jQuery(".apigee-search-keys", this).get(0).value; return false;';
+      $form['basic']['keys']['#size'] = 20;
+      $form['basic']['keys']['#title'] = '';
+      $form['#submit'] = array("apachesolr_search_form_search_submit");
+      $form['basic']['keys']['#attributes'] = $textfield_attributes;
+      $form['basic']['submit']['#type'] = 'hidden';
+      break;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alter search page form.
+ */
+function apigee_search_form_apachesolr_search_custom_page_search_form_alter(&$form, $form_state) {
+  drupal_add_css(drupal_get_path('module', 'apigee_search') . '/css/search-page.css', array('group' => CSS_DEFAULT, 'type' => 'file'));
+  // drupal_add_js(drupal_get_path('module', 'apigee_search') . '/js/search-page.js', array('weight' => '1000'));
+  // $form['basic']['#prefix'] = '<h1>' . t('Search Apigee.com') . '</h1>';
+  // Remove page title.
+}
+
+
+/**
+ * Custom submit handler for search_form and search_block_form.
+ *
+ * @param array $form
+ * @param array $form_state
+ */
+function apigee_search_search_form_submit($form, &$form_state) {
+  if (array_key_exists('keys', $form_state['values'])) {
+    $keys = $form_state['values']['keys'];
+  }
+  elseif (array_key_exists('search_block_form', $form_state['values'])) {
+    $keys = $form_state['values']['search_block_form'];
+  }
+  if (!empty($keys)) {
+    $default_search = variable_get('search_default_module', 'site');
+    if ($default_search == 'apachesolr_search') {
+      $default_search = 'site';
+    }
+    $form_state['redirect'] = 'search/' . $default_search . '/' . $keys;
+  }
+}

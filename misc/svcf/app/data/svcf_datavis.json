@@ -1,0 +1,253 @@
+{
+  "name": "Silicon Valley Community Foundation Data Visualization",
+  "id": "svcf-datavis",
+  "uid": 0,
+  "pages": [
+    "index",
+    "local",
+    "national",
+    "global"
+  ],
+  "description": [
+    "We serve as a catalyst and leader for innovative solutions to our region’s most challenging problems, and award more money to charities than any other community foundation in the United States.",
+    "As a center of philanthropy, we provide thousands of individuals, families and corporations with simple and effective ways to give locally and around the world."
+  ],
+  "sections": [
+    {
+      "backgroundMapLocal": "backgroundMapLocal",
+      "name": "SVCF Local Charity",
+      "class": "local",
+      "background-map": "background-map-local",
+      "id": "svcf-local-charity",
+      "duration": 0.333,
+      "uid": 1,
+      "pagination": {
+        "next": "national"
+      },
+      "summary": {
+        "statement": {
+          "title": "Local",
+          "subtitle": "Giving",
+          "amount": "$219M",
+          "description": "Granted to local charities"
+        },
+        "attribution": "2014 Grants to Bay Area Charities by Fund Type",
+        "sources": [
+          {
+            "name": "Donor Advised",
+            "dollar": "$134.3M"
+          },
+          {
+            "name": "Corporate Advised",
+            "dollar": "$9.2M"
+          },
+          {
+            "name": "Supporting Organizations",
+            "dollar": "$19.5M"
+          },
+          {
+            "name": "Discretionary",
+            "dollar": "$6.5M"
+          },
+          {
+            "name": "Other",
+            "dollar": "$49.7M"
+          }
+        ]
+      },
+      "body": [
+        {
+          "title": "Bette Moorman",
+          "href": "http://www.siliconvalleycf.org/bette-moorman",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/DSCN3603.jpg",
+            "alt": "SVCF Article–Bette Moorman"
+          },
+          "text": [
+            "Longtime SVCF donor Bette Moorman has…"
+          ]
+        },
+        {
+          "title": "The Big Lift",
+          "href": "http://www.siliconvalleycf.org/big-lift",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/20150527-IMG_0279.jpg",
+            "alt": "SVCF Article–The Big Lift"
+          },
+          "text": [
+            "The Big Lift, an effort…"
+          ]
+        },
+        {
+          "title": "CONEC",
+          "href": "http://www.siliconvalleycf.org/conec-0",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/shutterstock_143514718.jpg",
+            "alt": "SVCF Article–CONEC"
+          },
+          "text": [
+            "Another local “solution” is CONEC…"
+          ]
+        },
+        {
+          "title": "400 scholarships",
+          "href": "http://www.siliconvalleycf.org/scholarship-programs",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/shutterstock_22476844.jpg",
+            "alt": "SVCF Article–400 scholarships"
+          },
+          "text": [
+            "Scholarships are also vital tools for local students."
+          ]
+        },
+        {
+          "title": "Windrider Film Forum",
+          "href": "http://www.siliconvalleycf.org/terri-bullock",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/10919046_1176542415704246_5421765838354905121_n.jpg",
+            "alt": "SVCF Article–Windrider Film Forum"
+          },
+          "text": [
+            "Many of SVCF’s donors are focused…"
+          ]
+        }
+      ]
+    },
+    {
+      "backgroundMapNational": "backgroundMapNational",
+      "name": "SVCF National Charity",
+      "class": "national",
+      "id": "svcf-national-charity",
+      "offset": 0.333,
+      "duration": 0.333,
+      "uid": 2,
+      "pagination": {
+        "next": "global"
+      },
+      "summary": {
+        "statement": {
+          "title": "National",
+          "subtitle": "Giving",
+          "amount": "$239M",
+          "description": "Granted to U.S. Charities (Excluding the Bay Area)"
+        },
+        "attribution": "2014 Grants to U.S. Charities (Excluding the Bay Area) by Fund Type",
+        "sources": [
+          {
+            "name": "Donor Advised",
+            "dollar": "$140M"
+          },
+          {
+            "name": "Corporate Advised",
+            "dollar": "$22M"
+          },
+          {
+            "name": "Supporting Organizations",
+            "dollar": "$51M"
+          },
+          {
+            "name": "Other",
+            "dollar": "$26M"
+          }
+        ]
+      },
+      "body": [
+        {
+          "title": "Concert for Valor",
+          "href": "http://www.siliconvalleycf.org/concert",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/SVCF-CVR.jpg",
+            "alt": "SVCF Article–Concert for Valor"
+          },
+          "text": [
+            "Last year we were able to work with…"
+          ]
+        },
+        {
+          "title": "White House Meeting",
+          "href": "http://www.siliconvalleycf.org/white-house-meeting",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/IMG_0223.jpg",
+            "alt": "SVCF Article–White House Meeting"
+          },
+          "text": [
+            "A highlight of last year came…"
+          ]
+
+        }
+      ]
+    },
+    {
+      "name": "SVCF Global Charity",
+      "backgroundMapGlobal": "backgroundMapGlobal",
+      "class": "global",
+      "background-map": "background-map-global",
+      "id": "svcf-global-charity",
+      "offset": 0.666,
+      "duration": 0.334,
+      "uid": 3,
+      "summary": {
+        "statement": {
+          "title": "Global",
+          "subtitle": "Giving",
+          "amount": "$18M",
+          "description": "Granted to International Charities"
+        },
+        "attribution": "Global Giving by Fund Type",
+        "sources": [
+          {
+            "name": "Donor Advised",
+            "dollar": "$1.4M"
+          },
+          {
+            "name": "Corporate Advised",
+            "dollar": "$4.3M"
+          },
+          {
+            "name": "Supporting Organization",
+            "dollar": "$11.9M"
+          },
+          {
+            "name": "Other",
+            "dollar": "$214K"
+          }
+        ]
+      },
+      "body": [
+        {
+          "title": "YourCause",
+          "href": "http://www.siliconvalleycf.org/yourcause",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/indian-reading-girl.jpg",
+            "alt": "SVCF Article–YourCause"
+          },
+          "text": [
+            "SVCF’s collaboration with YourCause…"
+          ]
+        },
+        {
+          "title": "Ebola crisis in WestAfrica",
+          "href": "http://www.siliconvalleycf.org/tackle-ebola-campaign",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/GUI011215206.jpg",
+            "alt": "SVCF Article–Ebola crisis in WestAfrica"
+          },
+          "text": [
+            "SVCF also brought simplicity to international…"
+          ]
+        },
+        {
+          "title": "The Girl Project",
+          "href": "http://www.siliconvalleycf.org/girl-project",
+          "image": {
+            "src": "http://www.siliconvalleycf.org/sites/all/modules/svcf_infograph/images/theGirlProject.jpg",
+            "alt": "SVCF Article–The Girl Project"
+          },
+          "text": [
+            "SVCF worked with Glamour magazine on…"
+          ]
+        }
+      ]
+    }
+  ]
+}

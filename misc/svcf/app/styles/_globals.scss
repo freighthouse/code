@@ -1,0 +1,32 @@
+* {
+  box-sizing: border-box;
+  font: {
+    family: 'Open Sans', sans-serif;
+  }
+}
+*:focus {
+    outline: 0;
+}
+body {
+  font: {
+    family: 'Open Sans', sans-serif;
+  }
+  background-color: white;
+}
+.panel {
+  margin: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.btn {
+  box-shadow: none !important;
+  &:focus,
+  &:hover,
+  &.active {
+    border: 0;
+    box-shadow: none !important;
+  }
+}

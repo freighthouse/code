@@ -1,0 +1,96 @@
+# @author Jeremy Cerda
+# @version $Id: INSTALL.txt 2709 2011-09-29 17:52:19Z jcerda $
+
+################################################################################
+  Quick Install
+################################################################################
+--------------------------------------------------------------------------------
+Download and User
+--------------------------------------------------------------------------------
+# cd /var/www/mni6/sites/all/modules
+# svn checkout http://10.1.1.40/svn/trunk/sites/modules/mnnewsmlfeed
+# cd mnnewsmlfeed
+# tar -xzf aqrpush-sh.tgz
+
+# chown -R 1080:mni6 .
+# chmod -R g+rw .
+# chmod -R g+x ./.ssh
+# chmod -R g-w ./.ssh
+
+# useradd -s /bin/bash -d /var/www/mni6/sites/all/modules/mnnewsmlfeed feedpush
+# passwd feedpush
+# usermod -a -G www-data feedpush
+# usermod -a -G mni6 feedpush
+
+--------------------------------------------------------------------------------
+File System
+--------------------------------------------------------------------------------
+- Go to admin/settings/file-system
+- If either directories are showing errors, correct them.
+    - Defaults are:
+        - File System Path -> sites/default/files
+        - Temporary Dir    -> tmp
+- Adjust the data and archive paths in mnnewsmlfeed/conf/pushConfig.cfg w/
+  the full path versions of the above two directories
+
+- Change both of these paths to www-data:www-data ownership.
+    - Examples:
+        # chown -R www-data:www-data /var/www/mni6/tmp
+        # chown -R www-data:www-data /var/www/mni6/sites/defaul/files
+- Change both of these paths to include group write permissions.
+    - Examples:
+        # chmod -R g+w /var/www/mni6/tmp
+        # chmod -R g+w /var/www/mni6/sites/default/files
+
+--------------------------------------------------------------------------------
+Enable the Module
+--------------------------------------------------------------------------------
+- Go to admin/build/modules
+- Enable the "MNI NewsML Feed" module
+- Click "Save" at the bottom
+- Adjust the permissions on both of the file directories, now that we have made
+  changes, to allow group rw access
+     - Defaults would be something like this:
+         # chmod -R g+rw /var/www/mni6/sites/default/files
+         # chmod -R g+rw /var/www/mni6/tmp
+
+--------------------------------------------------------------------------------
+Triggers
+--------------------------------------------------------------------------------
+- Go to admin/rules/trigger
+- Select the rule "After news item is edited, publish to the feed"
+- Select "Add an action"
+- Select the "Push NewsML Content" action
+- Continue through the menus, w/ the default settings for everything
+
+--------------------------------------------------------------------------------
+Starting Push Scripts
+--------------------------------------------------------------------------------
+# cd /var/www/mni6/sites/all/modules/mnnewsmlfeed
+
+// To Start
+# ./bin/start_push.sh
+
+// To Stop
+# ./bin/stop_push.sh
+
+--------------------------------------------------------------------------------
+Setup for New Recipients
+--------------------------------------------------------------------------------
+# cd /var/www/mni6/sites/all/modules/mnnewsmlfeed
+# su - feedpush
+$ ssh [new user]@[new host]
+// Answer 'yes' to add this to known hosts, then CTRL-C out
+$ scp .ssh/id_dsa.pub [new user]@[new host]:~/.ssh/
+$ ssh [new user]@[new host]
+$ cd .ssh
+$ cat id_dsa.pub >> authorized_keys2
+$ exit
+$ ssh [new user]@[new host]
+// You should not be prompted for your password at this point.
+// If you are prompted, please begin troubleshooting.
+
+// To begin pushing files to this host, add new hosts to the
+// mnnewsmlfeed/conf/pushHosts.cfg file and restart the push scripts.
+
+################################################################################

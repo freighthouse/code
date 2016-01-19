@@ -1,0 +1,241 @@
+# @author Jeremy Cerda
+# @version $Id:$
+
+Basic Headlines                    	A0000000  	0	mainwire                                      	SLOW
+Agencies                           	M$$AG$    	0	mainwire agencies                             	SLOW
+Agencies                           	MN$AG$    	0	mainwire agencies                             	SLOW
+All Europe                         	M$B$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$BDS$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$F$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$G$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$I$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$S$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$X$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$X$$$    	0	mainwire alleurope                            	SLOW
+All Europe                         	M$XDS$    	0	mainwire alleurope                            	SLOW
+Asia News Events Calendar          	F-GEXSHI  	0	credit asianewseventscalendar                 	SLOW
+Asia News Events Calendar          	F-GEXSHI  	0	fibullets asianewseventscalendar              	SLOW
+Asia News Events Calendar          	F-GEXSHI  	0	mainwire asianewseventscalendar               	SLOW
+Asia Including Japan               	M$A$$$    	0	mainwire asiaincludingjapan                   	SLOW
+Australia                          	M$L$$$    	0	mainwire australia                            	SLOW
+Australia Data Stories             	MALDS$    	0	mainwire australiadatastories                 	SLOW
+Australia Economic Data Calendar   	F-GERCAL  	0	mainwire australiaeconomicdatacalendar        	SLOW
+BOE State of Play                  	F-BOEPLY  	0	credit boestateofplay frontpage               	SLOW
+BOE State of Play                  	F-BOEPLY  	0	fibullets boestateofplay frontpage            	SLOW
+BOE State of Play                  	F-BOEPLY  	0	mainwire boestateofplay                       	SLOW
+BOE State of Play                  	F-BULBOE  	0	mainwire boestateofplay                       	SLOW
+BOJ State of Play                  	F-GEISHI  	0	credit bojstateofplay                         	SLOW
+BOJ State of Play                  	F-GEISHI  	0	fibullets bojstateofplay                      	SLOW
+BOJ State of Play                  	F-GEISHI  	0	mainwire bojstateofplay                       	SLOW
+Bank of England                    	M$$BE$    	0	mainwire bankofengland                        	SLOW
+Bank of England Comments           	F-UKSVHI  	0	mainwire bankofenglandcomments                	SLOW
+Bank of Japan                      	MMJBJ$    	0	mainwire bankofjapan                          	SLOW
+Bank of Japan State of Play        	F-GEISHI  	0	mainwire bankofjapanstateofplay               	SLOW
+Canada                             	M$C$$$    	0	mainwire canada                               	SLOW
+Canada Data Stories                	MACDS$    	0	mainwire canadadatastories                    	SLOW
+Canada Data Tables                 	MACDA$    	0	mainwire canadadatatables                     	SLOW
+Canada Data Tables                 	MACDT$    	0	mainwire canadadatatables                     	SLOW
+Canada Economic Data Calendar      	F-CANCAL  	0	mainwire canadaeconomicdatacalendar           	SLOW
+Canada/Mexico Data Calendar        	F-CAICAL  	0	credit canadamexicodatacalendar               	SLOW
+Canada/Mexico Data Calendar        	F-CAICAL  	0	fibullets canadamexicodatacalendar            	SLOW
+Central Bank Rate Actions          	F-CENACT  	0	credit centralbankrateactions                 	SLOW
+Central Bank Rate Actions          	F-CENACT  	0	fibullets centralbankrateactions              	SLOW
+Central Bank Rate Actions          	F-CENACT  	0	mainwire centralbankrateactions               	SLOW
+China                              	M$Q$$$    	0	mainwire china                                	SLOW
+China Data Calendar                	F-ITALHI  	0	fibullets chinadatacalendar                   	SLOW
+China Data Calendar                	F-SPASUR  	0	credit chinadatacalendar                      	SLOW
+China Data Stories                 	MAQDS$    	0	mainwire chinadatastories                     	SLOW
+China Data Tables                  	MAQDA$    	0	mainwire chinadatatables                      	SLOW
+China Data Tables                  	MAQDT$    	0	mainwire chinadatatables                      	SLOW
+China Economic Data Calendar       	F-ITALHI  	0	mainwire chinaeconomicdatacalendar            	SLOW
+China Money Week                   	F-EUTEST  	0	mainwire chinamoneyweek                       	SLOW
+Commodities Bullets                	F-BULLED  	0	cobullets cobulletsp                          	SLOW
+Congress Watch                     	F-CAPWTC  	0	mainwire congresswatch frontpage              	SLOW
+Corporate Bond Chatter             	F-AWATCH  	0	credit corporatebondchatter frontpage         	SLOW
+Corporate Bond Chatter             	F-AWATCH  	0	mainwire corporatebondchatter frontpage       	SLOW
+Corporate Bond Chatter             	F-DATWTC  	0	mainwire corporatebondchatter frontpage       	SLOW
+Credit Bullets                     	F-BULLCR  	0	credit crbulletsp                             	SLOW
+Credit Crisis                      	M$$CR$    	0	mainwire creditcrisis                         	SLOW
+Credit Default Swaps               	F-GILTS0  	0	credit creditdefaultswaps frontpage           	SLOW
+Credit Default Swaps               	F-GILTS0  	0	mainwire creditdefaultswaps frontpage         	SLOW
+Credit Market                      	F-DERINS  	0	mainwire creditmarket frontpage               	SLOW
+Credit Market                      	F-EMUBON  	0	mainwire creditmarket frontpage mainwirep     	SLOW
+Credit Market                      	F-USTSYU  	0	mainwire creditmarket frontpage mainwirep     	SLOW
+Credit Market                      	M$$CO$    	0	mainwire creditmarket frontpage               	SLOW
+Credit Market                      	M$$FI$    	0	mainwire creditmarket frontpage               	SLOW
+Credit Market                      	MN$$AG$   	0	mainwire creditmarket frontpage                            	SLOW
+Credit Market                      	MN$CO$    	0	mainwire creditmarket frontpage                            	SLOW
+Credit Market Focus                	F-BULF10  	0	credit creditmarketfocus                            	SLOW
+Credit Market Focus                	F-BULF10  	0	fibullets creditmarketfocus                            	SLOW
+ECB Comments                       	F-BUNCOM  	0	mainwire ecbcomments                            	SLOW
+ECB State of Play                  	F-BUNPLY  	0	credit ecbstateofplay                            	SLOW
+ECB State of Play                  	F-BUNPLY  	0	fibullets ecbstateofplay                            	SLOW
+ECB State of Play                  	F-BUNPLY  	0	mainwire ecbstateofplay                            	SLOW
+ECB Update                         	F-TOPSTY  	0	mainwire ecbupdate frontpage                            	SLOW
+Economic Data Review               	F-BULWC2  	0	fibullets economicdatareview                            	SLOW
+Equities Bullets                   	F-BULLEE  	0	eqbullets eqbulletsp                            	SLOW
+Euro Credit                        	F-DATWTC  	0	credit eurocredit                            	SLOW
+Euro Credit Supply Pipeline        	F-WASWAT  	0	credit eurocreditsupplypipeline                            	SLOW
+Euro Credit Supply Pipeline        	F-WASWAT  	0	fibullets eurocreditsupplypipeline                            	SLOW
+European Central Bank              	M$$EC$    	0	mainwire europeancentralbank mainwirep                            	SLOW
+European News Event Calendar       	F-EUECAL  	0	credit europeannewseventcalendar                            	SLOW
+European News Event Calendar       	F-EUECAL  	0	fibullets europeannewseventcalendar                            	SLOW
+European News Event Calendar       	F-EUECAL  	0	mainwire europeannewseventcalendar                            	SLOW
+Eurozone                           	M$X$$$    	0	mainwire eurozone                            	SLOW
+Eurozone                           	M$XDS$    	0	mainwire eurozone                            	SLOW
+Eurozone Bond Technicals           	F-EUTECH  	0	fibullets eurozonebondtechnicals                            	SLOW
+Eurozone Data Stories              	M$XDS$    	0	mainwire eurozonedatastories                            	SLOW
+Eurozone Data Stories              	MAFDS$    	0	mainwire eurozonedatastories                            	SLOW
+Eurozone Data Stories              	MAGDS$    	0	mainwire eurozonedatastories                            	SLOW
+Eurozone Data Stories              	MAIDS$    	0	mainwire eurozonedatastories                            	SLOW
+Eurozone Data Stories              	MASDS$    	0	mainwire eurozonedatastories                            	SLOW
+Eurozone Detailed Data Tables      	MAXDT$    	0	mainwire eurozonedetaileddatatables                            	SLOW
+Eurozone Key Indicators Summary    	F-EUDSTA  	0	mainwire eurozonekeyindicatorssummary                            	SLOW
+Eurozone Summary Data Tables       	MAXDA$    	0	mainwire eurozonesummarydatatables                            	SLOW
+Eurozone/UK Bond Calendar          	F-EBNCAL  	0	mainwire eurozoneukbondcalendar                            	SLOW
+Eurozone/UK Bond Calendar          	F-EZBCAL  	0	fibullets eurozoneukbondcalendar                            	SLOW
+Exclusives                         	MX$$$$    	0	mainwire exclusives mainwirep                            	SLOW
+FX Market                          	F-ETRENC  	0	mainwire fxmarket frontpage                            	SLOW
+FX Market                          	F-EUFXEX  	0	mainwire fxmarket frontpage                            	SLOW
+FX Market                          	F-FXDOLU  	0	mainwire fxmarket frontpage mainwirep                            	SLOW
+FX Market                          	F-FXEURU  	0	mainwire fxmarket frontpage mainwirep                            	SLOW
+FX Market                          	M$$FX$    	0	mainwire fxmarket frontpage                            	SLOW
+FX Options                         	F-GERSHI  	0	mainwire fxoptions                            	SLOW
+Fed State of Play                  	F-BULWC3  	0	credit fedstateofplay                            	SLOW
+Fed State of Play                  	F-BULWC3  	0	fibullets fedstateofplay                            	SLOW
+Fed State of Play                  	F-BULWC3  	0	mainwire fedstateofplay                            	SLOW
+Federal Reserve                    	MMUFE$    	0	mainwire federalreserve mainwirep                            	SLOW
+Fixed Income Bullets               	F-BULLET  	0	fibullets fibulletsp                            	SLOW
+France                             	M$F$$$    	0	mainwire france                            	SLOW
+France Data Stories                	MAFDS$    	0	mainwire francedatastories                            	SLOW
+France Data Tables                 	MAFDA$    	0	mainwire francedatatables                            	SLOW
+France Data Tables                 	MAFDT$    	0	mainwire francedatatables                            	SLOW
+France Key Indicators Summary      	F-FRACDT  	0	mainwire francekeyindicatorssummary                            	SLOW
+Germany                            	M$G$$$    	0	mainwire germany                            	SLOW
+Germany Data Stories               	MAGDS$    	0	mainwire germanydatastories                            	SLOW
+Germany Data Tables                	MAGDA$    	0	mainwire germanydatatables                            	SLOW
+Germany Data Tables                	MAGDT$    	0	mainwire germanydatatables                            	SLOW
+Germany Key Indicators Summary     	F-GERCDT  	0	mainwire germanykeyindicatorssummary                            	SLOW
+Global News Event Calendar         	F-CALGBL  	0	credit globalnewseventcalendar                            	SLOW
+Global News Event Calendar         	F-CALGBL  	0	fibullets globalnewseventcalendar                            	SLOW
+Global News Event Calendar         	F-GBLCAL  	0	mainwire globalnewseventcalendar                            	SLOW
+Government Bond Focus              	F-EUSPRD  	0	fibullets governmentbondfocus                            	SLOW
+International Economy              	MI$$$$    	0	mainwire internationaleconomy frontpage                            	SLOW
+International Economy              	MI$OI$    	0	mainwire internationaleconomy frontpage                            	SLOW
+Italy                              	M$I$$$    	0	mainwire italy                            	SLOW
+Italy Data Calendar                	F-ITACAL  	0	fibullets italydatacalendar                            	SLOW
+Italy Data Stories                 	MAIDS$    	0	mainwire italydatastories                            	SLOW
+Italy Data Tables                  	MAIDA$    	0	mainwire italydatatables                            	SLOW
+Italy Data Tables                  	MAIDT$    	0	mainwire italydatatables                            	SLOW
+Japan                              	M$J$$$    	0	mainwire japan                            	SLOW
+Japan Data Calendar                	F-JPICOR  	0	credit japandatacalendar                            	SLOW
+Japan Data Stories                 	MAJDS$    	0	mainwire japandatastories                            	SLOW
+Japan Data Tables                  	MAJDA$    	0	mainwire japandatatables                            	SLOW
+Japan Data Tables                  	MAJDT$    	0	mainwire japandatatables                            	SLOW
+Japan Economic Data Calendar       	F-JPXCOR  	0	mainwire japaneconomicdatacalendar                            	SLOW
+Japanese Data Calendar             	F-JPICOR  	0	fibullets japanesedatacalendar                            	SLOW
+Latam Watch                        	F-LAWTCH  	0	mainwire latamwatch frontpage                            	SLOW
+Latin America                      	M$T$$$    	0	mainwire latinamerica                            	SLOW
+Latin America                      	MFT$$$    	0	mainwire latinamerica                            	SLOW
+Latin America                      	MGT$$$    	0	mainwire latinamerica                            	SLOW
+MNI Capital Goods Index            	MDUCG$    	0	mainwire mnicapitalgoodsindex                            	SLOW
+MNI China Business Sentiment Survey	MDQCB$    	0	mainwire mnichinabusinesssentimentsurvey frontpage                            	SLOW
+MNI Proprietary Economic Indexes   	MDUCG$    	0	mainwire mniproprietaryeconomicindexes frontpage                            	SLOW
+MNI Proprietary Economic Indexes   	MDURE$    	0	mainwire mniproprietaryeconomicindexes frontpage                            	SLOW
+MNI Retail Sales Index             	MDURE$    	0	mainwire mniretailsalesindex                            	SLOW
+Market Glance                      	F-BULMKT  	0	fibullets marketglance                            	SLOW
+Mexico                             	M$M$$$    	0	mainwire mexico                            	SLOW
+Mexico                             	MAMDS$    	0	mainwire mexico                            	SLOW
+New Zealand                        	M$N$$$    	0	mainwire newzealand                            	SLOW
+New Zealand Data Stories           	MANDS$    	0	mainwire newzealanddatastories                            	SLOW
+New Zealand Economic Data Calendar 	F-GERCAL  	0	mainwire newzealandeconomicdatacalendar                            	SLOW
+People's Bank of China             	MMQPB$    	0	mainwire peoplesbankofchina                            	SLOW
+Portfolios                         	F-MNPORT  	0	mainwire portfolios                            	SLOW
+Reality Check                      	F-MNREAL  	0	mainwire realitycheck frontpage mainwirep                            	SLOW
+Reality Check                      	F-MNREAL  	0	mainwire realitycheck frontpage mainwirep                            	SLOW
+Reality Check                      	MABRC$    	0	mainwire realitycheck frontpage                            	SLOW
+Reality Check                      	MAJRC$    	0	mainwire realitycheck frontpage                            	SLOW
+Reality Check                      	MAQRC$    	0	mainwire realitycheck frontpage                            	SLOW
+Reality Check                      	MAURC$    	0	mainwire realitycheck frontpage                            	SLOW
+Reality Check                      	MAURC$    	0	mainwire realitycheck frontpage                            	SLOW
+Reality Check                      	MAXRC$    	0	mainwire realitycheck frontpage                            	SLOW
+Spain Data Stories                 	MASDS$    	0	mainwire spaindatastories                            	SLOW
+Spain Data Tables                  	MASDA$    	0	mainwire spaindatatables                            	SLOW
+Spain Data Tables                  	MASDT$    	0	mainwire spaindatatables                            	SLOW
+Stories By Steve Beckner           	M$$BR$    	0	mainwire storiesbystevebeckner                            	SLOW
+Talk from the Trenches             	F-TRENCH  	0	mainwire talkfromthetrenches                            	SLOW
+The FX Spot                        	F-ETRENC  	0	mainwire thefxspot                            	SLOW
+Top News Stories                   	MT$$$$    	0	mainwire topnewsstories mainwirep                            	SLOW
+UK                                 	M$B$$$    	0	mainwire uk                            	SLOW
+UK Data Stories                    	MABDS$    	0	mainwire ukdatastories                            	SLOW
+UK Data Tables                     	MABDA$    	0	mainwire ukdatatables                            	SLOW
+UK Data Tables                     	MABDT$    	0	mainwire ukdatatables                            	SLOW
+UK Economic Data Calendar          	F-UKECAL  	0	credit ukeconomicdatacalendar                            	SLOW
+UK Economic Data Calendar          	F-UKECAL  	0	fibullets ukeconomicdatacalendar                            	SLOW
+UK Economic Data Calendar          	F-UKECAL  	0	mainwire ukeconomicdatacalendar                            	SLOW
+UK Economic Data Calendar          	F-UKICAL  	0	mainwire ukeconomicdatacalendar                            	SLOW
+UK Forecast Survey                 	F-UKSFC1  	0	mainwire ukforecastsurvey                            	SLOW
+UK Forecast Survey                 	F-UKSFC2  	0	mainwire ukforecastsurvey                            	SLOW
+UK Forecast Survey                 	F-UKSFC3  	0	mainwire ukforecastsurvey                            	SLOW
+US Agency Spreads                  	F-BULIDE  	0	credit usagencyspreads                            	SLOW
+US Agency Spreads                  	F-BULIDE  	0	fibullets usagencyspreads                            	SLOW
+US Agency Spreads                  	F-BULIDE  	0	mainwire usagencyspreads                            	SLOW
+US Bond Technicals                 	F-BULTEC  	0	fibullets usbondtechnicals                            	SLOW
+US Companies                       	M$UEQ$    	0	mainwire uscompanies                            	SLOW
+US Companies                       	MNUEQ$    	0	mainwire uscompanies                            	SLOW
+US Data Stories                    	MAUDS$    	0	mainwire usdatastories                            	SLOW
+US Data Tables                     	MAUDA$    	0	mainwire usdatatables                            	SLOW
+US Data Tables                     	MAUDT$    	0	mainwire usdatatables                            	SLOW
+US Economic Data Calendar          	F-USECOR  	0	credit useconomicdatacalendar                            	SLOW
+US Economic Data Calendar          	F-USECOR  	0	fibullets useconomicdatacalendar                            	SLOW
+US Economic Data Calendar          	F-USECOR  	0	mainwire useconomicdatacalendar                            	SLOW
+US Economic Data Calendar          	F-USICOR  	0	mainwire useconomicdatacalendar                            	SLOW
+US Forecast Highlights             	F-EFORHI  	0	fibullets usforecasthighlights                            	SLOW
+US Forecast Highlights             	F-EFORHI  	0	mainwire usforecasthighlights                            	SLOW
+US Forecast Survey                 	F-EFORC1  	0	mainwire usforecastsurvey                            	SLOW
+US Forecast Survey                 	F-EFORC2  	0	mainwire usforecastsurvey                            	SLOW
+US Forecast Survey                 	F-EFORC3  	0	mainwire usforecastsurvey                            	SLOW
+US Interest Rate Swaps             	F-USREPO  	0	mainwire usinterestrateswaps frontpage                            	SLOW
+US Key Indicators Summary          	F-6MRUSD  	0	mainwire uskeyindicatorssummary                            	SLOW
+US Markets Calendar                	F-BULDEX  	0	credit usmarketscalendar                            	SLOW
+US Markets Calendar                	F-BULDEX  	0	fibullets usmarketscalendar                            	SLOW
+US News Briefs                     	MBU$$$    	0	mainwire usnewsbriefs                            	SLOW
+US News Event Calendar             	F-USACAL  	0	credit usnewseventcalendar                            	SLOW
+US News Event Calendar             	F-USACAL  	0	fibullets usnewseventcalendar                            	SLOW
+US News Event Calendar             	F-USACAL  	0	mainwire usnewseventcalendar                            	SLOW
+US News Event Calendar             	F-USICAL  	0	mainwire usnewseventcalendar                            	SLOW
+US Repo Market Rates               	F-USTORR  	0	mainwire usrepomarketrates                            	SLOW
+US Treasury Options Volatilities   	F-BULWC4  	0	fibullets ustreasuryoptionsvolatilities                            	SLOW
+US Treasury/Agency Auction Calendar	F-TSYCAL  	0	fibullets ustreasuryagencyauctioncalendar                            	SLOW
+US Treasury/Agency Auction Calendar	F-TSYCAL  	0	mainwire ustreasuryagencyauctioncalendar                            	SLOW
+US Weekly Economic Data Roundup    	F-WKRUSD  	0	mainwire usweeklyeconomicdataroundup                            	SLOW
+US$ Credit Supply Pipeline         	F-BULWC1  	0	credit uscreditsupplypipeline                            	SLOW
+US$ Credit Supply Pipeline         	F-BULWC1  	0	fibullets uscreditsupplypipeline                            	SLOW
+United States                      	M$U$$$    	0	mainwire unitedstates                            	SLOW
+Washington                         	MFU$$$    	0	mainwire washington                            	SLOW
+Washington                         	MGU$$$    	0	mainwire washington                            	SLOW
+World News Roundup                 	F-EUMORN  	0	mainwire worldnewsroundup                            	SLOW
+Japanese Government                	MGJ$$$    	0	japanesegovernment                            	SLOW
+
+Asia News Events Calendar          	F-GEXSHI  	0	fxbullets asianewseventscalendar
+BOE State of Play                  	F-BOEPLY  	0	fxbullets boestateofplay frontpage
+BOJ State of Play                  	F-GEISHI  	0	fxbullets bojstateofplay
+Canada/Mexico Data Calendar        	F-CAICAL  	0	fxbullets canadamexicodatacalendar
+Central Bank Rate Actions          	F-CENACT  	0	fxbullets centralbankrateactions
+China Data Calendar                	F-ITALHI  	0	fxbullets chinadatacalendar
+ECB State of Play                  	F-BUNPLY  	0	fxbullets ecbstateofplay
+Economic Data Review               	F-BULWC2  	0	fxbullets economicdatareview
+European News Event Calendar       	F-EUECAL  	0	fxbullets europeannewseventcalendar
+FX Expectations Survey             	F-EUWFEX  	0	fxbullets fxexpectationssurvey
+Fed State of Play                  	F-BULWC3  	0	fxbullets fedstateofplay
+Foreign Exchange Bullets           	F-BULLEF  	0	fxbullets fxbulletsp
+Global News Event Calendar         	F-CALGBL  	0	fxbullets globalnewseventcalendar
+Italy Data Calendar                	F-ITACAL  	0	fxbullets italydatacalendar
+Japanese Data Calendar             	F-JPICOR  	0	fxbullets japanesedatacalendar
+Key FX Levels                      	F-FXPAIR  	0	fxbullets keyfxlevels
+Mergers And Acquisitions           	F-MERGER  	0	fxbullets mergersandacquisitions
+UK Economic Data Calendar          	F-UKECAL  	0	fxbullets ukeconomicdatacalendar
+US Economic Data Calendar          	F-USECOR  	0	fxbullets useconomicdatacalendar
+US Forecast Highlights             	F-EFORHI  	0	fxbullets usforecasthighlights
+US Markets Calendar                	F-BULDEX  	0	fxbullets usmarketscalendar
+US News Event Calendar             	F-USACAL  	0	fxbullets usnewseventcalendar

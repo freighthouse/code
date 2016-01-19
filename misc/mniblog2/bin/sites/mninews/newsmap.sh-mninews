@@ -1,0 +1,93 @@
+#!/bin/bash
+
+# @author Jeremy Cerda
+# @version $Id: newsmap.sh 2337 2011-07-08 15:25:32Z jcerda $
+
+SCRIPT_NAME=`basename $0`
+DIRNAME=$(cd `dirname $0` && pwd)
+PROG_HOME=${DIRNAME/\/bin/}
+source ${PROG_HOME}/conf/runconfig.sh
+#source ${PROG_HOME}/conf/scriptconfig.sh
+USER=`id|cut -d"(" -f2|cut -d")" -f1`
+
+DRUPAL_SETTINGS="/var/www/mninews/sites/default/settings.php"
+THEURL=`${GREP} "^[$]db_url" "${DRUPAL_SETTINGS}" | ${TR} -d "'"`
+THEUSER=`echo "${THEURL}" | ${SED} 's/[^:]*:\/\/\([^:]*\).*/\1/g'`
+THEHOST=`echo "${THEURL}" | ${SED} 's/[^@]*@\([^/]*\).*/\1/g'`
+THEDB=`echo "${THEURL}" | ${SED} 's/[^/]*\/\/[^/]*\/\([^;]*\);/\1/g'`
+THEPASS=`echo "${THEURL}" | ${SED} 's/[^:]*:[^:]*:\([^@]*\)@.*/\1/g'`
+THEPASS="`${PYTHON} -c 'import urllib; print urllib.unquote_plus("'"${THEPASS}"'");'`"
+
+MYT=`${DATE} +"%z"`
+#MYT="-0410"
+
+MYTZ=$(( 60 * ${MYT:3:2} + 60 * 60 * ${MYT:1:2} ))
+
+if [ "${MYT:0:1}" == "+" ]; then
+	MYTZ=$(( 0 - $MYTZ))
+fi
+
+echo -e "
+SELECT node.nid, node.created, url_alias.dst AS url, node.type, node.title,
+GROUP_CONCAT(term_data.name SEPARATOR ',') AS terms
+FROM term_node
+INNER JOIN node ON term_node.nid = node.nid AND term_node.vid = node.vid
+INNER JOIN term_data ON term_node.tid = term_data.tid
+INNER JOIN url_alias ON src = CONCAT('node/', node.nid)
+WHERE node.status = 1 AND node.promote = 1 AND node.type IN ('free_article', 'alacarte_article')
+AND unix_timestamp(now()) - node.created < (60 * 60 * 72)
+GROUP BY node.nid
+" | ${MYSQL} --user=${THEUSER} --password=${THEPASS} ${THEDB} | ${SORT} -n | ${GAWK} -F'\t' -vmytz=${MYTZ} '
+{ if (int(oldnid) != int($1))
+    { print oldnid"\t" strftime("%Y-%m-%dT%H:%M:%SZ",oldtime+mytz)"\t" url"\t" type"\t" title"\t" tids; oldnid=$1; oldtime=$2; url=$3; type=$4; title=$5; tids=$6 }
+    else { oldtime=$2; tids=tids", "$6 }
+}
+END { print oldnid"\t" strftime("%Y-%m-%dT%H:%M:%SZ",oldtime+mytz)"\t" url"\t" type"\t" title"\t" tids }' | ${GREP} -v "1969-12-31T23:00:00Z" | ${PYTHON} -c '
+
+import sys
+import cgi
+
+siteprefix="http://mninews.deutsche-boerse.com/"
+
+print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+print "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\" xmlns:news=\"http://www.google.com/schemas/sitemap-news/0.9\">"
+
+mylines = sys.stdin.readlines()
+
+for xmylines in mylines:
+        sxmylines = xmylines.split("\t")
+        topics = list()
+
+        for xt in sxmylines[5].split(","):
+                xt = xt.replace("\r","").replace("\n","").strip()
+                if xt == "Front Page" or xt == "Mainwire (A la Carte)":
+                        continue
+                topics.append(xt)
+
+        topics.append("business")
+        topics = ", ".join(topics)
+
+        if len(sxmylines) < 3:
+                continue
+
+        print "\t<url>\n"\
+              "\t\t<loc>"+siteprefix+sxmylines[2]+"</loc>\n"\
+              "\t\t<news:news>\n"\
+              "\t\t\t<news:publication>\n"\
+              "\t\t\t\t<news:name>MNI News</news:name>\n"\
+              "\t\t\t\t<news:language>en</news:language>\n"\
+              "\t\t\t</news:publication>\n"\
+              "\t\t\t<news:title>"+cgi.escape(sxmylines[4])+"</news:title>\n"\
+              "\t\t\t<news:publication_date>"+sxmylines[1]+"</news:publication_date>\n"\
+              "\t\t\t<news:keywords>"+topics+"</news:keywords>"
+
+        if (sxmylines[3] == "alacarte_article"):
+              print "\t\t\t<news:access>Subscription</news:access>"
+
+        print "\t\t</news:news>"
+        print "\t</url>"
+
+
+print "</urlset>"
+
+'

@@ -1,0 +1,161 @@
+<?php
+# @author: Jeremy Cerda
+# @version: $Id: mnsolrsearch.module 2531 2011-08-25 18:33:58Z jcerda $
+
+function mnsolrsearch_block($op = 'list', $delta = 0, $edit = array()) {
+	switch ($op) {
+		case 'list':
+			$block['mnsolrsearch_search_box']['info'] = t('MNI Solr Search Box');
+			return $block;
+		case 'view':
+			$block = array();
+			switch($delta) {
+				case 'mnsolrsearch_search_box':
+					$solr_base_url = url('search/apachesolr_search');
+					$block['content'] =
+						"<form class=\"form-search\" method=\"get\" ".
+							"accept-charset=\"UTF-8\" ".
+							"action=\"javascript:window.location = ".
+							"'".$solr_base_url."/' + ".
+							"$('input#mnisearch_terms').val() + ".
+							"'?filters=-type%3Aproduct%20&".
+							"solrsort=created%20desc&retain-filters=1'\">".
+						"	<div>".
+						"		<div class=\"container-inline\" >".
+						"			<div class=\"form-item\">".
+						"				<input id=\"mnisearch_terms\" ".
+											"type=\"text\" ".
+											"class=\"edit-search-theme-form-1 ".
+											"form-text\" title=\"Enter the ".
+											"terms you wish to search for.\" ".
+											"value=\"search MNI\" size=\"15\" ".
+											"name=\"keys\" maxlength=\"128\" ".
+											"onclick=\"if ".
+											"(this.value=='search MNI') ".
+											"{this.value=''};\"/>".
+						"			</div>".
+						"			<input type=\"submit\" ".
+									"class=\"form-submit\" value=\"Search\" />".
+						"		</div>".
+						"	</div>".
+						"</form>";
+					return $block;
+					break;
+			}
+	}
+}
+
+function _mnsolrsearch_addaday($date_string) {
+
+}
+
+function mnsolrsearch_form_search_submit($form, &$form_state) {
+	$fv = $form_state['values'];
+
+	$d = "";
+	if(strlen($fv['start_date']) > 0 || strlen($fv['end_date']) > 0) {
+		$sd = (strlen($fv['start_date']) > 0 ?
+			preg_replace('/ /', 'T', $fv['start_date'])."Z" : "*");
+		$ed = (strlen($fv['end_date']) > 0 ?
+			preg_replace('/ /', 'T', $fv['end_date'])."Z" : "*");
+		$ed = preg_replace('/00\:00\:00/', '23:59:59', $ed);
+		$d = "created:[".$sd." TO ".$ed."] ";
+	}
+
+	$queryvalues = json_decode($fv['apachesolr_search']['queryvalues'], TRUE);
+	$queryvalues['filters'] = preg_replace('/created\:\[.*\]/', '',
+			$queryvalues['filters']);
+	$queryvalues['filters'] = preg_replace('/type\:\(.*\)/', '',
+			$queryvalues['filters']);
+
+	$queryvalues['filters'] = "-type:product " . $queryvalues['filters'];
+	if(strlen($d) > 0)
+		$queryvalues['filters'] = $d.$queryvalues['filters'];
+
+	if($queryvalues['solrsort'] == null || !isset($queryvalues['solrsort']))
+		$queryvalues['solrsort'] = "created desc";
+
+	if($queryvalues['filters'] == null || !isset($queryvalues['filters']) ||
+	$queryvalues['filters'] == "")
+		unset($queryvalues['filters']);
+
+  	$form_state['values']['apachesolr_search']['queryvalues'] =
+  		json_encode($queryvalues);
+
+	$form_state['values']['apachesolr_search']['retain-filters'] = 1;
+}
+
+function mnsolrsearch_form_search_form_alter(&$form, $form_state)
+{
+	if ($form['module']['#value'] == 'apachesolr_search') {
+		if($form['#submit'][0] == 'apachesolr_search_form_search_submit') {
+			array_unshift($form['#submit'], 'mnsolrsearch_form_search_submit');
+		} else {
+			watchdog("mnsolrsearch", "Unable to add submit function in ".
+				"place. If possible, check the weights of the ".
+				"apachesolr_search module vs. the mnsolrsearch module, ".
+				"which should run after apache. Until fixed, mnsolrsearch ".
+				"cannot run. Uninstalling and reinstalling the mnsolrsearch ".
+				"module may fix this problem.", null, WATCHDOG_WARNING, null);
+			return;
+		}
+
+		drupal_add_css(drupal_get_path('module','mnsolrsearch').
+			'/mnsolrsearch.css');
+
+		if(isset($_GET['filters'])) {
+			$dates = preg_split('/TO/', $_GET['filters']);
+
+			$sd = preg_split('/\[/', $dates[0]);
+			$sd = $sd[1];
+			$sd = preg_split('/T/', $sd);
+			$sd = $sd[0];
+			$sd = preg_replace('/ /', '', $sd);
+
+			$ed = preg_split('/\]/', $dates[1]);
+			$ed = $ed[0];
+			$ed = preg_split('/T/', $ed);
+			$ed = $ed[0];
+			$ed = preg_replace('/ /', '', $ed);
+		}
+
+		$form['basic']['start_date']= array(
+			'#type'                => 'date_popup',
+			'#title'               => t('From'),
+			'#default_value'       => (isset($sd) && strlen($sd) > 1 ? $sd : ''),
+			'#date_format'         => 'Y-m-d',
+			'#date_label_position' => 'above'
+		);
+		$form['basic']['end_date'] = array(
+			'#type'                => 'date_popup',
+			'#title'               => t('To'),
+			'#default_value'       => (isset($ed) && strlen($ed) > 1 ? $ed : ''),
+			'#date_format'         => 'Y-m-d',
+			'#date_label_position' => 'above'
+		);
+
+		$s = $form['basic']['inline']['submit'];
+		unset($form['basic']['inline']['submit']);
+		$form['basic']['submit'] = $s;
+
+		if(isset($form['basic']['apachesolr_search']['retain-filters'])) {
+			$form['basic']['apachesolr_search']['retain-filters']['#type'] = 'hidden';
+			$form['basic']['apachesolr_search']['retain-filters']['#default_value'] = 1;
+		} else {
+			$_GET['retain-filters'] = 1;
+		}
+	}
+}
+
+/**
+ * Implementation of hook_apachesolr_process_results(&$results).
+ */
+function mnsolrsearch_apachesolr_process_results(&$results)
+{
+	for($i = 0; $i < count($results); $i++){
+		if($results[$i]['node']->type == 'subscription_article') {
+			$results[$i]['link'] = "/node/".$results[$i]['node']->nid;
+		}
+	}
+}
+

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# @author Jeremy Cerda
+# @version $Id: startblog.sh-mninews 2644 2011-09-20 16:15:38Z jcerda $
+
+SCRIPT_NAME=`basename $0`
+DIRNAME=$(cd `dirname $0` && pwd)
+PROG_HOME=${DIRNAME/\/bin/}
+source $PROG_HOME/conf/runconfig.sh
+USER=`id|cut -d"(" -f2|cut -d")" -f1`
+
+if [ ${USER} != ${PROCESSUSER} ] && [ ${USER} != "root" ]; then
+	echo "ERROR: Must be run as root or ${PROCESSUSER}"
+	exit 2
+fi
+
+# NOTE: richpdf publication isn't finished yet, but is left commented out
+
+pushd ${BLOGDIR} &> /dev/null
+CMD1="/usr/bin/python ${BLOGDIR}/mnadapt.py -m ${BLOGDIR}/conf/multipub.cfg"
+#CMD2="/usr/bin/python ${BLOGDIR}/mnrichwatch.py -m ${BLOGDIR}/conf/multipub.cfg"
+
+CFG_FREE="${BLOGDIR}/conf/sites/mninews/free/pub.production.cfg-mninews"
+CFG_SUB="${BLOGDIR}/conf/sites/mninews/subscription/pub.production.cfg-mninews"
+#CFG_ALA="${BLOGDIR}/conf/sites/mninews/alacarte/pub.production.cfg-mninews"
+
+PUB_FREE="/usr/bin/python ${BLOGDIR}/mniblogpub.py ${CFG_FREE}"
+PUB_SUB="/usr/bin/python ${BLOGDIR}/mniblogpub.py ${CFG_SUB}"
+#PUB_ALA="/usr/bin/python ${BLOGDIR}/mniblogpub.py ${CFG_ALA}"
+PUB_RSS="/usr/bin/python ${BLOGDIR}/mnirsspub.py ${CFG_FREE}"
+
+case "${USER}" in
+${PROCESSUSER})
+	${CMD1} >> ${BLOGDIR}/log/mnadapt.log 2>&1 &
+	#${CMD2} >> ${BLOGDIR}/log/mnrichwatch.log 2>&1 &
+
+	${PUB_FREE} >> ${BLOGDIR}/log/mniblogpub-free.log 2>&1 &
+	${PUB_SUB} >> ${BLOGDIR}/log/mniblogpub-sub.log 2>&1 &
+#	${PUB_ALA} >> ${BLOGDIR}/log/mniblogpub-ala.log 2>&1 &
+	${PUB_RSS} >> ${BLOGDIR}/log/mnirsspub.log 2>&1 &
+	;;
+root)
+	/bin/su - ${PROCESSUSER} -c "${CMD1} >> ${BLOGDIR}/log/mnadapt.log 2>&1 &"
+	#/bin/su - ${PROCESSUSER} -c "${CMD2} >> ${BLOGDIR}/log/mnrichwatch.log 2>&1 &"
+
+	/bin/su - ${PROCESSUSER} -c "${PUB_FREE} >> ${BLOGDIR}/log/mniblogpub-free.log 2>&1 &"
+	/bin/su - ${PROCESSUSER} -c "${PUB_SUB} >> ${BLOGDIR}/log/mniblogpub-sub.log 2>&1 &"
+#	/bin/su - ${PROCESSUSER} -c "${PUB_ALA} >> ${BLOGDIR}/log/mniblogpub-ala.log 2>&1 &"
+	/bin/su - ${PROCESSUSER} -c "${PUB_RSS} >> ${BLOGDIR}/log/mnirsspub.log 2>&1 &"
+	;;
+*)
+	echo "ERROR: Must be run as root or ${PROCESSUSER}"
+	exit 2
+esac
+popd &> /dev/null

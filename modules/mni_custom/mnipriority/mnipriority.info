@@ -1,0 +1,6 @@
+; $Id: mnipriority.info, v 1.0 2012/04/23 12:00:00 jmcerda Exp $
+name = MNI Priority
+description = Assigns priority levels to content
+package = "MNI"
+core = 6.x
+version = "6.x-1.0"

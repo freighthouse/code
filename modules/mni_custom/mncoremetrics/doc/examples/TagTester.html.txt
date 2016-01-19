@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE> Test Tags </TITLE>
+<script type="text/javascript" src="//libs.coremetrics.com/eluminate.js"></script>
+<script type="text/javascript">
+
+// send data to production – Client-Managed 1st Party
+//cmSetClientID("90378103",true,"data.coremetrics.com","marketnews.com");
+
+// send data to 6-series test system
+cmSetClientID("60378103",false,"testdata.coremetrics.com","marketnews.com");
+
+</script>
+</HEAD>
+<BODY>
+
+<script type="text/javascript">
+
+	cmCreatePageviewTag( "Page ID"		// Page ID
+			   , "PageCatID"			// Category ID 
+			   , "SearchTerm"			// Optional Search String
+			   , "56"          			// # of results for Search Term	 
+			   , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+			   );
+
+	cmCreateProductviewTag("Sample Prod ID"
+				, "Sample Prod Name"
+				, "Sample Category ID"
+			   , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+			   , "cross-sell"
+                );
+
+	cmCreateShopAction5Tag( "Sample Prod ID"
+			      , "Sample Prod Name"
+			      , "1"			// Quantity
+			      , "99"			// Unit Price
+			      , "Sample Category ID"
+			   , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+			      );
+	   cmDisplayShop5s();
+
+	cmCreateShopAction9Tag(   "Sample Prod ID"
+	                        , "Sample Prod Name"
+				, "1"				// Quantity
+				, "99"			// Unit Price
+				, "Sample Customer ID" 
+				, "Sample Order ID"
+				, "99"			// Order Subtotal
+				, "Sample Category ID"
+			   , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+				);
+	   cmDisplayShop9s();
+
+
+	cmCreateOrderTag(   "Sample Order ID"
+			  , "99"				//Order Subtotal
+			  , "10"				//Order Shipping
+			  , "CustomerID"
+			  , "customerCity"
+			  , "customerState"
+			  , "99999"				// customer postal code
+			  , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+			   );
+
+	cmCreateRegistrationTag(  "Sample Cust ID"
+				, "customerEmail"
+				, "customerCity"
+				, "customerState"
+				, "99999"		// zip
+			    , "customerCountry"	
+				, "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+				);
+
+	cmCreateConversionEventTag( "eventID"
+							, "1"
+							, "categoryID"
+							, "10"
+			   , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+				);
+
+	cmCreateElementTag( "elementID"
+						, "elementCategory"
+					   , "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+							);
+
+	cmCreateManualPageviewTag( "ManualPageID"
+						, "ManualCategoryID"
+						, "DestinationURL"
+						, "ReferringURL"
+						, "attr1-_-attr2-_-attr3-_-attr4-_-attr5-_-attr6-_-attr7-_-attr8-_-attr9-_-attr10-_-attr11-_-attr12-_-attr13-_-attr14-_-attr15-_-attr16-_-attr17-_-attr18-_-attr19-_-attr20-_-attr21-_-attr22-_-attr23-_-attr24-_-attr25-_-attr26-_-attr27-_-attr28-_-attr29-_-attr30-_-attr31-_-attr32-_-attr33-_-attr34-_-attr35-_-attr36-_-attr37-_-attr38-_-attr39-_-attr40-_-attr41-_-attr42-_-attr43-_-attr44-_-attr45-_-attr46-_-attr47-_-attr48-_-attr49-_-attr50"
+						, "SearchTerm"			// Optional Search String
+						, "56"          			// # of results for Search Term	 
+						);
+
+    cmCreateManualImpressionTag( "pageID"
+							, "1-_-2-_-3"   // track SP 
+							, "1-_-2-_-3"   // track RE
+							);
+
+	cmCreateManualLinkClickTag( "/image12/w30913z.jpg"   // target HREF
+					, "linkname"							// linkname
+					, "PRODUCT: Big Sneakers(16123)");   // pageID of page hosting this link
+
+// deprecated tag functions
+
+	cmCreateErrorTag( "Sample PageID"
+					, "Sample CategoryID"
+					);
+				
+	
+ //-->
+</script>
+<!-- END COREMETRICS -->
+</BODY>
+</HTML>

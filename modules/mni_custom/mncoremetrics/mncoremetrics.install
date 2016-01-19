@@ -1,0 +1,30 @@
+<?php
+# @author: Jeremy Cerda
+# @version: $Id: mncoremetrics.install 2381 2011-07-28 16:10:12Z jcerda $
+
+module_load_include('inc', 'mncoremetrics', 'mncoremetrics.util');
+
+function mncoremetrics_install() {
+	variable_set('mncoremetrics_setup', 0);
+	variable_set('mncoremetrics_testing', 1);
+	variable_set('mncoremetrics_src', "");
+	variable_set('mncoremetrics_clientid', "");
+	variable_set('mncoremetrics_clientid.test', "");
+	variable_set('mncoremetrics_domains.test', "");
+	variable_set('mncoremetrics_domains.prod', "");
+	variable_set('mncoremetrics_domains.cookie', "");
+
+	mncoremetrics_load_cfg();
+}
+
+function mncoremetrics_uninstall() {
+	variable_del('mncoremetrics_setup');
+	variable_del('mncoremetrics_testing');
+	variable_del('mncoremetrics_src');
+	variable_del('mncoremetrics_clientid');
+	variable_del('mncoremetrics_clientid.test');
+	variable_del('mncoremetrics_domains.test');
+	variable_del('mncoremetrics_domains.prod');
+	variable_del('mncoremetrics_domains.cookie');
+}
+

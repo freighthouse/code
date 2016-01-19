@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 16.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="38.214px" height="38.209px" viewBox="0 0 38.214 38.209" enable-background="new 0 0 38.214 38.209" xml:space="preserve">
+<symbol  id="arrow" viewBox="-19.107 -19.104 38.214 38.209">
+	<path fill="none" stroke="#EE5425" stroke-miterlimit="10" d="M18.583-0.009c-0.59-10.253-8.325-18.595-18.595-18.595
+		c-10.27,0-18.595,8.325-18.595,18.595c0,10.27,8.336,19.076,18.595,18.595C10.571,18.089,19.124,9.402,18.583-0.009z"/>
+	<polyline fill="none" stroke="#EE5425" stroke-linecap="round" stroke-miterlimit="10" points="-0.095,9.682 11.283,-0.009 
+		-0.095,-10.386 	"/>
+	
+		<line fill="none" stroke="#EE5425" stroke-linecap="round" stroke-miterlimit="10" x1="11.283" y1="-0.009" x2="-10.9" y2="-0.009"/>
+</symbol>
+<use xlink:href="#arrow"  width="38.214" height="38.209" x="-19.107" y="-19.104" transform="matrix(1 0 0 -1 19.1074 19.1045)" overflow="visible"/>
+</svg>

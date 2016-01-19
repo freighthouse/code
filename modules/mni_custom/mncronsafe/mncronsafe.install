@@ -1,0 +1,11 @@
+<?php
+# @author: Jeremy Cerda
+# @version: $Id:$
+
+function mncronsafe_enable() {
+	db_query("UPDATE {system} SET weight = -1 where name = 'mncronsafe'");
+	if(db_affected_rows() != 1) {
+		watchdog('mncronsafe', 'Could not update weight of mncronsafe module.',
+			null, WATCHDOG_ERROR);
+	}
+}

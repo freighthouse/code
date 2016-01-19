@@ -1,0 +1,32 @@
+# @author Jeremy Cerda
+# @version $Id: rich.production.cfg-mninews 2337 2011-07-08 15:25:32Z jcerda $
+
+## E: Embargo Time, D: Death Time, P: Price
+
+
+The FX Spot                        	20223  	300	0	5.00	mainwire thefxspot
+Latam Watch                        	20221  	300	0	5.00	mainwire latamwatch frontpage
+Fed State of Play                  	20220  	300	0	5.00	mainwire credit fibullets fxbullets fedstateofplay
+ECB Update                         	20272  	300	0	5.00	mainwire ecbupdate frontpage
+BOJ State of Play                  	20081  	300	0	5.00	mainwire credit fibullets fxbullets bojstateofplay japan asia
+ECB State of Play                  	20089  	300	0	5.00	mainwire credit fibullets fxbullets ecbstateofplay
+Reality Check                      	20068  	300	0	5.00	mainwire realitycheck frontpage mainwirep
+Reality Check                      	MABRC$ 	300	0	5.00	mainwire realitycheck frontpage
+Reality Check                      	MAJRC$ 	300	0	5.00	mainwire realitycheck frontpage
+Reality Check                      	MAQRC$ 	300	0	5.00	mainwire realitycheck frontpage
+Reality Check                      	40048  	300	0	5.00	mainwire realitycheck frontpage
+Reality Check                      	40048  	300	0	5.00	mainwire realitycheck frontpage
+Reality Check                      	40406  	300	0	5.00	mainwire realitycheck frontpage
+
+MNI China Business Sentiment Survey	40547  	300	0	5.00	mainwire mnichinabusinesssentimentsurvey frontpage china asia
+Portfolios                         	20236  	300	0	5.00	mainwire portfolios
+
+Talk from the Trenches             	20036  	300	0	5.00	mainwire talkfromthetrenches
+Corporate Bond Chatter             	20050  	300	0	5.00	mainwire credit corporatebondchatter frontpage
+Corporate Bond Chatter             	20115  	300	0	5.00	mainwire corporatebondchatter frontpage
+Credit Default Swaps               	20279  	300	0	5.00	mainwire credit creditdefaultswaps frontpage
+US Interest Rate Swaps             	20268  	300	0	5.00	mainwire usinterestrateswaps frontpage
+
+Top News Stories                   	40002  	600	0	5.00	mainwire topnewsstories mainwirep
+
+Exclusives                         	40000  	1200	0	5.00	mainwire exclusives mainwirep

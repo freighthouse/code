@@ -1,0 +1,6 @@
+; $Id
+name = MNI Embargo
+description = Delay publish time for nodes based on information given by the mniblog software.
+core = 6.x
+package = MNI
+php = 5.2

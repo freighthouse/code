@@ -1,0 +1,435 @@
+<?php
+
+// Takes a node object, and moves it from alacarte to subscription tier
+function _mnevolution_alac_to_sub($node)
+{
+	$newNode = array(
+                'type'      => 'subscription_article',
+                'title'     => $node->title,
+                'teaser'    => $node->teaser,
+                'uid'       => $node->uid,
+                'name'      => $node->name,
+                'promote'   => $node->promote,
+                'taxonomy'  => $node->taxonomy,
+                'created'   => $node->created,
+                'format'    => $node->format,
+                'body'      => $node->field_full_body[0]['value'],
+                'comment'   => 0,
+                'language'  => $node->language
+        );
+	$newNode = node_submit($newNode);
+	$newNode->created = $node->created;
+	node_save($newNode);
+
+	// If it worked, re-attach paths and other important data
+	if($newNode->nid) {
+		path_set_alias("node/".$newNode->nid, $node->path);
+
+		$pn = node_load($n->field_product_nid[0]['value']);
+		$pn->field_product_active[0]['value'] = 0;
+		$pn->field_item_nid[0]['value'] = $newNode->nid;
+		node_save($pn);
+
+		$newNode->field_sub_time_to_sub[0]['value'] =
+			$node->field_ala_time_to_sub[0]['value'];
+		node_save($newNode);
+
+		// Finally, if all went well, delete the old node
+		node_delete($node->nid);
+	}
+}
+
+// Takes a node object, and moves it from alacarte to free tier
+function _mnevolution_alac_to_free($node)
+{
+	$newNode = array(
+                'type'      => 'free_article',
+                'title'     => $node->title,
+                'teaser'    => $node->teaser,
+                'uid'       => $node->uid,
+                'name'      => $node->name,
+                'promote'   => $node->promote,
+                'taxonomy'  => $node->taxonomy,
+                'created'   => $node->created,
+                'format'    => $node->format,
+                'body'      => $node->field_full_body[0]['value'],
+                'comment'   => 0,
+                'language'  => $node->language
+        );
+	$newNode = node_submit($newNode);
+	$newNode->created = $node->created;
+	node_save($newNode);
+
+	// If it worked, re-attach paths and other important data
+	if($newNode->nid) {
+		path_set_alias("node/".$newNode->nid, $node->path);
+
+		$pn = node_load($n->field_product_nid[0]['value']);
+		$pn->field_product_active[0]['value'] = 0;
+		$pn->field_item_nid[0]['value'] = $newNode->nid;
+		node_save($pn);
+
+		// Finally, if all went well, delete the old node
+		node_delete($node->nid);
+	}
+}
+
+// Takes a node object, and moves it from subscription to free tier
+function _mnevolution_sub_to_free($node)
+{
+	$newNode = array(
+                'type'      => 'free_article',
+                'title'     => $node->title,
+                'teaser'    => $node->teaser,
+                'uid'       => $node->uid,
+                'name'      => $node->name,
+                'promote'   => $node->promote,
+                'taxonomy'  => $node->taxonomy,
+                'created'   => $node->created,
+                'format'    => $node->format,
+                'body'      => $node->body,
+                'comment'   => 0,
+                'language'  => $node->language
+        );
+	$newNode = node_submit($newNode);
+	$newNode->created = $node->created;
+	node_save($newNode);
+
+	// If it worked, re-attach paths and other important data
+	if($newNode->nid) {
+		path_set_alias("node/".$newNode->nid, $node->path);
+
+		// Finally, if all went well, delete the old node
+		node_delete($node->nid);
+	}
+}
+
+// Cron hook for mnevolution
+function mnevolution_cron()
+{
+	global $user;
+	$ubu = $user;
+	$old_state = session_save_session();
+	session_save_session(false);
+	$user = user_load(1);
+
+	$t = time();
+
+	// Alacarte
+	$q = "SELECT nid FROM {content_type_alacarte_article} " .
+		"WHERE (field_ala_time_to_free_value != NULL AND ".
+		"field_ala_time_to_free_value != -1) OR " .
+		"(field_time_to_sub != NULL AND field_time_to_sub != -1)";
+	$r = db_query($q);
+	while($row = db_fetch_array($r)) {
+		$n = node_load($row->nid);
+
+		$tot_sub = $n['created'] + $n['field_time_to_sub'][0]['value'];
+		$tot_free = $n['created'] + $n['field_ala_time_to_free'][0]['value'];
+
+		if (($tot_free > $n['created'] && $tot_free < $t))
+			_mnevolution_alac_to_free($n);
+		else if (($tot_sub > $n['created'] && $tot_sub < $t))
+			_mnevolution_alac_to_sub($n);
+	}
+
+	// Subscription
+	$q = "SELECT nid FROM {content_type_subscription_article} " .
+		"WHERE field_sub_time_to_free_value == NULL OR ".
+		"field_sub_time_to_free_value == -1";
+	$r = db_query($q);
+	while($row = db_fetch_array($r)) {
+		$n = node_load($row->nid);
+
+		$tot_free = $n['created'] + $n['field_sub_time_to_free'][0]['value'];
+		if (($tot_free > $n['created'] && $tot_free < $t))
+			_mnevolution_sub_to_free($n);
+	}
+
+	$user = $ubu;
+	session_save_session($old_state);
+}
+
+
+/*$results = db_query("SELECT * FROM {mnevolution} WHERE nid = " .
+		$node->nid);
+	if(db_affected_rows()) {
+		$db_data = _mnevolution_load_node($node);
+
+		// Check if any data has changed
+		$data_changed = false;
+		$s = "";
+
+		while($r = db_fetch_array($results)) {
+			if($db_data[''.$r['time_to_evo']]) {
+				// It's still here, has it changed?
+				if($db_data[''.$r['time_to_evo']] != $r['end_type']) {
+					// Update it
+					$q = "UPDATE {mnevolution} SET"
+				}
+			} else {
+				// We removed it, delete from evo system
+			}
+		}
+
+		// If we have items in db_data that aren't in r, we have to add them
+
+		foreach(array_keys($r) as $k) {
+			if($node->mnevolution[$k] != $r[$k]) {
+				$s .= $k . " = " . ($node->mnevolution[$k] ?
+					$node->mnevolution[$k] : -1) . ", ";
+				$data_changed = true;
+			}
+		}
+
+		// If so update
+		if($data_changed) {
+			$q = "UPDATE {mnevolution} SET " . substr($s, 0, -2) .
+				" WHERE nid = " . $node->nid;
+			db_query($q);
+			if(!db_affected_rows()) {
+				watchdog('mnevolution', "There was an error updating " .
+						"evolution information for nid " . $node->nid, array(),
+						WATCHDOG_ERROR);
+			}
+		}
+	} else {
+		_mnevolution_add_node($node);
+	}*/
+
+
+
+
+
+
+
+
+
+
+
+	/*$mn_now = time();
+
+	$past_evo = false;
+	$r = $row_data;
+	foreach(array_keys($r) as $k) {
+		if(!(strlen($k) >= 3 && (substr($k, 0, 3) == "tt_" || $k == "ttd")))
+			unset($r[$k]);
+		else if($k == $node->type)
+			unset($r[$k]);
+		else if($r[$k]+$node->created <= $mn_now)
+			$past_evo = true;
+	}
+
+	if(!count($r) > 0)
+		return array('null', -1);
+
+	$tot = 0;
+	if($past_evo)
+		$tot = max($r);
+	else
+		$tot = min($r);
+	$evo_type = array_keys($r, $tot);
+	$evo_type = ($evo_type[0] != "ttd" ? $evo_type =
+			substr($evo_type[0], 3) : "ttd");
+
+	return array($evo_type, $tot);*/
+
+
+
+
+
+
+
+
+
+
+
+	/**
+ * Updates mnevolution table schema when node types are added or removed
+ */
+/*function mnevolution_node_type($op, $info)
+{
+	switch($op) {
+		case "delete":
+			$ret = array();
+			db_drop_field(&$ret, "mnevolution", "tt_".$info->type);
+
+			$q = "DELETE FROM {mnevolution_scripts} " .
+					"WHERE curr_type = '$info->type'";
+			db_query($q);
+
+			menu_rebuild();
+			break;
+		case "insert":
+			$ret = array();
+			db_add_field(&$ret, "mnevolution", "tt_".$info->type,
+				array('type' => 'int', 'unsigned' => FALSE,
+				'not null' => TRUE, 'default' => -1, 'disp-width' => '10'));
+
+			$code_default = "";
+			$cols = "curr_type, ";
+			$vals = "'".$info->type."', ";
+			foreach(node_get_types() as $t) {
+				$cols .= $t->type.", ";
+				$vals .= "'".$code_default."', ";
+			}
+			db_query("INSERT INTO {mnevolution_scripts} " .
+					"(".substr($cols, 0, -2).") VALUES " .
+					"(".substr($vals, 0, -2).")");
+
+			menu_rebuild();
+			break;
+	}
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+//**************************************************************************
+	//  Old Schemas
+	//**************************************************************************
+	//--------------------------------------------------------------------------
+	//  Code Lookup Table
+	//--------------------------------------------------------------------------
+	/*$types = node_get_types();
+	foreach($types as $t) {
+		$l_fields = array(
+			'curr_type' => array('type' => 'varchar', 'length' => 32,
+							'not null' => TRUE),
+		);
+		foreach($types as $t2) {
+			$l_fields[$t2->type] = array('type' => 'text', 'size' => 'big',
+				'not null' => true);
+		}
+	}
+	$schema['mnevolution_scripts'] = array(
+		'fields' => $l_fields,
+		'primary key' => array('curr_type'),
+		'indexes' => array('curr_type' => array('curr_type'))
+	);*/
+
+	//--------------------------------------------------------------------------
+	//  Core Data Table
+	//--------------------------------------------------------------------------
+	// Basic fields
+	/*$t_fields = array(
+		'mnevoid'	=> array('type' => 'serial', 'not null' => TRUE),
+		'nid'		=> array('type' => 'int', 'unsigned' => TRUE,
+						'not null' => TRUE, 'default' => 0,
+						'disp-width' => '10'),
+		'ttd'		=> array('type' => 'int', 'unsigned' => FALSE,
+						'not null' => TRUE, 'default' => -1,
+						'disp-width' => '10')
+	);
+
+	// Type fields
+	foreach($types as $t)
+		$t_fields['tt_'.$t->type] = array('type' => 'int', 'unsigned' => FALSE,
+									'not null' => TRUE, 'default' => -1,
+									'disp-width' => '10');
+
+	// Table itself
+	$schema['mnevolution'] = array(
+		'fields'		=> $t_fields,
+		'primary key'	=> array('mnevoid'),
+		'indexes' 		=> array(
+      		'nid' 		=> array('nid')),
+	);
+
+	return $schema;*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+		/*$code_default = "";
+	$types = node_get_types();
+	foreach($types as $t) {
+		$cols = "curr_type, ";
+		$vals = "'".$t->type."', ";
+		foreach($types as $t2) {
+			$cols .= $t2->type.", ";
+			$vals .= "'".$code_default."', ";
+		}
+
+		db_query("INSERT INTO {mnevolution_scripts} " .
+				"(".substr($cols, 0, -2).") VALUES " .
+				"(".substr($vals, 0, -2).")");
+	}*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*$vals = array();
+	$cols = "";
+	$ct = $form_state['values']['curr_type'];
+	foreach(node_get_types() as $type) {
+		if($type->type != $ct) {
+			$fs_name = $ct . "_to_" . $type->type;
+			$cols .= $type->type . " = '%s', ";
+			$vals[] = $form_state['values'][$type->type."_evolution"];
+		}
+	}
+	$vals[] = $ct;
+
+	db_query("UPDATE {mnevolution_scripts} SET ".substr($cols, 0, -2)
+		." WHERE curr_type = '%s'", $vals);
+	if(db_affected_rows())
+		drupal_set_message(t("Evolution scripts have been updated."));*/
+
+
+
+
+
+
+
+
+
+
+		$q = db_query("SELECT m.*, n.title, n.created, n.type " .
+			"FROM {mnevolution} m LEFT JOIN {node} n ON n.nid = m.nid");
+	$types = node_get_types();
+
+	$headers = array('Title', 'Type', 'New Type', 'Evolution Time');
+	$data = array();
+
+	while($row = db_fetch_array($q)) {
+		$evo_data = _mnevolution_next_evolution($row, node_load($row['nid']));
+		if($evo_data[1] == -1)
+			continue;
+
+		$data[] = array($row['title'], $types[$row['type']]->name,
+			$types[$evo_data[0]]->name, date("r",
+			$row['created']+$evo_data[1]));
+	}
+
+	if(count($data))
+		return theme_table($headers, $data);
+
+	return "<p>No upcoming evolutions to report.</p>";

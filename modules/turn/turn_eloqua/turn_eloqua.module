@@ -1,0 +1,344 @@
+<?php
+
+function turn_eloqua_menu() {
+  //set menu item array values for eloqua webform confirmation pages
+  $base_menu_array = array(
+    'page callback' => '_turn_eloqua_confirmation',
+    'access arguments' => array("access content"),
+    'type' => MENU_CALLBACK,
+    'title callback' => 't',
+    'title arguments' => array()
+  );
+  
+  $form_query = db_select('webform', 'w');
+  $form_query->join('node', 'n', 'n.nid = w.nid');
+  $form_query->fields('w', array('redirect_url', 'nid'))
+    ->fields('n', array('title'))
+    ->condition('n.type', 'webform')
+    ->condition('n.language', 'en')
+    ->condition('n.status', 1)
+    ->condition('w.redirect_url', array('<confirmation>', '<none>', ''), 'NOT IN')
+    ->condition('w.status', 1);
+  $result = $form_query->execute();
+  foreach($result as $form){
+    if(!url_is_external($form->redirect_url, TRUE)){
+      $items[$form->redirect_url] = $base_menu_array;
+      $items[$form->redirect_url]['page arguments'] = array(node_load($form->nid));
+      $items[$form->redirect_url]['title'] = $form->title.' - '.t('Confirmation');
+    }
+  }
+  $items['pdf_download/%turn_eloqua_pdf'] = array(
+    'page callback' => 'turn_eloqua_pdf_download',
+    'page arguments' => array(1),
+    'access arguments' => array("access content"),
+    'title arguments' => array(1)
+  );
+  return $items;
+}
+
+function turn_eloqua_pdf_load($pdf) {
+  if (file_exists('public://'.$pdf)) {
+    return $pdf;
+  }else return false;
+}
+
+function turn_eloqua_init(){
+  drupal_add_js(drupal_get_path('module', 'turn_gating') .'/eloqua_example/js/elq_tracking-1.0-min.js', array('every_page' => TRUE));
+  drupal_add_js(drupal_get_path('module', 'turn_eloqua') .'/turn_eloqua_page_tracking.js', array('every_page' => TRUE));
+}
+
+function turn_eloqua_pdf_download($pdf){
+  header('Content-Disposition: attachment; filename='.$pdf);
+  header('Content-type: application/pdf');
+  readfile($_SERVER['DOCUMENT_ROOT'].base_path().'sites/default/files/'.$pdf);
+  die();
+}
+
+function turn_eloqua_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['#node']) && $form['#node']->type == 'webform' && $form_id != 'webform_components_form') {
+    //drupal_add_js(drupal_get_path('module', 'turn_eloqua') .'/turn_eloqua_page_tracking.js');
+    //drupal_add_js(drupal_get_path('module', 'turn_eloqua') .'/turn_eloqua_customer_guid.js'); // moved to _page_tracking js
+    drupal_add_js(drupal_get_path('module', 'turn_eloqua') .'/turn_eloqua_set_cookie_fields.js');
+    
+    $form['#submit'][] = 'turn_eloqua_submit_eloqua';
+    $form['#attributes']['name'] = 'eloqua_form';
+  }
+  
+	// also careers?
+	if( $form['#form_id'] == 'views_exposed_form' )  {
+		if ( is_object($form_state['view']) ) {
+			if ( $form_state['view']->name == 'career_detail_pages') { 
+				$form['submit']['#value'] = t('submit');
+				$form['submit']['#type'] = 'image_button';
+				$form['submit']['#src'] = base_path() . drupal_get_path('theme', 'turn') .'/images/career-search-sub.gif';
+			}
+		}
+	}
+}
+
+/**
+* Submit handler for Webform
+*/
+function turn_eloqua_submit_eloqua(&$form, &$form_state) {
+  global $user;
+  if(isset($form['submitted']['eloqua_contact_form_handling']) || in_array($form['#node']->nid, array(24, 26, 3641)) || ($form['#node']->tnid && in_array($form['#node']->tnid, array(24, 26, 3641)))){
+    if(!empty($form['#node']->tnid)){
+      $english_form = node_load($form['#node']->tnid);
+    }else{
+      $english_form = $form['#node'];
+    }
+    $english_options = array();
+    foreach($english_form->webform['components'] as $c){
+      if(isset($c['extra']['items'])){
+        $english_options[$c['form_key']] = _webform_select_options_from_text($c['extra']['items'], TRUE);
+      }
+    }
+    //send data to Eloqua
+	if ( in_array($form['#node']->nid, array(3641)) || ($form['#node']->tnid && in_array($form['#node']->tnid, array(3641))) ) {
+		// new strategicPartner form
+
+//		if ( function_exists('watchdog') ) watchdog('eloqua_submit', 'nid '. $form['#node']->nid .' <br /><pre>'. print_r($form['submitted'],true) .'</pre>');
+
+		$eloqua_data = array(
+		  'partnerType' => $form['submitted']['personal']['partnerType']['#value'],
+		  'firstName' => $form['submitted']['personal']['first_name']['#value'],
+		  'lastName' => $form['submitted']['personal']['last_name']['#value'],
+		  'emailAddress' => $form['submitted']['personal']['email']['#value'],
+		  'businessPhone' => $form['submitted']['personal']['phone']['#value'],
+		  'address' => $form['submitted']['personal']['address']['#value'],
+		  'country' => $form['submitted']['personal']['country']['#options'][$form['submitted']['personal']['country']['#value']],
+		  'stateOrProvince' => $form['submitted']['personal']['state_province_region']['#value'],
+		  'zipCode' => $form['submitted']['personal']['zip_code']['#value'],
+		  'company' => $form['submitted']['company_fieldset']['company']['#value'],
+		  'industry' => $form['submitted']['company_fieldset']['industry']['#options'][$form['submitted']['company_fieldset']['industry']['#value']],
+		  'revenue' => $form['submitted']['company_fieldset']['revenue']['#options'][$form['submitted']['company_fieldset']['revenue']['#value']],
+		  'numberOfEmployees' => $form['submitted']['company_fieldset']['numberOfEmployees']['#options'][$form['submitted']['company_fieldset']['numberOfEmployees']['#value']],
+		  'companyType' => $form['submitted']['company_fieldset']['company_type']['#options'][$form['submitted']['company_fieldset']['company_type']['#value']],
+		  'product/SolutionOfInterest' => $form['submitted']['company_fieldset']['productOfInterest']['#options'][$form['submitted']['company_fieldset']['productOfInterest']['#value']],
+		  'numberOfCustomers' => $form['submitted']['company_fieldset']['numberOfCustomers']['#options'][$form['submitted']['company_fieldset']['numberOfCustomers']['#value']],
+		  'businessModel' => $form['submitted']['company_fieldset']['businessModel']['#options'][$form['submitted']['company_fieldset']['businessModel']['#value']],
+		  'salesRequest' => $form['submitted']['sales_request']['#value'],
+		  'turnNews' => !empty($form['submitted']['subscribe_turn_news']['#value']),
+		  'elqFormName' => $form['submitted']['elqformname']['#value'],
+		  'elqSiteID' => $form['submitted']['elqsiteid']['#value'],
+		  'elqCustomerGUID' => $form['submitted']['elqcustomerguid']['#value'],
+		  'elqCookieWrite' => $form['submitted']['elqcookiewrite']['#value'],
+		  'CmpID' => $form['submitted']['cmpid']['#value'],
+		  'IntCmpID' => $form['submitted']['intcmpid']['#value'],
+		  'RetouchCmpID' => $form['submitted']['retouchcmpid']['#value'],
+		  'TurnUserID' => $form['submitted']['turnuserid']['#value'],
+		);
+	} else {
+		$eloqua_data = array(
+		  'firstName' => $form['submitted']['personal']['first_name']['#value'],
+		  'lastName' => $form['submitted']['personal']['last_name']['#value'],
+		  'emailAddress' => $form['submitted']['personal']['email']['#value'],
+		  'businessPhone' => $form['submitted']['personal']['phone']['#value'],
+		  'country' => $form['submitted']['personal']['country']['#options'][$form['submitted']['personal']['country']['#value']],
+		  'stateOrProvince' => $form['submitted']['personal']['state_province_region']['#value'],
+		  'company' => $form['submitted']['company_fieldset']['company']['#value'],
+		  'industry' => $english_options['industry'][$form['submitted']['company_fieldset']['industry']['#value']],
+		  'jobRank' => $english_options['job_rank'][$form['submitted']['company_fieldset']['job_rank']['#value']],
+		  'department' => $english_options['department'][$form['submitted']['company_fieldset']['department']['#value']],
+		  'companyType' => $english_options['company_type'][$form['submitted']['company_fieldset']['company_type']['#value']],
+		  'salesRequest' => $form['submitted']['sales_request']['#value'],
+		  'turnNews' => !empty($form['submitted']['subscribe_turn_news']['#value']),
+		  'elqFormName' => $form['submitted']['elqformname']['#value'],
+		  'elqSiteID' => $form['submitted']['elqsiteid']['#value'],
+		  'elqCustomerGUID' => $form['submitted']['elqcustomerguid']['#value'],
+		  'elqCookieWrite' => $form['submitted']['elqcookiewrite']['#value'],
+		  'CmpID' => $form['submitted']['cmpid']['#value'],
+		  'IntCmpID' => $form['submitted']['intcmpid']['#value'],
+		  'RetouchCmpID' => $form['submitted']['retouchcmpid']['#value'],
+		  'TurnUserID' => $form['submitted']['turnuserid']['#value'],
+		);
+	}
+//	if ( function_exists('watchdog') ) watchdog('eloqua_submit', 'nid '. $form['#node']->nid .' <br /><pre>'. print_r($eloqua_data,true) .'</pre>');
+	
+    if(isset($form['submitted']['elqcampaignid']) && isset($form['submitted']['elqcampaignid']['#value'])){
+        $eloqua_data['elqcampaignid'] = $form['submitted']['elqcampaignid']['#value'];
+    }
+    //redirect to confirmation page without sid get variable
+    if(isset($form['#node']->webform['redirect_url']) && drupal_valid_path($form['#node']->webform['redirect_url'])){
+      $form_state['redirect'] = $form['#node']->webform['redirect_url'];
+    }
+  }elseif(isset($form['submitted']['eloqua_contact_form_handling']) || in_array($form['#node']->nid, array(2407, 2727)) || ($form['#node']->tnid && in_array($form['#node']->tnid, array(2407, 2727)))){
+    //Impressions for Good form
+    if(!empty($form['#node']->tnid)){
+      $english_form = node_load($form['#node']->tnid);
+    }else{
+      $english_form = $form['#node'];
+    }
+    $english_options = array();
+    foreach($english_form->webform['components'] as $c){
+      if(isset($c['extra']['items'])){
+        $english_options[$c['form_key']] = _webform_select_options_from_text($c['extra']['items'], TRUE);
+      }
+    }
+    
+    $additional_information = '';
+    $additional_info_array = array(
+		$form['submitted']['company_fieldset']['organization_registered']['#title'] => $english_options['organization_registered'][$form['submitted']['company_fieldset']['organization_registered']['#value']],
+		$form['submitted']['company_fieldset']['if_yes_enter_charity_commission_or_status']['#title'] => $english_options['organization_registered'][$form['submitted']['company_fieldset']['if_yes_enter_charity_commission_or_status']['#value']],
+		$form['submitted']['company_fieldset']['does_your_organization_have_a_nationwide_reach']['#title'] => $english_options['does_your_organization_have_a_nationwide_reach'][$form['submitted']['company_fieldset']['does_your_organization_have_a_nationwide_reach']['#value']],
+		$form['submitted']['campaign_fieldset']['is_your_campaign_ready_for_launch']['#title'] => $form['submitted']['campaign_fieldset']['is_your_campaign_ready_for_launch']['#options'][$form['submitted']['campaign_fieldset']['is_your_campaign_ready_for_launch']['#value']],
+		$form['submitted']['campaign_fieldset']['ad_specifications']['iab_standard_ad_sizes_160x600_300x250_728x90']['#title'] => $form['submitted']['campaign_fieldset']['ad_specifications']['iab_standard_ad_sizes_160x600_300x250_728x90']['#options'][$form['submitted']['campaign_fieldset']['ad_specifications']['iab_standard_ad_sizes_160x600_300x250_728x90']['#value']],
+		$form['submitted']['campaign_fieldset']['ad_specifications']['30k_maximum_ad_file_size']['#title'] => $form['submitted']['campaign_fieldset']['ad_specifications']['30k_maximum_ad_file_size']['#options'][$form['submitted']['campaign_fieldset']['ad_specifications']['30k_maximum_ad_file_size']['#value']],
+		$form['submitted']['campaign_fieldset']['ad_specifications']['static_jpegs_or_gifs']['#title'] => $form['submitted']['campaign_fieldset']['ad_specifications']['static_jpegs_or_gifs']['#options'][$form['submitted']['campaign_fieldset']['ad_specifications']['static_jpegs_or_gifs']['#value']],
+		$form['submitted']['additional_information']['#title'] => $form['submitted']['additional_information']['#value']
+	);
+    foreach($additional_info_array as $title => $value){
+      $additional_information .= $title."\n".$value."\n\n";
+    }
+    
+	//removed: 
+    $eloqua_data = array(
+      'name_of_organization' => $form['submitted']['company_fieldset']['name_of_organization']['#value'],
+      'organization_website' => $form['submitted']['company_fieldset']['organization_website']['#value'],
+	  'organization_registered' => $form['submitted']['company_fieldset']['organization_registered']['#value'],
+	  'if_yes_enter_charity_commission_or_status' => $form['submitted']['company_fieldset']['if_yes_enter_charity_commission_or_status']['#value'],
+	  'does_your_organization_have_a_nationwide_reach' => $form['submitted']['company_fieldset']['does_your_organization_have_a_nationwide_reach']['#value'],
+      'first_name' => $form['submitted']['personal_fieldset']['first_name']['#value'],
+      'last_name' => $form['submitted']['personal_fieldset']['last_name']['#value'],
+      'emailAddress' => $form['submitted']['personal_fieldset']['email']['#value'],
+      'phone' => $form['submitted']['personal_fieldset']['phone']['#value'],
+      'country' => $form['submitted']['personal_fieldset']['country']['#options'][$form['submitted']['personal_fieldset']['country']['#value']],
+      'state' => $form['submitted']['personal_fieldset']['state']['#options'][$form['submitted']['personal_fieldset']['state']['#value']],
+	  'is_your_campaign_ready_for_launch' => $form['submitted']['campaign_fieldset']['is_your_campaign_ready_for_launch']['#value'],
+	  'iab_standard_ad_sizes_160x600_300x250_728x90' => $form['submitted']['campaign_fieldset']['ad_specifications']['iab_standard_ad_sizes_160x600_300x250_728x90']['#value'],
+	  '30k_maximum_ad_file_size' => $form['submitted']['campaign_fieldset']['ad_specifications']['30k_maximum_ad_file_size']['#value'],
+	  'static_jpegs_or_gifs' => $form['submitted']['campaign_fieldset']['ad_specifications']['static_jpegs_or_gifs']['#value'],
+      'how_did_you_hear_about_us' => $form['submitted']['campaign_fieldset']['how_did_you_hear_about_us']['#options'][$form['submitted']['campaign_fieldset']['how_did_you_hear_about_us']['#value']],
+      'other' => $form['submitted']['campaign_fieldset']['other']['#value'],
+	  'additional_information' => $additional_information,
+      'elqFormName' => $form['submitted']['elqformname']['#value'],
+      'elqSiteID' => $form['submitted']['elqsiteid']['#value'],
+      'elqCustomerGUID' => $form['submitted']['elqcustomerguid']['#value'],
+      'elqCookieWrite' => $form['submitted']['elqcookiewrite']['#value'],
+	  'elqCGUID' => $form['submitted']['elqcustomerguid']['#value'],
+	  'elqCWrite' => $form['submitted']['elqcookiewrite']['#value']
+    );
+  }else{
+    $eloqua_data = array(
+      'emailAddress' => $form['submitted']['personal']['email']['#value'],
+      'elqFormName' => $form['submitted']['elqformname']['#value'],
+      'elqSiteID' => $form['submitted']['elqsiteid']['#value'],
+      'elqCustomerGUID' => $form['submitted']['elqcustomerguid']['#value'],
+      'elqCookieWrite' => $form['submitted']['elqcookiewrite']['#value'],
+      'TurnUserID' => $form['submitted']['turnuserid']['#value'],
+    );
+  }
+  if ( ( arg(2) == 'webform' ) && ( arg(3) == 'configure' ) ) {
+	  // shhhh
+  } else {
+		// check for gating...
+		$gcheck = strpos($form['#action'], 'destination=g/' );
+		if ( $gcheck ) {
+			// and then...
+			//watchdog('gcheck', $form['#action'] .' :: '. substr($form['#action'], $gcheck+14) );
+			
+			$eloqua_data['elqFormName'] = "Insights";
+			$eloqua_data['elqCookieWrite'] = "0";
+			$eloqua_data['CmpID'] = '70180000000SXmP'; //default salseforce campaign id (if download does not have a unique cmpid, this one should be used)
+			$eloqua_data['elqCampaignID'] = '274';
+ 
+ 			$yarg = substr($form['#action'], $gcheck+14);
+			//watchdog('gated', 'yarg '. $yarg);
+				
+			$nod = node_load($yarg);
+			if ( $nod != false ) {
+				//watchdog('gated no', '<pre>'. print_r($nod,true) .'</pre>');
+				if ( $nod->field_cmpid['und'][0]['value'] ) $eloqua_data['CmpID'] = $nod->field_cmpid['und'][0]['value'];
+				if ( $nod->field_eloqua_campaign_id['und'][0]['value'] ) $eloqua_data['elqCampaignID'] = $nod->field_eloqua_campaign_id['und'][0]['value'];
+			}
+			
+			if ( isset ( $form_state['values']['details']['sid'] ) ) {
+				setcookie( 't_tguk', $form_state['values']['details']['sid'],  time()+60*60*24*365, '/' );
+			}
+			/*
+			if ( function_exists('watchdog') ) {
+				watchdog('gated elq', '<pre>'. print_r($eloqua_data, true) .'</pre>');
+				watchdog('gated elq', 'FORM submission : '. $form_state['values']['details']['sid'] .'<br /><pre>'. print_r($form_state['values'], true) .'</pre>');
+			}
+			*/
+	  }
+	  
+	  
+	  
+	  if ( function_exists('curl_init') ) {
+		  $curl = curl_init();
+		  curl_setopt($curl, CURLOPT_URL, "http://now.eloqua.com/e/f2.aspx");
+		  curl_setopt($curl, CURLOPT_POST, true);
+		  curl_setopt($curl, CURLOPT_POSTFIELDS, $eloqua_data);
+		  curl_setopt($curl, CURLOPT_REFERER, $_SERVER['HTTP_REFERER']);
+		  $repsonse = curl_exec($curl);
+		  curl_close($curl);
+	  }
+  }
+}
+
+function _turn_eloqua_confirmation($node) {
+	global $language;
+	
+  $breadcrumb = drupal_get_breadcrumb();
+  array_pop($breadcrumb);
+  
+  $tnode = $node;
+  if ( $tnode->language != $language->language ) {
+	  // fix
+	  $nid = db_select('node', 'n')
+	  	->condition('n.type', 'webform')
+		->condition('n.tnid', $node->tnid)
+		->condition('n.status', 1)
+		->condition('n.language', $language->language)
+		->fields('n', array('nid'))
+		->execute()
+		->fetchField();
+	if($nid !== FALSE) {
+		$tnode = node_load($nid);
+	}
+  }
+  
+  $breadcrumb[] = l($tnode->title, 'node/' . $tnode->nid);
+  $breadcrumb[] = t('Confirmation');
+  drupal_set_breadcrumb($breadcrumb);
+  
+  //watchdog('elqconf', 'our lang : '. $language->language .' <br />node : <pre>'. print_r($node,true) .'</pre><br />tnode : <pre>'. print_r($tnode,true) .'</pre>');
+  
+  return theme('turn_eloqua_webform_confirmation', array('node' => $tnode));
+}
+
+/**
+ * Implements hook_theme().
+ */
+function turn_eloqua_theme() {
+  $theme = array(
+    'turn_eloqua_webform_confirmation' => array(
+      'variables' => array('node' => NULL),
+      'template' => 'templates/turn-eloqua-webform-confirmation'
+    )
+  );
+  return $theme;
+}
+
+function template_preprocess_turn_eloqua_webform_confirmation(&$vars) {
+  //get confirmation message
+  // Strip out empty tags added by WYSIWYG editors if needed.
+  $confirmation = check_markup($vars['node']->webform['confirmation'], $vars['node']->webform['confirmation_format'], '', TRUE);
+  if(strlen(trim(strip_tags($confirmation)))){
+    //check if the confirmation message is in the drupal message queue.  Remove it if it is.
+    $msg = drupal_get_messages('status');
+    if(isset($msg['status'])){
+      $confirm_key = array_search($confirmation, $msg['status']);
+      if($confirm_key !== FALSE){
+        unset($msg['status'][$confirm_key]);
+      }
+      foreach($msg['status'] as $m){
+        drupal_set_message($m, 'status', TRUE);
+      }
+    }
+    $vars['confirmation_message'] = $confirmation;
+  }else{
+    $vars['confirmation_message'] = '';
+  }
+}

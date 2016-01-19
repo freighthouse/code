@@ -1,0 +1,151 @@
+<?php
+function mnihelper_menu() {
+  $items = array();
+
+  $items['start-translation/%node'] = array(
+    'title' => 'translation',
+    'description' => 'Start Translation',
+    'page callback' => 'mnihelper_start_translation',
+    'page arguments' => array(1),
+    //'access callback' => 'node_access',
+    //'access arguments' => array('view', 1),
+    'access callback' => 'mnihelper_access',
+    'access arguments' => array('translate'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['start-editing/%node'] = array(
+    'title' => 'editing',
+    'description' => 'Start Editing',
+    'page callback' => 'mnihelper_start_editing',
+    'page arguments' => array(1),
+    //'access callback' => 'node_access',
+    //'access arguments' => array('update', 1),
+    'access callback' => 'mnihelper_access',
+    'access arguments' => array('edit'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['remove-duplicates'] = array(
+    'title' => 'remove duplicates',
+    'description' => 'Remove Duplicates',
+    'page callback' => 'mnihelper_remove_duplicates',
+    'access arguments' => array('administer users'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function mnihelper_access($mode) {
+	if($mode == 'translate')
+		return user_access('start translating');
+	else if($mode == 'edit')
+		return user_access('start editing');
+	return false;
+}
+
+function mnihelper_perm() {
+	return array('start translating', 'start editing');
+}
+
+function mnihelper_remove_duplicates() {
+  $term_tree = taxonomy_get_tree(3);
+  $titles = array();
+  $duplicates = array();
+  foreach($term_tree as $term) {
+    if(!in_array($term->name, $titles)) {
+      $titles[] = $term->name;
+    } else {
+      taxonomy_del_term($term->tid);
+    }
+  }
+  return '<pre>' . print_r(taxonomy_get_tree(3), 1) . '</pre>';
+}
+
+function mnihelper_start_translation($node) {
+  global $user;
+  rules_invoke_event('mnihelper_translation_started', $user, $node);
+  drupal_goto('node/' . $node->nid . '/edit');
+}
+
+function mnihelper_start_editing($node) {
+  global $user;
+  rules_invoke_event('mnihelper_editing_started', $user, $node);
+  drupal_goto('node/' . $node->nid . '/edit');
+}
+
+/**
+* Implementation of hook_rules_event_info().
+* @ingroup rules
+*/
+function mnihelper_rules_event_info() {
+  return array(
+    'mnihelper_translation_started' => array(
+      'label' => t('Translation was begun on a node'),
+      'module' => 'mnihelper',
+      'arguments' => array(
+        'acting_user' => array(
+			'type' => 'user',
+			'label' => t('The translator who initiated the translation.')),
+        'node' => array(
+			'type' => 'node', 'label' => t('The node being translated.')),
+      ),
+    ),
+    'mnihelper_editing_started' => array(
+      'label' => t('Editing was begun on a node'),
+      'module' => 'mnihelper',
+      'arguments' => array(
+        'acting_user' => array(
+			'type' => 'user',
+			'label' => t('The editor who initiated the editing')),
+        'node' => array(
+			'type' => 'node', 'label' => t('The node being edited')),
+      ),
+    ),
+  );
+}
+
+/**
+* Implementation of hook_action_info().
+*/
+function mnihelper_action_info() {
+ return array(
+    'mnihelper_deploy_to_mni_feed_action' => array(
+      'description' => t('Deploy node to the MNI feed(s)'),
+      'type' => 'node',
+      'configurable' => FALSE,
+      'hooks' => array(
+        'nodeapi' => array('presave', 'delete', 'insert', 'update', 'view'),
+      ),
+    ),
+  );
+}
+
+function mnihelper_deploy_to_mni_feed_action(&$object, $context = array()) {
+  if (isset($object->nid)) {
+    $nid = $object->nid;
+  }
+  elseif (isset($context['nid'])) {
+    $nid = $context['nid'];
+  }
+
+  if($nid) {
+    $node = node_load($nid);
+    //Processing!!!
+    watchdog('action', 'Added node ID %nid to the MNI feed.',
+    	array('%nid' => check_plain($node->nid)));
+  }
+}
+
+function mnihelper_form_user_login_block_alter(&$form, &$form_state) {
+	$c = '<div class="item-list">'.
+		'<ul><li class="first last">'.
+		'<a href="register">'.
+		'<input type="button" value="Free Trial" class="form-submit"/>'.
+		//'<a href="register">Free Trial</a>' . // Keeps our language prefix
+		//l('Free Trial', 'en/register').
+		'</a></li></ul></div>';
+
+	$form['links'] = array(
+		'#value' => $c
+	);
+}

@@ -1,0 +1,4 @@
+name = Turn Ooyala embedded
+description = alter node content if ooyala keyword video in node
+package = Custom Turn Modules
+core = 7.x

@@ -1,0 +1,6 @@
+# @author Jeremy Cerda
+# @version $Id:$
+
+NEWSMAP_DB_NAME='mninews'
+NEWSMAP_DB_USER='mninews'
+NEWSMAP_DB_PASS='@zsh@r@.'

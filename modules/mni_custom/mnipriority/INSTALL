@@ -1,0 +1,45 @@
+DESCRIPTION
+-----------
+This module creates a column in the stories queue which displays the priority
+status of an item marked for translation.
+
+INSTALLATION
+------------
+# cd [SITEROOT]/sites/all/modules/
+# svn checkout http://10.1.1.40/svn/jcerda/mni6/sites/all/modules/mnipriority
+
+Enable the MNI Priority module: Administer > Site building > Modules
+  (admin/build/modules)
+
+Run 'atrader.sh' to generate the atrader.js file
+# [SITEROOT]/sites/all/modules/mnipriority/atrader.sh
+
+RUN PREPPERM.SH
+---------------
+# [SITEROOT]/bin/prepperm.sh
+
+CONFIGURATION
+-------------
+Navigate to the block admin page: Administer > Site building > Blocks
+  (admin/build/block)
+
+Assign the 'MNI Priority' block to any region in the theme.
+
+Save your settings.
+
+On the same page (admin/build/block), click on the 'configure' link found to the
+right of the 'MNI Priority' block located in the region that you previously
+specified.
+
+On the 'MNI Priority' block configuration page, under the 'PAGE SPECIFIC
+VISIBILITY SETTINGS', select 'Show on only the listed pages'.
+
+In the 'Pages' field, input the paths which you want the funtionality to appear.
+Enter one page per line as Drupal paths. The '*' character is a wildcard.
+The current setting is input as follows:
+
+translate
+edit
+manage
+
+Save the block.

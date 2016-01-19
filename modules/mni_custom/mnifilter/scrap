@@ -1,0 +1,14 @@
+#################################
+  Original Post Chunk Stuff
+#################################
+ // Put the top bylines and dashlines in a single paragraph
+ $r = '/(?<=(<\/span>))<\/p>[\n\s]*<p>'.
+ 	'((?=(<span class="byline"))|'.
+ 	'(?=(<span class="dashline")))/';
+ $output = preg_replace($r,"", $output);
+ 
+ // If no bylines or dashlines, add space p anyway
+ if(!preg_match('/^<p><span/', $output))
+   $output = '<p class="mni-space"><span class="space"></span></p>'.$output;
+ else
+   $output = substr_replace($output, '<p class="mni-space">', 0, 3);

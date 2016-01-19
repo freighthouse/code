@@ -1,0 +1,10 @@
+This readme describes key concepts for the mncoremetrics module.
+
+###############################################################################
+  Dynamic vs. Versioned Configuration
+###############################################################################
+
+Configuration options for mncoremetrics can be loaded one of two ways. By
+default they are loaded from the mncoremetrics.cfg file, so that version control
+can be used to manage these. The other option, is to disable this in the
+admin screen, and load them dynamically via the administration screens.

@@ -1,0 +1,42 @@
+<?php
+function apigee_docs_vote_alter_vote_source($vote_source)
+{
+  $session_id = '';
+  if (!isset($_COOKIE['session_api_session']) || !$_COOKIE['session_api_session']) {
+      $cookie_domain = ini_get('session.cookie_domain');
+      //Creates a dummy cookie with fast expiration, to prevent session api from assuming the cookies are disabled
+      setcookie('foo', 'foo', REQUEST_TIME + 10, '/', $cookie_domain);
+      $_COOKIE["foo"] = 'foo';
+      //Calls session_api_get_sid for the first time, and then reads the session_id value recently stored in the database
+      $sid = session_api_get_sid(TRUE);
+      $session_id = db_select('session_api', 's')
+         ->condition('s.sid', $sid)
+         ->fields('s', array('session_id'))
+         ->execute()
+         ->fetchField();
+       $_COOKIE["session_api_session"] = $session_id;
+  }
+  else {
+      $session_id = $_COOKIE["session_api_session"];
+  }
+  return $vote_source.':'.$session_id;
+}
+function apigee_docs_vote_votingapi_storage_add_vote(&$vote) {
+  if(isset($vote['vote_source'])) {
+    $vote['vote_source'] = apigee_docs_vote_alter_vote_source($vote['vote_source']);
+    // dpm($vote['vote_source']);
+  }
+  drupal_write_record('votingapi_vote', $vote);
+}
+function apigee_docs_vote_votingapi_storage_delete_votes($votes, $vids) {
+   votingapi_votingapi_storage_delete_votes($votes, $vids);
+}
+function apigee_docs_vote_votingapi_storage_select_votes($criteria, $limit) {
+   if(isset($criteria['vote_source'])) {
+      $criteria['vote_source'] = apigee_docs_vote_alter_vote_source($criteria['vote_source']);
+   }
+   return votingapi_votingapi_storage_select_votes($criteria, $limit);
+}
+function apigee_docs_vote_votingapi_storage_standard_results($entity_id, $entity) {
+   return votingapi_votingapi_storage_standard_results($entity_id, $entity);
+}

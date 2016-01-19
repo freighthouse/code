@@ -1,0 +1,5 @@
+name = IHA Misc Functions
+description = Additional functionality for IHA.org
+core = 7.x
+
+files[] = iha_misc_functions.module

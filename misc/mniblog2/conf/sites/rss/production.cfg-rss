@@ -1,0 +1,63 @@
+# @author Jeremy Cerda
+# @version $Id: production.cfg-rss 3284 2012-03-09 20:03:16Z jcerda $
+
+The FX Spot                        	F-ETRENC   	-1	1	0.0	none	    QUICK
+Latam Watch                        	F-LAWTCH   	-1	1	0.0	none	    QUICK
+Fed State of Play                  	F-BULWC3   	-1	1	0.0	none	    QUICK
+ECB Update                         	F-TOPSTY   	-1	1	0.0	none	    QUICK
+BOJ State of Play                  	F-GEISHI   	-1	1	0.0	none	    QUICK
+ECB State of Play                  	F-BUNPLY   	-1	1	0.0	none	    QUICK
+Reality Check                      	F-MNREAL   	-1	1	0.0	none	    QUICK
+Reality Check                      	MABRC$     	-1	1	0.0	none	    QUICK
+Reality Check                      	MAJRC$     	-1	1	0.0	none	    QUICK
+Reality Check                      	MAQRC$     	-1	1	0.0	none	    QUICK
+Reality Check                      	MAURC$     	-1	1	0.0	none	    QUICK
+Reality Check                      	MAURC$     	-1	1	0.0	none	    QUICK
+Reality Check                      	MAXRC$     	-1	1	0.0	none	    QUICK
+MNI China Business Sentiment Survey	MDQCB$     	-1	1	0.0	none	    QUICK
+Portfolios                         	F-MNPORT   	-1	1	0.0	none	    QUICK
+Talk from the Trenches             	F-TRENCH   	-1	1	0.0	none	    QUICK
+Corporate Bond Chatter             	F-AWATCH   	-1	1	0.0	none	    QUICK
+Corporate Bond Chatter             	F-DATWTC   	-1	1	0.0	none	    QUICK
+Credit Default Swaps               	F-GILTS0   	-1	1	0.0	none	    QUICK
+US Interest Rate Swaps             	F-USREPO   	-1	1	0.0	none	    QUICK
+Exclusives                         	MX$$$$     	-1	1	0.0	none	    QUICK
+
+US Data Tables                     	MAUDT$     	0	0	0.0	txttbl	    SLOW
+Tabular Data                     	MTABLE     	0	0	0.0	txttbl	    SLOW
+
+# NO LAG
+
+FX Features              	M$$FX$     	0	0	0.0	foreignexchange frontpage fxfeatures
+Latin America            	M$T$$$     	0	0	0.0	latinamerica frontpage
+Canada                   	M$C$$$     	0	0	0.0	northamerica frontpage canada
+CongressWatch            	F=CAPWTC   	0	0	0.0	northamerica frontpage uscongress
+FX Market Updates        	F=FXDOLU   	0	0	0.0	foreignexchange northamerica frontpage fxupdatenorthamerica
+FX Market Updates        	F=FXEURU   	0	0	0.0	foreignexchange europe frontpage fxupdateeurope
+MNI Capital Goods Index  	MDUCG$     	0	0	0.0	macroeconomy northamerica  frontpage capitalgoods
+MNI Retail Trade Index   	MDURE$     	0	0	0.0	macroeconomy northamerica frontpage retailsales
+
+# TEN MINUTES
+
+Economic Data Stories    	MAUDS$     	600	0	0.0	macroeconomy northamerica frontpage usdata
+Economic Data Stories    	M$XDS$     	600	0	0.0	macroeconomy europe frontpage europedata
+Economic Data Stories    	MAMDS$     	600	0	0.0	macroeconomy latinamerica frontpage latamdata
+Economic Data Stories    	MABDS$     	600	0	0.0	macroeconomy europe frontpage ukdata
+Economic Data Stories    	MAQDS$     	600	0	0.0	macroeconomy china frontpage chinadata asia
+Economic Data Stories    	MAJDS$     	600	0	0.0	macroeconomy japan frontpage japandata asia
+Economic Data Stories    	MACDS$     	600	0	0.0	macroeconomy northamerica frontpage canadadata
+US Government Policy     	MFU$$$     	600	0	0.0	northamerica governmentpolicy frontpage usgov
+US Government Policy     	MGU$$$     	600	0	0.0	northamerica governmentpolicy frontpage usgov
+UK Government Policy     	MGB$$$     	600	0	0.0	governmentpolicy frontpage ukgov
+Eurozone Gov't Policy    	MGX$$$     	600	0	0.0	europe governmentpolicy frontpage eurogov
+China Gov't Policy       	MGQ$$$     	600	0	0.0	foreignexchange china governmentpolicy frontpage chinagov asia
+Japan Gov't Policy       	MGJ$$$     	600	0	0.0	foreignexchange japan governmentpolicy frontpage japangov asia
+Top News Stories           	MT$$$$    	600	0	0.0	mainwirealacarte topnewsstories mainwirep frontpage
+
+# TWENTY MINUTES
+
+Federal Reserve          	MMUFE$     	1200	0	0.0	centralbanks northamerica frontpage federalreserve
+ECB Stories              	M$$EC$     	1200	0	0.0	centralbanks europe frontpage ecb europeancentralbank
+BOJ Stories              	MMJBJ$     	1200	0	0.0	centralbanks japan frontpage boj asia
+BOE Stories              	M$$BE$     	1200	0	0.0	centralbanks europe frontpage boe
+PBOC Stories             	MMQPB$     	1200	0	0.0	centralbanks china frontpage pboc asia peoplesbankofchina

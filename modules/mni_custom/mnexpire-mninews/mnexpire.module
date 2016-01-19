@@ -1,0 +1,261 @@
+<?php
+
+//------------------------------------------------------------------------------
+//  Menu and Path Control
+//------------------------------------------------------------------------------
+function mnexpire_menu() {
+	$items = array();
+
+	$items['admin/settings/mnexpire/expirations'] = array(
+		'title' => 'Upcoming Expirations',
+		'description' => 'View upcoming expirations.',
+		'page callback' => 'mnexpire_admin_expirations',
+		'access arguments' => array('view mni node expirations'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mnexpire.admin.inc'
+	);
+
+	$items['admin/settings/mnexpire'] = array(
+		'title' => 'MNI Expiration Settings',
+		'description' => 'Administer settings for how and when Nodes will ' .
+				'change Node types.',
+		'page callback' => 'mnexpire_admin_main',
+		'access arguments' => array('administer mni node expirations'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mnexpire.admin.inc'
+	);
+
+	return $items;
+}
+
+//------------------------------------------------------------------------------
+//  The CRON!
+//------------------------------------------------------------------------------
+function mnexpire_cron()
+{
+	global $user;
+	$orig_user = $user;
+	$old_state = session_save_session();
+	session_save_session(false);
+	$user = user_load(1);
+
+	$q = "SELECT m.nid FROM {mnexpire} m ".
+		"LEFT JOIN {node} n ON n.nid = m.nid ".
+		"WHERE (n.created + m.time_to_exp) < UNIX_TIMESTAMP(NOW())";
+	$results = db_query($q);
+	while($row = db_fetch_array($results)) {
+
+		$node = node_load($row['nid']);
+		
+		if (module_exists('rules')) {
+			rules_invoke_event('mnexpire_event_prior_to_expiration',
+				$node);
+		}
+		
+		$exp_method = variable_get('mnexpire_expire_action_'.$node->type, 0);
+		$exp_method_name = null;
+		$result = -1;
+		if($exp_method == 2 && module_exists('workflow')) {
+			$sid = variable_get('mnexpire_workflow_cfg_state_'.$node->type, 0);
+			$force = variable_get('mnexpire_workflow_cfg_force_'.
+				$node->type, 0);
+			$result = _mnexpire_expire_workflow($node, $sid, $force);
+			$exp_method_name = "workflow";
+		} elseif($exp_method == 1) {
+			$result = _mnexpire_expire_delete($node);
+			$exp_method_name = "delete"; 
+		} else {
+			$result = _mnexpire_expire_status($node);
+			$exp_method_name = "status";
+		}
+		
+		if($result) {
+			watchdog("mnexpire", 'Node expired (@nid, @title) using '
+			.'@method.', array("@nid"=>$node->nid,"@title"=>$node->title,
+			"@method"=>$exp_method_name), WATCHDOG_INFO);
+			_mnexpire_node_remove($node->nid);
+		}
+		
+	}
+
+	$user = $orig_user;
+	session_save_session($old_state);
+}
+
+function _mnexpire_expire_workflow($node, $sid, $force)
+{
+	$nsid = workflow_execute_transition($node, $sid, NULL, $force);
+	if($nsid != $sid) {
+		watchdog('mnexpire', "Error occured while expiring node. (workflow) ". 
+			"Will remain in expiration queue for retry. ".
+			"nid:%d time_to_exp:%d", array($node->nid, $node->time_to_exp),
+			WATCHDOG_ERROR);
+		return false;
+	}
+	return true;
+}
+
+function _mnexpire_expire_status($node)
+{
+	$node->status = 0;
+	node_save($node);
+	$n = node_load($node->nid, NULL, TRUE);
+	if ($n->status != 0) {
+		watchdog('mnexpire', "Error occured while expiring node. (status) ".
+			"Will remain in expiration queue for retry. ".
+			"nid:@nid time_to_pub:@pub status:@stat", 
+			array('@nid' => $n->nid, '@pub' => $n->time_to_pub,
+			'@stat' => $n->status),
+			WATCHDOG_ERROR);
+		return false;
+	}
+	return true;
+}
+
+function _mnexpire_expire_delete($node)
+{
+	node_delete($node->nid);
+	$n = node_load($row['nid'], NULL, TRUE);
+	if ($n) {
+		watchdog('mnexpire', "Error occured while expiring node. (delete) ".
+			"Will remain in expiration queue for retry. ".
+			"nid:%d time_to_exp:%d", array($node->nid, $node->time_to_exp),
+			WATCHDOG_ERROR);
+		return false;
+	}
+	return true;
+}
+
+//------------------------------------------------------------------------------
+//  Nodeapi, Database Control, and Expiration Data Loading
+//------------------------------------------------------------------------------
+function mnexpire_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL)
+{
+	switch($op)
+	{
+		case "insert":
+			if($node->nid)
+				_mnexpire_node_add($node);
+			break;
+		case "update":
+			if($node->nid)
+				_mnexpire_node_update($node);
+			break;
+		case "delete":
+			if($node->nid)
+				_mnexpire_node_remove($node->nid);
+			break;
+		case "load":
+			if($node->nid)
+				return _mnexpire_node_load(&$node);
+			break;
+	}
+}
+
+/**
+ * Handles removing a node from the mnexpire system
+ *
+ * nid - Node id of the record to delete
+ */
+function _mnexpire_node_remove($nid)
+{
+	$q = "DELETE FROM {mnexpire} WHERE nid = " . $nid;
+	db_query($q);
+	/*if(!db_affected_rows()) {
+		watchdog('mnexpire', "There was an error deleting " .
+			"expiration information. nid:%d", array($nid), WATCHDOG_ERROR);
+	}*/
+}
+
+/**
+ * Handles adding a new node to the system. Will not add a node with no
+ * expiration information
+ *
+ * node - Node object containing all necessary information
+ */
+function _mnexpire_node_add($node)
+{
+	$time_to_exp = $node->time_to_exp;
+	if($time_to_exp) {
+		$q = "INSERT INTO {mnexpire} (nid, time_to_exp) VALUES (%d, %d)";
+		db_query($q, $node->nid, $time_to_exp);
+		if(!db_affected_rows()) {
+			watchdog('mnexpire', "There was an error inserting " .
+				"expiration information. nid:%d time_to_exp:%d",
+				array($node->nid, $time_to_exp),
+				WATCHDOG_ERROR);
+		}
+	}
+}
+
+/**
+ * Handles updating a node's expiration information. If not in the system,
+ * will call insert function to handle. If mnexpire section empty, will
+ * call remove function to handle.
+ *
+ * node - Node object containing mnexpire array with necessary information
+ */
+function _mnexpire_node_update($node)
+{
+	$time_to_exp = $node->time_to_exp;
+	$results = db_query("SELECT * FROM {mnexpire} WHERE nid = " .
+		$node->nid);
+	if(db_affected_rows()) {
+		if($time_to_exp) {
+			$r = db_fetch_array($results);
+			if($time_to_exp != $r['time_to_exp']) {
+				// UPDATE TABLE
+				$q = db_query("UPDATE {mnexpire} SET time_to_exp = %d " .
+					"WHERE nid = %d", $time_to_exp, $node->nid);
+				if(!db_affected_rows()) {
+					watchdog('mnexpire', "There was an error " .
+						"updating expiration information. nid:%d " .
+						"time_to_exp:%d", array($node->nid,
+						$time_to_exp), WATCHDOG_ERROR);
+				}
+			}
+		} else {
+			_mnexpire_node_remove($node->nid);
+		}
+	} else {
+		_mnexpire_node_add($node);
+	}
+	
+	
+}
+
+/**
+ * Adds any relevant mnexpire data to a node object.
+ *
+ * node - Node object containing all necessary information
+ */
+function _mnexpire_node_load(&$node)
+{
+	$ret = array();
+	$results = db_query("SELECT time_to_exp FROM {mnexpire} ".
+		"WHERE nid = %d", $node->nid);
+	if(db_affected_rows()) {
+		$r = db_fetch_array($results);
+		$ret['time_to_exp'] = $r['time_to_exp'];
+	}
+
+	return $ret;
+}
+
+//------------------------------------------------------------------------------
+//  Actions, Rules, and Triggers
+//------------------------------------------------------------------------------
+function mnexpire_rules_event_info() {
+	return array(
+		'mnexpire_event_prior_to_expiration' => array(
+			'label' => t('Prior to Embargo Expiration'),
+			'module' => 'mnexpire',
+			'arguments' => array(
+				'node' => array(
+					'type' => 'node',
+					'label' => t('The node expiring.')
+				),
+			),
+	    ),
+	);
+}

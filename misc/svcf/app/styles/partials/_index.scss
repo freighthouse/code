@@ -1,0 +1,80 @@
+section.index {
+  position: absolute !important;
+  top: 0 !important;
+  width: 100%;
+  height: 100% !important;
+  background-color: $dark-green;
+  pointer-events: none;
+  z-index: 1;
+  .panel[data-id="description"] {
+    top: 50%;
+    display: block;
+    position: relative;
+    margin: 0 auto !important;
+    width: 100%;
+    max-width: 992px;
+    height: auto;
+    color: $white;
+    font: {
+      size: 15px;
+      weight: 200;
+    }
+    padding: 20px;
+    text-align: left;
+    cursor: pointer;
+    & > * {
+      color: inherit;
+    }
+    .btn {
+      transition: 0.17s linear transform;
+      transform: scale(1);
+      display: block;
+      margin: 0 auto;
+      width: 130px;
+      pointer-events: auto;
+      &.active,
+      &:focus {
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+    &:hover {
+      .btn {
+        transition: 0.17s linear transform;
+        transform: scale(1.07);
+      }
+    }
+  }
+}
+@media (min-width: $screen-md-min) {
+  section.index {
+    .panel[data-id="description"] {
+      margin-top: 0;
+      top: 0;
+      padding: $paddingMD;
+      font-size: 24px;
+    }
+  }
+}
+
+@media (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+  section.index {
+    .panel[data-id="description"] {
+      margin-top: 0;
+      top: 0;
+      padding: $paddingSM;
+      font-size: 20px;
+    }
+  }
+}
+
+@media (max-width: $screen-xs-max) {
+  section.index {
+    .panel[data-id="description"] {
+      margin-top: 0;
+      top: 0;
+      padding: $paddingXS;
+      font-size: 16px;
+    }
+  }
+}

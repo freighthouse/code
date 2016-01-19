@@ -1,0 +1,17 @@
+These are instructions for installing the mncronsafe module into a Drupal 6
+website.
+
+################################################################################
+  Quick Install
+################################################################################
+
+# cd /var/www/mninews/sites/all/modules
+# svn checkout http://10.1.1.40/svn/jcerda/sites/modules/mncronsafe
+# chown -R 1080:mninews mncronsafe
+
+// Go to:  admin/build/modules
+// Enable the "MNI Cron Safe" module
+
+// Should you want to adjust the primary ip address or add additional
+// modules to disable, please modify the file:
+//     /var/www/mninews/sites/all/modules/mncronsafe/production.cfg

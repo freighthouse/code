@@ -1,0 +1,4 @@
+name = Turn Translation Alerts
+description = Alert when content needs a new translation
+package = Custom Turn Modules
+core = 7.x

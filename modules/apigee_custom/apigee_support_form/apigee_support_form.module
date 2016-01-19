@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * Implements hook_form_alter().
+ */
+
+function apigee_support_form_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'webform_client_form_1381') {
+
+    $options_first = _apigee_support_form_get_first_dropdown_options();
+
+    $selected = isset($form_state['values']['submitted']['00N70000002sdCq']) ? $form_state['values']['submitted']['00N70000002sdCq'] : key($options_first);
+
+    $form['submitted']['00N70000002sdCq'] = array(
+      '#type' => 'select',
+      '#title' => 'Product',
+      '#prefix' => '<div class="form-item webform-component webform-component-select webform-container-inline">',
+      '#suffix' => '</div>',
+      '#options' => $options_first,
+      '#default_value' => $selected,
+      // Bind an ajax callback to the change event (which is the default for the
+      // select form type) of the first dropdown. It will replace the second
+      // dropdown when rebuilt
+      '#ajax' => array(
+        // When 'event' occurs, Drupal will perform an ajax request in the
+        // background. Usually the default value is sufficient (eg. change for
+        // select elements), but valid values include any jQuery event,
+        // most notably 'mousedown', 'blur', and 'submit'.
+        // 'event' => 'change',
+        'callback' => 'apigee_support_form_dependent_dropdown_callback',
+        'wrapper' => 'webform-component-component',
+      ),
+      '#weight' => 18,
+      '#required' => TRUE,
+    );
+
+    $form['submitted']['00N70000002sXMc'] = array(
+      '#type' => 'select',
+      '#title' => 'Component',
+      // The entire enclosing div created here gets replaced when dropdown_first
+      // is changed.
+      '#prefix' => '<div id="webform-component-component" class="form-item webform-component webform-component-select webform-container-inline">',
+      '#suffix' => '</div>',
+      // when the form is rebuilt during ajax processing, the $selected variable
+      // will now have the new value and so the options will change
+      '#options' => _apigee_support_form_get_second_dropdown_options($selected),
+      '#default_value' => isset($form_state['values']['submitted']['00N70000002sXMc']) ? $form_state['values']['submitted']['00N70000002sXMc'] : '',
+      '#weight' => 19,
+      '#required' => TRUE,
+    );
+
+    return $form;
+  }
+}
+
+/**
+ * Helper function to populate the Services dropdown. This would normally be
+ * pulling data from the database.
+ *
+ * @param $key
+ *   This will determine which set of options is returned.
+ *
+ * @return array of options
+ */
+
+function _apigee_support_form_get_second_dropdown_options($key = '') {
+  $options = array(
+    t('Apigee Edge Cloud') => drupal_map_assoc(array(t('API Services (API Runtime Traffic)'), ('Management UI (edge.apigee.com / enterprise.apigee.com)'), ('Analytics / Mobile Analytics / Insights'), ('Developer Portal'), ('API Consoles'), ('Monetization Services'), ('API BaaS (App Services)'), ('License Request'))),
+    t('Apigee Edge On-Premises') => drupal_map_assoc(array(t('API Services (API Runtime Traffic)'), ('Management UI (edge.apigee.com / enterprise.apigee.com)'), ('Analytics / Mobile Analytics / Insights'), ('Developer Portal'), ('API Consoles'), ('Monetization Services'), ('API BaaS (App Services)'), ('License Request'))),
+    t('Apigee 3.8 Cloud') => drupal_map_assoc(array(t('API Services (API Runtime Traffic)'), ('Dev Connect'), ('Analytics'), ('KMS'), ('License Request'))),
+    t('Apigee 3.8 On-Premises') => drupal_map_assoc(array(t('API Services (API Runtime Traffic)'), ('Dev Connect'), ('Analytics'), ('KMS'), ('License Request'))),
+  );
+  if (isset($options[$key])) {
+    return $options[$key];
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * Helper function to populate the Product dropdown. This would normally be
+ * pulling data from the database.
+ *
+ * @return array of options
+ */
+function _apigee_support_form_get_first_dropdown_options() {
+  // drupal_map_assoc() just makes an array('String' => 'String'...).
+  return drupal_map_assoc(array(t('Apigee Edge Cloud'), t('Apigee Edge On-Premises'), t('Apigee 3.8 Cloud'), t('Apigee 3.8 On-Premises')));
+}
+
+/**
+ * Selects just the second dropdown to be returned for re-rendering
+ *
+ * Since the controlling logic for populating the form is in the form builder
+ * function, all we do here is select the element and return it to be updated.
+ *
+ * @return renderable array (the second dropdown)
+ */
+function apigee_support_form_dependent_dropdown_callback($form, $form_state) {
+  return $form['submitted']['00N70000002sXMc'];
+}

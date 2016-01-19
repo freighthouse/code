@@ -1,0 +1,8 @@
+name = Turn Home Page JS
+description = Home Page JS for Turn
+package = Custom Turn Modules
+core = 7.x
+files[] = qps.php
+files[] = jquery-ui-1.8.17.custom.css
+files[] = jquery-ui-1.8.17.custom.min.js
+files[] = turn_home_scripts.js

@@ -1,0 +1,50 @@
+--- style.css	2011-10-03 15:15:34.000000000 -0400
++++ style.css-g	2011-10-04 09:32:52.000000000 -0400
+@@ -2494,4 +2494,45 @@
+ 	margin-bottom:0px;
+ 	padding-bottom:0px;
+ 	vertical-align:bottom;
+-}
+\ No newline at end of file
++}
++
++p.mni-space { min-height:1em; }
++
++ul.articles-list li p
++{
++        position: relative;
++        top: -10px;
++        display:none;
++}
++
++span.dashline { display:none; }
++
++div.post-content-type span.dashline,
++div.lightbox2 div.holder div.news span.dashline
++{
++        font-size: 0.8em;
++        line-height: 0.8em;
++        display: inline;
++}
++
++p.byline { display:block; }
++
++span.byline
++{
++        height: 1em;
++        position: relative;
++        align: right;
++        left: 450px;
++        top: -40px;
++
++        font-size: 11px;
++        font-style: italic;
++        font-weight: bold;
++        color: #777777;
++}
++
++div.single-post div.post-content-type div.node span.byline
++{ top: -50px; }
++
++div.single-post div.post-content-type div.node pre span.byline
++{ top: -80px; }

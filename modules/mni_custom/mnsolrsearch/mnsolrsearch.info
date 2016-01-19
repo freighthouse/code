@@ -1,0 +1,13 @@
+name = MNI Solr search
+description = Search with Solr
+dependencies[] = search
+dependencies[] = apachesolr
+dependencies[] = apachesolr_search
+dependencies[] = date_api
+dependencies[] = date_popup
+package = MNI
+core = "6.x"
+php = 5.2
+
+; # @author: Jeremy Cerda
+; # @version: $Id: mnsolrsearch.info 2380 2011-07-28 16:03:45Z jcerda $

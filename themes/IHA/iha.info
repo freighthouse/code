@@ -1,0 +1,98 @@
+name = IHA
+description = Subtheme based on Bootstrap.
+core = 7.x
+base theme = bootstrap
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Regions
+;;;;;;;;;;;;;;;;;;;;;
+
+regions[navigation]     = 'Navigation'
+regions[header]         = 'Header'
+regions[highlighted]    = 'Highlighted'
+regions[help]           = 'Help'
+regions[content]        = 'Content'
+regions[sidebar_first]  = 'Primary'
+regions[sidebar_second] = 'Secondary'
+regions[footer]         = 'Footer'
+regions[page_top]       = 'Page top'
+regions[page_bottom]    = 'Page bottom'
+
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Stylesheets
+;;;;;;;;;;;;;;;;;;;;;
+stylesheets[all][] = bower_components/jQuery.mmenu/src/css/jquery.mmenu.css
+stylesheets[all][] = bower_components/jQuery.mmenu/src/css/extensions/jquery.mmenu.positioning.css
+stylesheets[all][] = bower_components/jQuery.mmenu/src/css/extensions/jquery.mmenu.themes.css
+stylesheets[all][] = css/menus.css
+stylesheets[all][] = css/ie.css
+stylesheets[all][] = css/style.css
+; stylesheets[all][] = css/mega_menu.css
+;stylesheets[all][] = css/print.css
+;stylesheets[all][] = css/screen.css
+
+
+; For information on choosing the desired method, please read the Drupal
+; Bootstrap sub-theme "how-to" documentation:
+; https://drupal.org/node/1978010
+
+; ;----------------------------------
+; ; METHOD 1: Bootstrap Source Files
+; ;----------------------------------
+
+; ;;;;;;;;;;;;;;;;;;;;;
+; ;; Scripts
+; ;;;;;;;;;;;;;;;;;;;;;
+
+; scripts[] = 'bootstrap-sass/javascripts/affix.js'
+; scripts[] = 'bootstrap-sass/javascripts/alert.js'
+; scripts[] = 'bootstrap-sass/javascripts/button.js'
+; scripts[] = 'bootstrap-sass/javascripts/carousel.js'
+; scripts[] = 'bootstrap-sass/javascripts/collapse.js'
+; scripts[] = 'bootstrap-sass/javascripts/dropdown.js'
+; scripts[] = 'bootstrap-sass/javascripts/modal.js'
+; scripts[] = 'bootstrap-sass/javascripts/tooltip.js'
+; scripts[] = 'bootstrap-sass/javascripts/popover.js'
+; scripts[] = 'bootstrap-sass/javascripts/scrollspy.js'
+; scripts[] = 'bootstrap-sass/javascripts/tab.js'
+; scripts[] = 'bootstrap-sass/javascripts/transition.js'
+scripts[] = 'bower_components/navgoco/src/jquery.navgoco.min.js'
+scripts[] = 'js/compiled.js'
+scripts[] = 'bower_components/html5shiv/dist/html5shiv.js'
+
+; ; Disable BootstrapCDN if using Bootstrap source files in your sub-theme.
+; settings[bootstrap_cdn] = ''
+
+
+; ;-------------------------
+; ; METHOD 2: Bootstrap CDN
+; ;-------------------------
+
+; Method 2 uses BootstrapCDN, the only thing you might need to provide here
+; is overrides to Bootstrap theme settings. Copy them here from the base theme
+; to override.
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Breakpoints
+;;;;;;;;;;;;;;;;;;;;;
+breakpoints[screen-xs-max] = (max-width: 767px)
+breakpoints[screen-sm-min] = (max-width: 768px)
+breakpoints[screen-sm-max] = (max-width: 991px)
+breakpoints[screen-md-min] = (max-width: 992px)
+breakpoints[screen-md-max] = (max-width: 1199px)
+breakpoints[screen-lg-min] = (min-width: 1200px)
+; Multipiers
+multipliers[screen-xs-max][] = 1.5x
+multipliers[screen-xs-max][] = 2x
+multipliers[screen-sm-min][] = 1.5x
+multipliers[screen-sm-min][] = 2x
+multipliers[screen-sm-max][] = 1.5x
+multipliers[screen-sm-max][] = 2x
+multipliers[screen-md-min][] = 1.5x
+multipliers[screen-md-min][] = 2x
+multipliers[screen-md-max][] = 1.5x
+multipliers[screen-md-max][] = 2x
+multipliers[screen-lg-min][] = 1.5x
+multipliers[screen-lg-min][] = 2x

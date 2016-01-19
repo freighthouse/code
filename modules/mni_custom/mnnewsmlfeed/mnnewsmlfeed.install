@@ -1,0 +1,46 @@
+<?php
+# @author Jeremy Cerda
+# @version $Id: mnnewsmlfeed.install 2526 2011-08-24 14:11:56Z jcerda $
+
+function mnnewsmlfeed_install() {
+	// Create directory for normal files
+	$p = file_create_path("mnnewsmlfeed_data");
+	if(!file_check_directory($p, FILE_CREATE_DIRECTORY)) {
+		file_check_directory($p, FILE_MODIFY_PERMISSIONS);
+	}
+
+	// Create directory for archive files
+	try {
+		mkdir(file_directory_temp()."/mnnewsmlfeed_archive");
+	} catch(Excetion $e) {
+		watchdog("mnnewsmlfeed", "Could not create archie dir. - ".
+			file_directory_temp()."/mnnewsmlfeed_archive",
+			null, WATCHDOG_ERROR, null);
+		drupal_set_message("Error creating archive directory for ".
+			"acquire files.", 'error', TRUE);
+	}
+
+	/*$d = $p."/template.xml";
+	$a = file_directory_temp()."/mnnewsmlfeed_archive/template.xml";
+	$s = drupal_get_path('module', 'mnnewsmlfeed')."/conf/template.xml";
+	if(!file_copy($s, $d, FILE_EXISTS_REPLACE) || !copy($s, $a)) {
+		watchdog("mnnewsmlfeed", "Could not copy template file to proper ".
+			"directories.", null, WATCHDOG_ERROR, null);
+	}*/
+
+	// NEVER WORKED RIGHT - jcerda 08/23/11
+	// Add temp and file directories to pushConfig.cfg
+	/*$p = drupal_get_path('module', 'mnnewsmlfeed')."/conf/pushConfig.cfg";
+	$c = file_get_contents($p);
+	$c = preg_replace("/^files.dir       =.*(\n|$)/m",
+		"files.dir       = ".file_directory_path(), $c);
+	$c = preg_replace("/^files.dir       =.*(\n|$)/m",
+		"tmp.dir         = ".file_directory_temp(), $c);
+	$fp = fopen($p, 'w');
+	fwrite($fp, $c);
+	fclose($fp);*/
+}
+
+function mnnewsmlfeed_enable() {
+	mnnewsmlfeed_install();
+}

@@ -1,0 +1,5 @@
+name = Turn Front Feed
+description = Feed of news and twitter posts on the front page
+package = Custom Turn Modules
+dependencies[] = twitter
+core = 7.x

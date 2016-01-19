@@ -1,0 +1,7 @@
+name = IHA Account Login
+description = Slingshot to iha.org to verify identity
+core = 7.x
+package = "IHA"
+version = "7.x-1.0"
+
+dependencies[] = iha_sso_ui

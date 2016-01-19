@@ -1,0 +1,275 @@
+<?php
+// $Id: mni_dashboard.module,v 1 2011/04/12 14:41:03 jc Exp $
+
+/**
+ * @file
+ * create blocks for each product a user is subscribed to
+ *
+ */
+
+
+/*
+*  ---------------------------------------------------------
+*  UI section
+*  ---------------------------------------------------------
+*/
+
+/*
+* Implementation of hook_perm().
+*/
+
+function mni_dashboard_perm() {
+ return array('administer mni_dashboard');
+}
+
+/*
+* Implementation of hook_help().
+*/
+
+function mni_dashboard_help($path, $arg) {
+ switch ($path) {
+   case 'admin/help#mni_dashboard':
+		$message= "<p>This module contains all the blocks for the dashboard page</p>";
+		return $message;
+		break;
+ }
+}
+
+
+/**
+ *
+ * hook_block() implementation
+ */
+function mni_dashboard_block($op = 'list', $delta = 0, $edit = array()) {
+	global $user;
+	$show_block=false;
+  switch ($op) {
+    // listing of blocks, such as on the admin/system/block page
+    case 'list' :
+      $block['mni_dashboard_mainwire']['info'] = t('Dashboard: MNI Main Wire');
+      $block['mni_dashboard_cobullets']['info'] = t('Dashboard: MNI Commodities Bullets');
+      $block['mni_dashboard_credit']['info'] = t('Dashboard: MNI Credit Bullet Points');
+      $block['mni_dashboard_eqbullets']['info'] = t('Dashboard: MNI Equities Bullets');
+      $block['mni_dashboard_fibullets']['info'] = t('Dashboard: MNI Fixed Income Bullets');
+      $block['mni_dashboard_fxbullets']['info'] = t('Dashboard: MNI Foreign Exchange Bullets');
+
+      $block['mni_dashboard_fxpackage']['info'] = t('Dashboard: MNI Foreign Exchange Packages');
+      $block['mni_dashboard_fipackage']['info'] = t('Dashboard: MNI Fixed Income Packages');
+      $block['mni_dashboard_alphaflash']['info'] = t('Dashboard: AlphaFlash');
+      $block['mni_dashboard_mnimonitor']['info'] = t('Dashboard: MNI Monitor');
+      $block['mni_dashboard_oracleessay']['info'] = t('Dashboard: Oracle');
+
+      $block['mni_dashboard_email']['info'] = t('Dashboard: MNI Email Services');
+      $block['mni_dashboard_screamaudio']['info'] = t('Dashboard: SCREAM Audio');
+      //$block['mni_dashboard_additional_products']['info'] = t('Dashboard: Additional Products');
+
+      return $block;
+    break;
+    case 'view' :
+      // return block content
+      $block['subject'] = $delta;
+      $block['content'] = array();
+      $tabs = array();
+      if($delta=="mni_dashboard_additional_products") {
+	    	//$block['content'] = "~~addl prods~~"; //TODO
+      }else{
+	    	//get all the information about this product
+	    	//TODO a) does this go here? b) make it configureable with an admin menu -- ideally from the product info pages
+				/*
+				 * Variables fpr template:
+				 * 			$product_name
+				 *      $launch_url
+				 * 			$tabs[] //array of tabs and menus
+				 *				for each tab in tabs:
+				 *					tab_name
+				 *					tab_machine_name
+				 *					tab_item_count
+				 *					menus[]
+				 *						for each menu in menus:
+				 *							count -- # of menu items
+				 *							links -- formatted html
+				 */
+			  switch ($delta) {
+			    case 'mni_dashboard_mainwire' :
+			    	$required_role="mainwire";
+					  if (in_array($required_role, array_values($user->roles))) {
+					  	$show_block=true;
+				    	$product_name="MNI Main Wire";
+				    	$launch_url="https://sso.deutsche-boerse.com/cas/activateAndLogin?service=http%3A%2F%2Fmni10-1-2-215.marketnews.com%2Frtmw&sso_b=MNIA";
+
+							$m=array();
+			    		$m[0]=_mni_dashboard_simple_links(menu_navigation_links('menu-mainwire'),'');
+				    	$tabs[] = array(
+				    		tab_name=>'News',
+				    		tab_machine_name=>'tab_news',
+				    		tab_item_count=>$m[0]['count'],
+				    		menus=>array(
+				    			$m[0]['links']),
+				    		);
+
+							$m=array();
+			    		$m[0]=_mni_dashboard_simple_links(menu_navigation_links('menu-main-wire-markets'),'');
+				    	$tabs[] = array(
+				    		tab_name=>'Markets',
+				    		tab_machine_name=>'tab_markets',
+				    		tab_item_count=>$m[0]['count'],
+				    		menus=>array(
+				    			$m[0]['links']),
+				    		);
+
+							$m=array();
+			    		$m[0]=_mni_dashboard_simple_links(menu_navigation_links('menu-main-wire-central-banks'),'');
+				    	$tabs[] = array(
+				    		tab_name=>'Central Banks',
+				    		tab_machine_name=>'tab_banks',
+				    		tab_item_count=>$m[0]['count'],
+				    		menus=>array(
+				    			$m[0]['links']),
+				    		);
+
+							$m=array();
+			    		$m[0]=_mni_dashboard_simple_links(menu_navigation_links('menu-news-index-by-region-europe'),'Europe');
+			    		$m[1]=_mni_dashboard_simple_links(menu_navigation_links('menu-american-news-index'),'Americas');
+			    		$m[2]=_mni_dashboard_simple_links(menu_navigation_links('menu-asia-index-menu'),'Asia');
+				    	$tabs[] = array(
+				    		tab_name=>'Region',
+				    		tab_machine_name=>'tab_region',
+				    		tab_item_count=>$m[0]['count']+$m[1]['count']+$m[2]['count'],
+				    		menus=>array(
+				    			$m[0]['links'],
+				    			$m[1]['links'],
+				    			$m[2]['links']),
+				    		);
+
+							$m=array();
+			    		$m[0]=_mni_dashboard_simple_links(menu_navigation_links('menu-calendars'),'');
+				    	$tabs[] = array(
+				    		tab_name=>'Calendars',
+				    		tab_machine_name=>'tab_calendars',
+				    		tab_item_count=>$m[0]['count'],
+				    		menus=>array(
+				    			$m[0]['links']),
+				    		);
+
+							$m=array();
+							$m[0]=_mni_dashboard_simple_links(menu_navigation_links('menu-australia-indicators'),'Australia');
+							$m[1]=_mni_dashboard_simple_links(menu_navigation_links('menu-china-indicators'),'China');
+							$m[2]=_mni_dashboard_simple_links(menu_navigation_links('menu-eurozone-indicators'),'Eurozone');
+							$m[3]=_mni_dashboard_simple_links(menu_navigation_links('menu-france-indicators-mw'),'France');
+							$m[4]=_mni_dashboard_simple_links(menu_navigation_links('menu-germany-indicators-mw'),'Germany');
+							$m[5]=_mni_dashboard_simple_links(menu_navigation_links('menu-italy-indicators'),'Italy');
+							$m[6]=_mni_dashboard_simple_links(menu_navigation_links('menu-japan-indicators'),'Japan');
+							$m[7]=_mni_dashboard_simple_links(menu_navigation_links('menu-new-zealand-indicators-mw'),'New Zealand');
+							$m[8]=_mni_dashboard_simple_links(menu_navigation_links('menu-spain-indicators-mw'),'Spain');
+							$m[9]=_mni_dashboard_simple_links(menu_navigation_links('menu-uk-indicators-mw'),'UK');
+							$m[10]=_mni_dashboard_simple_links(menu_navigation_links('menu-united-states-indicators-mw'),'United States');
+							$m[11]=_mni_dashboard_simple_links(menu_navigation_links('menu-canada-indicators-mw'),'Canada');
+				    	$tabs[] = array(
+				    		tab_name=>'Economic indicators',
+				    		tab_machine_name=>'tab_indicators',
+				    		tab_item_count=>$m[0]['links']+$m[1]['count']+$m[2]['count']+$m[3]['count']+$m[4]['count']+$m[5]['count']+$m[6]['count']+$m[7]['count']+$m[8]['count']+$m[9]['count']+$m[10]['count']+$m[11]['count'],
+				    		menus=>array(
+				    			$m[0]['links'],
+				    			$m[1]['links'],
+				    			$m[2]['links'],
+				    			$m[3]['links'],
+				    			$m[4]['links'],
+				    			$m[5]['links'],
+				    			$m[6]['links'],
+				    			$m[7]['links'],
+				    			$m[8]['links'],
+				    			$m[9]['links'],
+				    			$m[10]['links'],
+				    			$m[11]['links']),
+				    		);
+				    	}else{ //not role member
+					    	$product_name="";
+					    	$launch_url="";
+					    	$tabs[] = array();
+				    	}
+			    break;
+			    case 'mni_dashboard_cobullets' :
+			    	$product_name="MNI Commodities Bullets";
+			    break;
+			    case 'mni_dashboard_credit' :
+			    	$product_name="MNI Credit Bullet Points";
+			    break;
+			    case 'mni_dashboard_eqbullets' :
+			    	$product_name="MNI Equities Bullets";
+			    break;
+			    case 'mni_dashboard_fibullets' :
+			    	$product_name="MNI Fixed Income Bullets";
+			    break;
+			    case 'mni_dashboard_fxbullets' :
+			    	$product_name="MNI Foreign Exchange Bullets";
+			    break;
+			    case 'mni_dashboard_fxpackage' :
+			    	$product_name="MNI Foreign Exchange Packages";
+			    break;
+			    case 'mni_dashboard_fipackage' :
+			    	$product_name="MNI Fixed Income Packages";
+			    break;
+			    case 'mni_dashboard_alphaflash' :
+			    	$product_name="AlphaFlash";
+			    break;
+			    case 'mni_dashboard_mnimonitor' :
+			    	$product_name="MNI Monitor";
+			    break;
+			    case 'mni_dashboard_oracleessay' :
+			    	$product_name="Oracle";
+			    break;
+			    case 'mni_dashboard_email' :
+			    	$product_name="MNI Email Services";
+			    break;
+			    case 'mni_dashboard_screamaudio' :
+			    	$product_name="SCREAM Audio";
+			    break;
+			    default :
+			    break;
+				}
+				if($show_block){
+	      	$block['content'] = theme('dashboard_product', $product_name, $launch_url, $tabs);
+	      }else{
+	      	$block['content'] = NULL;
+	      }
+			}
+      return $block;
+    break;
+    default :
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function mni_dashboard_theme() {
+  return array(
+    'dashboard_product' => array(
+      'arguments' => array('product_name' => NULL, 'launch_url' => NULL, 'tabs' => array()),
+      'template' => 'dashboard_product',
+    ),
+  );
+}
+
+function _mni_dashboard_simple_links($links, $hdr=null) {
+	if ($hdr){
+		$output="<li class='subhed'>".$hdr."</li>";
+	} else {
+		$output="";
+	}
+	$c=0;
+	foreach ($links as $link_item) {
+    // Check to see if it is a visible menu item.
+    if (!isset($link_item['hidden']) || $link_item['hidden'] == 0) {
+      $c++;
+      $clean_path = str_replace(array('http://', 'www', '<', '>', '&', '=', '?', ':', '.'), '', $link_item['href']);
+      // Convert slashes to dashes.
+      $clean_path = str_replace('/', '-', $clean_path);
+      $output .= '<li><a href="'.$link_item['href'].'">'.$link_item['title'].'</a></li>
+';
+    }
+  }
+	return array('count'=>$c,'links'=>$output);
+}
+
+

@@ -1,0 +1,40 @@
+<?php if (!empty($q)): ?>
+  <?php
+    // This ensures that, if clean URLs are off, the 'q' is added first so that
+    // it shows up first in the URL.
+    print $q;
+  ?>
+<?php endif; ?>
+<!--<?php
+ // drupal_set_message('<pre>'. print_r($widgets, TRUE) .'</pre>');
+?>-->
+
+<div class="views-exposed-form container">
+  <div class="views-exposed-widgets clearfix">
+    <div class="col-sm-3 col-xs-12">
+      <label>Keyword</label>
+      <?php print (!empty($widgets['filter-keys']))?
+        $widgets['filter-keys']->widget : ''; ?>
+    </div>
+    <div class="col-sm-3 col-xs-12">
+      <label>Type</label>
+      <?php print (!empty($widgets['filter-field_resource_type_tid']))?
+        $widgets['filter-field_resource_type_tid']->widget : ''; ?>
+    </div>
+    <div class="col-sm-3 col-xs-12">
+      <label>Topic</label>
+      <?php print (!empty($widgets['filter-field_resource_topic_tid']))?
+        $widgets['filter-field_resource_topic_tid']->widget : ''; ?>
+    </div>
+    <div class="col-sm-3 col-xs-12">
+      <div class="col-xs-6 views-exposed-widget views-submit-button">
+            <?php print $button; ?>
+      </div>
+      <?php if (!empty($reset_button)): ?>
+        <div class="col-xs-6 views-exposed-widget views-reset-button">
+          <?php print $reset_button; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>

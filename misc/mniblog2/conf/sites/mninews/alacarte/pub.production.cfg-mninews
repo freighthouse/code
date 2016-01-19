@@ -1,0 +1,79 @@
+[mniblogpub.shared]
+bloghome = /usr/local/mniblog2
+delivery = delivery/alacarte
+archive  = archive/alacarte
+failure  = failure/alacarte
+
+; ## Shared Settings ###########################################################
+; # bloghome            - Home directory from which all other directories are
+; #                       configured relative to.
+; # delivery            - Delivery directory to watch for new content
+; #                       (relative to mniblogpub.shared-bloghome).
+; # archive             - Archive directory from completed content
+; #                       (relative to mniblogpub.shared-bloghome).
+; # failure             - Directory for content which encountered an error
+; #                       during publication.
+; #                       (relative to mniblogpub.shared-bloghome).
+; ##############################################################################
+
+[mniblogpub.php]
+node.type               = "alacarte_article"
+rich.type               = "alacarte_article"
+node.status_published   = true
+node.comments           = true
+node.taxonomy.load_from = description
+user.name               = feed
+user.use                = true
+format.name             = MNI Filter
+date.adjust             = true
+load                    = "args"
+dir.pdf.drupal          = mni_pdfs
+modules.mnembargo       = true
+modules.mnexpire        = true
+modules.ubercart        = true
+basepath                = https://mninews.deutsche-boerse.com
+
+; ## Publication Settings ######################################################
+; # node.type               - Node type to use during publication.
+; # rich.type               - Node type to use during rich content publication.
+; # node.status_published   - Default publication status for new nodes.
+; # node.comments           - Comment status for new nodes.
+; # node.taxonomy.load_from - Field for loading taxonomy machine names during
+; #                           publication.
+; # user.name               - User to use for author information.
+; # user.use                - Whether to use a configured author for new nodes.
+; # format.name             - Input format to use for new nodes.
+; # date.adjust             - Whether to adjust date to publication date.
+; # load                    - Load new stories via arguments or entire
+; #                           directory. ("args" and "files" respectively)
+; # dir.pdf.drupal          - Directory to store rich content.
+; # modules.mnembargo       - Use embargo information for the mnembargo module.
+; # modules.mnexpire        - Use expiration information for the mnexpire
+; #                           module.
+; # modules.ubercart        - Use price information for the ubercart modules.
+; # seo.writeback           - Write SEO information back to archived files.
+; # basepath                - Basepath for site, to be used w/ SEO data.
+; ##############################################################################
+
+[mniblogpub.py]
+php.cmd    = /usr/bin/php
+php.file   = mniblogpub.php
+php.config = conf/sites/mninews/alacarte/pub.production.cfg-mninews
+loopdelay  = 0.5
+looplimit  = 1000
+
+; ## Publication Control Settings ##############################################
+; # php.cmd             - Command for cmdline php call.
+; # php.file            - PHP Publication file to use.
+; #                       (relative to mniblogpub.shared-bloghome).
+; # php.config          - Config file for publication settings.
+; #                       (relative to mniblogpub.shared-bloghome).
+; # loopdelay           - Delay in seconds between publication loops.
+; # looplimit           - Limit on number of files published per loop.
+; # rss                 - RSS
+; # rss.delivery        - Delivery directory for RSS bound content.
+; #                       (relative to mniblogpub.shared-bloghome).
+; ##############################################################################
+
+; # @author Jeremy Cerda
+; # @version $Id: pub.production.cfg-mninews 3348 2012-03-19 13:10:01Z jcerda $

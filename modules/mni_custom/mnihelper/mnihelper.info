@@ -1,0 +1,5 @@
+; $Id: mnihelper.info,v 1.0 2010/10/19 22:20:06 jcerda Exp $
+name = MNIhelper
+package = "MNI"
+description = Maintain a mnihelper on your site.
+core = 6.x

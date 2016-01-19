@@ -1,0 +1,4 @@
+name = Turn Content Gating
+description = Module to handle redirects and "permission checks" for Turn Content Gating
+package = Custom Turn Modules
+core = 7.x

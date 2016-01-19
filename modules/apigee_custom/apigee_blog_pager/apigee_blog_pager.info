@@ -1,0 +1,5 @@
+name = Apigee Blog Pager
+description = Add previous/next links to blog posts
+
+core = 7.x
+package = BLOG

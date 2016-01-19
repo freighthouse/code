@@ -1,0 +1,1 @@
+sites/mninews/scriptconfig.sh-mninews

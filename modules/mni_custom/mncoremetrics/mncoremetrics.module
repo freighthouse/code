@@ -1,0 +1,157 @@
+<?php
+# @author: Jeremy Cerda
+# @version: $Id: mncoremetrics.module 2745 2011-10-07 15:11:40Z jcerda $
+
+module_load_include('inc', 'mncoremetrics', 'mncoremetrics.util');
+
+function mncoremetrics_menu() {
+	$items = array();
+
+	$items['admin/settings/mncoremetrics'] = array(
+		'title' => 'MNI Coremetrics Settings',
+		'description' => 'Administer settings for Coremetrics system.',
+		'page callback' => 'mncoremetrics_admin_main',
+		'access arguments' => array('administer coremetrics'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mncoremetrics.admin.inc'
+	);
+
+	return $items;
+}
+
+function mncoremetrics_perm() {
+	return array('administer coremetrics', 'coremetrics not tracked');
+}
+
+function mncoremetrics_init() {
+
+	if(! user_access('coremetrics not tracked') &&
+	variable_get('mncoremetrics_setup', 0)) {
+
+		$current_path = $_GET['q'];
+		if (module_exists('path'))
+			$current_path = drupal_get_path_alias($_GET['q']);
+
+		// Libraries
+		drupal_set_html_head('<script type="text/javascript" '.
+			'src="'.variable_get('mncoremetrics_src','').'"></script>');
+
+		$head = '<script type="text/javascript">'."\n";
+		$js = 'Drupal.behaviors.mncoremetrics = function (context) {'."\n";
+
+		// Load Category
+		$cat = mncoremetrics_category($current_path);
+
+		// Load Node
+		$p = drupal_get_normal_path($current_path);
+		$s = explode("/", $p);
+		if(count($s) > 1)
+			$n = node_load($s[1]);
+
+		// Load Taxonomies
+		$taxdata = "";
+		if($n) {
+			$first = "";
+			$tax = taxonomy_node_get_terms($n);
+			foreach ($tax as $t) {
+				$taxdata .= $t->name . "-_-";
+				$first .= $t->name . ",";
+			}
+			$taxdata = substr($taxdata, 0, -3);
+			$taxdata = substr($first, 0, -1)."-_-".$taxdata;
+		}
+
+		$pageID             = '"'.$current_path.'"';
+		$catID              = $cat;
+		$searchTerm         = 'null';
+		$searchResultsTotal = 'null';
+		$isSearch = false;
+
+		// Detect Search Pages
+		if($s[0] == "search" && module_exists('apachesolr')) {
+			$isSearch = true;
+			$searchTerm = '"'.$s[2].'"';
+			$searchResultsTotal = 'searchTotalResults';
+			$catID = '500';
+			$pageID = 'searchPageID';
+
+			$js .= "\t".'var searchPageID = "SEARCH UNSUCCESSFUL";'."\n";
+			$js .= "\t".'if(Drupal.settings.MNI && '.
+				'Drupal.settings.MNI.searchPageID)'."\n";
+			$js .= "\t\t".'searchPageID = '.
+				'Drupal.settings.MNI.searchPageID;'."\n";
+
+			$js .= "\t".'var searchTotalResults = "0";'."\n";
+			$js .= "\t".'if(Drupal.settings.MNI && '.
+				'Drupal.settings.MNI.totalSearchResults)'."\n";
+			$js .= "\t\t".'searchTotalResults = '.
+				'Drupal.settings.MNI.totalSearchResults;'."\n";
+		}
+
+		// Basics
+		if(variable_get('mncoremetrics_testing', 1)) {
+			if(!$isSearch)
+				$pageID = "\"TEST: ".substr($pageID,1,-1)."\"";
+			$head .= "\t".'cmSetClientID("'.
+				variable_get('mncoremetrics_clientid.test','')
+				.'",false,"'.variable_get('mncoremetrics_domains.test','').'",'.
+				'"'.variable_get('mncoremetrics_domains.cookie','').'");'."\n";
+		} else {
+			$head .= "\t".'cmSetClientID("'.
+				variable_get('mncoremetrics_clientid','')
+				.'",true,"'.variable_get('mncoremetrics_domains.prod','').'",'.
+				'"'.variable_get('mncoremetrics_domains.cookie','').'");'."\n";
+		}
+
+		$js .= "\t".'cmCreatePageviewTag('.$pageID.', '.$catID.','.
+			' '.$searchTerm.', '.$searchResultsTotal.', "'.$taxdata.'", '.
+				'"'.$taxdata.'");'."\n";
+
+
+		// Login tagging
+		if($_SESSION['mncoremetrics']['recentlogin']) {
+			global $user;
+			$js .= "\t".'//cmCreateRegistrationTag("'.$user->mail.'","'
+				.$user->mail.'");'."\n";
+			if(isset($_SESSION['mncoremetrics']))
+				$_SESSION['mncoremetrics']['recentlogin'] = 0;
+		}
+
+		$js .= '}'."\n";
+		$head .= '</script>';
+
+		drupal_add_js($js, 'inline');
+		drupal_set_html_head($head);
+	}
+}
+
+function mncoremetrics_user($op, &$edit, &$account, $category = NULL) {
+	if($op == "login") {
+		if(! user_access('coremetrics not tracked') &&
+		variable_get('mncoremetrics_setup', 0)) {
+			$_SESSION['mncoremetrics'] = array('recentlogin' => 1);
+		}
+	}
+}
+
+function mncoremetrics_category($url) {
+	$d = mncoremetrics_load_cdf();
+
+	$ret = 0;
+	foreach($d as $k => $v)
+		if(preg_match("/".$v."/", $url))
+			$ret = $k;
+
+	return $ret;
+}
+
+function mncoremetrics_preprocess_search_results(&$variables) {
+  global $pager_total_items;
+  drupal_add_js(array(
+  	'MNI' => array(
+  		'totalSearchResults' => intval($pager_total_items[0]),
+  		'searchPageID' => (intval($pager_total_items[0]) ?
+  			"SEARCH SUCCESSFUL" : "SEARCH UNSUCCESSFUL"),
+  	)
+  ), 'setting');
+}

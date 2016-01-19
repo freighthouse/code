@@ -1,0 +1,16 @@
+<div class="summary-sources">
+  <div class="summary-attribution">
+    <p>{{attribution}}</p>
+  </div>
+  <div class="summary-sources-container list-inline list-unstyled">
+    {{#each sources}}
+      <div class="summary-source">
+        <div class="summary-source-container">
+          <p class="summary-source-value">{{dollar}}</p>
+          <p class="summary-source-label">{{name}}</p>
+          <p class="summary-source-percentage">{{percentage}}</p>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>

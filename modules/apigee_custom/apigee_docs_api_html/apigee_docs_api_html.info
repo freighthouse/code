@@ -1,0 +1,8 @@
+name = Apigee docs importer
+
+core = 7.x
+package = DOCS
+dependencies[] = feeds_xpathparser
+dependencies[] = feeds_tamper
+files[] = feeds_plugins/ApigeeDocsHTMLParser.inc
+files[] = feeds_plugins/ApigeeDocsFileFetcher.inc

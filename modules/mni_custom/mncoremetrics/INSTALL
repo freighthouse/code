@@ -1,0 +1,27 @@
+These are instructions for installing the mncoremetrics module into a Drupal 6
+website.
+
+################################################################################
+  Quick Install
+################################################################################
+
+# cd /var/www/mninews/sites/all/modules
+# svn checkout http://10.1.1.40/svn/jcerda/sites/modules/mncoremetrics
+# chown -R 1080:mninews mncoremetrics
+
+// Go to:  admin/build/modules
+// Enable the "MNI Coremetrics" module
+
+// Go to: https://itt.coremetrics.com
+// Login
+// Click "Show Test Data" down at the bottom
+// Verify that test data is coming in from your site
+// (should take a few minutes to appear)
+
+--------------------------------------------------------------------------------
+ When ready to begin sending data to the production coremetrics account
+--------------------------------------------------------------------------------
+// Edit /var/www/mninews/sites/all/modules/mncoremetrics/mncoremetrics.cfg
+// Change mncoremetrics_testing to 0
+// Go to: admin/settings/mncoremetrics
+// Click "Reload" at the bottom to reload settings from the cfg file

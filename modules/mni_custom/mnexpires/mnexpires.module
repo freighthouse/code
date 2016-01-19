@@ -1,0 +1,258 @@
+<?php
+
+function mnexpires_perm() {
+	return array('administer mni node expiration');
+}
+
+function mnexpires_menu() {
+	$items = array();
+
+	$items['admin/settings/mnexpires'] = array(
+		'title' => 'MNI Expires Settings',
+		'description' => 'Administer settings for how and when a Node should expire.',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('mnexpires_admin'),
+		'access arguments' => array('administer mni node expiration'),
+		'type' => MENU_NORMAL_ITEM
+	);
+
+	return $items;
+}
+
+function mnexpires_cron() {
+	global $user;
+	$orig_user = $user;
+	$old_state = session_save_session();
+	session_save_session(false);
+	$user = user_load(1);
+
+	$globalexp = variable_get('mnexpires_global_exp', 0);
+	$maxexp = variable_get('mnexpires_max_exp', 100);
+
+	$nodes_to_exp = array();
+	$types = node_get_types();
+	$ftypes = array();
+	foreach($types as &$t) {
+		$exp = variable_get('mnexpires_exp_'.$t->type, 0);
+		if(($exp == 0) || ($exp != 0 && $globalexp != 0 && $globalexp < $exp))
+			$exp = $globalexp;
+		if($exp == 0)
+			continue;
+		$exp = $exp*60*60*24;
+		if($exp > 0)
+			array_push($ftypes, array('type' => $t->type, 'exp' => $exp));
+	}
+
+	$cdate = time();
+	if(count($ftypes) > 0) {
+		$q = "SELECT nodes.nid, nodes.created FROM (";
+		$i = 0;
+		foreach($ftypes as $t) {
+			$i++;
+			$exp = $cdate - $t['exp'];
+			$q .= "(SELECT n".$i.".nid as nid, n".$i.".created as created " .
+		    		"FROM {node} n".$i." WHERE n".$i.".type = '".$t['type']."' " .
+		    		"AND n".$i.".created < ".$exp." LIMIT ".$maxexp.")".
+				"UNION ALL";
+		}
+		$q = substr($q, 0, -9);
+		$q .= ") nodes ".
+		"ORDER BY nodes.created DESC LIMIT ".$maxexp."";
+
+		$r = db_query($q);
+		while($row = db_fetch_object($r)) {
+			$n = node_load($row->nid);
+			$te = variable_get('mnexpires_exp_'.$n->type, 0);
+			$g = ((($globalexp > 0) && ($te > 0) && ($globalexp < $te)) ||
+				($globalexp > 0 && $te == 0));
+			watchdog('mnexpires', '@node_title expired due to %reason expiration.',
+					array('@node_title' => $n->title,
+						'%reason' => ($g ? 'global' : $n->type)),
+					WATCHDOG_NOTICE);
+			node_delete($n->nid);
+		}
+	}
+
+	node_load(1, NULL, true);
+	$user = $orig_user;
+	session_save_session($old_state);
+}
+
+//-----------------------------------------------------------------------------
+//  Admin Form
+//-----------------------------------------------------------------------------
+function mnexpires_admin() {
+	drupal_add_js(drupal_get_path('module', 'mnexpires')
+		.'/js/mnexpires_global_safety.js', 'module');
+
+	$cfg = parse_ini_file(drupal_get_path('module', 'mnexpires') .
+		"/mnexpires.cfg", true);
+	$danger_global = $cfg["mnexpires"]["allow.global"];
+	$danger_pages = $cfg["mnexpires"]["allow.pages"];
+	$danger_stories = $cfg["mnexpires"]["allow.stories"];
+	$danger_webforms = $cfg["mnexpires"]["allow.webforms"];
+
+	$form = array();
+
+	$form['instructions'] = array(
+		'#value' => "<p>".t("The lowest expiration available will be used." .
+				" All numbers are in days. 0 means no expiration.")."</p>"
+	);
+
+	// ********** Examples **********
+	$form['examples'] = array(
+		'#type' => 'fieldset',
+		'#collapsible' => true,
+		'#collapsed' => true,
+		'#title' => t('Examples'),
+    );
+    $form['examples']['ex1'] = array(
+		'#value' => "<label>".t("Example 1")."</label>".
+			"<ul>".
+			"<li>".t("Global Expiration set to 0.")."</li>".
+			"<li>".t("Page Expiration set to 0.")."</li>".
+			"<li>".t("RESULTS: Nodes never expire.")."</li>".
+			"</ul>"
+	);
+    $form['examples']['ex2'] = array(
+		'#value' => "<label>".t("Example 2")."</label>".
+			"<ul>".
+			"<li>".t("Global Expiration set to 14.")."</li>".
+			"<li>".t("Page Expiration set to 7.")."</li>".
+			"<li>".t("RESULTS: Page nodes expire in 7 days, all others " .
+					"in 14.")."</li>".
+			"</ul>"
+	);
+	$form['examples']['ex3'] = array(
+		'#value' => "<label>".t("Example 3")."</label>".
+			"<ul>".
+			"<li>".t("Global Expiration set to 0.")."</li>".
+			"<li>".t("Page Expiration set to 7.")."</li>".
+			"<li>".t("RESULTS: Page nodes expire in 7 days, all others " .
+					"don't expire'.")."</li>".
+			"</ul>"
+	);
+
+	// ********** Settings **********
+	$form['misc'] = array(
+		'#type' => 'fieldset',
+		'#collapsible' => true,
+		'#collapsed' => false,
+		'#title' => t('Settings')
+	);
+	$form['misc']['mnexpires_max_exp'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Max Nodes to Expire per Cron Run'),
+		'#default_value' => variable_get('mnexpires_max_exp', 100),
+		'#size' => 4,
+		'#maxlength' => 4,
+		'#required' => TRUE
+	);
+
+	// ********** Node Type **********
+	$types = node_get_types();
+	foreach($types as &$t)
+	{
+		if(($t->type != "page" || $danger_pages) &&
+		($t->type != "story" || $danger_stories) &&
+		($t->type != "webform" || $danger_webforms)) {
+			$form[$t->type] = array(
+				'#type' => 'fieldset',
+				'#collapsible' => true,
+				'#collapsed' => true,
+				'#title' => t('Expiration for '.$t->name.' Nodes'),
+		    );
+		    $form[$t->type]['mnexpires_exp_'.$t->type] = array(
+		    	'#type' => 'textfield',
+				'#title' => t($t->name.' Expiration'),
+				'#default_value' => variable_get('mnexpires_exp_'.$t->type, 0),
+				'#size' => 5,
+				'#maxlength' => 5,
+				'#required' => TRUE
+		    );
+		}
+	}
+
+	// ********** Global **********
+	if($danger_global) {
+		$form['global'] = array(
+			'#type' => 'fieldset',
+			'#collapsible' => true,
+			'#collapsed' => true,
+			'#title' => t('Global Expiration'),
+	    );
+	    $form['global']['global_warn'] = array(
+	    	'#value' =>
+	    		'<div id="content-messages" class="content-messages block">'.
+	    		'<div id="content-messages-inner" ' .
+	    			'class="content-messages-inner inner clearfix">' .
+	    		'<div class="messages warning">'.
+	    			t('WARNING: This will affect nodes of ALL types. ' .
+	    			'Please use with caution.').
+				'</div></div></div>'
+	    );
+		$form['global']['mnexpires_global_exp'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Global Expiration'),
+			'#default_value' => variable_get('mnexpires_global_exp', 0),
+			'#size' => 5,
+			'#maxlength' => 5,
+			'#required' => TRUE
+		);
+	}
+
+	return system_settings_form($form);
+	/*return confirm_form($form, 'Are you sure these expiration values are ' .
+			'correct? Once activated, nodes will be deleted, which cannot be ' .
+			'undone.', 'admin/settings/mnexpires', 'WARNING: Proceed with ' .
+			'caution.', 'Activate');*/
+}
+
+function mnexpires_admin_validate($form, &$form_state) {
+	$cfg = parse_ini_file(drupal_get_path('module', 'mnexpires') .
+		"/mnexpires.cfg", true);
+	$danger_global = $cfg["mnexpires"]["allow.global"];
+	$danger_pages = $cfg["mnexpires"]["allow.pages"];
+	$danger_stories = $cfg["mnexpires"]["allow.stories"];
+	$danger_webforms = $cfg["mnexpires"]["allow.webforms"];
+
+	$expiration = $form_state['values']['mnexpires_max_exp'];
+	if (!is_numeric($expiration)) {
+		form_set_error('mnexpires_max_exp', t('You must enter an integer ' .
+				'for the maximum nodes per cron run.'));
+	} else if ($expiration < 0) {
+		form_set_error('mnexpires_max_exp', t('The maximum nodes per cron ' .
+				'run must be 0 or greater.'));
+	}
+
+	if($danger_global) {
+		$expiration = $form_state['values']['mnexpires_global_exp'];
+		if (!is_numeric($expiration)) {
+			form_set_error('mnexpires_global_exp', t('You must enter an integer ' .
+					'for the Global expiration.'));
+		} else if ($expiration < 0) {
+			form_set_error('mnexpires_global_exp', t('Expiration dates ' .
+					'must be positive or 0.'));
+		} else if ($expiration > 0) {
+			drupal_set_message('WARNING: The Global Expiration has been set. ' .
+					'Please make sure this is not in error. If at all possible ' .
+					'please refrain from using the Global Expiration.', 'warning');
+		}
+	}
+
+	$types = node_get_types();
+	foreach($types as &$t) {
+		if(($t->type != "page" || $danger_pages) &&
+		($t->type != "story" || $danger_stories) &&
+		($t->type != "webform" || $danger_webforms)) {
+			$expiration = $form_state['values']['mnexpires_exp_'.$t->type];
+			if (!is_numeric($expiration)) {
+				form_set_error('mnexpires_exp_'.$t->type, t('You must enter an' .
+						' integer for the '.$t->name.' expiration.'));
+			} else if ($expiration < 0) {
+				form_set_error('mnexpires_exp_'.$t->type, t('Expiration date ' .
+						'must be positive or 0.'));
+			}
+		}
+	}
+}

@@ -1,0 +1,593 @@
+<?php
+// $Id: alacarte_functions.module,v 1 2011/02/28 14:41:03 jc Exp $
+
+/**
+ * @file
+ * disallow purchasing alacarte_articles more than once
+ * also
+ * Filter alacarte articles to display sell-text or hide preview depending on user access
+ */
+
+
+/*
+*  ---------------------------------------------------------
+*  UI section
+*  ---------------------------------------------------------
+*/
+
+/*
+* Implementation of hook_perm().
+*/
+
+function alacarte_functions_perm() {
+ return array('administer alacarte_functions');
+}
+
+/*
+* Implementation of hook_help().
+*/
+
+function alacarte_functions_help($path, $arg) {
+ switch ($path) {
+   case 'admin/help#alacarte_functions':
+		$message= "<p>This module contains all the special functions for alacarte articles.<br/>1) Disallow a user buying the same article more than once, both preventing adding multiple to cart, and also checking acl to make sure it isn't already unlocked.<br/>2) Filter alacarte articles to display sell-text or hide preview depending on user access.<br/>3) Hide product nodes (redirect to article)</p>";
+		return $message;
+		break;
+ }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+
+function alacarte_functions_form_alter(&$form, &$form_state, $form_id) {
+	_alacarte_functions_qty_form_alter($form, $form_state, $form_id);
+	_alacarte_functions_comment_form_alter($form, $form_state, $form_id);
+	_alacarte_functions_form_alter($form, $form_state, $form_id);
+	_alacarte_functions_ucsaferpay_popup_form_alter($form, $form_state, $form_id);
+	_alacarte_functions_checkout_form_alter($form, $form_state, $form_id);
+}
+/**
+ * Implementation of hook_nodeapi().
+ */
+function alacarte_functions_nodeapi(&$node, $op, $arg = 0) {
+  switch ($op) {
+    case 'alter':
+			_alacarte_functions_comment_nodeapi($node, $arg);
+			_alacarte_functions_preview_nodeapi($node, $arg);
+      break;
+    case 'view':
+      break;
+  }
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function alacarte_functions_theme() {
+  return array(
+    'alacarte_body' => array(
+	  	'arguments' => array('nid'=>NULL,'title' => NULL,'taxonomy' => NULL, 'body' => NULL, 'postdate' => NULL,'comment_count'=>NULL, 'hdr' => NULL, 'loggedin' => false, 'acl_access' => false, 'product_nid'=> NULL ),
+      'template' => 'alacarte_body',
+    ),
+    'restrict_qty_field' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+
+/*
+*  ---------------------------------------------------------
+*  article has an id for product, but product doesn't have the reverse because it's implemented as an ubercart "product feature"
+*  use this to link back from product to article
+*  ---------------------------------------------------------
+*/
+
+function alacarte_functions_get_article_nid_for_product($p_nid){
+	$result = db_query("SELECT unap.access_nid FROM {uc_node_access_products} unap join {uc_product_features} upf on unap.pfid=upf.pfid WHERE fid='node_access' and nid = %d", $p_nid);
+	while ($row = db_fetch_array($result)) {
+		$ret=$row['access_nid'];
+	}
+	return $ret;
+
+}
+
+/*
+*  ---------------------------------------------------------
+* function to be called by ubercart conditional action on payment received
+* creates links to alacarte article(s) and subscription content
+* call to this function must be added in conditional actions, trigger:customer completes checkout, weighted to run last, no conditions
+*  ---------------------------------------------------------
+*/
+function alacarte_functions_uc_ca_link_to_unlocked_article($order){
+	$msg="";
+	foreach($order->products as $item) {
+		$p_nid=$item->nid;
+		if(is_numeric($p_nid)){
+			$p_node=node_load($p_nid);
+			if($p_node->model=="alacarte"){
+				$article_nid=alacarte_functions_get_article_nid_for_product($p_nid);
+				$msg.='<a href="/node/'.$article_nid.'">Click Here to read "'.$item->title.'"</a><br/>';
+			} else {
+				//its a subscription product.  redirect them to their dashboard.  for testing just send to the subscription view and they'll see whatever they have rights to
+				//note: This is a holdover from when we were going to sell some subscription products online with ecommerce.  it's not currently used and this section will never be called but it could be revived in the future so i left this here
+				$msg.='Thanks for subscribing.  <a href="/mni-dashboard">Access your subscription here</a><br/>';
+			}
+		}
+	}
+	drupal_set_message($msg, 'status');
+}
+
+/*
+*  ---------------------------------------------------------
+*  this section is to make sure they only buy one
+*  ---------------------------------------------------------
+*/
+
+/**
+ * Implementation of hook_add_to_cart().
+ */
+function alacarte_functions_add_to_cart($nid, $qty, $data) {
+	global $user;
+
+  $success=TRUE;
+  $message = '';
+  $node=node_load($nid);
+	if($node->model=="alacarte"){
+		//check cart contents
+		$cartcontents=uc_cart_get_contents();
+		foreach($cartcontents as $item) {
+		    if ($item->nid==$nid) {
+				$success=FALSE;
+		    $message = 'That article is already in your cart.  Please proceed to checkout to unlock the article';
+
+		    db_query("UPDATE {uc_cart_products} SET qty = 1, changed = %d WHERE cart_id = '%s' AND nid = %d AND data = '%s'", time(), uc_cart_get_id(), $item->nid, serialize($item->data));
+		    break;
+		    }
+		}
+
+		//check acl
+		$article_nid=alacarte_functions_get_article_nid_for_product($nid);
+	  if (field_acl_check_access($user->uid,$article_nid,"field_full_body" )) {
+			$success=FALSE;
+	    $message = 'You have already have access to this article - <a href="/node/'.$article_nid.'">here is the link to it</a>';
+		}
+	}
+
+	$result[] = array(
+	'success' => $success,
+	'message' => $message,
+	);
+
+  return $result;
+}
+
+/**
+ * Implementation of hook_add_to_cart_data().
+ */
+function alacarte_functions_add_to_cart_data($form_values) {
+	$node=node_load(check_plain($form_values['nid']));
+	if($node->model=="alacarte"){
+  	return array('restrict_qty' => 1);
+  }
+}
+
+/**
+ * Implementation of hook_cart_item().
+ */
+function alacarte_functions_cart_item($op, &$item) {
+  if ($op == 'load') {
+    if ($item->model == "alacarte") {
+      // Reduce the quantity to 1 if necessary.
+      db_query("UPDATE {uc_cart_products} SET qty = 1, changed = %d WHERE cart_id = '%s' AND nid = %d AND data = '%s'", time(), uc_cart_get_id(), $item->nid, serialize($item->data));
+      $item->qty = 1;
+    }
+  }
+}
+
+/**
+ * called by alacarte_functions_form_alter().
+ */
+
+function _alacarte_functions_qty_form_alter(&$form, &$form_state, $form_id) {
+  // Disable the appropriate Qty. fields on the cart view form.
+  if ($form_id == 'uc_cart_view_form') {
+   for ($i = 0, $j = count(uc_cart_get_contents()); $i < $j; $i++) {
+      $nid = check_plain($form['items'][$i]['nid']['#value']);
+      // If this item is alacarte disable qty box
+			$node=node_load($nid);
+			if($node->model=="alacarte"){
+        $form['items'][$i]['qty']['#type'] = 'value';
+        $form['items'][$i]['qty']['#theme'] = 'restrict_qty_field';
+      }
+    }
+  }
+}
+
+// Themes cart Qty. boxes so they can't be changed. (currently not in use)
+function theme_restrict_qty_field($element) {
+  return check_plain($element['#value']);
+}
+
+/**
+ * called by alacarte_functions_nodeapi().
+ */
+function _alacarte_functions_preview_nodeapi(&$node, $arg = 0) {
+  if ($node->type=="product" && $node->model=="alacarte") {
+  	$article_nid=alacarte_functions_get_article_nid_for_product($nid);
+  	drupal_goto("node/".$article_nid);
+  	return;
+  }
+  if ($node->type=="alacarte_article") {
+//print_r($node);
+	  //this is an article that needs to be filtered
+		global $user;
+		$loggedin=($user->uid? true: false);
+		$acl_access=field_acl_check_access($user->uid,$node->nid,"field_full_body");
+		$product_nid= $node->field_product_nid[0][value];
+
+		$hdr=taxonomy_subhed($node);
+
+		if ($acl_access){
+			//user has access to the full article so don't show the teaser at all - this weird path to the full body field seems like the best way to get it because it has already been themed now.  this preserves the theming without showing the teaser or doing any string operations.
+			$displaybody = $node->content['field_full_body']['#children'];
+			//need the email alerts sign up form too
+
+		} else {
+			$displaybody=$node->body;
+		}
+
+	  $node->body = theme('alacarte_body',$node->nid, $node->title,$node->taxonomy, $displaybody, date('l, F j, Y - H:i',$node->created),$node->comment_count, $hdr, $loggedin, $acl_access, $product_nid);
+  }
+}
+
+function taxonomy_subhed($node = NULL) {
+	//get a taxonomy term to use as subhed.
+	//Todo - better business logic?
+	//note see this same function in MNI theme
+  if ($node != NULL && !empty($node->taxonomy)) {
+      foreach ($node->taxonomy as $term) {
+        if (is_object($term) && ($term->vid==1 || $term->vid==2)) {
+        	$current_term=$term->name;
+       		break;
+        }
+      }
+    return $current_term;
+  }
+}
+
+
+/*
+*  ----------------------------------------------------------------------------------
+*  this section is to disallow commenting by users who have not purchased story
+*  largely swiped from comment_perm module which does it by role
+*  ----------------------------------------------------------------------------------
+*/
+
+
+
+/**
+ * Implementation of hook_comment().
+ */
+function alacarte_functions_comment(&$comment, $op) {
+  switch ($op) {
+    case 'validate':
+      $nid = $comment['nid'];
+      if (!alacarte_functions_comment_access($nid) ) {
+        form_set_error('', _alacarte_functions_comment_access_denied_message($nid));
+      }
+      break;
+    case 'insert':
+      $current_status = $comment['status'];
+      $desired_status = alacarte_functions_post_without_permission_access($comment['nid']) ? COMMENT_PUBLISHED : COMMENT_NOT_PUBLISHED;
+      if ($current_status != $desired_status) {
+        db_query("UPDATE {comments} SET status=%d WHERE cid=%d", $desired_status, $comment['cid']);
+        $comment['status'] = $desired_status;
+      }
+      break;
+  }
+}
+
+/**
+ * called by alacarte_functions_form_alter().
+ */
+function _alacarte_functions_comment_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'comment_form') {
+    $nid = check_plain($form['nid']['#value']);
+    if (!alacarte_functions_comment_access($nid)) {
+      // for comment reply pages, redirect back to the node
+      if (arg(0) == 'comment' && arg(1) == 'reply' && is_numeric(arg(2))) {
+        drupal_set_message(_alacarte_functions_comment_access_denied_message($nid), 'error');
+        drupal_goto('node/'. check_plain(arg(2)));
+      }
+      else {
+        // for inline comment forms, just remove their fields so nothing will show
+        unset($form['comment_filter']);
+        foreach ($form as $key => $item) {
+          if ($type = $item['#type']) {
+            switch ($type) {
+              case 'value':
+              case 'hidden':
+                // keep these
+                break;
+              default:
+                // remove all others
+                unset($form[$key]);
+                break;
+            }
+          }
+        }
+
+        // display a message to users who can't post comments
+        $form['text'] = array(
+          '#value' => '<p id="comment-perm-access-denied">'. _alacarte_functions_comment_access_denied_message($nid) .'</p>'
+        );
+      }
+    }
+
+    if (arg(0) == 'comment' && arg(1) == 'edit' && is_numeric(arg(2))) {
+      if (!alacarte_functions_edit_access($nid)) {
+        drupal_set_message(_alacarte_functions_comment_access_denied_message($nid), 'error');
+        drupal_goto('node/'. $nid);
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_link_alter().
+ */
+function alacarte_functions_link_alter(&$links, $node) {
+  if (!alacarte_functions_comment_access($node)) {
+    unset($links['comment_add']);
+    if (module_exists('quote')) {
+      unset($links['quote']);
+    }
+
+    // hide comments links entirely if that setting is enabled
+    if (variable_get('alacarte_functions_hide_comments', 0)) {
+      unset($links['comment_comments']);
+      unset($links['comment_new_comments']);
+    }
+  }
+}
+
+
+/**
+ * called by alacarte_functions_nodeapi().
+ */
+function _alacarte_functions_comment_nodeapi(&$node, $arg = 0) {
+      if (variable_get('alacarte_functions_hide_comments', 0) && !alacarte_functions_comment_access($node)) {
+        $node->comment = COMMENT_NODE_DISABLED;
+      }
+}
+
+
+/**
+ * Can the current user add comments to a given node?
+ */
+function alacarte_functions_comment_access($node) {
+  global $user;
+
+  if (is_numeric($node)) {
+    $node = node_load($node);
+  }
+
+	if (!$user->uid){
+		//anon user - no commenting
+		return FALSE;
+	}
+	if ($node->type!="alacarte_article"){
+		//if it's not alacarte, ignore
+		return TRUE;
+	}
+  if (user_access('administer comments') || field_acl_check_access($user->uid,$node->nid,"field_full_body")) {
+  	//user has access to the full article (or is admin) so allow commenting
+    return TRUE;
+  } else {
+		//no commenting
+    return FALSE;
+	}
+}
+
+/**
+ * Can the current user post comments without permission?
+ */
+function alacarte_functions_post_without_permission_access($node) {
+  return alacarte_functions_comment_access($node);
+}
+
+/**
+ * Can the current user edit comments?
+ */
+function alacarte_functions_edit_access($node) {
+	return alacarte_functions_comment_access($node);
+}
+
+/**
+ * Process variables for comment.tpl.php.
+ *
+ * @see theme_comment()
+ */
+function alacarte_functions_preprocess_comment(&$variables) {
+  // remove edit link
+  if (isset($variables['links']) && !user_access('administer comments')) {
+    if (!alacarte_functions_edit_access($variables['node'])) {
+      $variables['links'] = preg_replace('|<li class="comment_edit.*?</li>|i', '', $variables['links']);
+    }
+    if (!alacarte_functions_comment_access($variables['node'])) {
+      $variables['links'] = preg_replace('|<li class="comment_reply.*?</li>|i', '', $variables['links']);
+    }
+    if (strpos($variables['links'], '<li') === FALSE) {
+      $variables['links'] = '';
+    }
+  }
+}
+
+/**
+ * 'Post new comment' forms on the node page should be removed
+ * if a user doesn't have permission to post comments.
+ */
+function alacarte_functions_preprocess_box(&$variables) {
+  if (arg(0) == 'node' && is_numeric(arg(1))) {
+    if (!alacarte_functions_comment_access(arg(1))) {
+      if ($variables['title'] == t('Post new comment')) {
+        unset($variables['title']);
+        unset($variables['content']);
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function alacarte_functions_menu() {
+  $items = array();
+
+  $items['admin/content/alacarte-functions-settings'] = array(
+    'title' => 'Alacarte Article Settings',
+    'description' => 'Comment Access options for users who have not purchased article.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('alacarte_functions_admin_settings'),
+    'access arguments' => array('administer alacarte_functions'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function _alacarte_functions_comment_access_denied_message($nid){
+	return "Sorry, commenting on this article is restricted";
+}
+
+/**
+ * Menu callback; presents the alacarte_functions_admin settings page.
+ */
+function alacarte_functions_admin_settings() {
+  $form = array();
+
+  $form['alacarte_functions_hide_comments'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Hide comments entirely for users who haven\'t purchased the article'),
+    '#default_value' => variable_get('alacarte_functions_hide_comments', 0),
+    '#description' => t('Comments will be hidden entirely for users who have not purchased the article.  If unchecked, the messages set below will be shown instead.'),
+  );
+
+  $form['alacarte_functions_message_reg'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Commenting denied message for registered users who have not purchased the alacarte article'),
+    '#default_value' => variable_get('alacarte_functions_message_reg', t("Please purchase the article to comment.")),
+    '#description' => t('Ideally commenting will be invisible to those without permission to post, but
+                         just in case you can specify the message they will see.')
+  );
+
+  return system_settings_form($form);
+}
+
+/* hide subscriptions (email alerts) form on alacarte articles if no ACL */
+function _alacarte_functions_form_alter(&$form, $form_state, $form_id) {
+  global $user;
+	$pos = strpos($form_id, "notifications_ui_options_form"); //this form may appear multiple times each id appends _0 _1 ...
+
+	if ($pos !== false) {
+		if (is_numeric(arg(1))) {
+		  $node = node_load(check_plain(arg(1)));
+		  if($node && $node->type=="alacarte_article"){
+			  if (!field_acl_check_access($user->uid,$node->nid,"field_full_body")) {
+					$form=array(); //clear the form
+					return $form;
+				}
+			}
+		}
+	}
+}
+
+//need to remove the popup window that uc_saferpay creates
+function _alacarte_functions_ucsaferpay_popup_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'uc_cart_checkout_review_form' && ($order_id = intval($_SESSION['cart_order'])) > 0) {
+    $order = uc_order_load($order_id);
+    if ($order->payment_method == 'saferpay') {
+      //remove this:  $form['#attributes']['onsubmit'] = 'window.open(\'' . $url . '\', \'SaferpayTerminal\', \'width=650,height=500\'); return false;';
+      unset($form['#attributes']['onsubmit']);
+    }
+  }
+}
+
+
+/**
+ * Implementation of hook_checkout_pane_alter().
+ */
+
+//add a link back to cart since we bypass it and go straight to checkout
+function alacarte_functions_checkout_pane_alter(&$panes) {
+  foreach ($panes as &$pane) {
+    if ($pane['id'] == 'cart') {
+      $pane['title'] = 'Cart contents <a href="/cart">Click here to modify or delete items in your cart</a>';
+    }
+  }
+
+}
+
+
+//add terms of service checkbox and validate
+//adapted from uc_termsofservice module which did too much and not the way we want it so simplify it here
+
+/**
+ * Implementation of hook_checkout_pane().
+ */
+function alacarte_functions_checkout_pane() {
+  $panes[] = array(
+    'id' => 'alacarte_functions_tos_checkout',
+    'callback' => 'alacarte_functions_tos_checkout_pane_callback',
+    'title' => t('@title', array('@title' => 'Terms of Use')),
+    'desc' => t("You must agree to our Terms of Use in order to purchase articles on MNINews"),
+    'weight' => 5,
+    'collapsible' => FALSE,
+  );
+  return $panes;
+}
+
+function _alacarte_functions_checkout_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'uc_cart_checkout_form') {
+    $form['#validate'][] = 'alacarte_functions_checkout_form_validate';
+    return;
+  }
+}
+
+function alacarte_functions_checkout_form_validate($form, &$form_state) {
+  $agreed = $form_state['values']['panes']['alacarte_functions_tos_checkout']['tos_agree']['agreed'];
+  if (!$agreed) {
+    form_set_error('tos_agree', t("You must accept the Terms of Use to continue."));
+  }
+}
+
+/**
+ * Callback form for checkout pane.
+ */
+function alacarte_functions_tos_checkout_pane_callback($op) {
+  switch ($op) {
+    case 'view':
+		  $form = array();
+	    $form['tos_agree'] = array(
+	      '#type' => 'checkboxes',
+	      '#options' => array('agreed' => t('I have read and agree to the <a href="/terms-use">MNINews Terms of Use</a>')),
+	    );
+	    //$form['#theme'] = 'tos_checkout_pane';
+      return array('contents' => $form);
+      break;
+    case 'settings':
+      //$form = alacarte_functions_tos_checkout_admin_form('checkout');
+      //TODO add config to take out the hard coded text strings above.
+      return $form;
+      break;
+  }
+}
+
+
+
+
+
+

@@ -1,0 +1,131 @@
+/* Search Form */
+.page-search-site form#search-form label.control-label,
+.page-search-site form#search-form label{
+  display: none;
+}
+.page-search-site form#search-form label.control-label.option.checkbox{
+  display: inline;
+}
+.page-search-site form#search-form input#edit-keys{
+  width: 450px;
+}
+
+/* Search Results */
+ul.search-results,
+ol.search-results{
+  margin: 0;
+  padding: 0;
+}
+li.search-result{
+  list-style: none;
+  margin: 0;
+  margin-bottom: 20px;
+  min-height: 65px;
+  padding: 0;
+  padding-left: 60px;
+}
+li.search-result h3.title{
+  margin: 0;
+}
+.search-result.docs{
+  background: url(../images/docs-icon.png) 0px 5px no-repeat transparent;
+}
+.search-result.mktg{
+  background: url(../images/mktg-icon.png) 0px 5px no-repeat transparent;
+}
+.search-result.blog{
+  background: url(../images/blog-icon.png) 0px 5px no-repeat transparent;
+}
+.search-result.devl{
+  background: url(../images/devl-icon.png) 0px 5px no-repeat transparent;
+}
+p.search-snippet{
+  font-family: ars-maquette-web, 'Myriad Pro', 'Gill Sans', 'Lucida Sans', Verdana, Geneva, sans-serif;
+  font-size: 13px;
+  line-height: 19.5px;
+}
+.search-results .search-snippet-info{
+  padding-left: 0 !important;
+}
+
+/* Facets */
+.spelling-suggestions{
+  display: none;
+}
+.block-facetapi{
+  margin-bottom: 20px;
+}
+.block-facetapi h2{
+  color: #666;
+  font-family: "ars-maquette-web", "Myriad Pro", "Gill Sans", "Lucida Sans", Verdana, Geneva, sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 22px;
+  padding: 4px 0px;
+  text-transform: uppercase;
+}
+ul.facetapi-facetapi-checkbox-links{
+  margin: 0;
+  padding: 0;
+}
+ul.facetapi-facetapi-checkbox-links li.leaf{
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+ul.facetapi-facetapi-checkbox-links input.facetapi-checkbox{
+  margin-right: 5px;
+}
+#edit-retain-filters{
+  display: inline;
+  float: none;
+  margin: 0;
+  margin-right: 5px;
+}
+
+/* Pagination */
+.pagination,
+.pagination ul {
+  text-align: center;
+  box-shadow: none !important;
+}
+.pagination li, .pagination a {
+  display: inline-block !important;
+}
+.pagination a {
+  border: 1px solid #DDD;
+  border-left-width: 1px !important;
+  color: #B3B3B3;
+}
+.pagination a:hover{
+  color: #B3B3B3;
+}
+.pagination li a {
+  padding: 0 5px;
+  line-height: 20px;
+}
+.pagination .active a {
+  color: #FFF !important;
+  background-color: #0094D8 !important;
+}
+.pagination li.first.prev a ,
+.pagination li.last.next a {
+  color: transparent;
+  background-repeat: no-repeat;
+  height: 20px;
+  width: 8px;
+}
+.pagination li:last-child a,
+.pagination li:first-child a {
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+}
+.pagination li.first.prev a {
+  background-image: url("http://apigee.com/about/sites/all/themes/apigee_themes/apigee_mktg/images/arrow-left.png");
+  background-position: 4px 5px;
+}
+.pagination li.last.next a {
+  background-image: url("http://apigee.com/about/sites/all/themes/apigee_themes/apigee_mktg/images/arrow-right.png");
+  background-position: 6px 5px;
+}

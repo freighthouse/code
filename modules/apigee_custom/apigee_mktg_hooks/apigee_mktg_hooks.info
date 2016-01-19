@@ -1,0 +1,8 @@
+name = Apigee MKTG Hooks
+description = Custom overrides of core and contrib modules
+
+core = 7.x
+package = MKTG
+
+stylesheets[all][] = css/apigee-mktg-hooks.css
+scripts[] = js/apigee-mktg-hooks.js

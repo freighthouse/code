@@ -1,0 +1,241 @@
+# @author Jeremy Cerda
+# @version $Id: rich.production.cfg-marketnews 2337 2011-07-08 15:25:32Z jcerda $
+
+Basic Headlines                    	10001    	0	mainwire
+Agencies                           	40049    	0	mainwire agencies
+Agencies                           	40032    	0	mainwire agencies
+All Europe                         	40006    	0	mainwire alleurope
+All Europe                         	40017    	0	mainwire alleurope
+All Europe                         	40012    	0	mainwire alleurope
+All Europe                         	40003    	0	mainwire alleurope
+All Europe                         	40009    	0	mainwire alleurope
+All Europe                         	40019    	0	mainwire alleurope
+All Europe                         	40022    	0	mainwire alleurope
+All Europe                         	40022    	0	mainwire alleurope
+All Europe                         	40007    	0	mainwire alleurope
+Asia News Events Calendar          	20078    	0	credit asianewseventscalendar
+Asia News Events Calendar          	20078    	0	fibullets asianewseventscalendar
+Asia News Events Calendar          	20078    	0	fxbullets asianewseventscalendar
+Asia News Events Calendar          	20078    	0	mainwire asianewseventscalendar
+Asia Including Japan               	40028    	0	mainwire asiaincludingjapan
+Australia                          	M$L$$$   	0	mainwire australia
+Australia Data Stories             	MALDS$   	0	mainwire australiadatastories
+Australia Economic Data Calendar   	20046    	0	mainwire australiaeconomicdatacalendar
+BOE State of Play                  	20112    	0	credit boestateofplay frontpage
+BOE State of Play                  	20112    	0	fibullets boestateofplay frontpage
+BOE State of Play                  	20112    	0	fxbullets boestateofplay frontpage
+BOE State of Play                  	20112    	0	mainwire boestateofplay
+BOE State of Play                  	20117    	0	mainwire boestateofplay
+BOJ State of Play                  	20081    	0	credit bojstateofplay
+BOJ State of Play                  	20081    	0	fibullets bojstateofplay
+BOJ State of Play                  	20081    	0	fxbullets bojstateofplay
+BOJ State of Play                  	20081    	0	mainwire bojstateofplay
+Bank of England                    	40023    	0	mainwire bankofengland
+Bank of England Comments           	20270    	0	mainwire bankofenglandcomments
+Bank of Japan                      	40556    	0	mainwire bankofjapan
+Bank of Japan State of Play        	20081    	0	mainwire bankofjapanstateofplay
+Canada                             	40054    	0	mainwire canada
+Canada Data Stories                	40560    	0	mainwire canadadatastories
+Canada Data Tables                 	40025    	0	mainwire canadadatatables
+Canada Data Tables                 	40400    	0	mainwire canadadatatables
+Canada Economic Data Calendar      	20055    	0	mainwire canadaeconomicdatacalendar
+Canada/Mexico Data Calendar        	20056    	0	credit canadamexicodatacalendar
+Canada/Mexico Data Calendar        	20056    	0	fibullets canadamexicodatacalendar
+Canada/Mexico Data Calendar        	20056    	0	fxbullets canadamexicodatacalendar
+Central Bank Rate Actions          	20094    	0	credit centralbankrateactions
+Central Bank Rate Actions          	20094    	0	fibullets centralbankrateactions
+Central Bank Rate Actions          	20094    	0	fxbullets centralbankrateactions
+Central Bank Rate Actions          	20094    	0	mainwire centralbankrateactions
+China                              	40546    	0	mainwire china
+China Data Calendar                	20091    	0	fibullets chinadatacalendar
+China Data Calendar                	20091    	0	fxbullets chinadatacalendar
+China Data Calendar                	20107    	0	credit chinadatacalendar
+China Data Stories                 	40558    	0	mainwire chinadatastories
+China Data Tables                  	40557    	0	mainwire chinadatatables
+China Data Tables                  	40559    	0	mainwire chinadatatables
+China Economic Data Calendar       	20091    	0	mainwire chinaeconomicdatacalendar
+China Money Week                   	20256    	0	mainwire chinamoneyweek
+Commodities Bullets                	F-BULLED 	0	cobullets cobulletsp
+Congress Watch                     	20224    	0	mainwire congresswatch frontpage
+Corporate Bond Chatter             	20050    	0	credit corporatebondchatter	frontpage
+Corporate Bond Chatter             	20050    	0	mainwire corporatebondchatter frontpage
+Corporate Bond Chatter             	20115    	0	mainwire corporatebondchatter frontpage
+Credit Bullets                     	F-BULLCR 	0	credit crbulletsp
+Credit Crisis                      	M$$CR$   	0	mainwire creditcrisis
+Credit Default Swaps               	20279    	0	credit creditdefaultswaps frontpage
+Credit Default Swaps               	20279    	0	mainwire creditdefaultswaps	frontpage
+Credit Market                      	20048    	0	mainwire creditmarket frontpage
+Credit Market                      	20035    	0	mainwire creditmarket frontpage mainwirep
+Credit Market                      	20004    	0	mainwire creditmarket frontpage mainwirep
+Credit Market                      	40102    	0	mainwire creditmarket frontpage
+Credit Market                      	40008    	0	mainwire creditmarket frontpage
+Credit Market                      	MN$$AG$  	0	mainwire creditmarket frontpage
+Credit Market                      	40038    	0	mainwire creditmarket frontpage
+Credit Market Focus                	20016    	0	credit creditmarketfocus
+Credit Market Focus                	20016    	0	fibullets creditmarketfocus
+ECB Comments                       	20085    	0	mainwire ecbcomments
+ECB State of Play                  	20089    	0	credit ecbstateofplay
+ECB State of Play                  	20089    	0	fibullets ecbstateofplay
+ECB State of Play                  	20089    	0	fxbullets ecbstateofplay
+ECB State of Play                  	20089    	0	mainwire ecbstateofplay
+ECB Update                         	20272    	0	mainwire ecbupdate frontpage
+Economic Data Review               	20059    	0	fibullets economicdatareview
+Economic Data Review               	20059    	0	fxbullets economicdatareview
+Equities Bullets                   	F-BULLEE 	0	eqbullets eqbulletsp
+Euro Credit                        	20115    	0	credit eurocredit
+Euro Credit Supply Pipeline        	20106    	0	credit eurocreditsupplypipeline
+Euro Credit Supply Pipeline        	20106    	0	fibullets eurocreditsupplypipeline
+European Central Bank              	40013    	0	mainwire europeancentralbank mainwirep
+European News Event Calendar       	20034    	0	credit europeannewseventcalendar
+European News Event Calendar       	20034    	0	fibullets europeannewseventcalendar
+European News Event Calendar       	20034    	0	fxbullets europeannewseventcalendar
+European News Event Calendar       	20034    	0	mainwire europeannewseventcalendar
+Eurozone                           	40022    	0	mainwire eurozone
+Eurozone                           	40007    	0	mainwire eurozone
+Eurozone Bond Technicals           	20011    	0	fibullets eurozonebondtechnicals
+Eurozone Data Stories              	40007    	0	mainwire eurozonedatastories
+Eurozone Data Stories              	40045    	0	mainwire eurozonedatastories
+Eurozone Data Stories              	40026    	0	mainwire eurozonedatastories
+Eurozone Data Stories              	40044    	0	mainwire eurozonedatastories
+Eurozone Data Stories              	40548    	0	mainwire eurozonedatastories
+Eurozone Detailed Data Tables      	40020    	0	mainwire eurozonedetaileddatatables
+Eurozone Key Indicators Summary    	20103    	0	mainwire eurozonekeyindicatorssummary
+Eurozone Summary Data Tables       	40052    	0	mainwire eurozonesummarydatatables
+Eurozone/UK Bond Calendar          	20099    	0	mainwire eurozoneukbondcalendar
+Eurozone/UK Bond Calendar          	20097    	0	fibullets eurozoneukbondcalendar
+Exclusives                         	40000    	0	mainwire exclusives mainwirep
+FX Expectations Survey             	20072    	0	fxbullets fxexpectationssurvey
+FX Market                          	20223    	0	mainwire fxmarket frontpage
+FX Market                          	20073    	0	mainwire fxmarket frontpage
+FX Market                          	20003    	0	mainwire fxmarket frontpage mainwirep
+FX Market                          	20028    	0	mainwire fxmarket frontpage mainwirep
+FX Market                          	40015    	0	mainwire fxmarket frontpage
+FX Options                         	20079    	0	mainwire fxoptions
+Fed State of Play                  	20220    	0	credit fedstateofplay
+Fed State of Play                  	20220    	0	fibullets fedstateofplay
+Fed State of Play                  	20220    	0	fxbullets fedstateofplay
+Fed State of Play                  	20220    	0	mainwire fedstateofplay
+Federal Reserve                    	40021    	0	mainwire federalreserve mainwirep
+Fixed Income Bullets               	20000    	0	fibullets fibulletsp
+Foreign Exchange Bullets           	20001    	0	fxbullets fxbulletsp
+France                             	40012    	0	mainwire france
+France Data Stories                	40045    	0	mainwire francedatastories
+France Data Tables                 	40051    	0	mainwire francedatatables
+France Data Tables                 	40040    	0	mainwire francedatatables
+France Key Indicators Summary      	20095    	0	mainwire francekeyindicatorssummary
+Germany                            	40003    	0	mainwire germany
+Germany Data Stories               	40026    	0	mainwire germanydatastories
+Germany Data Tables                	40039    	0	mainwire germanydatatables
+Germany Data Tables                	40016    	0	mainwire germanydatatables
+Germany Key Indicators Summary     	20096    	0	mainwire germanykeyindicatorssummary
+Global News Event Calendar         	20014    	0	credit globalnewseventcalendar
+Global News Event Calendar         	20014    	0	fibullets globalnewseventcalendar
+Global News Event Calendar         	20014    	0	fxbullets globalnewseventcalendar
+Global News Event Calendar         	20013    	0	mainwire globalnewseventcalendar
+Government Bond Focus              	20109    	0	fibullets governmentbondfocus
+International Economy              	40005    	0	mainwire internationaleconomy frontpage
+International Economy              	40468    	0	mainwire internationaleconomy frontpage
+Italy                              	40009    	0	mainwire italy
+Italy Data Calendar                	20067    	0	fibullets italydatacalendar
+Italy Data Calendar                	20067    	0	fxbullets italydatacalendar
+Italy Data Stories                 	40044    	0	mainwire italydatastories
+Italy Data Tables                  	40056    	0	mainwire italydatatables
+Italy Data Tables                  	40030    	0	mainwire italydatatables
+Japan                              	40037    	0	mainwire japan
+Japan Data Calendar                	20101    	0	credit japandatacalendar
+Japan Data Stories                 	40554    	0	mainwire japandatastories
+Japan Data Tables                  	40553    	0	mainwire japandatatables
+Japan Data Tables                  	40555    	0	mainwire japandatatables
+Japan Economic Data Calendar       	20100    	0	mainwire japaneconomicdatacalendar
+Japanese Data Calendar             	20101    	0	fibullets japanesedatacalendar
+Japanese Data Calendar             	20101    	0	fxbullets japanesedatacalendar
+Key FX Levels                      	20005    	0	fxbullets keyfxlevels
+Latam Watch                        	20221    	0	mainwire latamwatch frontpage
+Latin America                      	40106    	0	mainwire latinamerica
+Latin America                      	40041    	0	mainwire latinamerica
+Latin America                      	40031    	0	mainwire latinamerica
+MNI Capital Goods Index            	40544    	0	mainwire mnicapitalgoodsindex
+MNI China Business Sentiment Survey	40547    	0	mainwire mnichinabusinesssentimentsurvey frontpage
+MNI Proprietary Economic Indexes   	40544    	0	mainwire mniproprietaryeconomicindexes frontpage
+MNI Proprietary Economic Indexes   	40533    	0	mainwire mniproprietaryeconomicindexes frontpage
+MNI Retail Sales Index             	40533    	0	mainwire mniretailsalesindex
+Market Glance                      	20006    	0	fibullets marketglance
+Mergers And Acquisitions           	20020    	0	fxbullets mergersandacquisitions
+Mexico                             	40532    	0	mainwire mexico
+Mexico                             	40055    	0	mainwire mexico
+New Zealand                        	40053    	0	mainwire newzealand
+New Zealand Data Stories           	MANDS$   	0	mainwire newzealanddatastories
+New Zealand Economic Data Calendar 	20046    	0	mainwire newzealandeconomicdatacalendar
+People's Bank of China             	MMQPB$   	0	mainwire peoplesbankofchina
+Portfolios                         	20236    	0	mainwire portfolios
+Reality Check                      	20068    	0	mainwire realitycheck frontpage mainwirep
+Reality Check                      	20068    	0	mainwire realitycheck frontpage mainwirep
+Reality Check                      	MABRC$   	0	mainwire realitycheck frontpage
+Reality Check                      	MAJRC$   	0	mainwire realitycheck frontpage
+Reality Check                      	MAQRC$   	0	mainwire realitycheck frontpage
+Reality Check                      	40048    	0	mainwire realitycheck frontpage
+Reality Check                      	40048    	0	mainwire realitycheck frontpage
+Reality Check                      	40406    	0	mainwire realitycheck frontpage
+Spain Data Stories                 	40548    	0	mainwire spaindatastories
+Spain Data Tables                  	40091    	0	mainwire spaindatatables
+Spain Data Tables                  	40064    	0	mainwire spaindatatables
+Stories By Steve Beckner           	M$$BR$   	0	mainwire storiesbystevebeckner
+Talk from the Trenches             	20036    	0	mainwire talkfromthetrenches
+The FX Spot                        	20223    	0	mainwire thefxspot
+Top News Stories                   	40002    	0	mainwire topnewsstories mainwirep
+UK                                 	40006    	0	mainwire uk
+UK Data Stories                    	40154    	0	mainwire ukdatastories
+UK Data Tables                     	40549    	0	mainwire ukdatatables
+UK Data Tables                     	40550    	0	mainwire ukdatatables
+UK Economic Data Calendar          	20039    	0	credit ukeconomicdatacalendar
+UK Economic Data Calendar          	20039    	0	fibullets ukeconomicdatacalendar
+UK Economic Data Calendar          	20039    	0	fxbullets ukeconomicdatacalendar
+UK Economic Data Calendar          	20039    	0	mainwire ukeconomicdatacalendar
+UK Economic Data Calendar          	20038    	0	mainwire ukeconomicdatacalendar
+UK Forecast Survey                 	20116    	0	mainwire ukforecastsurvey
+UK Forecast Survey                 	20240    	0	mainwire ukforecastsurvey
+UK Forecast Survey                 	20246    	0	mainwire ukforecastsurvey
+US Agency Spreads                  	20012    	0	credit usagencyspreads
+US Agency Spreads                  	20012    	0	fibullets usagencyspreads
+US Agency Spreads                  	20012    	0	mainwire usagencyspreads
+US Bond Technicals                 	20022    	0	fibullets usbondtechnicals
+US Companies                       	40047    	0	mainwire uscompanies
+US Companies                       	40043    	0	mainwire uscompanies
+US Data Stories                    	40014    	0	mainwire usdatastories
+US Data Tables                     	40018    	0	mainwire usdatatables
+US Data Tables                     	40004    	0	mainwire usdatatables
+US Economic Data Calendar          	20031    	0	credit useconomicdatacalendar
+US Economic Data Calendar          	20031    	0	fibullets useconomicdatacalendar
+US Economic Data Calendar          	20031    	0	fxbullets useconomicdatacalendar
+US Economic Data Calendar          	20031    	0	mainwire useconomicdatacalendar
+US Economic Data Calendar          	20030    	0	mainwire useconomicdatacalendar
+US Forecast Highlights             	20041    	0	fibullets usforecasthighlights
+US Forecast Highlights             	20041    	0	fxbullets usforecasthighlights
+US Forecast Highlights             	20041    	0	mainwire usforecasthighlights
+US Forecast Survey                 	20042    	0	mainwire usforecastsurvey
+US Forecast Survey                 	20049    	0	mainwire usforecastsurvey
+US Forecast Survey                 	20077    	0	mainwire usforecastsurvey
+US Interest Rate Swaps             	20268    	0	mainwire usinterestrateswaps frontpage
+US Key Indicators Summary          	20027    	0	mainwire uskeyindicatorssummary
+US Markets Calendar                	20015    	0	credit usmarketscalendar
+US Markets Calendar                	20015    	0	fibullets usmarketscalendar
+US Markets Calendar                	20015    	0	fxbullets usmarketscalendar
+US News Briefs                     	40035    	0	mainwire usnewsbriefs
+US News Event Calendar             	20019    	0	credit usnewseventcalendar
+US News Event Calendar             	20019    	0	fibullets usnewseventcalendar
+US News Event Calendar             	20019    	0	fxbullets usnewseventcalendar
+US News Event Calendar             	20019    	0	mainwire usnewseventcalendar
+US News Event Calendar             	20018    	0	mainwire usnewseventcalendar
+US Repo Market Rates               	20060    	0	mainwire usrepomarketrates
+US Treasury Options Volatilities   	20009    	0	fibullets ustreasuryoptionsvolatilities
+US Treasury/Agency Auction Calendar	20023    	0	fibullets ustreasuryagencyauctioncalendar
+US Treasury/Agency Auction Calendar	20023    	0	mainwire ustreasuryagencyauctioncalendar
+US Weekly Economic Data Roundup    	20061    	0	mainwire usweeklyeconomicdataroundup
+US$ Credit Supply Pipeline         	20002    	0	credit uscreditsupplypipeline
+US$ Credit Supply Pipeline         	20002    	0	fibullets uscreditsupplypipeline
+United States                      	40001    	0	mainwire unitedstates
+Washington                         	40011    	0	mainwire washington
+Washington                         	40010    	0	mainwire washington
+World News Roundup                 	20008    	0	mainwire worldnewsroundup
+Japanese Government                	MGJ$$$   	0	japanesegovernment
+

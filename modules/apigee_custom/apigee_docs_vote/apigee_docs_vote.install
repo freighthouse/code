@@ -1,0 +1,7 @@
+<?php
+function apigee_docs_vote_install() {
+  variable_set('votingapi_storage_module', 'apigee_docs_vote');
+}
+function apigee_docs_vote_uninstall() {
+  variable_del('votingapi_storage_module');
+}

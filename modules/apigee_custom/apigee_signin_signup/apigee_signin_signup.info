@@ -1,0 +1,6 @@
+name = Apigee Sign-In/Sign-On
+description = Extend Sign-In/Sign-On functionality.
+core = 7.x
+package = "apigee.com"
+
+configure = admin/config/system/signin-signup

@@ -1,0 +1,40 @@
+<?php if (!empty($q)): ?>
+  <?php
+    // This ensures that, if clean URLs are off, the 'q' is added first so that
+    // it shows up first in the URL.
+    print $q;
+  ?>
+<?php endif; ?>
+<!--<?php
+ // drupal_set_message('<pre>'. print_r($widgets, TRUE) .'</pre>');
+?>-->
+<div class="row">
+  <div class="col-xs-12 col-sm-4">
+    <a class="btn btn-default portal_button" href="//dofr.iha.org" style="width:100%" target="_blank" type="button">DOFR Explorer</a>
+  </div>
+  <div class="col-xs-12 col-sm-4">
+    <a class="btn btn-default portal_button" href="//digitalhealth.iha.org" style="width:100%" target="_blank" type="button">Digital Health Search Tool</a>
+  </div>
+  <div class="col-xs-12 col-sm-4">
+    <a class="btn btn-default portal_button" href="//analytics.iha.org" style="width:100%" target="_blank" type="button">Analytics Portal</a>
+  </div>
+</div>
+<div class="views-exposed-form container">
+  <div class="views-exposed-widgets clearfix">
+    <div class="col-sm-8 col-xs-12">
+      <label>Keyword</label>
+      <?php print (!empty($widgets['filter-keys']))?
+        $widgets['filter-keys']->widget : ''; ?>
+    </div>
+    <div class="col-sm-4 col-xs-12" style="text-align: center;">
+      <div class="col-xs-6 views-exposed-widget views-submit-button">
+            <?php print $button; ?>
+      </div>
+      <?php if (!empty($reset_button)): ?>
+        <div class="col-xs-6 views-exposed-widget views-reset-button">
+          <?php print $reset_button; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>

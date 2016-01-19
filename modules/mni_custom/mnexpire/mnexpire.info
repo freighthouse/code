@@ -1,0 +1,6 @@
+; $Id
+name = MNI Expire
+description = Expiration of nodes based on information given by the mniblog software.
+core = 6.x
+package = MNI
+php = 5.2

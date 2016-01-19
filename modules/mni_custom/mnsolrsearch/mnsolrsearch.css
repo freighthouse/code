@@ -1,0 +1,18 @@
+@CHARSET "UTF-8";
+/*
+# @author: Jeremy Cerda
+# @version: $Id: mnsolrsearch.css 2385 2011-07-28 19:33:29Z jcerda $
+*/
+
+div.date-clear-block {
+	display: inline-block;
+	padding-top: 10px;
+}
+
+form#search-form input#edit-submit {
+	display: block;
+}
+
+p.search-snippet {
+	display: none;
+}

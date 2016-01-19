@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * Installs our schema and drupal variables
+ */
+function mnexpire_install()
+{
+	drupal_install_schema('mnexpire');
+}
+
+/**
+ * Removes our schema and drupal variables
+ */
+function mnexpire_uninstall()
+{
+	drupal_uninstall_schema('mnexpire');
+	$types = node_get_types();
+	foreach($types as &$t){
+		variable_del("mnexpire_expire_action_".$t->type);
+		variable_del("mnexpire_workflow_cfg_state_".$t->type);
+		variable_del("mnexpire_workflow_cfg_force_".$t->type);
+	}
+}
+
+/**
+ * Database schema for mnexpire, include the core and script tables
+ */
+function mnexpire_schema()
+{
+	//--------------------------------------------------------------------------
+	//  Core Data Table
+	//--------------------------------------------------------------------------
+	$cd_fields  = array(
+		'nid'			=> array('type' => 'int', 'unsigned' => TRUE,
+							'not null' => TRUE, 'default' => 0,
+							'disp-width' => '10'),
+		'time_to_exp'	=> array('type' => 'int', 'unsigned' => FALSE,
+							'not null' => TRUE, 'default' => -1,
+							'disp-width' => '10'),
+	);
+	// Table itself
+	$schema['mnexpire'] = array(
+		'fields'		=> $cd_fields,
+		'primary key'	=> array('nid')
+	);
+
+	return $schema;
+}

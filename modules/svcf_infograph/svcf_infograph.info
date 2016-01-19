@@ -1,0 +1,4 @@
+name = SVCF: Infographic Block
+description = Displays the infographic animation in a block.
+core = 7.x
+package = Project6

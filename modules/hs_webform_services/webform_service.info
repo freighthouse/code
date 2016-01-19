@@ -1,0 +1,12 @@
+name = HS Webform Services
+description = Custom build for Heyspoon. Provides services for the Webform module.
+package = Heyspoon
+core = 7.x
+version = "7.x-1.0-beta"
+dependencies[] = services
+dependencies[] = webform
+dependencies[] = ctools
+dependencies[] = uuid
+dependencies[] = webform_submission_uuid
+dependencies[] =  views
+files[] = tests/ServicesResourceWebformTests.test

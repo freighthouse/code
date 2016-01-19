@@ -1,0 +1,1 @@
+<div class="iha_search"><?php print $search_form; ?></div>

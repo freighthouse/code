@@ -1,0 +1,4 @@
+name = Apigee Support Request Form
+description = Add some extra functionality, such as dependent drop-downs, to the Support Request webform.
+core = 7.x
+package = apigee.com

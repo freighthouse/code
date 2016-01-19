@@ -1,0 +1,9 @@
+<?php
+
+function turn_home_js_preprocess_page(&$variables) {
+  drupal_add_library('system', 'ui.dialog');
+  if(drupal_is_front_page()){
+    //drupal_add_css(drupal_get_path('module', 'turn_home_js').'/jquery-ui-1.8.17.custom.css');
+    drupal_add_js(drupal_get_path('module', 'turn_home_js').'/turn_home_scripts.js');
+  }
+}

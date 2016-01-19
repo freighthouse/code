@@ -1,0 +1,47 @@
+These are install instructions for mnifilter. Please note, these instructions
+are valid for the follow sites only:
+
+mninews
+marketnews
+
+Any other sites may require upgrades or modifications to work correctly. For
+questions please contact Jeremy Cerda, Al Gleicher, or other development staff.
+
+################################################################################
+  Quick Install (mninews)
+################################################################################
+
+# cd /var/www/mninews/sites/all/modules
+# svn checkout http://10.1.1.40/sites/modules/mnifilter
+# chown -R 1080:mninews mnifilter
+
+// Go to: admin/build/modules
+// Enable the module "MNI Filter"
+
+// Go to: admin/settings/filters
+// Select "Add input format" at the top of the page
+
+// Set the name to "MNI Filter"
+// Select "admin" and "feed" under "Roles"
+// NOTE: If feed has not been setup as an independent role, admin will suffice
+//       for now. This is a security error.
+// Set "MNI Filter" as the only selected option under "Filters"
+// Select "Save configuration" at the bottom
+
+// Ensure that all mniblog publishing software, has properly setup their
+// format.name option under pub.production.cfg files. This option should match
+// with the name given to our new Input Format (in this case "MNI Filter")
+
+// Go to: admin/build/views/edit/hp_stories_by_sector
+// Select "Node: Teaser" from the "Fields" section
+// Under "Maximum Length" expand this out to 800 characters.
+
+// Go to: admin/content/node-settings
+// Under "Length of trimmed posts", set this to 800 characters.
+// NOTE: This will only apply to new stories.
+
+// NOTE: As a final point, ensure that all theme changes are up to date.
+//       This module is NOT responsible for theming or display handling, except
+//       in the case of whether or not to display topiclines. All other display
+//       should be handled at the theme layer. Please check the theme_patches
+//       dir for the latest theme updates.

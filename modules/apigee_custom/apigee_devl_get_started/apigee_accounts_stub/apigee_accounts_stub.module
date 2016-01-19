@@ -1,0 +1,111 @@
+<?php
+
+function apigee_accounts_stub_menu() {
+  $items = array();
+
+  $items['accounts/sign_in'] = array(
+    'title' => 'Please sign in with your Apigee credentials',
+    'page callback'    => 'drupal_get_form',
+    'page arguments' => array('apigee_accounts_stub_authenticate'),
+    'access arguments' => array('access content'),
+  );
+  $items['accounts/sign_out'] = array(
+    'title' => 'Signing out',
+    'page callback'    => 'drupal_get_form',
+    'page arguments' => array('apigee_accounts_stub_signout'),
+    'access arguments' => array('access content'),
+  );
+  $items['accounts/sign_up'] = array(
+    'title' => 'Sign Up for an Apigee login credential',
+    'page callback' => 'apigee_accounts_stub_signup',
+    'access callback' => TRUE
+  );
+  return $items;
+}
+
+function apigee_accounts_stub_signout() {
+  // pretend to sign out here
+  $callback = (isset($_GET['callback']) ? $_GET['callback'] : '<front>');
+  drupal_goto($callback);
+}
+
+function apigee_accounts_stub_authenticate($form, $form_state) {
+  $form = array();
+
+  $form['token'] = array(
+    '#type' => 'value',
+    '#value' => ''
+  );
+  $form['uuid'] = array(
+    '#type' => 'value',
+    '#value' => ''
+  );
+  $form['admin_email'] = array(
+    '#type' => 'value',
+    '#value' => ''
+  );
+
+  $form['callback'] = array(
+    '#type' => 'value',
+    '#value' => $_GET['callback']
+  );
+
+  $form['username'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#title' => 'Username'
+  );
+  $form['password'] = array(
+    '#type' => 'password',
+    '#required' => TRUE,
+    '#title' => 'Password'
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => 'Sign In'
+    )
+  );
+
+  return $form;
+}
+
+function apigee_accounts_stub_authenticate_validate($form, &$form_state) {
+  $host = variable_get('apigee_devl_get_started_usergrid_host', 'https://api.usergrid.com');
+  $args = array(
+    'grant_type' => 'password',
+    'username' => $form_state['values']['username'],
+    'password' => $form_state['values']['password']
+  );
+  $qs = http_build_query($args);
+  $response_obj = drupal_http_request("$host/management/token?$qs");
+  if ($response_obj->code != 200) {
+    form_set_error(NULL, 'Invalid username and/or password.');
+  }
+  else {
+    $json = @json_decode($response_obj->data, TRUE);
+    $form_state['values']['token'] = $json['access_token'];
+    $form_state['values']['uuid'] = $json['user']['uuid'];
+    $form_state['values']['admin_email'] = $json['user']['email'];
+  }
+}
+
+function apigee_accounts_stub_authenticate_submit($form, &$form_state) {
+  $callback = $form_state['values']['callback'];
+  $args = array(
+    'access_token' => $form_state['values']['token'],
+    'uuid' => $form_state['values']['uuid'],
+    'admin_email' => $form_state['values']['admin_email']
+  );
+  $callback .= '?' . http_build_query($args);
+  $form_state['redirect'] = $callback;
+}
+
+function apigee_accounts_stub_signup() {
+  $callback = (!empty($_GET['callback']) && valid_url($_GET['callback']) ? $_GET['callback'] : NULL);
+  return '<p>If this were a real signup page, you would see a signup form here.'
+    . ($callback ? ' <a href="' . $callback . '">Click here to go back.</a>' : '')
+    . '</p>';
+}

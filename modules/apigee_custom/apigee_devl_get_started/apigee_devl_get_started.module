@@ -1,0 +1,439 @@
+<?php
+
+
+function apigee_devl_get_started_init() {
+
+  // Prevent drush from dying.
+  if (function_exists('drush_print')) {
+    return;
+  }
+
+  // Ignore AAC check for URLs starting with these elements:
+  switch (arg(0)) {
+    case 'sign-on':
+    case 'sign-out':
+    case 'aac-callback':
+    case 'no-cookies':
+    case 'admin':
+    case 'aac-unset':
+    case 'user':
+    case 'search':
+    case 'faq-page':
+      return;
+    // AAC may send tokens back to this URL. If they are present, ignore
+    // further AAC checks to avoid circular redirects.
+    case 'get-started':
+      if (!empty($_GET['access_token']) && !empty($_GET['uuid'])) {
+        return;
+      }
+  }
+  // If we have a known status, ignore.
+  $status = (isset($_SESSION['aac_status']) ? $_SESSION['aac_status'] : NULL);
+  if ($status == 'logged-in' || $status == 'logged-out') {
+    return;
+  }
+  $current_uri = drupal_get_path_alias(join('/', arg()));
+  $callback = url('aac-callback', array('query' => array('g' => $current_uri), 'absolute' => TRUE));
+  $host = variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com');
+  $query = array(
+    'callback' => $callback,
+    'is_public' => 'true'
+  );
+
+  $_SESSION['aac_status'] = 'init';
+  drupal_goto("$host/accounts/sign_in", array('query' => $query));
+}
+
+/**
+ * Implements hook_variable_info().
+ *
+ * @param $options
+ * @return array
+ */
+function apigee_devl_get_started_variable_info($options) {
+
+  $variables = array();
+
+  $variables['apigee_devl_get_started_accounts_host'] = array(
+    "title" => t('Accounts Host'),
+    "type" => 'string',
+    "description" => 'Apigee accounts manager instance which will be used to authenticate users',
+    "default" => 'https://accounts.apigee.com'
+  );
+
+  $variables['apigee_devl_get_started_usergrid_host'] = array(
+    "title" => t('Account API Endpoint'),
+    "type" => "string",
+    "description" => 'Endpoint which will be used by the API to authenticate accounts',
+    "default" => 'https://api.usergrid.com'
+  );
+
+  $variables['apigee_devl_get_started_signout_path'] = array(
+    "title" => t("Signout Path"),
+    "type" => 'string',
+    "description" => 'Path to which users will be redirected after they sign out.',
+    "default" => "<front>"
+  );
+
+  return $variables;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function apigee_devl_get_started_menu() {
+
+  $items['sign-on'] = array(
+    'title' => 'Sign On',
+    'page callback' => 'apigee_devl_get_started_sign_on',
+    'access callback' => TRUE
+  );
+
+  $items['sign-out'] = array(
+    'title' => 'Sign On',
+    'page callback' => 'apigee_devl_get_started_sign_out',
+    'access callback' => TRUE
+  );
+
+  $items['get-started'] = array(
+    'title' => 'Welcome! Let’s get you started.',
+    'page callback'    => 'apigee_devl_get_started_page',
+    'access arguments' => array('access content'),
+  );
+
+  $items['aac-callback'] = array(
+    'title' => 'Are you logged in?',
+    'page callback' => 'apigee_devl_get_started_aac_ping',
+    'access callback' => TRUE
+  );
+
+  $items['no-cookies'] = array(
+    'title' => 'Please enable cookies',
+    'page callback' => 'theme',
+    'page arguments' => array('apigee_devl_get_started_no_cookies'),
+    'access callback' => TRUE
+  );
+
+  $items['get-started/ajax'] = array(
+    'title' => 'Ping!',
+    'page callback' => 'apigee_devl_get_started_ajax',
+    'access callback' => '_apigee_devl_get_started_access'
+  );
+
+  $items['admin/config/system/apigee-auth'] = array(
+    'title' => 'Apigee Authentication',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('apigee_devl_get_started_admin'),
+    'access arguments' => array('administer site configuration')
+  );
+
+  //For internal/testing use only
+  $items['aac-unset'] = array(
+    'title' => 'Unset Session',
+    'page callback' => 'apigee_devl_get_started_unset_session',
+    'access callback' => TRUE
+  );
+  return $items;
+}
+
+/**
+ * For internal/testing use only: Unset session values.
+ * @return string
+ */
+function apigee_devl_get_started_unset_session() {
+  unset($_SESSION['usergrid'], $_SESSION['aac_status']);
+  return '<h3>Session Unset</h3>';
+}
+
+/**
+ * Menu callback for signing out via AAC.
+ */
+function apigee_devl_get_started_sign_out() {
+  $destination = variable_get('apigee_devl_get_started_signout_path', '<front>');
+  if (isset($_SESSION['usergrid'])) {
+    unset($_SESSION['usergrid']);
+  }
+  $_SESSION['aac_status'] = 'logged-out';
+  drupal_goto($destination);
+  // Per MARKETING-547, do not sign out on aac, as this enters an infinite loop.
+  /*
+  $qs = array('callback' => url($destination, array('absolute' => TRUE)));
+  $host = variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com');
+  $url = "$host/accounts/sign_out";
+  drupal_goto($url, array('query' => $qs));
+  */
+}
+
+/**
+ * Menu callback for determining if a user is logged in.
+ *
+ * If the session does not exist and we arrive at this URI, we know that the
+ * user has disabled cookies, and we advise them to enable them before
+ * continuing.
+ */
+function apigee_devl_get_started_aac_ping() {
+  if (!isset($_SESSION) || !isset($_SESSION['aac_status'])) {
+    drupal_goto('no-cookies');
+  }
+
+  $destination = (isset($_GET['g']) ? $_GET['g'] : '<front>');
+  $status = 'logged-out'; // default value
+  if (isset($_GET['uuid']) && isset($_GET['access_token'])) {
+    $session_info = _apigee_devl_get_started_session_info($_GET['access_token'], $_GET['uuid']);
+    if (!empty($session_info)) {
+      $_SESSION['usergrid'] = $session_info;
+      $status = 'logged-in';
+    }
+    elseif (isset($_SESSION['usergrid'])) {
+      unset($_SESSION['usergrid']);
+    }
+  }
+  $_SESSION['aac_status'] = $status;
+  drupal_goto($destination);
+}
+
+/**
+ * Fetches user info from AAC.
+ *
+ * @param $token
+ * @param $uuid
+ * @return array
+ */
+function _apigee_devl_get_started_session_info($token, $uuid) {
+  $host = variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com');
+
+  $url = $host . '/api/v1/users/' . $uuid . '?access_token=' . $token;
+  $opts = array();
+  $session_info = array();
+  $response_obj = drupal_http_request($url, $opts);
+  if ($response_obj->code == 200 && !empty($response_obj->data)) {
+    $json = @json_decode($response_obj->data, TRUE);
+    if (is_array($json) && $json['status'] == 'ok' && is_array($json['data'])) {
+      $data = $json['data'];
+      $session_info['username'] = $data['username'];
+      $session_info['email'] = $data['email'];
+      $session_info['name'] = $data['name'];
+      $session_info['token'] = $data['token'];
+      $sandbox_app = NULL;
+      foreach ($data['organizations'] as $org_name => $org_data) {
+        foreach (array_keys($org_data['applications']) as $app_uri) {
+          if ($app_uri == "$org_name/sandbox") {
+            $sandbox_app = $app_uri;
+            break 2; // escape from both foreach loops
+          }
+        }
+      }
+      // break 2 breaks to here
+      if (isset($sandbox_app)) {
+        $session_info['sandbox_app'] = $sandbox_app;
+      }
+    }
+  }
+  return $session_info;
+}
+
+/**
+ * Menu callback to handle accounts.apigee.com authentication.
+ *
+ * @return mixed
+ */
+function apigee_devl_get_started_sign_on() {
+  $destination = (empty($_GET['g']) ? 'get-started' : $_GET['g']);
+  if (!empty($_GET['access_token']) && !empty($_GET['uuid'])) {
+    $token = $_GET['access_token'];
+    $uuid = $_GET['uuid'];
+    $session_info = _apigee_devl_get_started_session_info($token, $uuid);
+    if (empty($session_info)) {
+      if (isset($_SESSION['usergrid'])) {
+        unset($_SESSION['usergrid']);
+      }
+      drupal_access_denied();
+    }
+    $_SESSION['usergrid'] = $session_info;
+    $_SESSION['aac_status'] = 'logged-in';
+    _apigee_devl_get_started_cancel_callback_override($token, $uuid);
+    drupal_goto($destination);
+  }
+  $qs = array(
+    'callback' => url('sign-on', array('absolute' => TRUE, 'query' => array('g' => $destination)))
+  );
+  $host = variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com');
+
+  $url = $host . '/accounts/sign_in';
+  drupal_goto($url, array('query' => $qs));
+}
+
+/**
+ * Access callback for ajax page.
+ *
+ * @return bool
+ */
+function _apigee_devl_get_started_access() {
+  if (!user_access('access content')) {
+    return FALSE;
+  }
+  if (!isset($_SESSION['usergrid']['username']) || !isset($_SESSION['usergrid']['token'])) {
+    return FALSE;
+  }
+  return TRUE;
+}
+
+/**
+ * Menu callback for getting started page.
+ */
+function apigee_devl_get_started_page() {
+  // AAC may sometimes send users back to this page instead of /sign-on.
+  // Handle this here and perform the redirect.
+  if (isset($_SESSION['aac_status']) && $_SESSION['aac_status'] != 'logged-in' && !empty($_GET['access_token']) && !empty($_GET['admin_email'])) {
+    $token = $_GET['access_token'];
+    $uuid = $_GET['uuid'];
+    $session_info = _apigee_devl_get_started_session_info($token, $uuid);
+    if (!empty($session_info)) {
+      $_SESSION['usergrid'] = $session_info;
+      $_SESSION['aac_status'] = 'logged-in';
+      _apigee_devl_get_started_cancel_callback_override($token, $uuid);
+      $destination = (empty($_GET['g']) ? 'get-started' : $_GET['g']);
+      drupal_goto($destination);
+    }
+  }
+
+  drupal_add_js(drupal_get_path('module', 'apigee_devl_get_started') .'/js/apigee_devl_get_started.js');
+
+  $is_authenticated = (isset($_SESSION['usergrid']));
+  if (!$is_authenticated) {
+    $name = 'anonymous user';
+  }
+  else {
+    $name = $_SESSION['usergrid']['name'];
+  }
+  return theme('apigee_devl_get_started_page', array('is_authenticated' => $is_authenticated, 'name' => $name));
+}
+
+/**
+ * Implements hook_theme()
+ */
+function apigee_devl_get_started_theme() {
+  return array(
+    'apigee_devl_get_started_page' => array(
+      'template' => 'apigee-devl-get-started',
+      'variables' => array(
+        'is_authenticated' => FALSE,
+        'username' => NULL
+      )
+    ),
+    'apigee_devl_get_started_no_cookies' => array(
+      'template' => 'apigee-devl-no-cookies',
+      'variables' => array()
+    )
+  );
+}
+
+/**
+ * Menu callback for AJAX calls on getting started page
+ *
+ * @return string
+ */
+function apigee_devl_get_started_ajax() {
+  static $book_created = FALSE;
+
+  if (!$book_created) {
+    $usergrid = $_SESSION['usergrid'];
+    try {
+      if (isset($usergrid['sandbox_app'])) {
+        $host = variable_get('apigee_devl_get_started_usergrid_host', 'https://api.usergrid.com');
+        $url = $host . '/' . $usergrid['sandbox_app'] . '/books';
+        $opts = array('headers' => array('Authorization: Bearer ' . $usergrid['token']));
+        $response_obj = drupal_http_request($url, $opts);
+        if ($response_obj->code == 200) {
+          $json = @json_decode($response_obj->data, TRUE);
+          if (is_array($json) && array_key_exists('count', $json) && $json['count'] > 0) {
+            $book_created = TRUE;
+          }
+        }
+      }
+    }
+    catch (Exception $e) {
+      $message = $e->getMessage();
+      if (strpos('404', $message) !== FALSE) {
+        $severity = WATCHDOG_NOTICE;
+      }
+      else {
+        $severity = WATCHDOG_ERROR;
+      }
+      watchdog('apigee_devl_get_started', $message, array(), $severity);
+    }
+  }
+  $payload = array('book_created' => $book_created);
+  drupal_json_output($payload);
+}
+
+/**
+ * Form constructor for admin config form.
+ *
+ * @return array
+ */
+function apigee_devl_get_started_admin() {
+  $form = array();
+
+  $form['apigee_devl_get_started_accounts_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Accounts.apigee.com scheme and hostname'),
+    '#default_value' => variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com')
+  );
+  $form['apigee_devl_get_started_usergrid_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Usergrid API scheme and hostname'),
+    '#default_value' => variable_get('apigee_devl_get_started_usergrid_host', 'https://api.usergrid.com')
+  );
+  $form['apigee_devl_get_started_signout_path'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Sign-out destination path',
+    '#default_value' => variable_get('apigee_devl_get_started_signout_path', '<front>')
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Utility function to get link for signup page, with appropriate callback.
+ *
+ * @return string
+ */
+function apigee_devl_get_started_signup_link() {
+  $host = variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com');
+  $path = "$host/accounts/sign_up";
+  $callback = 'https://apigee.com/usergrid';
+  $callback_override = url(join('/', arg()), array('absolute' => TRUE));
+  return url($path, array('query' => array('callback' => $callback, 'callback_override' => $callback_override)));
+}
+
+/**
+ * Convenience function for building the sign-on link.
+ *
+ * @return string
+ */
+function apigee_devl_get_started_signin_link() {
+  $query = array(
+    'g' => drupal_get_path_alias(join('/', arg()))
+  );
+  return url('sign-on', array('query' => $query));
+}
+
+/**
+ * Helper function to cancel the callback_override once login is successful.
+ *
+ * @param string $token
+ * @param string $uuid
+ */
+function _apigee_devl_get_started_cancel_callback_override($token, $uuid) {
+  $host = variable_get('apigee_devl_get_started_accounts_host', 'https://accounts.apigee.com');
+  $url = "$host/api/v1/users/$uuid?access_token=$token";
+  $opts = array(
+    'method' => 'PUT',
+    'headers' => array(
+      'Content-Type' => 'application/json'
+    ),
+    'data' => '{"callbackOverride":""}'
+  );
+  drupal_http_request($url, $opts);
+}

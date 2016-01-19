@@ -1,0 +1,4 @@
+name = Eloqua Integration for Turn
+description = Module to allow eloqua integration for Turn
+package = Custom Turn Modules
+core = 7.x

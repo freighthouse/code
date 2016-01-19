@@ -1,0 +1,31 @@
+{
+  "name": "IHA",
+  "description": "Bootstrap for IHA.",
+  "authors": [
+    "Jeremy Michael Cerda"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "bootstrap",
+    "sass",
+    "css",
+    "jquery"
+  ],
+  "homepage": "https://www.freighthouse.nyc",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "edina-fonts": "https://github.com/edina/edina-fonts.git#~0.0.1",
+    "bootstrap-iconpicker": "~1.7.0",
+    "navgoco": "^0.2.1"
+  },
+  "devDependencies": {
+    "html5shiv": "~3.7.3"
+  }
+}

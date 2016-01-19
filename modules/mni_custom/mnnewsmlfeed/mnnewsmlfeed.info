@@ -1,0 +1,11 @@
+; $Id
+name = MNI NewsML Feed
+description = Generates NewsML to be pushed to other systems fore publication.
+package = "MNI"
+dependencies[] = trigger
+dependencies[] = rules
+core = 6.x
+php = 5.2
+
+; # @author Jeremy Cerda
+; # @version $Id: mnnewsmlfeed.info 2526 2011-08-24 14:11:56Z jcerda $

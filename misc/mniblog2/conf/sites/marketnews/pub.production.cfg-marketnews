@@ -1,0 +1,37 @@
+[mniblogpub.shared]
+bloghome = /usr/local/mniblog2
+delivery = delivery
+archive  = archive
+failure  = failure
+
+[mniblogpub.php]
+node.type = "story"
+rich.type = "story"
+node.status_published = true
+user.name = feed
+user.use = true
+format.name = MNI Filter
+date.adjust = true
+load = "args"
+dir.pdf.drupal = mni_pdfs
+
+[mniblogpub.py]
+php.cmd = /usr/bin/php
+php.file = mniblogpub.php
+php.config = conf/pub.production.cfg
+loopdelay = 0.5
+
+[mnadapt.py]
+ser.host = 10.1.1.135
+ser.port = 7002
+#ser.host = localhost
+#ser.port = 9802
+
+[mnrichwatch.py]
+loopdelay = 0.5
+dir.scp.delivery = data
+dir.scp.archive = archive/scp
+looplimit  = 1000
+
+; # @author Jeremy Cerda
+; # @version $Id: pub.production.cfg-marketnews 2505 2011-08-15 18:19:56Z jcerda $

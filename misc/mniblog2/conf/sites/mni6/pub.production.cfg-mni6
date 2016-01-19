@@ -1,0 +1,95 @@
+[mniblogpub.shared]
+bloghome = /usr/local/mniblog2
+delivery = delivery
+archive  = archive
+failure  = failure
+
+; ## Shared Settings ###########################################################
+; # bloghome            - Home directory from which all other directories are
+; #                       configured relative to.
+; # delivery            - Delivery directory to watch for new content
+; #                       (relative to mniblogpub.shared-bloghome).
+; # archive             - Archive directory from completed content
+; #                       (relative to mniblogpub.shared-bloghome).
+; # failure             - Directory for content which encountered an error
+; #                       during publication.
+; #                       (relative to mniblogpub.shared-bloghome).
+; ##############################################################################
+
+[mniblogpub.php]
+node.type = "news_item"
+rich.type = "news_item"
+node.status_published = true
+node.comments         = false
+user.name = editor
+user.use = true
+date.adjust = true
+load = "args"
+dir.pdf.drupal = mni_pdfs
+
+; ## Publication Settings ######################################################
+; # node.type               - Node type to use during publication.
+; # rich.type               - Node type to use during rich content publication.
+; # node.status_published   - Default publication status for new nodes.
+; # node.comments           - Comment status for new nodes.
+; # node.taxonomy.load_from - Field for loading taxonomy machine names during
+; #                           publication.
+; # user.name               - User to use for author information.
+; # user.use                - Whether to use a configured author for new nodes.
+; # format.name             - Input format to use for new nodes.
+; # date.adjust             - Whether to adjust date to publication date.
+; # load                    - Load new stories via arguments or entire
+; #                           directory. ("args" and "files" respectively)
+; # dir.pdf.drupal          - Directory to store rich content.
+; # modules.mnembargo       - Use embargo information for the mnembargo module.
+; # modules.mnexpire        - Use expiration information for the mnexpire
+; #                           module.
+; # modules.ubercart        - Use price information for the ubercart modules.
+; # seo.writeback           - Write SEO information back to archived files.
+; # basepath                - Basepath for site, to be used w/ SEO data.
+; ##############################################################################
+
+[mniblogpub.py]
+php.cmd = /usr/bin/php
+php.file = mniblogpub.php
+php.config = conf/pub.production.cfg
+loopdelay = 0.5
+
+; ## Publication Control Settings ##############################################
+; # php.cmd             - Command for cmdline php call.
+; # php.file            - PHP Publication file to use.
+; #                       (relative to mniblogpub.shared-bloghome).
+; # php.config          - Config file for publication settings.
+; #                       (relative to mniblogpub.shared-bloghome).
+; # loopdelay           - Delay in seconds between publication loops.
+; # looplimit           - Limit on number of files published per loop.
+; # rss                 - RSS
+; # rss.delivery        - Delivery directory for RSS bound content.
+; #                       (relative to mniblogpub.shared-bloghome).
+; ##############################################################################
+
+[mnadapt.py]
+ser.host = 10.1.1.135
+ser.port = 7002
+#ser.host = localhost
+#ser.port = 9802
+
+; ## Adapter Settings ##########################################################
+; # ser.host            - Hostname to connect to for tcpserial data feed.
+; # ser.port            - Port to connect to for above host.
+; # cfg.advanced        - If true, reads production.cfg files in advanced
+; #                       format, w/ embargo, death, and price information.
+; # loopdelay           - Delay in seconds between connection attempts.
+; ##############################################################################
+
+[mnrichwatch.py]
+loopdelay = 0.5
+dir.scp.delivery = data
+dir.scp.archive = archive/scp
+
+; ## Rich Content Settings #####################################################
+; # NOT YET PRODUCTION READY
+; ##############################################################################
+
+; # @author Jeremy Cerda
+; # @version $Id: pub.production.cfg-mni6 3348 2012-03-19 13:10:01Z jcerda $

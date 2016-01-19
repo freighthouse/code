@@ -1,0 +1,72 @@
+# @author Jeremy Cerda
+# @version $Id: INSTALL.txt 2383 2011-07-28 16:23:02Z jcerda $
+
+--------------------------------------------------------------------------------
+  Installation
+--------------------------------------------------------------------------------
+
+Module:
+    - Copy mnizhotranslit folder to your drupal modules folder:
+        - [drupal root]/sites/all/modules
+        - Also ensure that the newly copied folder has the correct ownership
+          and permissions. (Compare to other modules if necessary.)
+    - Verify File System is setup correctly
+        - Go to Site Configuration->File system
+        - If either File system path or Temporary directory is not working,
+          please adjust folders or permissions as necessary.
+    - Enable the MNI Chinese Transliteration module
+        - Module list is usually under Site Building->Modules->List
+        - Under Other enable the module
+    - This will provide the adminstrator with two new Triggers to implement
+        - Generate Traditional Chinese
+        - Push Acquire XML
+    - See below for proper setup of both, according to orginal specifications.
+
+Triggers:
+    - Enable Triggers module (May already be setup.)
+        - Go to Site Building->Modules->List
+        - Scroll to the Core-Optional section and enable the Trigger module.
+    - Each of the following triggers can be activated whenever you like, based
+      on any changing business logic.
+    - Generate Traditional Chinese
+        - This trigger will generate the Traditional Chinese content within
+          the Drupal site.
+    - Push Acquire XML
+        - This trigger will create the xml files which will be pushed to
+          Acquire Media's systems
+    - Archive Translated Content
+        - This trigger will create archived copies of any translated content.
+
+Acquire Push Program
+    - To push files to acquire we will need a new user created.
+    - This user must have read, write, and exec access to the following dirs:
+        - [drupal root]/sites/default/files/acquire_zho_xml/
+        - [drupal root]/sites/all/modules/mnizhotranslit/
+        - /tmp/mni6/tmp/acquire_archive/ (or other designated archive dir)
+    - Please also ensure they execute acces to pushaqfiles.py, start_push.sh,
+      and stop_push.sh
+    - Adjust the directories in the pushConfig.cfg file in
+      [drupal root]/sites/all/modules/mnizhotranslit/, to match the ones used
+      above.
+    - Change to the user that will be used to push files to Acquire
+    - SSH into the Acquire system. Answer yes to connecting to a new host, if
+      prompted.
+    - logout
+    - ssh-keygen -t dsa -b 1024
+        - Use default for filename (id_dsa.pub)
+        - Use a secure passphrase
+    - scp .ssh/id_dsa.pub acquire.host:.ssh/
+    - You may be prompted at this point for your secure passphrase. This will
+      happen before being asked for your password to the Acquire system. If not
+      you will be prompted later in the instructions.
+    - SSH into the Acquire system.
+    - cd .ssh
+    - cat id_dsa.pub >> authorized_keys2
+    - logout
+    - SSH into the Acquire system.
+        - If prompted for your secure passphrase, use it, and setup is complete.
+        - If not prompted for any password or passphrase, setup is complete.
+        - If prompted for your user password, setup was unsuccessful.
+    - To start pushing, switch to the user created above, and run the following
+      command:
+        - [drupal root]/sites/all/modules/mnizhotranslit/pushaqfiles.py [drupal root]/sites/all/modules/mnizhotranslit/pushConfig.cfg

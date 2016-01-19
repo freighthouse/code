@@ -1,0 +1,24 @@
+<div class="summary-bodies">
+  <div class="summary-body-container">
+  {{#each this}}
+    <div class="summary-body">
+      <a href="{{href}}">
+        <div class="summary-body-image">
+          <img src="{{image.src}}" alt="{{image.alt}}">
+        </div>
+        <div class="summary-body-text">
+          <div class="summary-body-text-container">
+            <p class="summary-body-text-title"><strong>{{title}}</strong></p>
+            {{#each text}}
+              <p>
+                {{this}}
+              </p>
+            {{/each}}
+            <p><em>Read More</em></p>
+          </div>
+        </div>
+      </a>
+    </div>
+  {{/each}}
+  </div>
+</div>

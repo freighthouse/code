@@ -1,0 +1,18 @@
+--- modules/mni_misc_functions/mni_misc_functions.module	2011-09-23 16:06:52.000000000 -0400
++++ /var/www/mninews/sites/all/modules/mni_misc_functions/mni_misc_functions.module	2011-09-29 13:12:37.000000000 -0400
+@@ -659,7 +634,14 @@
+ /* used on product info page forms */
+ function _mni_misc_functions_list_products() {
+ 	$products = array();
+-	$sql = "SELECT n.title from node n join content_type_product_info_page ctpip on n.nid=ctpip.nid and n.vid=ctpip.vid where n.type ='product_info_page' and n.nid!=6852 order by ctpip.field_weight_value";
++	$sql = "SELECT n.title ".
++		"FROM node n ".
++		"JOIN content_type_product_info_page ctpip ON n.nid=ctpip.nid ".
++			"AND n.vid=ctpip.vid ".
++		"WHERE n.type ='product_info_page' ".
++		"AND n.nid!=6852 ".
++		"AND ctpip.field_weight_value < 50 ".
++		"ORDER BY ctpip.field_weight_value";
+ 	$result = db_query($sql);
+ 	while ($row= db_fetch_array($result)) {
+ 		//it has a ® in it that I can't seem to get rid of and messes things up

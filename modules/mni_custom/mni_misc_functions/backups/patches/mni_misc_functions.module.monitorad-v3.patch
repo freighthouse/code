@@ -1,0 +1,36 @@
+--- mni_misc_functions.module	2011-09-16 14:57:43.000000000 -0400
++++ /home/jcerda/sandbox/mni_misc_functions.module	2011-09-16 14:56:26.000000000 -0400
+@@ -731,6 +731,7 @@
+ 	    case 'list' :
+ 	      $block['mni_misc_functions_chat_link']['info'] = t('MNI Chat link');
+ 	      $block['mni_misc_functions_sector_tabs']['info'] = t('MNI Sector Tabs');
++		$block['mni_monitor_ad']['info'] = t('MNI Monitor Ad');
+ 	      return $block;
+ 	    break;
+ 	    case 'view' :
+@@ -756,6 +757,25 @@
+
+ 			      return $block;
+ 					break;
++		      case 'mni_monitor_ad':
++			$c = '<script type="text/javascript">'."\n".
++			'	var mni_movie_shown = false;'."\n".
++			'	function mni_showMonitorMovie() {'."\n".
++			'		if(!mni_movie_shown) {'."\n".
++			'			$("p.mni_monitor_movie").html(\'<iframe width="300" height="250" \'+'."\n".
++			'				\'src="http://www.youtube.com/embed/uWzQG5WIfFo?\'+'."\n".
++			'				\'&controls=0&autoplay=1" frameborder="0" \'+'."\n".
++			'				\'</iframe>\');'."\n".
++			'			mni_movie_shown = true;'."\n".
++			'		}'."\n".
++			'	}'."\n".
++			'</script>'."\n".
++			'<p class="mni_monitor_movie"><a href="javascript:mni_showMonitorMovie();">'."\n".
++			'<img alt="" src="/sites/default/files/mnimonitor_thumb.png" style="width: 300px; height: 250px;" />'. "\n".
++			'</a></p>';
++			$block['content'] = $c;
++			return $block;
++			break;
+ 		      case 'mni_misc_functions_sector_tabs':
+ 						//MNI Sector Tabs
+ 			      $block['subject'] = $delta;

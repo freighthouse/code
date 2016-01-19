@@ -1,0 +1,29 @@
+name = MNI
+version = 1.0
+core = 6.x
+engine = phptemplate
+stylesheets[all][] = style.css
+stylesheets[print][] = print.css
+
+scripts[] = js/jquery-1.5.1.min.js
+scripts[] = js/jquery.main.js
+scripts[] = js/ie-hover-ns-pack.js
+scripts[] = js/show_teasers.js
+
+regions[top] = Top
+regions[main_menu] = Main Menu
+regions[top_social_links] = Top Social Links
+regions[scrolling_ticker] = Scrolling Ticker
+regions[tabbed_menu] = Tabbed Menu
+regions[right] = Right
+regions[above_content] = Above Content
+regions[content] = Content
+regions[below_content] = Below Content
+regions[bottom] = Bottom
+regions[footer_nav] = Footer Menu
+regions[footer] = Footer
+regions[dashboard_products] = Dashboard Subscription Product Boxes
+
+
+; # @author: Jeremy Cerda
+; # @version: $Id: mni.info 2813 2011-10-17 16:12:53Z jcerda $

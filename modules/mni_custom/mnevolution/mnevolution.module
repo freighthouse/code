@@ -1,0 +1,495 @@
+<?php
+
+define("MNEVOLUTION_DEATHTYPE", "mnevolution_death");
+
+//------------------------------------------------------------------------------
+//  Menu and Path Control
+//------------------------------------------------------------------------------
+function mnevolution_menu() {
+	$items = array();
+
+	foreach(node_get_types() as $type) {
+		$items['admin/settings/mnevolution/edit/'.$type->type] = array(
+			'title' => $type->name . ' Evolution Code',
+			'description' => 'Code for evolving from node type ' . $type->name,
+			'page callback' => 'mnevolution_admin_type_edit',
+			'page arguments' => array($type),
+			'access arguments' => array('administer mni node evolution'),
+			'type' => MENU_NORMAL_ITEM,
+			'file' => 'mnevolution.admin.inc'
+		);
+	}
+
+	$items['admin/settings/mnevolution/evolutions'] = array(
+		'title' => 'Upcoming Evolutions',
+		'description' => 'View upcoming evolutions.',
+		'page callback' => 'mnevolution_admin_evolutions',
+		'access arguments' => array('view mni node evolutions'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mnevolution.admin.inc'
+	);
+
+	$items['admin/settings/mnevolution'] = array(
+		'title' => 'MNI Evolution Settings',
+		'description' => 'Administer settings for how and when Nodes will ' .
+				'change Node types.',
+		'page callback' => 'mnevolution_admin_main',
+		'access arguments' => array('administer mni node evolution'),
+		'type' => MENU_NORMAL_ITEM,
+		'file' => 'mnevolution.admin.inc'
+	);
+
+	return $items;
+}
+
+//------------------------------------------------------------------------------
+//  The CRON!
+//------------------------------------------------------------------------------
+function mnevolution_cron()
+{
+	global $user;
+	$orig_user = $user;
+	$old_state = session_save_session();
+	session_save_session(false);
+	$user = user_load(1);
+
+	$q = "SELECT DISTINCT nid FROM {mnevolution}";
+	$results = db_query($q);
+	while($row = db_fetch_array($results)) {
+
+		// Check if we want to evolve
+		if(!($new_type = _mnevolution_cron_checks($row['nid'])))
+			continue;
+
+		$old_node = node_load($row['nid']);
+
+		if($new_type != MNEVOLUTION_DEATHTYPE) {
+			$q = "SELECT script, evo_type FROM {mnevolution_scripts} " .
+				"WHERE start_type = '%s' AND end_type = '%s'";
+			$r = db_fetch_array(db_query($q, $old_node->type, $new_type));
+			$evo_type = ($r['evo_type'] ? $r['evo_type'] :
+				variable_get('mnevolution_global_evotype', 0));
+
+			rules_invoke_event('mnevolution_event_prior_to_evolution',
+				$old_node, $new_type);
+			if($evo_type)
+				_mnevolution_evo_sql($old_node, $new_type, $r['script']);
+			else
+				_mnevolution_evo_node($old_node, $new_type, $r['script']);
+
+		} else {
+			rules_invoke_event('mnevolution_event_node_death', $old_node);
+
+			// MAYBE TODO: Implement death code here
+			node_delete($old_node->nid);
+		}
+	}
+
+	$user = $orig_user;
+	session_save_session($old_state);
+}
+
+/**
+ * Evolve using SQL Evolution.
+ */
+function _mnevolution_evo_sql($node, $new_type, $script)
+{
+	$mn_now = time();
+
+	$old_type = $node->type;
+
+	// Change type
+	$q = "UPDATE {node} SET type = '%s' WHERE nid = %d";
+	db_query($q, $new_type, $node->nid);
+
+	// Load our node again and save it. Gives modules an opportunity to
+	// cleanly handle any leftover data we caused.
+	$n = node_load($node->nid, null, true);
+
+	// Adjust all evo times which have passed
+	foreach(array_keys($n->mnevolution) as $k) {
+		if($n->mnevolution[$k] +
+		$n->created < $mn_now)
+			unset($n->mnevolution[$k]);
+	}
+
+	// Build code to run
+	$evo_code = "<?php \$new_node = unserialize('".
+			addcslashes(serialize($n), "'")."');\n".
+			"\$old_type = unserialize('".
+			addcslashes(serialize($old_type), "'")."');\n";
+	$evo_code .= $script;
+	$evo_code .= "\n\n \$exit = array(\$new_node);\n " .
+			"print serialize(\$exit);\n ?>";
+
+	// Run script and save results
+	$exit_vars = unserialize(drupal_eval($evo_code));
+	$n = $exit_vars[0];
+
+	node_save($n);
+
+	rules_invoke_event('mnevolution_event_sql_evolution', $n);
+}
+
+/**
+ * Evolve using Node Evolution.
+ */
+function _mnevolution_evo_node($node, $new_type, $script)
+{
+	$mn_now = time();
+
+	// Generate our new Temporary Node
+	$orig_new_node = array(
+		'type'    => $new_type,
+		'status'  => 0,
+		'title'   => 'temporary',
+		'body'    => 'temporary',
+		'taxonomy' => array()
+	);
+	$orig_new_node = node_submit($orig_new_node);
+	node_save($orig_new_node);
+
+	// Run Scripts
+	// Build our new to be saved node
+	$fin_new_node = node_load($node->nid);
+	$fin_new_node->nid = $orig_new_node->nid;
+	$fin_new_node->vid = $orig_new_node->vid;
+	$fin_new_node->type = $orig_new_node->type;
+
+	// Build evo code
+	$evo_code = "<?php \$old_node = unserialize('".
+			addcslashes(serialize($node), "'")."');\n"
+		."\$orig_new_node = unserialize('".
+			addcslashes(serialize($orig_new_node), "'")."');\n"
+		."\$fin_new_node = unserialize('".
+			addcslashes(serialize($fin_new_node), "'")."');\n";
+	$evo_code .= $script;
+	$evo_code .= "\n\n \$exit = array(\$old_node, \$orig_new_node, " .
+			"\$fin_new_node);\n print serialize(\$exit);\n ?>";
+
+	// Run evo code
+	$exit_vars = unserialize(drupal_eval($evo_code));
+	$old_node = $exit_vars[0];
+	$orig_new_node = $exit_vars[1];
+	$fin_new_node = $exit_vars[2];
+
+	// Adjust all evo times which have passed
+	foreach(array_keys($fin_new_node->mnevolution) as $k) {
+		if($fin_new_node->mnevolution[$k] +
+		$fin_new_node->created < $mn_now)
+			$fin_new_node->mnevolution[$k] = -1;
+	}
+
+	rules_invoke_event('mnevolution_event_node_evolution', $old_node,
+		$orig_new_node, $fin_new_node);
+
+	// Delete our old node
+	node_delete($old_node->nid);
+	node_save($fin_new_node);
+}
+
+/**
+ * Checks node to ensure it should be evolved. If yes, the machine name
+ * for the new type will be returned. Otherwise it will return false.
+ *
+ * Also makes corrections to broken mnevolution tables.
+ */
+function _mnevolution_cron_checks($nid)
+{
+	$mn_now = time();
+	$node = node_load($nid);
+
+	// If this node is gone, remove from mnevolution
+	if(!$node) {
+		_mnevolution_node_remove($nid);
+		return false;
+	}
+
+	$evo_data = mnevolution_next_evolution($node);
+
+	$all_types = node_get_types('names');
+	$new_type = $evo_data['end_type'];
+
+	// If this type doesn't exist or it's the state we are already in,
+	// put it out of it's misery
+	if($new_type == $old_node->type || (!$all_types[$new_type]
+	&& !$new_type == MNEVOLUTION_DEATHTYPE)) {
+		unset($node->mnevolution[$new_type]);
+		_mnevolution_node_update($node);
+		return false;
+	}
+
+	// If all were -1, get rid of it
+	if($evo_data['time_to_evo'] < 0){
+		_mnevolution_node_remove($node->nid);
+		return false;
+	}
+
+	// If all the times are still in the future, move on
+	if(($evo_data['time_to_evo']+$node->created) > $mn_now)
+		return false;
+
+	return $new_type;
+}
+
+/**
+ * Returns the next evolution to take place for this node
+ *
+ * return - array with type at end_type and time at time_of_evo
+ *          for the next evolution
+ */
+function mnevolution_next_evolution($node)
+{
+	$mn_now = time();
+
+	$q = "SELECT m.* FROM {mnevolution} m " .
+		"LEFT JOIN {node} n ON n.nid = m.nid " .
+		"WHERE m.nid = %d AND (n.created + m.time_to_evo) > %d " .
+		"ORDER BY m.time_to_evo DESC LIMIT 1";
+	$results = db_query($q, $node->nid, $mn_now);
+	if(db_affected_rows())
+		return db_fetch_array($results);
+
+	$q = "SELECT m.* FROM {mnevolution} m WHERE m.nid = %d " .
+		"ORDER BY m.time_to_evo ASC LIMIT 1";
+	$results = db_query($q, $node->nid, $mn_now);
+	if(!db_affected_rows())
+		return array('time_to_evo' => -1, 'end_type' => 'null', 'nid' => -1);
+
+	return db_fetch_array($results);
+}
+
+//------------------------------------------------------------------------------
+//  Nodeapi, Database Control, and Evolution Data Loading
+//------------------------------------------------------------------------------
+function mnevolution_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL)
+{
+	switch($op)
+	{
+		case "insert":
+			if($node->nid)
+				_mnevolution_node_add($node);
+			break;
+		case "update":
+			if($node->nid)
+				_mnevolution_node_update($node);
+			break;
+		case "delete":
+			if($node->nid)
+				_mnevolution_node_remove($node->nid);
+			break;
+		case "load":
+			if($node->nid)
+				return _mnevolution_node_load(&$node);
+			break;
+	}
+}
+
+/**
+ * Handles removing a node from the mnevolution system
+ *
+ * nid - Node id of the record to delete
+ */
+function _mnevolution_node_remove($nid)
+{
+	$q = "DELETE FROM {mnevolution} WHERE nid = " . $nid;
+	db_query($q);
+}
+
+/**
+ * Handles adding a new node to the system. Will not add a node with no
+ * evolution information
+ *
+ * node - Node object containing all necessary information
+ */
+function _mnevolution_node_add($node)
+{
+	$mnevolution = $node->mnevolution;
+	if($mnevolution && count($mnevolution) > 0) {
+		foreach(array_keys($mnevolution) as $k) {
+			if($mnevolution[$k] != -1) {
+				$q = "INSERT INTO {mnevolution} (nid, end_type, time_to_evo) " .
+						"VALUES (%d, '%s', %d)";
+				db_query($q, $node->nid, $k, $mnevolution[$k]);
+				if(!db_affected_rows()) {
+					watchdog('mnevolution', "There was an error inserting " .
+							"evolution information. nid:%d type:%s toe:%d",
+							array($node->nid, $k, $mnevolution[$k]),
+							WATCHDOG_ERROR);
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Handles updating a node's evolution information. If not in the system,
+ * will call insert function to handle. If mnevolution section empty, will
+ * call remove function to handle.
+ *
+ * node - Node object containing mnevolution array with necessary information
+ */
+function _mnevolution_node_update($node)
+{
+	$mnevolution = $node->mnevolution;
+	$results = db_query("SELECT * FROM {mnevolution} WHERE nid = " .
+		$node->nid);
+
+	if(db_affected_rows()) {
+		if($mnevolution && count($mnevolution) > 0) {
+			// Check each piece for updates
+			$mnevo2 = $mnevolution;
+			while($r = db_fetch_array($results)) {
+				if($mnevolution[$r['end_type']] &&
+				$mnevolution[$r['end_type']] > 0) {
+					if($r['time_to_evo'] != $mnevolution[$r['end_type']]) {
+
+						// Update records different from the current db
+						db_query("UPDATE {mnevolution} SET time_to_evo = %d " .
+								"WHERE nid = %d AND end_type ='%s'",
+								$mnevolution[$r['end_type']], $node->nid,
+								$r['end_type']);
+						if(!db_affected_rows()) {
+							watchdog('mnevolution', "There was an error " .
+								"updating evolution information. op:U nid:%d " .
+								"type:%s timeOfEvo:%d", array($node->nid,
+								$r['end_type'], $mnevolution[$r['end_type']]),
+								WATCHDOG_ERROR);
+						}
+					}
+					unset($mnevo2[$r['end_type']]);
+				} else {
+
+					// Remove records not in our updating node
+					db_query("DELETE FROM {mnevolution} WHERE nid = %d " .
+						"AND end_type = '%s'", $node->nid, $r['end_type']);
+					if(!db_affected_rows()) {
+						watchdog('mnevolution', "There was an error " .
+							"updating evolution information. op:D nid:%d " .
+							"type:%s timeOfEvo:%d", array($node->nid,
+							$r['end_type'], $mnevolution[$r['end_type']]),
+							WATCHDOG_ERROR);
+					}
+				}
+			}
+
+			// Add any new records not found in db
+			foreach(array_keys($mnevo2) as $new_type) {
+				db_query("INSERT INTO {mnevolution} (nid, end_type, " .
+						"time_to_evo) VALUES (%d, '%s', %d)", $node->nid,
+						$new_type, $mnevo2[$new_type]);
+				if(!db_affected_rows()) {
+					watchdog('mnevolution', "There was an error " .
+						"updating evolution information. op:I nid:%d " .
+						"type:%s timeOfEvo:%d", array($node->nid,
+						$new_type, $mnevo2[$new_type]), WATCHDOG_ERROR);
+				}
+			}
+		} else {
+			// No records in our updating node, purge db
+			_mnevolution_node_remove($node->nid);
+		}
+	} else if($mnevolution && count($mnevolution) > 0) {
+		// Nothing in database, but new evolution info
+		_mnevolution_node_add($node);
+	}
+}
+
+/**
+ * Adds any relevant mnevolution data to a node object.
+ *
+ * node - Node object containing all necessary information
+ */
+function _mnevolution_node_load(&$node)
+{
+	$ret['mnevolution'] = array();
+	$results = db_query("SELECT * FROM {mnevolution} WHERE nid = %d",
+		$node->nid);
+	if(db_affected_rows()) {
+		while($r = db_fetch_array($results))
+			$ret['mnevolution'][$r['end_type']] = $r['time_to_evo'];
+	}
+
+	return $ret;
+}
+
+//------------------------------------------------------------------------------
+//  Actions, Rules, and Triggers
+//------------------------------------------------------------------------------
+function mnevolution_rules_event_info() {
+	return array(
+		'mnevolution_event_prior_to_evolution' => array(
+			'label' => t('Prior to Evolution Call'),
+			'module' => 'mnevolution',
+			'arguments' => array(
+				'node' => array(
+					'type' => 'node',
+					'label' => t('The node being evolved.')
+				),
+				'end_type' => array(
+					'type' => 'string',
+					'label' => t('Node Type being evolved to.')
+				)
+			),
+	    ),
+	    'mnevolution_event_node_evolution' => array(
+			'label' => t('Node Evolution - Prior to Node Save'),
+			'module' => 'mnevolution',
+			'arguments' => array(
+				'old_node' => array(
+					'type' => 'node',
+					'label' => t('The node being evolved, and the node about' .
+							' to be deleted.')
+				),
+				'orig_new_node' => array(
+					'type' => 'node',
+					'label' => t('Newly created node as it currently exists.')
+				),
+				'final_new_node' => array(
+					'node' => 'node',
+					'label' => t('Newly created node as it will be saved.')
+				)
+			),
+	    ),
+	    'mnevolution_event_sql_evolution' => array(
+			'label' => t('SQL Evolution - After Modification'),
+			'module' => 'mnevolution',
+			'arguments' => array(
+				'node' => array(
+					'type' => 'node',
+					'label' => t('The node after evolution.')
+				)
+			),
+	    ),
+		'mnevolution_event_node_death' => array(
+			'label' => t('Node removed via evolution'),
+			'module' => 'mnevolution',
+			'arguments' => array(
+				'node' => array(
+					'type' => 'node',
+					'label' => t('The node being killed.')
+				),
+			),
+		),
+	);
+}
+
+// TODO: Build triggers in as well
+// TODO: Build forms and make actions configurable. Won't work otherwise.
+
+/*function mnihelper_action_info() {
+	return array(
+		'mnevolution_action_evolve_node_sql' => array(
+			'description' => t('Evolve Node via SQL Modifications'),
+			'type' => 'node',
+			'configurable' => 'false',
+			'triggers' => array('any')
+		),
+		'mnevolution_action_evolve_node_node' => array(
+			'description' => t('Evolve Node via Node API'),
+			'type' => 'node',
+			'configurable' => 'false',
+			'triggers' => array('any')
+		)
+	);
+}*/

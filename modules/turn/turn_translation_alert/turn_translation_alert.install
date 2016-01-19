@@ -1,0 +1,185 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the Superfish module.
+ */
+
+function turn_translation_alert_install() {
+  // Populate the node access table.
+  db_insert('turn_translation_alert_emails')
+    ->fields(array(
+      'language' => 'alert',
+      'emails' => ''
+    ))
+    ->execute();
+}
+function turn_translation_alert_schema() {
+  $schema['turn_translation_alert'] = array(
+    'description' => 'The base table for turn translation alerts',
+    'fields' => array(
+      'ttid' => array(
+        'description' => 'The primary identifier for a turn translation alert.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'id_type' => array(
+        'description' => 'The type (node or block) of this turn translation alert.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'id' => array(
+        'description' => 'The id title of the node/block being tanslated.',
+        'type' => 'varchar',
+        'length' => 45,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'module' => array(
+        'description' => 'The module for blocks being tanslated.',
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid that initiated the translation alert.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'Boolean indicating whether this translation is complete.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the translation alert was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'modified' => array(
+        'description' => 'The Unix timestamp when the translation alert was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'translation_changed' => array('modified'),
+      'translatione_created' => array('created'),
+      'translation_status' => array('status'),
+    ),
+    'primary key' => array('ttid'),
+  );
+
+  $schema['turn_translation_alert_content'] = array(
+    'description' => 'The table for turn translation alerts content per language',
+    'fields' => array(
+      'ttcid' => array(
+        'description' => 'The primary identifier for a turn translation alert content.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'ttid' => array(
+        'description' => 'The {turn_translation_alert}.ttid that initiated the translation alert.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this translation alert content.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'content' => array(
+        'description' => 'The translated content.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid that last saved the translation alert.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+      'original' => array(
+        'description' => 'Boolean indicating whether this is the original content.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
+      'status' => array(
+        'description' => 'Boolean indicating whether this is has been translated.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the translation alert was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'modified' => array(
+        'description' => 'The Unix timestamp when the translation alert was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'translation_changed' => array('modified'),
+      'translatione_created' => array('created'),
+      'translation_status' => array('status'),
+      'translation_ttid' => array('ttid'),
+      'translation_ttid_language' => array('ttid', 'language'),
+    ),
+    'primary key' => array('ttcid'),
+  );
+
+  $schema['turn_translation_alert_emails'] = array(
+    'description' => 'The table for turn translation alerts content per language',
+    'fields' => array(
+      'ttaeid' => array(
+        'description' => 'The primary identifier for a turn translation alert content.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language for these emails.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'emails' => array(
+        'description' => 'The emails for this language.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'medium',
+      ),
+    ),
+    'indexes' => array(
+      'translation_emails_language' => array('language'),
+    ),
+    'primary key' => array('ttaeid'),
+  );
+  return $schema;
+}

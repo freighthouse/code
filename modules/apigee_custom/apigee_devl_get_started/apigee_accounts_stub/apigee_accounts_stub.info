@@ -1,0 +1,5 @@
+name = Apigee Accounts pseudo-server
+description = Simulates accounts.apigee.com authentication
+core = 7.x
+package = DEVL
+version = 7.x-1.x-dev

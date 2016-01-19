@@ -1,0 +1,5 @@
+name = Apigee Devl Get Started
+description = Displays the 'Get Started' page for developers.apigee.com
+core = 7.x
+package = DEVL
+version = 7.x-1.x-dev

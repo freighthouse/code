@@ -1,0 +1,9 @@
+# @author Jeremy Cerda
+# @version $Id: README 2383 2011-07-28 16:23:02Z jcerda $
+
+MNI Chinese Transliteration Module
+
+This is a custom built drupal module which provides functionality
+for transliterating between Simplified and Tradional Chinese.
+
+For installation instructions please see the INSTALL.txt file.

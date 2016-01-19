@@ -1,0 +1,6 @@
+tr.mnevo_red 				{ background-color:#FFC0CB; }
+tr.mnevo_red td.active		{ background-color:#F5B6C1; }
+tr.mnevo_yellow 			{ background-color:#FFF5C2; }
+tr.mnevo_yellow td.active	{ background-color:#F5EAB8; }
+
+label { font-weight:bold; }

@@ -1,0 +1,4 @@
+name = Apigee Search
+description = Customizations of the Search functionality
+core = 7.x
+package = "apigee.com"

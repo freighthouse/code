@@ -1,0 +1,38 @@
+# @author: Jeremy Cerda
+# @version: $Id: importing_missing_stories.txt 2364 2011-07-22 15:15:01Z jcerda $
+
+This document outlines in more detail the methods by which historical data
+and / or missing stories can be imported into a site via mniblog2 software.
+
+################################################################################
+	Method 1: Pulling from Staging
+################################################################################
+This method should only be used if mniblog2 on Staging is an exact mirror
+of Production.
+
+Steps:
+- Find missing story files from the Staging archive dir.
+- Ensure that mniblog2 is running on the Production box.
+- Copy the files into the appropriate delivery directory or sub directory under
+  Production mniblog2.
+- Check that the story published successfully.
+
+################################################################################
+	Method 2: Pulling from Legacy Logs
+################################################################################
+
+Steps:
+- Find the legacy logs and copy them to the target box.
+- Ensure that mniblog2 is running on the target box.
+- Edit them to contain only stories you wish to publish.
+- Run the following commands as the mniblog2 user:
+
+// MNINEWS:
+$ python mnadapt.py -m ./conf/multipub.cfg -i < [log file]
+// MARKETNEWS:
+$ python mnadapt.py ./conf/production.cfg ./conf/pub.production.cfg -i < [log file]
+
+- Check that the story published successfully.
+
+- NOTE: If importing from a previous year, add the "-y <year>" option before
+  the file redirection in both above cases.

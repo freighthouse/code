@@ -1,0 +1,24 @@
+<?php
+mniblocks_block($op = 'list', $delta = 0, $edit = array()) {
+/*  switch ($op) {
+    case 'list':
+      $blocks['select_to_radio']
+      break;
+    case 'view':
+      $block = array(
+        'subject' => t(''),
+        'content' => my
+      break;
+  }
+*/
+function mniblocks_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'view': 
+      if ($node->nid == 1) {
+        $path = drupal_get_path('module', 'my_module');
+        drupal_add_js ("$path/my-module.js");
+      }
+      break;
+  }
+}
+}

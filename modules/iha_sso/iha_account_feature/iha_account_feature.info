@@ -1,0 +1,9 @@
+name = IHA Account Features
+core = 7.x
+package = IHA
+dependencies[] = iha_sso_ui
+dependencies[] = context
+dependencies[] = ctools
+features[context][] = iha_account
+features[ctools][] = context:context:3
+features[features_api][] = api:2

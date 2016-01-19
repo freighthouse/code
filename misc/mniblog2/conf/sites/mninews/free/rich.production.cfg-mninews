@@ -1,0 +1,61 @@
+# @author Jeremy Cerda
+# @version $Id: rich.production.cfg-mninews 2337 2011-07-08 15:25:32Z jcerda $
+
+The FX Spot                        	20223   	-1	1	0.0	none	    QUICK
+Latam Watch                        	20221   	-1	1	0.0	none	    QUICK
+Fed State of Play                  	20220   	-1	1	0.0	none	    QUICK
+ECB Update                         	20272   	-1	1	0.0	none	    QUICK
+BOJ State of Play                  	20081   	-1	1	0.0	none	    QUICK
+ECB State of Play                  	20089   	-1	1	0.0	none	    QUICK
+Reality Check                      	20068   	-1	1	0.0	none	    QUICK
+Reality Check                      	MABRC$  	-1	1	0.0	none	    QUICK
+Reality Check                      	MAJRC$  	-1	1	0.0	none	    QUICK
+Reality Check                      	MAQRC$  	-1	1	0.0	none	    QUICK
+Reality Check                      	40048   	-1	1	0.0	none	    QUICK
+Reality Check                      	40048   	-1	1	0.0	none	    QUICK
+Reality Check                      	40406   	-1	1	0.0	none	    QUICK
+MNI China Business Sentiment Survey	40547   	-1	1	0.0	none	    QUICK
+Portfolios                         	20236   	-1	1	0.0	none	    QUICK
+Talk from the Trenches             	20036   	-1	1	0.0	none	    QUICK
+Corporate Bond Chatter             	20050   	-1	1	0.0	none	    QUICK
+Corporate Bond Chatter             	20115   	-1	1	0.0	none	    QUICK
+Credit Default Swaps               	20279   	-1	1	0.0	none	    QUICK
+US Interest Rate Swaps             	20268   	-1	1	0.0	none	    QUICK
+Top News Stories                   	40002   	-1	1	0.0	none	    QUICK
+Tabular Information                	MTABLE  	-1	1	0.0	none	    QUICK
+Exclusives                         	40000   	-1	1	0.0	none	    QUICK
+
+# NO LAG
+
+FX Features              	40015   	0	0	0.0	foreignexchange frontpage fxfeatures
+Latin America            	40106   	0	0	0.0	latinamerica frontpage
+Canada                   	40054   	0	0	0.0	northamerica frontpage canada
+CongressWatch            	20224   	0	0	0.0	northamerica frontpage uscongress
+FX Market Updates        	20003   	0	0	0.0	foreignexchange northamerica frontpage fxupdatenorthamerica
+FX Market Updates        	20028   	0	0	0.0	foreignexchange europe frontpage fxupdateeurope
+MNI Capital Goods Index  	40544   	0	0	0.0	macroeconomy northamerica  frontpage capitalgoods
+MNI Retail Trade Index   	40533   	0	0	0.0	macroeconomy northamerica frontpage retailsales
+
+# TEN MINUTES
+
+Economic Data Stories    	40014     	600	0	0.0	macroeconomy northamerica frontpage usdata
+Economic Data Stories    	40007     	600	0	0.0	macroeconomy europe frontpage europedata
+Economic Data Stories    	40055     	600	0	0.0	macroeconomy latinamerica frontpage latamdata
+Economic Data Stories    	40154     	600	0	0.0	macroeconomy europe frontpage ukdata
+Economic Data Stories    	40558     	600	0	0.0	macroeconomy china frontpage chinadata asia
+Economic Data Stories    	40554     	600	0	0.0	macroeconomy japan frontpage japandata asia
+Economic Data Stories    	40560     	600	0	0.0	macroeconomy northamerica frontpage canadadata
+US Government Policy     	40011     	600	0	0.0	northamerica governmentpolicy frontpage usgov
+US Government Policy     	40010     	600	0	0.0	northamerica governmentpolicy frontpage usgov
+UK Government Policy     	MGB$$$    	600	0	0.0	governmentpolicy frontpage ukgov
+Eurozone Gov't Policy    	MGX$$$    	600	0	0.0	europe governmentpolicy frontpage eurogov
+China Gov't Policy       	MGQ$$$    	600	0	0.0	foreignexchange china governmentpolicy frontpage chinagov asia
+Japan Gov't Policy       	MGJ$$$    	600	0	0.0	foreignexchange japan governmentpolicy frontpage japangov asia
+
+# TWENTY MINUTES
+
+Federal Reserve          	40021     	1200	0	0.0	centralbanks northamerica frontpage federalreserve
+ECB Stories              	40013     	1200	0	0.0	centralbanks europe frontpage ecb
+BOJ Stories              	40556     	1200	0	0.0	centralbanks japan frontpage boj asia
+BOE Stories              	40023     	1200	0	0.0	centralbanks europe frontpage boe
+PBOC Stories             	MMQPB$    	1200	0	0.0	centralbanks china frontpage pboc asia peoplesbankofchina

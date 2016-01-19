@@ -1,0 +1,1 @@
+./sites/marketnews/stopblog.sh-marketnews

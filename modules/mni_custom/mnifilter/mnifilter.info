@@ -1,0 +1,5 @@
+;$Id$
+name = MNI Filter
+description = Filter themeing for subheads, topics and linebreaks
+core = 6.x
+package = MarketNews

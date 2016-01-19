@@ -1,0 +1,6 @@
+; $Id
+name = MNI Expires
+description = Module to expire nodes past a certain date, using Drupal cron.
+core = 6.x
+package = MNI
+php = 5.2

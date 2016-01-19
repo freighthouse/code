@@ -1,0 +1,16 @@
+{
+  "name": "development",
+  "private": true,
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "bootstrap-sass-official": "~3.2.0",
+    "greensock": "~1.17.0",
+    "imagesloaded": "~3.1.8",
+    "slick-carousel": "~1.5.8",
+    "jquery-scrollstop": "~1.2.0"
+  },
+  "devDependencies": {
+    "chai": "~3.0.0",
+    "mocha": "~2.2.5"
+  }
+}

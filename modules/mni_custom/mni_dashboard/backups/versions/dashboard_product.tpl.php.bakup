@@ -1,0 +1,131 @@
+<?php
+/**
+ * @file dashboard_product.tpl.php
+ *
+ * Variables available:
+ * 
+ *      $launch_url
+ * 			$product_name
+ * 			$tabs[] //array of tabs and menus
+ *				for each tab in tabs:
+ *					tab_name
+ *					tab_machine_name
+ *					tab_item_count
+ *					menus[]
+ *						for each menu in menus:
+ *							menu_links html 
+ */
+?>
+							<div class="buttons-area">
+								<a class="btn link-window" href="<?php print $launch_url; ?>">Launch <?php print $product_name; ?></a>
+							</div>
+							<div class="dashboard">
+								<div class="block">
+									<h3>Available Content</h3>
+									<div class="area">
+										<div class="frame">
+<?php
+foreach ($tabs as $tab): 
+?>
+											<ul id="tab_<?php print $tab['tab_machine_name']; ?>">
+<?php
+	foreach ($tab['menus'] as $menu){
+		echo ($menu); 
+	}
+?>
+											</ul> 
+<?php
+endforeach;
+?>
+										</div>
+									</div>
+									<ul class="list tabset">
+<?php
+$i=0;
+foreach ($tabs as $tab): 
+$i++;
+?>
+										<li><a href="#tab_<?php print $tab['tab_machine_name']; ?>" class="tab<?php if($i==1){ print ' active'; }?>"><?php print $tab['tab_name']; ?> (<?php print $tab['tab_item_count']; ?>)</a></li>
+<?php
+endforeach;
+?>
+									</ul>
+								</div>
+								<h3><strong>Main Wire:</strong> Last Viewed</h3>
+								<?php echo('TK:last viewed list here'); /*print MNI_user_last_viewed($user->uid, 5, 'Main Wire', false, false, 'product&alacarte_article&free_article&product_info_page&story&subscription_article');*/ ?>
+							</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="<?php print $classes; ?>">
+  <?php if ($admin_links): ?>
+    <div class="views-admin-links views-hide">
+      <?php print $admin_links; ?>
+    </div>
+  <?php endif; ?>
+  <?php if ($header): ?>
+    <div class="view-header">
+      <?php print $header; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($exposed): ?>
+    <div class="view-filters">
+      <?php print $exposed; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($attachment_before): ?>
+    <div class="attachment attachment-before">
+      <?php print $attachment_before; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($rows): ?>
+    <ul class="articles-list">
+      <?php print $rows; ?>
+    </ul>
+  <?php elseif ($empty): ?>
+    <div class="view-empty">
+      <?php print $empty; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($pager): ?>
+    <?php print $pager; ?>
+  <?php endif; ?>
+
+  <?php if ($attachment_after): ?>
+    <div class="attachment attachment-after">
+      <?php print $attachment_after; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($more): ?>
+    <?php print $more; ?>
+  <?php endif; ?>
+
+  <?php if ($footer): ?>
+    <div class="view-footer">
+      <?php print $footer; ?>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($feed_icon): ?>
+    <div class="feed-icon">
+      <?php print $feed_icon; ?>
+    </div>
+  <?php endif; ?>
+
+</div> <?php /* class view */ ?>

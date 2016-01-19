@@ -1,0 +1,40 @@
+<?php
+# @author: Jeremy Cerda
+# @version: $Id$
+
+function _mncronsafe_cfg_load($filename = "production.cfg")
+{
+	// Load file
+	$mp = drupal_get_path('module', 'mncronsafe');
+	$cfg = parse_ini_file($mp.'/'.$filename);
+	return $cfg;
+}
+
+function _mncronsafe_check_primary($primaries = null)
+{
+	// Check that we loaded the primaries
+	if($primaries == null) {
+		$cfg = _mncronsafe_cfg_load();
+		$primaries = $cfg['primaries'];
+	}
+
+	// Load system iplist
+	$ret = 0;
+	$iplist = system('I=$(/sbin/ifconfig -a | grep "inet addr" | '.
+		'cut -d":" -f2 | cut -d" " -f1); echo ${I}', $ret);
+	if($ret)
+		return 0;
+	$iplist = explode(" ", $iplist);
+
+	// Get intersection
+	$i = array_intersect($iplist, $primaries);
+
+	return count($i);
+}
+
+function mncronsafe_cron()
+{
+	$cfg = _mncronsafe_cfg_load();
+	if(!_mncronsafe_check_primary($cfg['primaries']))
+		module_disable($cfg['modules']);
+}

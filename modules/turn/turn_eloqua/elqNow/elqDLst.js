@@ -41,3 +41,4 @@ var elqDL = 'turn.com#www.turn.com#Jobscore.com#Facebook.com#Linkedin.com#Twitte
 // Example: var elqDURL = 'http://www.mysite.com/UnsafeRedirect.htm';
 // Default: var elqDURL = 'elqNoRedir.htm';
 var elqDURL = 'elqNoRedir.htm';
+

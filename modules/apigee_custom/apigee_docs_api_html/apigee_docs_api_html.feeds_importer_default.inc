@@ -8,14 +8,15 @@
 /**
  * Implements hook_feeds_importer_default().
  */
-function apigee_docs_api_html_feeds_importer_default() {
-  $export = array();
+function apigee_docs_api_html_feeds_importer_default() 
+{
+    $export = array();
 
-  $feeds_importer = new stdClass();
-  $feeds_importer->disabled = FALSE; /* Edit this to true to make a default feeds_importer disabled initially */
-  $feeds_importer->api_version = 1;
-  $feeds_importer->id = 'api_html';
-  $feeds_importer->config = array(
+    $feeds_importer = new stdClass();
+    $feeds_importer->disabled = false; /* Edit this to true to make a default feeds_importer disabled initially */
+    $feeds_importer->api_version = 1;
+    $feeds_importer->id = 'api_html';
+    $feeds_importer->config = array(
     'name' => 'API HTML',
     'description' => '',
     'fetcher' => array(
@@ -65,7 +66,7 @@ function apigee_docs_api_html_feeds_importer_default() {
           1 => array(
             'source' => 'xpathparser:2',
             'target' => 'body',
-            'unique' => FALSE,
+            'unique' => false,
           ),
           2 => array(
             'source' => 'file_path',
@@ -75,27 +76,27 @@ function apigee_docs_api_html_feeds_importer_default() {
           3 => array(
             'source' => 'Blank source 1',
             'target' => 'path_alias',
-            'unique' => FALSE,
+            'unique' => false,
           ),
           4 => array(
             'source' => 'xpathparser:3',
             'target' => 'menu:menu_name',
-            'unique' => FALSE,
+            'unique' => false,
           ),
           5 => array(
             'source' => 'Blank source 3',
             'target' => 'menu:link_title',
-            'unique' => FALSE,
+            'unique' => false,
           ),
           6 => array(
             'source' => 'xpathparser:4',
             'target' => 'menu:plid',
-            'unique' => FALSE,
+            'unique' => false,
           ),
           7 => array(
             'source' => 'Blank source 4',
             'target' => 'menu:enabled',
-            'unique' => FALSE,
+            'unique' => false,
           ),
         ),
         'update_existing' => '2',
@@ -108,9 +109,9 @@ function apigee_docs_api_html_feeds_importer_default() {
     'expire_period' => 3600,
     'import_on_create' => 1,
     'process_in_background' => 0,
-  );
+    );
 
-  $export[$feeds_importer->id] = $feeds_importer;
+    $export[$feeds_importer->id] = $feeds_importer;
 
-  return $export;
+    return $export;
 }

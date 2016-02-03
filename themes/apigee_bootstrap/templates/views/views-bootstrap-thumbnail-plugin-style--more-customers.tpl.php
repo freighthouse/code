@@ -12,33 +12,33 @@
 ?>
 
 <div id="views-bootstrap-thumbnail-<?php print $id ?>" class="<?php print $classes ?>">
-  <?php if ($options['alignment'] == 'horizontal'): ?>
+    <?php if ($options['alignment'] == 'horizontal') : ?>
 
     <?php foreach ($items as $row): ?>
       <div class="row">
         <?php foreach ($row['content'] as $column): ?>
           <div class="col col-lg-3 col-md-3 col-sm-6">
             <div class="thumbnail">
-              <?php print $column['content'] ?>
+                <?php print $column['content'] ?>
             </div>
           </div>
         <?php endforeach ?>
       </div>
     <?php endforeach ?>
 
-  <?php else: ?>
+    <?php else: ?>
 
     <div class="row">
-      <?php foreach ($items as $column): ?>
+        <?php foreach ($items as $column): ?>
         <div class="col col-lg-3 col-md-3 col-sm-6">
-          <?php foreach ($column['content'] as $row): ?>
+            <?php foreach ($column['content'] as $row): ?>
             <div class="thumbnail">
-              <?php print $row['content'] ?>
+                <?php print $row['content'] ?>
             </div>
-          <?php endforeach ?>
+            <?php endforeach ?>
         </div>
-      <?php endforeach ?>
+        <?php endforeach ?>
     </div>
 
-  <?php endif ?>
+    <?php endif ?>
 </div>

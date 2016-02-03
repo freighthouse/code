@@ -7,10 +7,10 @@
 print $head; 
 ?>
 		<title><?php print $head_title ?></title>
-		<?php print $styles ?>
-		<?php print $scripts; ?>
+    <?php print $styles ?>
+    <?php print $scripts; ?>
 		<!--[if lt IE 8]>
-			<?php print phptemplate_get_ie_styles(); ?>
+    <?php print phptemplate_get_ie_styles(); ?>
 		<![endif]-->
 	</head>
 	<body>
@@ -23,47 +23,52 @@ print $head;
 			</div>
 			<div class="holder">
 				<div class="news">
-					<?php if ($mission): print '<div id="mission">'. $mission .'</div>'; endif; ?>
-					<?php if ($tabs): print '<div id="tabs-wrapper">'; endif; ?>
-					<?php if ($tabs): print '<ul class="tabs primary">'. $tabs .'</ul></div>'; endif; ?>
-					<?php if ($tabs2): print '<ul class="tabs secondary">'. $tabs2 .'</ul>'; endif; ?>
-					<div id="drupal_msg"><?php if ($show_messages && $messages): print $messages; endif; ?></div>
-      <?php print $help; ?>
+        <?php if ($mission) : print '<div id="mission">'. $mission .'</div>'; 
+        endif; ?>
+        <?php if ($tabs) : print '<div id="tabs-wrapper">'; 
+        endif; ?>
+        <?php if ($tabs) : print '<ul class="tabs primary">'. $tabs .'</ul></div>'; 
+        endif; ?>
+        <?php if ($tabs2) : print '<ul class="tabs secondary">'. $tabs2 .'</ul>'; 
+        endif; ?>
+					<div id="drupal_msg"><?php if ($show_messages && $messages) : print $messages; 
+    endif; ?></div>
+        <?php print $help; ?>
 					<h4><?php print $title; ?></h4>
-					<em class="date"><?php print date ('h:i T / M d', $node->created); ?></em>
+					<em class="date"><?php print date('h:i T / M d', $node->created); ?></em>
                     
 					<div class="txt">
-		<?php 
-			if(mni_misc_functions_node_is_txttbl($node)){
-				print("<pre>".str_replace("<br />","",$node->body)."</pre>");
-			} else {
-				print($node->body);
-			}
-		?> 
+    <?php 
+    if(mni_misc_functions_node_is_txttbl($node)) {
+        print("<pre>".str_replace("<br />", "", $node->body)."</pre>");
+    } else {
+        print($node->body);
+    }
+    ?> 
 		
 <?php 
-	if ($node->taxonomy){ 
+if ($node->taxonomy) { 
 ?>
-	<div class="meta">
-	<h2 class="nodesection">See Related Headlines:</h2>
+<div class="meta">
+<h2 class="nodesection">See Related Headlines:</h2>
 <?php 
-		$links=MNI_taxonomy_link($node);
-		print theme('links', $links);
+ $links=MNI_taxonomy_link($node);
+ print theme('links', $links);
 ?>
-	</div>
+</div>
 <?php 
-	}
+}
 ?>
 		<h2>Comments 
-		<?php
-			if ($node->comment_count){
-				print '<span class="comments">(' . $node->comment_count . ')</span>';
-			} ?></h2><?php
-			
-			print $comments; 
-			print $below_content; 
+    <?php
+    if ($node->comment_count) {
+        print '<span class="comments">(' . $node->comment_count . ')</span>';
+    } ?></h2><?php
+            
+            print $comments; 
+            print $below_content; 
 
-		?>
+    ?>
 
 
 					</div>
@@ -71,6 +76,6 @@ print $head;
 			</div>
 		</div>
 
-		<?php print $closure ?>
+    <?php print $closure ?>
 	</body>
 </html>

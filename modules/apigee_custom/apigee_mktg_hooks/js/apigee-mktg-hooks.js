@@ -1,10 +1,10 @@
 (function ($) {
 
-  // Products
-  Drupal.behaviors.apigeeMktgHooks = {
-    attach: function (context, settings) {
+    // Products
+    Drupal.behaviors.apigeeMktgHooks = {
+        attach: function (context, settings) {
 
-    }
-  };
+        }
+    };
 
 }(jQuery));

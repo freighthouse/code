@@ -14,7 +14,7 @@ padding-right: 20px;
 }
 
 .pricing-table td.collapsible-cell {
-	background-color: #fff;
+    background-color: #fff;
 }
 
 .pricing-table .btn {
@@ -24,11 +24,11 @@ font-size: 17px;
 }
 
 .pricing-table thead tr:first-child td:first-child {
-	border-top-left-radius: 7px;
+    border-top-left-radius: 7px;
 }
 
 .pricing-table tr:first-child td:last-child {
-	border-top-right-radius: 7px;
+    border-top-right-radius: 7px;
 }
 
 .pricing-table tr:last-child td{
@@ -108,12 +108,12 @@ table.pricing-table-alternate, table.pricing-table-alternate * {
   padding: 0;
 }
 table.pricing-table-alternate a.btn {
-	display: inline-block;
-	font-size: 17px;
-	line-height: 35px;
-	min-width: 190px;
-	padding: 0 10px;
-	margin: 14px 0;
+    display: inline-block;
+    font-size: 17px;
+    line-height: 35px;
+    min-width: 190px;
+    padding: 0 10px;
+    margin: 14px 0;
 }
 table.pricing-table-alternate div.table_header {
   border-top: 1px solid #e4e4e4;
@@ -147,22 +147,22 @@ table.pricing-table-alternate tr th, table.pricing-table-alternate tr td {
   background-color: #fff;
 }
 table.pricing-table-alternate tr td {
-	padding: 14px 36px;
+    padding: 14px 36px;
 }
 table.pricing-table-alternate tr th:first-child, table.pricing-table-alternate tr td:first-child {
-	text-align: right;
-	vertical-align: top;
-	line-height: 30px;
+    text-align: right;
+    vertical-align: top;
+    line-height: 30px;
 }
 table.pricing-table-alternate tr td:first-child, table.pricing-table-alternate tr td:first-child div.table_content {
-	color: #58595b;
-	font-size: 14px;
-	padding-right: 58px;
-	padding-left: 20px;
-	white-space: nowrap;
+    color: #58595b;
+    font-size: 14px;
+    padding-right: 58px;
+    padding-left: 20px;
+    white-space: nowrap;
 }
 table.pricing-table-alternate tr:last-child td {
-	padding: 0;
+    padding: 0;
 }
 table.pricing-table-alternate tr td {
   border-top: 1px dashed #e4e4e4;
@@ -178,8 +178,8 @@ table.pricing-table-alternate tr.sub_row td:first-child {
   border-top: none;
 }
 table.pricing-table-alternate tr.sub_row td {
-	font-size: 11px;
-	font-weight: medium;
+    font-size: 11px;
+    font-weight: medium;
 }
 table.pricing-table-alternate tr:first-child th {
   vertical-align: top;
@@ -194,19 +194,19 @@ table.pricing-table-alternate tr td:first-child, table.pricing-table-alternate t
   background-color: #f8f8f8;
 }
 table.pricing-table-alternate tr.super_row {
-	background-image: url(images/arrow-right.png);
-	background-position: -99999px -99999px;
+    background-image: url(images/arrow-right.png);
+    background-position: -99999px -99999px;
 }
 table.pricing-table-alternate tr.super_row td:first-child {
-	background: #f8f8f8 url(images/arrow-down.png) no-repeat 95% 24px;
-	cursor: pointer;
+    background: #f8f8f8 url(images/arrow-down.png) no-repeat 95% 24px;
+    cursor: pointer;
 }
 table.pricing-table-alternate tr.super_row.collapsed td:first-child {
-	background-image: url(images/arrow-right.png);
-	background-position-top: 22px;
+    background-image: url(images/arrow-right.png);
+    background-position-top: 22px;
 }
 table.pricing-table-alternate tr:last-child td:first-child div.table_content {
-	line-height: 58px;
+    line-height: 58px;
 }
 table.pricing-table-alternate tr:first-child th div.table_spacer, table.pricing-table-alternate tr:last-child td div.table_spacer {
   background-color: #fff;
@@ -258,11 +258,11 @@ table.pricing-table-alternate tr:last-child td:nth-child(2) div.table_content {
   box-shadow: 0 4px 6px -2px #cacaca;
 }
 table.pricing-table-alternate tr:last-child td div.content_inner {
-	margin-top: -81px;
+    margin-top: -81px;
 }
 table.pricing-table-alternate tr:last-child td:nth-child(2) div.content_inner {
-	margin-top: -96px;
+    margin-top: -96px;
 }
 table.pricing-table-alternate tr:last-child a.btn {
-	margin-top: 0;
+    margin-top: 0;
 }

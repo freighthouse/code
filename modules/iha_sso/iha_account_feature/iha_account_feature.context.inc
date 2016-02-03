@@ -7,16 +7,17 @@
 /**
  * Implements hook_context_default_contexts().
  */
-function iha_account_feature_context_default_contexts() {
-  $export = array();
+function iha_account_feature_context_default_contexts() 
+{
+    $export = array();
 
-  $context = new stdClass();
-  $context->disabled = FALSE; /* Edit this to true to make a default context disabled initially */
-  $context->api_version = 3;
-  $context->name = 'iha_account';
-  $context->description = '';
-  $context->tag = '';
-  $context->conditions = array(
+    $context = new stdClass();
+    $context->disabled = false; /* Edit this to true to make a default context disabled initially */
+    $context->api_version = 3;
+    $context->name = 'iha_account';
+    $context->description = '';
+    $context->tag = '';
+    $context->conditions = array(
     'path' => array(
       'values' => array(
         'user/*' => 'user/*',
@@ -27,8 +28,8 @@ function iha_account_feature_context_default_contexts() {
         'anonymous user' => 'anonymous user',
       ),
     ),
-  );
-  $context->reactions = array(
+    );
+    $context->reactions = array(
     'block' => array(
       'blocks' => array(
         'iha_sso_ui-0' => array(
@@ -39,9 +40,9 @@ function iha_account_feature_context_default_contexts() {
         ),
       ),
     ),
-  );
-  $context->condition_mode = 1;
-  $export['iha_account'] = $context;
+    );
+    $context->condition_mode = 1;
+    $export['iha_account'] = $context;
 
-  return $export;
+    return $export;
 }

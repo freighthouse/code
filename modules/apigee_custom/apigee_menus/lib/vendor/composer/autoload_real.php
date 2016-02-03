@@ -9,7 +9,7 @@ class ComposerAutoloaderInit420a98f132845ba9bf259d2515edebec
     public static function loadClassLoader($class)
     {
         if ('Composer\Autoload\ClassLoader' === $class) {
-            require __DIR__ . '/ClassLoader.php';
+            include __DIR__ . '/ClassLoader.php';
         }
     }
 
@@ -26,12 +26,12 @@ class ComposerAutoloaderInit420a98f132845ba9bf259d2515edebec
         $vendorDir = dirname(__DIR__);
         $baseDir = dirname($vendorDir);
 
-        $map = require __DIR__ . '/autoload_namespaces.php';
+        $map = include __DIR__ . '/autoload_namespaces.php';
         foreach ($map as $namespace => $path) {
             $loader->set($namespace, $path);
         }
 
-        $classMap = require __DIR__ . '/autoload_classmap.php';
+        $classMap = include __DIR__ . '/autoload_classmap.php';
         if ($classMap) {
             $loader->addClassMap($classMap);
         }

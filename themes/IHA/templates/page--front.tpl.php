@@ -76,36 +76,36 @@
 <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
   <div class="<?php print $container_class; ?>">
     <div class="navbar-header">
-      <?php if ($logo): ?>
+        <?php if ($logo) : ?>
         <a class="logo navbar-btn pull-left" href="<?php print $front_page; ?>" title="<?php print t('IHA.org'); ?>">
           <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
         </a>
-      <?php endif; ?>
-      <?php if (!empty($site_name)): ?>
+        <?php endif; ?>
+        <?php if (!empty($site_name)) : ?>
       <a class="name navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a>
-      <?php endif; ?>
-      <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
+        <?php endif; ?>
+        <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])) : ?>
           <nav class="mobile">
-              <?php print $mobile_menu; ?>
+                <?php print $mobile_menu; ?>
           </nav>
           <a id="nav-expander" class="nav-expander fixed">
             <i class="fa fa-bars fa-lg white"></i>
           </a>
-      <?php endif; ?>
+        <?php endif; ?>
     </div>
 
-    <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
+    <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])) : ?>
       <div class="navbar-collapse collapse">
         <nav role="navigation">
-          <?php if (!empty($primary_nav)): ?>
+            <?php if (!empty($primary_nav)) : ?>
             <?php print render($primary_nav); ?>
-          <?php endif; ?>
-          <?php if (!empty($secondary_nav)): ?>
+            <?php endif; ?>
+            <?php if (!empty($secondary_nav)) : ?>
             <?php print render($secondary_nav); ?>
-          <?php endif; ?>
-          <?php if (!empty($page['navigation'])): ?>
+            <?php endif; ?>
+            <?php if (!empty($page['navigation'])) : ?>
             <?php print render($page['navigation']); ?>
-          <?php endif; ?>
+            <?php endif; ?>
         </nav>
       </div>
     <?php endif; ?>
@@ -124,7 +124,7 @@
             <div class="modal-dialog modal-sm">
               <div class="modal-content">
                 <div class="modal-body">
-                  <?php print $search_box; ?>
+                    <?php print $search_box; ?>
                 </div>
               </div>
             </div>
@@ -140,7 +140,7 @@
 <div class="main-container <?php print $container_class; ?>">
 
   <header role="banner" id="page-header">
-    <?php if (!empty($site_slogan)): ?>
+    <?php if (!empty($site_slogan)) : ?>
       <p class="lead"><?php print $site_slogan; ?></p>
     <?php endif; ?>
 
@@ -148,24 +148,25 @@
   </header> <!-- /#page-header -->
 <!--   <div class="row"> -->
     <section id="main_front_section" <?php print $content_column_class; ?>>
-        <?php if (!empty($page['highlighted'])): ?>
+        <?php if (!empty($page['highlighted'])) : ?>
           <div class="highlighted jumbotron"><?php print render($page['highlighted']); ?></div>
         <?php endif; ?>
-        <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
+        <?php if (!empty($breadcrumb)) : print $breadcrumb; 
+        endif;?>
         <a id="main-content"></a>
         <?php print render($title_prefix); ?>
-        <?php if (!empty($title)): ?>
+        <?php if (!empty($title)) : ?>
           <h1 class="page-header"><?php print $title; ?></h1>
         <?php endif; ?>
         <?php print render($title_suffix); ?>
         <?php print $messages; ?>
-        <?php if (!empty($tabs)): ?>
-          <?php print render($tabs); ?>
+        <?php if (!empty($tabs)) : ?>
+            <?php print render($tabs); ?>
         <?php endif; ?>
-        <?php if (!empty($page['help'])): ?>
-          <?php print render($page['help']); ?>
+        <?php if (!empty($page['help'])) : ?>
+            <?php print render($page['help']); ?>
         <?php endif; ?>
-        <?php if (!empty($action_links)): ?>
+        <?php if (!empty($action_links)) : ?>
           <ul class="action-links"><?php print render($action_links); ?></ul>
         <?php endif; ?>
         <?php print render($page['content']); ?>
@@ -203,10 +204,10 @@
         <h5>Sign up for our newsletter</h5>
           <p class="newsletter_signup"><a class="btn btn-default register_button" href="//visitor.r20.constantcontact.com/d.jsp?llr=fcitmjcab&amp;p=oi&amp;m=1101974315077&amp;sit=znsuj64cb&amp;f=e7fd2e98-c34d-48e0-930d-f96c2dc40cff" target="_blank" type="button">Sign up</a></p>
         <!--<?php
-      //  $block = block_load('constant_contact', 1);
-      //  $render_array = _block_get_renderable_array(_block_render_blocks(array($block)));
-      //  $output = drupal_render($render_array);
-      //  print $output; ?>-->
+        //  $block = block_load('constant_contact', 1);
+        //  $render_array = _block_get_renderable_array(_block_render_blocks(array($block)));
+        //  $output = drupal_render($render_array);
+        //  print $output; ?>-->
       </div>
     </div>
   </div>

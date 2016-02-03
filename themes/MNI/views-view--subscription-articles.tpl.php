@@ -30,52 +30,52 @@
  */
 ?>
 <div class="<?php print $classes; ?>">
-  <?php if ($header): ?>
+    <?php if ($header) : ?>
     <div class="view-header">
-      <?php print $header; ?>
+        <?php print $header; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($attachment_before): ?>
+    <?php if ($attachment_before) : ?>
     <div class="attachment attachment-before">
-      <?php print $attachment_before; ?>
+        <?php print $attachment_before; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($rows): ?>
+    <?php if ($rows) : ?>
     <ul class="news-list">
-      <?php print $rows; ?>
+        <?php print $rows; ?>
     </ul>
-  <?php elseif ($empty): ?>
+    <?php elseif ($empty) : ?>
     <div class="view-empty">
-      <?php print $empty; ?>
+        <?php print $empty; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($pager): ?>
+    <?php if ($pager) : ?>
     <?php print $pager; ?>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($attachment_after): ?>
+    <?php if ($attachment_after) : ?>
     <div class="attachment attachment-after">
-      <?php print $attachment_after; ?>
+        <?php print $attachment_after; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($more): ?>
+    <?php if ($more) : ?>
     <?php print $more; ?>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($footer): ?>
+    <?php if ($footer) : ?>
     <div class="view-footer">
-      <?php print $footer; ?>
+        <?php print $footer; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
-  <?php if ($feed_icon): ?>
+    <?php if ($feed_icon) : ?>
     <div class="feed-icon">
-      <?php print $feed_icon; ?>
+        <?php print $feed_icon; ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
 
 </div> <?php /* class view */ ?>

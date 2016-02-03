@@ -20,20 +20,20 @@
 </div>
 <div class="col-md-8 col-sm-12">
 <div class="all_news_title">News</div>
-<?php if ($rows): ?>
+<?php if ($rows) : ?>
   <div class="view-content">
     <?php print $rows; ?>
   </div>
-  <?php elseif ($empty): ?>
+    <?php elseif ($empty) : ?>
     <div class="view-empty">
-      <?php print $empty; ?>
+        <?php print $empty; ?>
     </div>
-  <?php endif; ?>
-  <?php if ($pager): ?>
+    <?php endif; ?>
+    <?php if ($pager) : ?>
     <?php print $pager; ?>
-  <?php endif; ?>
+    <?php endif; ?>
 </div>
 <div class="col-md-4 col-sm-12">
 <div class="all_events_title">Events</div>
-  <?php echo views_embed_view('news_events', $display_id = 'events');?>
+    <?php echo views_embed_view('news_events', $display_id = 'events');?>
 </div>

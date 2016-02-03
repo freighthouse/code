@@ -28,7 +28,7 @@
  * @ingroup themeable
  */
 ?>
-<?php if ($content): ?>
+<?php if ($content) : ?>
   <div class="<?php print $classes; ?>">
     <?php print $content; ?>
     <div class="col-lg-12">

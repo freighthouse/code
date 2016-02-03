@@ -3,16 +3,16 @@
 
 
 ul.archive li {
-	cursor:pointer;
-	color: #666;
+    cursor:pointer;
+    color: #666;
     font-size: 14px;
     font-weight: bold;
     line-height: 18px;
-	list-style:none outside none;
-	margin: 0 0 0 -40px;
-	padding: 0px;
-	border: none;
-	outline: none;
+    list-style:none outside none;
+    margin: 0 0 0 -40px;
+    padding: 0px;
+    border: none;
+    outline: none;
 
 }
 

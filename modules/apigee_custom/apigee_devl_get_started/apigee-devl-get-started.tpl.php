@@ -18,7 +18,7 @@
   <p class="border-btm">Create your first Apigee app in minutes with the simple
   example below. Then dive into our tutorials, SDKs, and documentation.</p>
   <div>
-    <?php if ($is_authenticated): ?>
+    <?php if ($is_authenticated) : ?>
       <h2>Thanks for signing up, <?php print check_plain($name); ?>.</h2>
       <p><em>Let’s get you started with app services.</em></p>
       <div class="well">
@@ -64,7 +64,8 @@
       <span class="step step-one"></span>
       <dt><h2>Set your account details in the app</h2></dt>
       <dd>
-        Extract the zip file and open <em>/new-project-template/index.html</em> in a text editor (Notepad, TextMate, SublimeText, or your preferred IDE). On line 18, enter your orgName — <?php if ($is_authenticated): ?><?php print $_SESSION['usergrid']['name']; ?> is<?php else: ?>it's<?php endif; ?> the username you picked when you signed up at <a href="http://apigee.com/about">apigee.com</a>. Keep the appName as “sandbox”: it’s a context we automatically created for you. It’s completely open by default, but don’t worry, other apps you create are not!
+        Extract the zip file and open <em>/new-project-template/index.html</em> in a text editor (Notepad, TextMate, SublimeText, or your preferred IDE). On line 18, enter your orgName — <?php if ($is_authenticated) : ?><?php print $_SESSION['usergrid']['name']; ?> is<?php else: ?>it's<?php 
+       endif; ?> the username you picked when you signed up at <a href="http://apigee.com/about">apigee.com</a>. Keep the appName as “sandbox”: it’s a context we automatically created for you. It’s completely open by default, but don’t worry, other apps you create are not!
   <pre class="prettyprint linenums:16 lang-java"><code>
     var client = new Usergrid.Client({
         orgName:'YOUR APIGEE.COM USERNAME',
@@ -400,7 +401,7 @@
     <p><strong>What can you build?</strong> Go to the docs to learn more about Apigee and what you can do with it. We have more advanced walkthroughs and samples there.</p>
   </div>
   <div class="admin-portal">
-    <?php if ($is_authenticated): ?>
+    <?php if ($is_authenticated) : ?>
       <h3><a href="https://apigee.com/appservices" target="_blank">Go to the admin portal</a></h3>
     <?php else: ?>
       <h3><a href="sign-on">Go to the admin portal</a></h3>

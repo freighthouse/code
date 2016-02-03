@@ -5,14 +5,14 @@
 */
 
 div.date-clear-block {
-	display: inline-block;
-	padding-top: 10px;
+    display: inline-block;
+    padding-top: 10px;
 }
 
 form#search-form input#edit-submit {
-	display: block;
+    display: block;
 }
 
 p.search-snippet {
-	display: none;
+    display: none;
 }

@@ -1,6 +1,6 @@
 (function ($) {
-  Drupal.behaviors.apigeeSearch = {
-    attach: function(context, settings) {
+    Drupal.behaviors.apigeeSearch = {
+        attach: function(context, settings) {
+        }
     }
-  }
 })(jQuery);

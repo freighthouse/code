@@ -31,26 +31,26 @@
 <div class="<?php print $classes; ?> clearfix" <?php print $attributes; ?>>
   <div class="content" <?php print $content_attributes; ?>>
     <div class="cta_image pull-left col-xs-12 col-sm-6">
-      <?php
+        <?php
         echo drupal_render($content["field_cta_image"]);
-      ?>
+        ?>
     </div>
     <div class="cta_image pull-right col-xs-12 col-sm-6">
-      <?php
+        <?php
         echo drupal_render($content["field_cta_image_right"]);
-      ?>
+        ?>
     </div>
     <div class="cta_main">
       <div class="cta_content col-xs-12 col-sm-6">
         <div class="cta_title">
-          <?php
+            <?php
             echo drupal_render($content["title_field"]);
-          ?>
+            ?>
         </div>
         <div class="cta_body">
-          <?php
+            <?php
             echo drupal_render($content["field_cta_body"]);
-          ?>
+            ?>
         </div>
         <table class="cta_active_container">
           <tr>

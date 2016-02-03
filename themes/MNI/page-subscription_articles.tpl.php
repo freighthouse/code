@@ -7,10 +7,10 @@
 print $head;
 ?>
 		<title><?php print $head_title ?></title>
-		<?php print $styles ?>
-		<?php print $scripts; ?>
+    <?php print $styles ?>
+    <?php print $scripts; ?>
 		<!--[if lt IE 8]>
-			<?php print phptemplate_get_ie_styles(); ?>
+    <?php print phptemplate_get_ie_styles(); ?>
 		<![endif]-->
 	</head>
 	<body>
@@ -21,16 +21,21 @@ print $head;
 				<h3><?php print $title ?></h3>
 			</div>
 			<div class="holder">
-				<?php if ($mission): print '<div id="mission">'. $mission .'</div>'; endif; ?>
-				<?php if ($tabs): print '<div id="tabs-wrapper">'; endif; ?>
-				<?php if ($tabs): print '<ul class="tabs primary">'. $tabs .'</ul></div>'; endif; ?>
-				<?php if ($tabs2): print '<ul class="tabs secondary">'. $tabs2 .'</ul>'; endif; ?>
-				<div id="drupal_msg"><?php if ($show_messages && $messages): print $messages; endif; ?></div>
+				<?php if ($mission) : print '<div id="mission">'. $mission .'</div>'; 
+    endif; ?>
+				<?php if ($tabs) : print '<div id="tabs-wrapper">'; 
+    endif; ?>
+				<?php if ($tabs) : print '<ul class="tabs primary">'. $tabs .'</ul></div>'; 
+    endif; ?>
+				<?php if ($tabs2) : print '<ul class="tabs secondary">'. $tabs2 .'</ul>'; 
+    endif; ?>
+				<div id="drupal_msg"><?php if ($show_messages && $messages) : print $messages; 
+   endif; ?></div>
 				<?php print $help; ?>
 				<?php print $content; ?>
 			</div>
 		</div>
-		<?php mni_dashboard_tracker(check_plain(arg(1)),check_plain(arg(2))); ?>
-		<?php print $closure ?>
+    <?php mni_dashboard_tracker(check_plain(arg(1)), check_plain(arg(2))); ?>
+    <?php print $closure ?>
 	</body>
 </html>

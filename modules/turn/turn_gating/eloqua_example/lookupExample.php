@@ -1,5 +1,5 @@
 <?php
-	include('class/class.eloquaLookup.php');
+    require 'class/class.eloquaLookup.php';
 ?>
 
 <!DOCTYPE html>

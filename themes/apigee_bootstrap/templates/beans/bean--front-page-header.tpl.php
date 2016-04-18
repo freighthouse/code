@@ -30,9 +30,9 @@
 <div class="<?php print $classes; ?> clearfix" <?php print $attributes; ?>>
   <div class="dh_image">
     <div class="header_background">
-      <?php
+        <?php
         echo drupal_render($content[field_background]);
-      ?>
+        ?>
     </div>
   </div>
   <div class="content header_content" <?php print $content_attributes; ?>>
@@ -46,28 +46,28 @@
         <div class="col-md-6">
           <div class="cta_left">
             <div class="cta_icon">
-              <?php
+                <?php
                 echo drupal_render($content[field_icon]);
-              ?>
+                ?>
             </div>
             <div class="cta_text">
-              <?php
+                <?php
                 echo drupal_render($content[field_text]);
-              ?>
+                ?>
             </div>
           </div>
         </div>
         <div class="col-md-6">
           <div class="cta_right">
             <div class="cta_icon">
-              <?php
+                <?php
                 echo drupal_render($content[field_icon2]);
-              ?>
+                ?>
             </div>
             <div class="cta_text">
-              <?php
+                <?php
                 echo drupal_render($content[field_text2]);
-              ?>
+                ?>
             </div>
           </div>
         </div>

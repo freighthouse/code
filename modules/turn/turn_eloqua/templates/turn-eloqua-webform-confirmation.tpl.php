@@ -17,11 +17,11 @@
 ?>
 
 <div class="webform-confirmation">
-  <?php if ($confirmation_message): ?>
+    <?php if ($confirmation_message) : ?>
     <?php print $confirmation_message ?>
-  <?php else: ?>
+    <?php else: ?>
     <p><?php print t('Thank you, your submission has been received.'); ?></p>
-  <?php endif; ?>
+    <?php endif; ?>
 </div>
 
 <!--div class="links">
@@ -46,7 +46,7 @@ $orderId_var = date('m-d-Y');?>
    k_trackevent(params,'105');
 </script>
 
-<?php if(arg(0) == 'contact-sales'){?>
+<?php if(arg(0) == 'contact-sales') {?>
 <!-- Do Not Remove - Turn Tracking Beacon Code - Do Not Remove -->
 <!-- Advertiser Name : Turn Corporate Advertising -->
 <!-- Beacon Name : Contact Sales Form Complete -->

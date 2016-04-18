@@ -1,13 +1,5 @@
 <?php
 
-/**
- *
- */
-
-/**
- *
- */
-
 class NodeEntityFieldQuery extends EntityFieldQuery {
   public function __construct() {
     $this
@@ -16,17 +8,16 @@ class NodeEntityFieldQuery extends EntityFieldQuery {
       ->propertyCondition('status', 1)
       ->propertyOrderBy('created', 'ASC');
   }
-
-  //exclude current node
-  public function excludeNode($nid = '') {
-    if ($nid = '') {
-      $object = menu_get_object();
-      $nid = $object->nid;
+    //exclude current node
+    public function excludeNode($nid = '')
+    {
+        if ($nid = '') {
+            $object = menu_get_object();
+            $nid = $object->nid;
+        }
+        if (!empty($nid) && $this->entityConditions['entity_type']['value'] === 'node') {
+            $this->propertyCondition('nid', $nid, '<>');
+        }
+        return $this;
     }
-    if (!empty($nid) && $this->entityConditions['entity_type']['value'] === 'node') {
-      $this->propertyCondition('nid', $nid, '<>');
-    }
-    return $this;
-  }
-
 }

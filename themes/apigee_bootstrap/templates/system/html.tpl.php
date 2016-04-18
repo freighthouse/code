@@ -49,9 +49,9 @@
 <head profile="<?php print $grddl_profile; ?>">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <?php print $head; ?>
+    <?php print $head; ?>
   <title><?php print $head_title; ?></title>
-  <?php print $styles; ?>
+    <?php print $styles; ?>
   <link href="//netdna.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
   <!-- HTML5 element support for IE6-8 -->
   <!--[if lt IE 9]>
@@ -78,10 +78,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <!-- <div id="skip-link">
     <a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
   </div> -->
-  <?php echo $page_top; ?>
-  <?php echo $page; ?>
-  <?php print $scripts; ?>
-  <?php echo $page_bottom; ?>
+    <?php echo $page_top; ?>
+    <?php echo $page; ?>
+    <?php print $scripts; ?>
+    <?php echo $page_bottom; ?>
 
 </body>
 </html>

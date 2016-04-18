@@ -472,7 +472,6 @@ EOF;
     /**
      *
      * @expectedException \Symfony\Component\Yaml\Exception\ParseException
-     *
      */
     public function testUnindentedCollectionException()
     {
@@ -493,7 +492,8 @@ EOF;
      */
     public function testSequenceInAMapping()
     {
-        Yaml::parse(<<<EOF
+        Yaml::parse(
+            <<<EOF
 yaml:
   hash: me
   - array stuff
@@ -506,7 +506,8 @@ EOF
      */
     public function testMappingInASequence()
     {
-        Yaml::parse(<<<EOF
+        Yaml::parse(
+            <<<EOF
 yaml:
   - array stuff
   hash: me
@@ -525,7 +526,8 @@ EOF;
 
     public function testStringBlockWithComments()
     {
-        $this->assertEquals(array('content' => <<<EOT
+        $this->assertEquals(
+            array('content' => <<<EOT
 # comment 1
 header
 
@@ -536,7 +538,8 @@ header
 
 footer # comment3
 EOT
-        ), Yaml::parse(<<<EOF
+            ), Yaml::parse(
+                <<<EOF
 content: |
     # comment 1
     header
@@ -548,12 +551,14 @@ content: |
 
     footer # comment3
 EOF
-        ));
+            )
+        );
     }
 
     public function testFoldedStringBlockWithComments()
     {
-        $this->assertEquals(array(array('content' => <<<EOT
+        $this->assertEquals(
+            array(array('content' => <<<EOT
 # comment 1
 header
 
@@ -564,7 +569,8 @@ header
 
 footer # comment3
 EOT
-        )), Yaml::parse(<<<EOF
+            )), Yaml::parse(
+                <<<EOF
 -
     content: |
         # comment 1
@@ -577,12 +583,14 @@ EOT
 
         footer # comment3
 EOF
-        ));
+            )
+        );
     }
 
     public function testNestedFoldedStringBlockWithComments()
     {
-        $this->assertEquals(array(array(
+        $this->assertEquals(
+            array(array(
             'title'   => 'some title',
             'content' => <<<EOT
 # comment 1
@@ -595,7 +603,8 @@ header
 
 footer # comment3
 EOT
-        )), Yaml::parse(<<<EOF
+            )), Yaml::parse(
+                <<<EOF
 -
     title: some title
     content: |
@@ -609,7 +618,8 @@ EOT
 
         footer # comment3
 EOF
-        ));
+            )
+        );
     }
 }
 

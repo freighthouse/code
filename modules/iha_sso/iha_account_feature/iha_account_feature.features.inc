@@ -7,8 +7,9 @@
 /**
  * Implements hook_ctools_plugin_api().
  */
-function iha_account_feature_ctools_plugin_api($module = NULL, $api = NULL) {
-  if ($module == "context" && $api == "context") {
-    return array("version" => "3");
-  }
+function iha_account_feature_ctools_plugin_api($module = null, $api = null) 
+{
+    if ($module == "context" && $api == "context") {
+        return array("version" => "3");
+    }
 }

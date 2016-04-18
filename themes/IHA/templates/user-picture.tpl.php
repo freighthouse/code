@@ -16,7 +16,7 @@
  * @ingroup themeable
  */
 ?>
-<?php if ($user_picture): ?>
+<?php if ($user_picture) : ?>
   <div class="<?php print $classes; ?>">
     <?php print $user_picture; ?>
   </div>

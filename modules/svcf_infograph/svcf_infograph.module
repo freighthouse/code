@@ -7,32 +7,34 @@
 /**
  * Implements hook_block_info().
  */
-function svcf_infograph_block_info() {
-  $blocks['infograph'] = array(
+function svcf_infograph_block_info() 
+{
+    $blocks['infograph'] = array(
     'info' => t('Homepage Infographic'),
     'cache' => DRUPAL_CACHE_PER_PAGE,
-  );
+    );
 
-  return $blocks;
+    return $blocks;
 }
 
 /**
  * Implements hook_block_view().
  */
-function svcf_infograph_block_view($delta = 0) {
-  global $base_url;
+function svcf_infograph_block_view($delta = 0) 
+{
+    global $base_url;
 
-  $block = array();
+    $block = array();
 
-  $path = drupal_get_path('module', 'svcf_infograph');
+    $path = drupal_get_path('module', 'svcf_infograph');
 
-  if (($delta == 'infograph') && ($content = file_get_contents($path . '/svcf_infograph.inc'))) {
-    $content = str_replace('SVCF_INFOGRAPH_ROOT', $base_url . '/' . $path, $content);
+    if (($delta == 'infograph') && ($content = file_get_contents($path . '/svcf_infograph.inc'))) {
+        $content = str_replace('SVCF_INFOGRAPH_ROOT', $base_url . '/' . $path, $content);
 
-    $block['subject'] = NULL;
-    $block['content'] = array(
-      '#markup' => $content,
-      '#attached' => array(
+        $block['subject'] = null;
+        $block['content'] = array(
+        '#markup' => $content,
+        '#attached' => array(
         'js' => array(
           $path . '/scripts/vendor.js' => array('type' => 'file'),
           $path . '/scripts/main.js' => array('type' => 'file'),
@@ -43,9 +45,9 @@ function svcf_infograph_block_view($delta = 0) {
           $path . '/styles/vendor.css' => array('type' => 'file'),
           $path . '/styles/main.css' => array('type' => 'file'),
         ),
-      ),
-    );
-  }
+        ),
+        );
+    }
 
-  return $block;
+    return $block;
 }

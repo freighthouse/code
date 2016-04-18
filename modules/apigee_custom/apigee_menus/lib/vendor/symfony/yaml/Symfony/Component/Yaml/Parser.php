@@ -113,7 +113,7 @@ class Parser
                         $data[] = $this->parseValue($values['value'], $exceptionOnInvalidType, $objectSupport);
                     }
                 }
-            } elseif (preg_match('#^(?P<key>'.Inline::REGEX_QUOTED_STRING.'|[^ \'"\[\{].*?) *\:(\s+(?P<value>.+?))?\s*$#u', $this->currentLine, $values) && false === strpos($values['key'],' #')) {
+            } elseif (preg_match('#^(?P<key>'.Inline::REGEX_QUOTED_STRING.'|[^ \'"\[\{].*?) *\:(\s+(?P<value>.+?))?\s*$#u', $this->currentLine, $values) && false === strpos($values['key'], ' #')) {
                 if ($context && 'sequence' == $context) {
                     throw new ParseException('You cannot define a mapping item when in a sequence');
                 }
@@ -173,7 +173,7 @@ class Parser
                 if ($isProcessed) {
                     // Merge keys
                     $data = $isProcessed;
-                // hash
+                    // hash
                 } elseif (!isset($values['value']) || '' == trim($values['value'], ' ') || 0 === strpos(ltrim($values['value'], ' '), '#')) {
                     // if next line is less indented or equal, then it means that the current value is null
                     if (!$this->isNextLineIndented() && !$this->isNextLineUnIndentedCollection()) {
@@ -223,23 +223,23 @@ class Parser
                 }
 
                 switch (preg_last_error()) {
-                    case PREG_INTERNAL_ERROR:
-                        $error = 'Internal PCRE error.';
-                        break;
-                    case PREG_BACKTRACK_LIMIT_ERROR:
-                        $error = 'pcre.backtrack_limit reached.';
-                        break;
-                    case PREG_RECURSION_LIMIT_ERROR:
-                        $error = 'pcre.recursion_limit reached.';
-                        break;
-                    case PREG_BAD_UTF8_ERROR:
-                        $error = 'Malformed UTF-8 data.';
-                        break;
-                    case PREG_BAD_UTF8_OFFSET_ERROR:
-                        $error = 'Offset doesn\'t correspond to the begin of a valid UTF-8 code point.';
-                        break;
-                    default:
-                        $error = 'Unable to parse.';
+                case PREG_INTERNAL_ERROR:
+                    $error = 'Internal PCRE error.';
+                    break;
+                case PREG_BACKTRACK_LIMIT_ERROR:
+                    $error = 'pcre.backtrack_limit reached.';
+                    break;
+                case PREG_RECURSION_LIMIT_ERROR:
+                    $error = 'pcre.recursion_limit reached.';
+                    break;
+                case PREG_BAD_UTF8_ERROR:
+                    $error = 'Malformed UTF-8 data.';
+                    break;
+                case PREG_BAD_UTF8_OFFSET_ERROR:
+                    $error = 'Offset doesn\'t correspond to the begin of a valid UTF-8 code point.';
+                    break;
+                default:
+                    $error = 'Unable to parse.';
                 }
 
                 throw new ParseException($error, $this->getRealCurrentLineNb() + 1, $this->currentLine);
@@ -613,10 +613,8 @@ class Parser
         }
 
         $ret = false;
-        if (
-            $this->getCurrentLineIndentation() == $currentIndentation
-            &&
-            $this->isStringUnIndentedCollectionItem($this->currentLine)
+        if ($this->getCurrentLineIndentation() == $currentIndentation
+            && $this->isStringUnIndentedCollectionItem($this->currentLine)
         ) {
             $ret = true;
         }

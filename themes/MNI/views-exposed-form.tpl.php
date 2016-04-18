@@ -15,34 +15,34 @@
  * @ingroup views_templates
  */
 ?>
-<?php if (!empty($q)): ?>
-  <?php
+<?php if (!empty($q)) : ?>
+    <?php
     // This ensures that, if clean URLs are off, the 'q' is added first so that
     // it shows up first in the URL.
     print $q;
-  ?>
+    ?>
 <?php endif; ?>
 <div class="views-exposed-form">
   <div class="views-exposed-widgets clear-block">
     <?php foreach($widgets as $id => $widget): ?>
       <div class="views-exposed-widget">
-        <?php if (!empty($widget->label)): ?>
+        <?php if (!empty($widget->label)) : ?>
           <label for="<?php print $widget->id; ?>">
             <?php print $widget->label; ?>
           </label>
         <?php endif; ?>
-        <?php if (!empty($widget->operator)): ?>
+        <?php if (!empty($widget->operator)) : ?>
           <div class="views-operator">
             <?php print $widget->operator; ?>
           </div>
         <?php endif; ?>
         <div class="views-widget">
-          <?php print $widget->widget; ?>
+            <?php print $widget->widget; ?>
         </div>
       </div>
     <?php endforeach; ?>
     <div class="views-exposed-widget">
-      <?php print $button ?>
+        <?php print $button ?>
     </div>
   </div>
 </div>

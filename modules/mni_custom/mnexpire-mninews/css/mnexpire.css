@@ -1,6 +1,6 @@
-tr.mnexp_red 				{ background-color:#FFC0CB; }
-tr.mnexp_red td.active		{ background-color:#F5B6C1; }
-tr.mnexp_yellow 			{ background-color:#FFF5C2; }
-tr.mnexp_yellow td.active	{ background-color:#F5EAB8; }
+tr.mnexp_red                 { background-color:#FFC0CB; }
+tr.mnexp_red td.active        { background-color:#F5B6C1; }
+tr.mnexp_yellow             { background-color:#FFF5C2; }
+tr.mnexp_yellow td.active    { background-color:#F5EAB8; }
 
 label { font-weight:bold; }

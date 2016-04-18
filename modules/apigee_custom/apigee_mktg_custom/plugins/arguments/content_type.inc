@@ -26,13 +26,14 @@ $plugin = array(
 /**
  * Discover if this argument gives us the term we crave.
  */
-function apigee_mktg_custom_content_type_context($arg = NULL, $conf = NULL, $empty = FALSE) {
-  // If unset it wants a generic, unfilled context.
-  if ($empty) {
-    return ctools_context_create_empty('content_type');
-  }
+function apigee_mktg_custom_content_type_context($arg = null, $conf = null, $empty = false) 
+{
+    // If unset it wants a generic, unfilled context.
+    if ($empty) {
+        return ctools_context_create_empty('content_type');
+    }
 
-  return ctools_context_create('content_type', $arg);
+    return ctools_context_create('content_type', $arg);
 }
 
 /**

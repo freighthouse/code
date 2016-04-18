@@ -54,16 +54,16 @@ class Inline
 
         $i = 0;
         switch ($value[0]) {
-            case '[':
-                $result = self::parseSequence($value, $i);
-                ++$i;
-                break;
-            case '{':
-                $result = self::parseMapping($value, $i);
-                ++$i;
-                break;
-            default:
-                $result = self::parseScalar($value, null, array('"', "'"), $i);
+        case '[':
+            $result = self::parseSequence($value, $i);
+            ++$i;
+            break;
+        case '{':
+            $result = self::parseMapping($value, $i);
+            ++$i;
+            break;
+        default:
+            $result = self::parseScalar($value, null, array('"', "'"), $i);
         }
 
         // some comments are allowed at the end
@@ -92,55 +92,55 @@ class Inline
     public static function dump($value, $exceptionOnInvalidType = false, $objectSupport = false)
     {
         switch (true) {
-            case is_resource($value):
-                if ($exceptionOnInvalidType) {
-                    throw new DumpException(sprintf('Unable to dump PHP resources in a YAML file ("%s").', get_resource_type($value)));
-                }
+        case is_resource($value):
+            if ($exceptionOnInvalidType) {
+                throw new DumpException(sprintf('Unable to dump PHP resources in a YAML file ("%s").', get_resource_type($value)));
+            }
 
-                return 'null';
-            case is_object($value):
-                if ($objectSupport) {
-                    return '!!php/object:'.serialize($value);
-                }
+            return 'null';
+        case is_object($value):
+            if ($objectSupport) {
+                return '!!php/object:'.serialize($value);
+            }
 
-                if ($exceptionOnInvalidType) {
-                    throw new DumpException('Object support when dumping a YAML file has been disabled.');
-                }
+            if ($exceptionOnInvalidType) {
+                throw new DumpException('Object support when dumping a YAML file has been disabled.');
+            }
 
-                return 'null';
-            case is_array($value):
-                return self::dumpArray($value, $exceptionOnInvalidType, $objectSupport);
-            case null === $value:
-                return 'null';
-            case true === $value:
-                return 'true';
-            case false === $value:
-                return 'false';
-            case ctype_digit($value):
-                return is_string($value) ? "'$value'" : (int) $value;
-            case is_numeric($value):
-                $locale = setlocale(LC_NUMERIC, 0);
-                if (false !== $locale) {
-                    setlocale(LC_NUMERIC, 'C');
-                }
-                $repr = is_string($value) ? "'$value'" : (is_infinite($value) ? str_ireplace('INF', '.Inf', strval($value)) : strval($value));
+            return 'null';
+        case is_array($value):
+            return self::dumpArray($value, $exceptionOnInvalidType, $objectSupport);
+        case null === $value:
+            return 'null';
+        case true === $value:
+            return 'true';
+        case false === $value:
+            return 'false';
+        case ctype_digit($value):
+            return is_string($value) ? "'$value'" : (int) $value;
+        case is_numeric($value):
+            $locale = setlocale(LC_NUMERIC, 0);
+            if (false !== $locale) {
+                setlocale(LC_NUMERIC, 'C');
+            }
+            $repr = is_string($value) ? "'$value'" : (is_infinite($value) ? str_ireplace('INF', '.Inf', strval($value)) : strval($value));
 
-                if (false !== $locale) {
-                    setlocale(LC_NUMERIC, $locale);
-                }
+            if (false !== $locale) {
+                setlocale(LC_NUMERIC, $locale);
+            }
 
-                return $repr;
-            case Escaper::requiresDoubleQuoting($value):
-                return Escaper::escapeWithDoubleQuotes($value);
-            case Escaper::requiresSingleQuoting($value):
-                return Escaper::escapeWithSingleQuotes($value);
-            case '' == $value:
-                return "''";
-            case preg_match(self::getTimestampRegex(), $value):
-            case in_array(strtolower($value), array('null', '~', 'true', 'false')):
-                return "'$value'";
-            default:
-                return $value;
+            return $repr;
+        case Escaper::requiresDoubleQuoting($value):
+            return Escaper::escapeWithDoubleQuotes($value);
+        case Escaper::requiresSingleQuoting($value):
+            return Escaper::escapeWithSingleQuotes($value);
+        case '' == $value:
+            return "''";
+        case preg_match(self::getTimestampRegex(), $value):
+        case in_array(strtolower($value), array('null', '~', 'true', 'false')):
+            return "'$value'";
+        default:
+            return $value;
         }
     }
 
@@ -158,7 +158,11 @@ class Inline
         // array
         $keys = array_keys($value);
         if ((1 == count($keys) && '0' == $keys[0])
-            || (count($keys) > 1 && array_reduce($keys, function ($v, $w) { return (integer) $v + $w; }, 0) == count($keys) * (count($keys) - 1) / 2)
+            || (count($keys) > 1 && array_reduce(
+                $keys, function ($v, $w) {
+                    return (integer) $v + $w; 
+                }, 0
+            ) == count($keys) * (count($keys) - 1) / 2)
         ) {
             $output = array();
             foreach ($value as $val) {
@@ -180,9 +184,9 @@ class Inline
     /**
      * Parses a scalar to a YAML string.
      *
-     * @param scalar $scalar
-     * @param string $delimiters
-     * @param array  $stringDelimiters
+     * @param scalar  $scalar
+     * @param string  $delimiters
+     * @param array   $stringDelimiters
      * @param integer &$i
      * @param Boolean $evaluate
      *
@@ -228,7 +232,7 @@ class Inline
     /**
      * Parses a quoted scalar to YAML.
      *
-     * @param string $scalar
+     * @param string  $scalar
      * @param integer &$i
      *
      * @return string A YAML string
@@ -258,7 +262,7 @@ class Inline
     /**
      * Parses a sequence to a YAML string.
      *
-     * @param string $sequence
+     * @param string  $sequence
      * @param integer &$i
      *
      * @return string A YAML string
@@ -274,35 +278,35 @@ class Inline
         // [foo, bar, ...]
         while ($i < $len) {
             switch ($sequence[$i]) {
-                case '[':
-                    // nested sequence
-                    $output[] = self::parseSequence($sequence, $i);
-                    break;
-                case '{':
-                    // nested mapping
-                    $output[] = self::parseMapping($sequence, $i);
-                    break;
-                case ']':
-                    return $output;
-                case ',':
-                case ' ':
-                    break;
-                default:
-                    $isQuoted = in_array($sequence[$i], array('"', "'"));
-                    $value = self::parseScalar($sequence, array(',', ']'), array('"', "'"), $i);
+            case '[':
+                // nested sequence
+                $output[] = self::parseSequence($sequence, $i);
+                break;
+            case '{':
+                // nested mapping
+                $output[] = self::parseMapping($sequence, $i);
+                break;
+            case ']':
+                return $output;
+            case ',':
+            case ' ':
+                break;
+            default:
+                $isQuoted = in_array($sequence[$i], array('"', "'"));
+                $value = self::parseScalar($sequence, array(',', ']'), array('"', "'"), $i);
 
-                    if (!$isQuoted && false !== strpos($value, ': ')) {
-                        // embedded mapping?
-                        try {
-                            $value = self::parseMapping('{'.$value.'}');
-                        } catch (\InvalidArgumentException $e) {
-                            // no, it's not
-                        }
+                if (!$isQuoted && false !== strpos($value, ': ')) {
+                    // embedded mapping?
+                    try {
+                        $value = self::parseMapping('{'.$value.'}');
+                    } catch (\InvalidArgumentException $e) {
+                        // no, it's not
                     }
+                }
 
-                    $output[] = $value;
+                $output[] = $value;
 
-                    --$i;
+                --$i;
             }
 
             ++$i;
@@ -314,7 +318,7 @@ class Inline
     /**
      * Parses a mapping to a YAML string.
      *
-     * @param string $mapping
+     * @param string  $mapping
      * @param integer &$i
      *
      * @return string A YAML string
@@ -330,12 +334,12 @@ class Inline
         // {foo: bar, bar:foo, ...}
         while ($i < $len) {
             switch ($mapping[$i]) {
-                case ' ':
-                case ',':
-                    ++$i;
-                    continue 2;
-                case '}':
-                    return $output;
+            case ' ':
+            case ',':
+                ++$i;
+                continue 2;
+            case '}':
+                return $output;
             }
 
             // key
@@ -345,23 +349,23 @@ class Inline
             $done = false;
             while ($i < $len) {
                 switch ($mapping[$i]) {
-                    case '[':
-                        // nested sequence
-                        $output[$key] = self::parseSequence($mapping, $i);
-                        $done = true;
-                        break;
-                    case '{':
-                        // nested mapping
-                        $output[$key] = self::parseMapping($mapping, $i);
-                        $done = true;
-                        break;
-                    case ':':
-                    case ' ':
-                        break;
-                    default:
-                        $output[$key] = self::parseScalar($mapping, array(',', '}'), array('"', "'"), $i);
-                        $done = true;
-                        --$i;
+                case '[':
+                    // nested sequence
+                    $output[$key] = self::parseSequence($mapping, $i);
+                    $done = true;
+                    break;
+                case '{':
+                    // nested mapping
+                    $output[$key] = self::parseMapping($mapping, $i);
+                    $done = true;
+                    break;
+                case ':':
+                case ' ':
+                    break;
+                default:
+                    $output[$key] = self::parseScalar($mapping, array(',', '}'), array('"', "'"), $i);
+                    $done = true;
+                    --$i;
                 }
 
                 ++$i;
@@ -387,51 +391,51 @@ class Inline
         $scalar = trim($scalar);
 
         switch (true) {
-            case 'null' == strtolower($scalar):
-            case '' == $scalar:
-            case '~' == $scalar:
-                return null;
-            case 0 === strpos($scalar, '!str'):
-                return (string) substr($scalar, 5);
-            case 0 === strpos($scalar, '! '):
-                return intval(self::parseScalar(substr($scalar, 2)));
-            case 0 === strpos($scalar, '!!php/object:'):
-                if (self::$objectSupport) {
-                    return unserialize(substr($scalar, 13));
-                }
+        case 'null' == strtolower($scalar):
+        case '' == $scalar:
+        case '~' == $scalar:
+            return null;
+        case 0 === strpos($scalar, '!str'):
+            return (string) substr($scalar, 5);
+        case 0 === strpos($scalar, '! '):
+            return intval(self::parseScalar(substr($scalar, 2)));
+        case 0 === strpos($scalar, '!!php/object:'):
+            if (self::$objectSupport) {
+                return unserialize(substr($scalar, 13));
+            }
 
-                if (self::$exceptionOnInvalidType) {
-                    throw new ParseException('Object support when parsing a YAML file has been disabled.');
-                }
+            if (self::$exceptionOnInvalidType) {
+                throw new ParseException('Object support when parsing a YAML file has been disabled.');
+            }
 
-                return null;
-            case ctype_digit($scalar):
-                $raw = $scalar;
-                $cast = intval($scalar);
+            return null;
+        case ctype_digit($scalar):
+            $raw = $scalar;
+            $cast = intval($scalar);
 
-                return '0' == $scalar[0] ? octdec($scalar) : (((string) $raw == (string) $cast) ? $cast : $raw);
-            case '-' === $scalar[0] && ctype_digit(substr($scalar, 1)):
-                $raw = $scalar;
-                $cast = intval($scalar);
+            return '0' == $scalar[0] ? octdec($scalar) : (((string) $raw == (string) $cast) ? $cast : $raw);
+        case '-' === $scalar[0] && ctype_digit(substr($scalar, 1)):
+            $raw = $scalar;
+            $cast = intval($scalar);
 
-                return '0' == $scalar[1] ? octdec($scalar) : (((string) $raw == (string) $cast) ? $cast : $raw);
-            case 'true' === strtolower($scalar):
-                return true;
-            case 'false' === strtolower($scalar):
-                return false;
-            case is_numeric($scalar):
-                return '0x' == $scalar[0].$scalar[1] ? hexdec($scalar) : floatval($scalar);
-            case 0 == strcasecmp($scalar, '.inf'):
-            case 0 == strcasecmp($scalar, '.NaN'):
-                return -log(0);
-            case 0 == strcasecmp($scalar, '-.inf'):
-                return log(0);
-            case preg_match('/^(-|\+)?[0-9,]+(\.[0-9]+)?$/', $scalar):
-                return floatval(str_replace(',', '', $scalar));
-            case preg_match(self::getTimestampRegex(), $scalar):
-                return strtotime($scalar);
-            default:
-                return (string) $scalar;
+            return '0' == $scalar[1] ? octdec($scalar) : (((string) $raw == (string) $cast) ? $cast : $raw);
+        case 'true' === strtolower($scalar):
+            return true;
+        case 'false' === strtolower($scalar):
+            return false;
+        case is_numeric($scalar):
+            return '0x' == $scalar[0].$scalar[1] ? hexdec($scalar) : floatval($scalar);
+        case 0 == strcasecmp($scalar, '.inf'):
+        case 0 == strcasecmp($scalar, '.NaN'):
+            return -log(0);
+        case 0 == strcasecmp($scalar, '-.inf'):
+            return log(0);
+        case preg_match('/^(-|\+)?[0-9,]+(\.[0-9]+)?$/', $scalar):
+            return floatval(str_replace(',', '', $scalar));
+        case preg_match(self::getTimestampRegex(), $scalar):
+            return strtotime($scalar);
+        default:
+            return (string) $scalar;
         }
     }
 

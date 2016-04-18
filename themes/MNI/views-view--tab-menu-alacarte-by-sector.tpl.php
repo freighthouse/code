@@ -29,8 +29,8 @@
  * @ingroup views_templates
  */ 
 ?>
-  <?php if ($rows): ?>
+    <?php if ($rows) : ?>
   	<ul class="key-list key-list-type2">
-      <?php print $rows; ?>
+        <?php print $rows; ?>
     </ul>
-  <?php endif; ?>
+    <?php endif; ?>

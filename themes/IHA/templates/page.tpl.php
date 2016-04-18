@@ -76,17 +76,17 @@
 <header id="navbar" role="banner" class="<?php print $navbar_classes; ?>">
   <div class="<?php print $container_class; ?>">
     <div class="navbar-header">
-      <?php if ($logo): ?>
+        <?php if ($logo) : ?>
       <a class="logo navbar-btn pull-left" href="<?php print $front_page; ?>" title="<?php print t('IHA.org'); ?>">
         <img src="<?php print $logo; ?>" alt="<?php print t('Home'); ?>" />
       </a>
-      <?php endif; ?>
+        <?php endif; ?>
 
-      <?php if (!empty($site_name)): ?>
+        <?php if (!empty($site_name)) : ?>
       <a class="name navbar-brand" href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>"><?php print $site_name; ?></a>
-      <?php endif; ?>
+        <?php endif; ?>
       <div id="iha_mobile_menu">
-        <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
+        <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])) : ?>
             <nav class="mobile">
                 <?php print $mobile_menu; ?>
             </nav>
@@ -96,18 +96,18 @@
         <?php endif; ?>
       </div>
     </div>
-    <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])): ?>
+    <?php if (!empty($primary_nav) || !empty($secondary_nav) || !empty($page['navigation'])) : ?>
       <div class="navbar-collapse collapse">
         <nav role="navigation">
-          <?php if (!empty($primary_nav)): ?>
+            <?php if (!empty($primary_nav)) : ?>
             <?php print render($primary_nav); ?>
-          <?php endif; ?>
-          <?php if (!empty($secondary_nav)): ?>
+            <?php endif; ?>
+            <?php if (!empty($secondary_nav)) : ?>
             <?php print render($secondary_nav); ?>
-          <?php endif; ?>
-          <?php if (!empty($page['navigation'])): ?>
+            <?php endif; ?>
+            <?php if (!empty($page['navigation'])) : ?>
             <?php print render($page['navigation']); ?>
-          <?php endif; ?>
+            <?php endif; ?>
         </nav>
       </div>
     <?php endif; ?>
@@ -126,7 +126,7 @@
             <div class="modal-dialog modal-sm">
               <div class="modal-content">
                 <div class="modal-body">
-                  <?php print $search_box; ?>
+                    <?php print $search_box; ?>
                 </div>
               </div>
             </div>
@@ -137,37 +137,37 @@
     <div class="main_navigation">
     </div>
   </div>
-  <?php print render($page['header']); ?>
+    <?php print render($page['header']); ?>
 </header>
 <div class="main-container <?php print $container_class; ?>">
   <div class="iha_header">
-    <?php if (!empty($site_slogan)): ?>
+    <?php if (!empty($site_slogan)) : ?>
       <p class="lead"><?php print $site_slogan; ?></p>
     <?php endif; ?>
     <div class="row container">
       <div class="col-sm-12 page_header_top hide_on_mobile"></div>
       <div class="page_header_bottom">
         <div class="header_right">
-          <?php
+            <?php
             if (isset($node_content) && $node_content['field_header_image']) {
-              echo '<div class="header_image">';
-              print render($node_content['field_header_image']);
-              echo '</div>';
+                echo '<div class="header_image">';
+                print render($node_content['field_header_image']);
+                echo '</div>';
             }
-          ?>
-          <?php
+            ?>
+            <?php
             if (isset($node_content) && $node_content['field_header_icon']) {
-              echo '<div class="header_icon">';
-              print render($node_content['field_header_icon']);
-              echo '</div>';
+                echo '<div class="header_icon">';
+                print render($node_content['field_header_icon']);
+                echo '</div>';
             }
-          ?>
+            ?>
         </div>
         <div class="header_left">
           <div class="iha_title">
             <?php print render($title_prefix); ?>
-            <?php if (!empty($title)): ?>
-              <?php print $title; ?>
+            <?php if (!empty($title)) : ?>
+                <?php print $title; ?>
             <?php endif; ?>
             <?php print render($title_suffix); ?>
           </div>
@@ -177,35 +177,36 @@
   <!-- /#page-header -->
   </div>
   <div class="row">
-    <?php if (!empty($page['sidebar_first'])): ?>
+    <?php if (!empty($page['sidebar_first'])) : ?>
       <aside class="col-sm-3" role="complementary">
         <?php print render($page['sidebar_first']); ?>
       </aside>  <!-- /#sidebar-first -->
     <?php endif; ?>
     <section<?php print $content_column_class; ?>>
       <div class="page_bodies">
-        <?php if (!empty($page['highlighted'])): ?>
+        <?php if (!empty($page['highlighted'])) : ?>
           <div class="highlighted jumbotron"><?php print render($page['highlighted']); ?></div>
         <?php endif; ?>
-        <?php if (!empty($breadcrumb)): print $breadcrumb; endif;?>
+        <?php if (!empty($breadcrumb)) : print $breadcrumb; 
+        endif;?>
         <a id="main-content"></a>
         <?php print $messages; ?>
-        <?php if (!empty($tabs)): ?>
-          <?php print render($tabs); ?>
+        <?php if (!empty($tabs)) : ?>
+            <?php print render($tabs); ?>
         <?php endif; ?>
-        <?php if (!empty($page['help'])): ?>
-          <?php print render($page['help']); ?>
+        <?php if (!empty($page['help'])) : ?>
+            <?php print render($page['help']); ?>
         <?php endif; ?>
-        <?php if (!empty($action_links)): ?>
+        <?php if (!empty($action_links)) : ?>
           <ul class="action-links"><?php print render($action_links); ?></ul>
         <?php endif; ?>
-          <?php
+            <?php
             print render($page['content']);
-          ?>
+            ?>
       </div>
     </section>
 
-    <?php if (!empty($page['sidebar_second'])): ?>
+    <?php if (!empty($page['sidebar_second'])) : ?>
       <aside class="col-sm-3" role="complementary">
         <?php print render($page['sidebar_second']); ?>
       </aside>  <!-- /#sidebar-second -->
@@ -243,10 +244,10 @@
         <h5>Sign up for our newsletter</h5>
           <p class="newsletter_signup"><a class="btn btn-default register_button" href="//visitor.r20.constantcontact.com/d.jsp?llr=fcitmjcab&amp;p=oi&amp;m=1101974315077&amp;sit=znsuj64cb&amp;f=e7fd2e98-c34d-48e0-930d-f96c2dc40cff" target="_blank" type="button">Sign up</a></p>
         <!--<?php
-      //  $block = block_load('constant_contact', 1);
-      //  $render_array = _block_get_renderable_array(_block_render_blocks(array($block)));
-      //  $output = drupal_render($render_array);
-      //  print $output; ?>-->
+        //  $block = block_load('constant_contact', 1);
+        //  $render_array = _block_get_renderable_array(_block_render_blocks(array($block)));
+        //  $output = drupal_render($render_array);
+        //  print $output; ?>-->
       </div>
     </div>
   </div>

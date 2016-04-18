@@ -3,30 +3,30 @@
 <head>
 	<meta name="MobileOptimized" content="width" /> 
 	<meta name="viewport" content="width=device-width, maximum-scale=1.0, initial-scale=1.0 , user-scalable=0;" />
-	<?php print $head; ?>
+    <?php print $head; ?>
 	<title><?php
-		if (drupal_is_front_page()){
-		 print "MNI News |MNI"; 
-		}else{
-		 print $head_title ;
-		}
-		 ?></title>
-	<?php print $styles ?>
-	<?php print $scripts ?>
+    if (drupal_is_front_page()) {
+        print "MNI News |MNI"; 
+    }else{
+        print $head_title ;
+    }
+    ?></title>
+    <?php print $styles ?>
+    <?php print $scripts ?>
 	<script type="text/javascript" src="<?php print base_path() . path_to_theme(); ?>/js/clear-input.js"></script>
 </head>
 <body>
 	<div id="wrapper">
 		<div class="w1">
-			<?php if ($top_menu): ?>
+    <?php if ($top_menu) : ?>
 				<div class="top-navigation">
-					<?php print $top_menu; ?>
+        <?php print $top_menu; ?>
 				</div>
-			<?php endif; ?>
+    <?php endif; ?>
 			<div id="header">
 				<h1 class="logo"><a href="<?php print $front_page ?>"><?php print $site_name; ?></a></h1>
 				<div class="holder">
-					<?php print str_replace('value=""', 'value="search MNI"', $search_box); ?>
+        <?php print str_replace('value=""', 'value="search MNI"', $search_box); ?>
 					<div class="wrap">
 						<ul class="social-networks">
 							<li><a href="https://www.facebook.com/MNINews" class="facebook">facebook</a></li>
@@ -39,10 +39,10 @@
 			</div>
 			<div id="main">
 				<?php
-				 if ($main_menu): ?>
+    if ($main_menu) : ?>
 					<div class="nav-box">
 						<div class="holder">
-							<?php print $main_menu; ?>
+        <?php print $main_menu; ?>
 						</div>
 					</div>
-				<?php endif; ?>
+    <?php endif; ?>

@@ -13,12 +13,13 @@
 <?php echo t('Customer:')." ".$order_first_name." ".$order_last_name; ?><br />
 <?php echo t('Customer Email:')." ".$order_email; ?><br />
 <?php echo t('Payment Method:')." ".$order->payment_method; ?><br />
-<?php if($order_vat_number){ echo t('Order vat-number:')." ".$order_vat_number;} ?><br />
+<?php if($order_vat_number) { echo t('Order vat-number:')." ".$order_vat_number;
+} ?><br />
 <?php echo t('Billing Address:')." ".$order_billing_address; ?><br />
 <?php echo t('Billing Phone:')." ".$order_billing_phone; ?><br />
 <?php if (uc_order_is_shippable($order)) { 
-				echo t('Shipping method:')." ".$order_shipping_method;
-			} ?>
+                echo t('Shipping method:')." ".$order_shipping_method;
+} ?>
 <p>
 <?php echo t('Products:'); ?><br />
 <?php
@@ -27,13 +28,13 @@ $context = array(
   'type' => 'order_product',
 );
 foreach ($products as $product) {
-  $price_info = array(
+    $price_info = array(
     'price' => $product->price,
     'qty' => $product->qty,
-  );
-  $context['subject'] = array(
+    );
+    $context['subject'] = array(
     'order_product' => $product,
-  );
+    );
 ?>
 - Quantity: <?php echo $product->qty; ?><br />
 - Product ID: <?php echo $product->nid; ?><br />
@@ -45,12 +46,12 @@ foreach ($products as $product) {
 
 <p><?php
 $taxes=$order->data['taxes'];
-if (!empty($taxes)){
-	echo "Taxes Applied:<br />";
+if (!empty($taxes)) {
+    echo "Taxes Applied:<br />";
 
-	foreach ($taxes as $tax) {
-		echo $tax->name." rate:".	$tax->rate."<br>";
-	}
+    foreach ($taxes as $tax) {
+        echo $tax->name." rate:".    $tax->rate."<br>";
+    }
 }
 ?></p>
 <p><?php 
@@ -62,11 +63,11 @@ $context = array(
   ),
 );
 foreach ($order->line_items as $line_item) {
-	if ($line_item['line_item_id'] == 'subtotal' || $line_item['line_item_id'] == 'total') {
-		continue;
-	}
-  $context['subject']['line_item'] = $line_item;
-  echo str_replace("xx","x",$line_item['title']).": ".uc_price($line_item['amount'], $context)."<br>"; //the xx x thing is for some reason it spells excluding exxcluding.
+    if ($line_item['line_item_id'] == 'subtotal' || $line_item['line_item_id'] == 'total') {
+        continue;
+    }
+    $context['subject']['line_item'] = $line_item;
+    echo str_replace("xx", "x", $line_item['title']).": ".uc_price($line_item['amount'], $context)."<br>"; //the xx x thing is for some reason it spells excluding exxcluding.
 }
 ?>
 Shipping Cost: 0<br>

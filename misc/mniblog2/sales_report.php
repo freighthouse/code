@@ -1,10 +1,10 @@
 <?php
 
-include 'includes/session.inc';
-include 'modules/node/node.module';
-include 'modules/user/user.module';
+require 'includes/session.inc';
+require 'modules/node/node.module';
+require 'modules/user/user.module';
 
-require_once('includes/bootstrap.inc');
+require_once 'includes/bootstrap.inc';
 drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
 
 $q = "	SELECT n.title, uo.order_total, uo.currency,
@@ -25,11 +25,11 @@ $q = "	SELECT n.title, uo.order_total, uo.currency,
 
 $r = db_query($q);
 print "'Story Title','Sale Total','Currency','Last Name','First Name',".
-	"'Email','Company','Country'\n";
+    "'Email','Company','Country'\n";
 while($o = db_fetch_object($r)){
-	print "'$o->title','$o->order_total','$o->currency',".
-		"'$o->billing_last_name','$o->billing_first_name',".
-		"'$o->primary_email','$o->billing_company',".
-		"'$o->billing_country'\n";
+    print "'$o->title','$o->order_total','$o->currency',".
+    "'$o->billing_last_name','$o->billing_first_name',".
+    "'$o->primary_email','$o->billing_company',".
+    "'$o->billing_country'\n";
 }
 ?>

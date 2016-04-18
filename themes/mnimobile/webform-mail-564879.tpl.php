@@ -21,7 +21,7 @@
 ?>
 <?php print ($email['html'] ? '<p>' : '') . t('Submitted on %date'). ($email['html'] ? '</p>' : ''); ?>
 
-<?php if ($user->uid): ?>
+<?php if ($user->uid) : ?>
 <?php print ($email['html'] ? '<p>' : '') . t('Submitted by user: %username') . ($email['html'] ? '</p>' : ''); ?>
 <?php else: ?>
 <?php print ($email['html'] ? '<p>' : '') . t('Submitted by anonymous user: [%ip_address]') . ($email['html'] ? '</p>' : ''); ?>
@@ -34,7 +34,7 @@
 (Using the tpl php file)
 
 
-<?php print_r (geoip_record_by_name($_SERVER["REMOTE_ADDR"])); ?>
+<?php print_r(geoip_record_by_name($_SERVER["REMOTE_ADDR"])); ?>
 
 <?php print ($email['html'] ? '<p>' : '') . t('The results of this submission may be viewed at:') . ($email['html'] ? '</p>' : '') ?>
 

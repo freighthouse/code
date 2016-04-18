@@ -10,6 +10,7 @@
  *               the query string)
  *   - openid_identifier (defaults to https://www.google.com/accounts/o8/id)
  */
-function hook_iha_sso_alter(&$params) {
-  $params['redirect'] = '<front>';
+function hook_iha_sso_alter(&$params) 
+{
+    $params['redirect'] = '<front>';
 }

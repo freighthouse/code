@@ -8,81 +8,83 @@
 
 
 +function ($) {
-  'use strict';
+    'use strict';
 
-  // ALERT CLASS DEFINITION
-  // ======================
+    // ALERT CLASS DEFINITION
+    // ======================
 
-  var dismiss = '[data-dismiss="alert"]'
-  var Alert   = function (el) {
-    $(el).on('click', dismiss, this.close)
-  }
-
-  Alert.prototype.close = function (e) {
-    var $this    = $(this)
-    var selector = $this.attr('data-target')
-
-    if (!selector) {
-      selector = $this.attr('href')
-      selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+    var dismiss = '[data-dismiss="alert"]'
+    var Alert   = function (el) {
+        $(el).on('click', dismiss, this.close)
     }
 
-    var $parent = $(selector)
+    Alert.prototype.close = function (e) {
+        var $this    = $(this)
+        var selector = $this.attr('data-target')
 
-    if (e) e.preventDefault()
+        if (!selector) {
+            selector = $this.attr('href')
+            selector = selector && selector.replace(/.*(?=#[^\s]*$)/, '') // strip for ie7
+        }
 
-    if (!$parent.length) {
-      $parent = $this.hasClass('alert') ? $this : $this.parent()
-    }
+        var $parent = $(selector)
 
-    $parent.trigger(e = $.Event('close.bs.alert'))
+        if (e) { e.preventDefault()
 
-    if (e.isDefaultPrevented()) return
+            if (!$parent.length) {
+                $parent = $this.hasClass('alert') ? $this : $this.parent()
+            } }
 
-    $parent.removeClass('in')
+        $parent.trigger(e = $.Event('close.bs.alert'))
 
-    function removeElement() {
-      $parent.trigger('closed.bs.alert').remove()
-    }
+        if (e.isDefaultPrevented()) { return
 
-    $.support.transition && $parent.hasClass('fade') ?
-      $parent
+            $parent.removeClass('in')
+
+            function removeElement() {
+                $parent.trigger('closed.bs.alert').remove()
+            } }
+
+        $.support.transition && $parent.hasClass('fade') ?
+        $parent
         .one($.support.transition.end, removeElement)
         .emulateTransitionEnd(150) :
-      removeElement()
-  }
+        removeElement()
+    }
 
 
-  // ALERT PLUGIN DEFINITION
-  // =======================
+    // ALERT PLUGIN DEFINITION
+    // =======================
 
-  var old = $.fn.alert
+    var old = $.fn.alert
 
-  $.fn.alert = function (option) {
-    return this.each(function () {
-      var $this = $(this)
-      var data  = $this.data('bs.alert')
+    $.fn.alert = function (option) {
+        return this.each(
+            function () {
+                var $this = $(this)
+                var data  = $this.data('bs.alert')
 
-      if (!data) $this.data('bs.alert', (data = new Alert(this)))
-      if (typeof option == 'string') data[option].call($this)
-    })
-  }
+                if (!data) { $this.data('bs.alert', (data = new Alert(this)))
+                    if (typeof option == 'string') { data[option].call($this)
+                    } } }
+        )
+    }
 
-  $.fn.alert.Constructor = Alert
-
-
-  // ALERT NO CONFLICT
-  // =================
-
-  $.fn.alert.noConflict = function () {
-    $.fn.alert = old
-    return this
-  }
+    $.fn.alert.Constructor = Alert
 
 
-  // ALERT DATA-API
-  // ==============
+    // ALERT NO CONFLICT
+    // =================
 
-  $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
+    $.fn.alert.noConflict = function () {
+        $.fn.alert = old
+        return this
+    }
+
+
+    // ALERT DATA-API
+    // ==============
+
+    $(document).on('click.bs.alert.data-api', dismiss, Alert.prototype.close)
 
 }(jQuery);

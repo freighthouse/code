@@ -79,7 +79,7 @@
     <div class="container">
       <div class="topitems">
         <div class="toplinks">
-          <?php $menu = menu_navigation_links('menu-top-bar-menu');
+            <?php $menu = menu_navigation_links('menu-top-bar-menu');
             print theme('links__menu_top_bar_menu', array('links' => $menu)); ?>
           <div class="apisearch">
             <?php print $search_box; ?>
@@ -88,36 +88,36 @@
           </div>
         </div>
       </div>
-      <?php if (!empty($page['header'])): ?>
+        <?php if (!empty($page['header'])) : ?>
         <section class ="col-lg-12">
-          <?php print render($page['header']); ?>
+            <?php print render($page['header']); ?>
         </section>
-      <?php endif; ?>
+        <?php endif; ?>
     </div>
   </div>
   <div class="container">
     <div class="navbar-header">
       <a class="logo" href="<?php print $front_page; ?>" title="<?php print t('Apigee.com'); ?>"></a>
-        <?php if (!empty($primary_nav) || !empty($page['navigation'])): ?>
+        <?php if (!empty($primary_nav) || !empty($page['navigation'])) : ?>
           <div class="navbar-collapse collapse">
             <nav role="navigation">
-              <?php $block = block_load('superfish', 1);
+                <?php $block = block_load('superfish', 1);
                     $output = render(_block_get_renderable_array(_block_render_blocks(array($block))));
                     print $output; ?>
 
-              <?php if (!empty($page['navigation'])): ?>
+                <?php if (!empty($page['navigation'])) : ?>
                 <?php print render($page['navigation']); ?>
-              <?php endif; ?>
+                <?php endif; ?>
 
-              <?php if (!empty($secondary_nav) || !empty($page['navigation'])): ?>
+                <?php if (!empty($secondary_nav) || !empty($page['navigation'])) : ?>
                 <div class="navbar-collapse collapse">
                   <nav role="navigation">
-                    <?php if (!empty($secondary_nav)): ?>
-                      <?php print render($secondary_nav); ?>
+                    <?php if (!empty($secondary_nav)) : ?>
+                        <?php print render($secondary_nav); ?>
                     <?php endif; ?>
                   </nav>
                 </div>
-              <?php endif; ?>
+                <?php endif; ?>
 
             </nav>
           </div>
@@ -135,37 +135,37 @@
 </header>
 
 <div class="apiheader">
-  <?php if (!empty($page['apiheader'])): ?>
+    <?php if (!empty($page['apiheader'])) : ?>
       <section>
         <?php print render($page['apiheader']); ?>
       </section>
-  <?php endif; ?>
+    <?php endif; ?>
 </div>
 
 <div class="banners">
     <div class="row">
       <div class="promo_left">
-          <?php if (!empty($page['promo_left'])): ?>
+            <?php if (!empty($page['promo_left'])) : ?>
             <div class="col-md-6">
-              <?php print render($page['promo_left']); ?>
+                <?php print render($page['promo_left']); ?>
             </div>
-          <?php endif; ?>
+            <?php endif; ?>
       </div>
       <div class="promo_right">
-          <?php if (!empty($page['promo_right'])): ?>
+            <?php if (!empty($page['promo_right'])) : ?>
             <div class="col-md-6">
-              <?php print render($page['promo_right']); ?>
+                <?php print render($page['promo_right']); ?>
             </div>
-          <?php endif; ?>
+            <?php endif; ?>
       </div>
     </div>
     <div class="row">
       <div class="promo">
-          <?php if (!empty($page['promo'])): ?>
+            <?php if (!empty($page['promo'])) : ?>
             <div class="col-sm-12">
-              <?php print render($page['promo']); ?>
+                <?php print render($page['promo']); ?>
             </div>
-          <?php endif; ?>
+            <?php endif; ?>
       </div>
     </div>
 </div>
@@ -174,10 +174,10 @@
   <section>
     <div class="container">
       <div class="fp_products_overview">
-          <?php
+            <?php
             $block = block_load('views', 'product_overview-front_page_products');
             echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-          ?>
+            ?>
       </div>
     </div>
   </section>
@@ -192,7 +192,7 @@
   </section> -->
   <section>
     <div class="row">
-      <?php
+        <?php
           print render_block_content('block', 81);
         ?>
     </div>
@@ -203,10 +203,10 @@
             <div class="customer_content">
               <div>
                 <div class="customer_stories col-md-8">
-                  <?php
-                  $block = block_load('views', 'customers_video_slideshow-featured_video');
-                  echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-                  ?>
+                    <?php
+                    $block = block_load('views', 'customers_video_slideshow-featured_video');
+                    echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+                    ?>
                 </div>
               </div>
               <div class="innovator_spotlights col-md-3">
@@ -225,10 +225,10 @@
     <div class="customers_block">
       <div class="container">
         <div>
-          <?php
-          $block = block_load('views', 'customers_front-block');
-          echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-          ?>
+            <?php
+            $block = block_load('views', 'customers_front-block');
+            echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+            ?>
         </div>
       </div>
     </div>
@@ -246,9 +246,9 @@
     <div class="fp_cta">
       <div class="row">
         <div class="container">
-          <?php
+            <?php
             print render_block_content('block', 66);
-          ?>
+            ?>
         </div>
       </div>
     </div>
@@ -257,10 +257,10 @@
     <section>
       <div class="row">
         <div class="container">
-          <?php
-          $block = block_load('views', 'ebooks_block-front_page_resources');
-          echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-          ?>
+            <?php
+            $block = block_load('views', 'ebooks_block-front_page_resources');
+            echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+            ?>
         </div>
       </div>
     </section>
@@ -269,37 +269,37 @@
     <section>
       <div class="row">
         <div class="container">
-          <?php
-          $block = block_load('views', 'apigee_in_the_news-front_page_news');
-          echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
-          ?>
+            <?php
+            $block = block_load('views', 'apigee_in_the_news-front_page_news');
+            echo drupal_render(_block_get_renderable_array(_block_render_blocks(array($block))));
+            ?>
         </div>
       </div>
     </section>
   </div>
   <section>
     <div class="row">
-      <?php if (!empty($page['front_page_content'])): ?>
+        <?php if (!empty($page['front_page_content'])) : ?>
         <div>
             <?php print render($page['front_page_content']); ?>
         </div>
-      <?php endif; ?>
+        <?php endif; ?>
     </div>
   </section>
 </div>
 
 <footer class="footer fp_footer">
   <div class="container">
-  <?php if (!empty($page['footer_left'])): ?>
+    <?php if (!empty($page['footer_left'])) : ?>
     <div class="footer-left col-sm-2">
-      <?php print render($page['footer_left']); ?>
+        <?php print render($page['footer_left']); ?>
     </div>
-  <?php endif; ?>
-  <?php if (!empty($page['footer'])): ?>
+    <?php endif; ?>
+    <?php if (!empty($page['footer'])) : ?>
     <div class="footer-main col-sm-10">
-      <?php print render($page['footer']); ?>
+        <?php print render($page['footer']); ?>
     </div>
-  <?php endif; ?>
+    <?php endif; ?>
   </div>
   <div class="copyright">
     &copy; <?php echo date('Y'); ?> Apigee Corp. All rights reserved.

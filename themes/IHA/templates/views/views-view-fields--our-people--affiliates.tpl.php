@@ -6,7 +6,7 @@
     </div>
     <div class="our_members_info col-xs-6">
       <div class="our_members_name">
-      <?php print (!empty($fields['field_affiliate_member_name'])) ?
+        <?php print (!empty($fields['field_affiliate_member_name'])) ?
         $fields['field_affiliate_member_name']->content : ''; ?>
       </div>
       <div class="our_members_title">

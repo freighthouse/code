@@ -1,91 +1,88 @@
 module.exports = function (grunt) {
      "use strict";
-    grunt.initConfig({
-
-        pkg: grunt.file.readJSON('package.json'),
-
-        watch: {
-            src: {
-                files: ['**/*.scss', '**/*.php'],
-                tasks: ['compass:dev']
-            },
-            scripts: {
-                files: ['./js/includes/*.js'],
-                tasks: ['jshint', 'concat:js', 'uglify'],
+    grunt.initConfig(
+        {
+            pkg: grunt.file.readJSON('package.json'),
+            watch: {
+                src: {
+                    files: ['**/*.scss', '**/*.php'],
+                    tasks: ['compass:dev']
+                },
+                scripts: {
+                    files: ['./js/includes/*.js'],
+                    tasks: ['jshint', 'concat:js', 'uglify'],
+                    options: {
+                        nospawn: true,
+                        livereload: 45729
+                    }
+                },
                 options: {
-                    nospawn: true,
-                    livereload: 45729
+                    livereload: true
+                },
+                configFiles: {
+                    files: ['Gruntfile.js'],
+                    options: {
+                        reload: true
+                    }
                 }
             },
-           options: {
-                livereload: true
-            },
-            configFiles: {
-                files: ['Gruntfile.js'],
-                options: {
-                    reload: true
-                }
-            }
-        },
-
-        sass: {
+            sass: {
                 dist: {
-                files: {
-                    'css/style.css' : 'custom-sass/style.scss'
+                    files: {
+                        'css/style.css' : 'custom-sass/style.scss'
+                    }
                 }
-            }
-        },
-
-        //Currently not using Compass
-        compass: {
-            dev: {
+            },
+            //Currently not using Compass
+            compass: {
+                dev: {
+                    options: {
+                        sassDir: 'custom-sass',
+                        cssDir: 'css',
+                        // imagesPath: 'assets/img',
+                        imagesPath: 'images',
+                        noLineComments: false,
+                        outputStyle: 'compressed'
+                    }
+                }
+            },
+            concat: {
+                options: {separator: ';'},
+                js: {
+                    // src: ['./js/includes/*.js'],
+                    // dest: './js/compiled.js'
+                    src: ['js/includes/*.js'],
+                    dest: 'js/compiled.js'
+                },
+            },
+            jshint: {
+                // all: ['js/src/'],
+                all: ['js/'],
                 options: {
-                    sassDir: 'custom-sass',
-                    cssDir: 'css',
-                    // imagesPath: 'assets/img',
-                    imagesPath: 'images',
-                    noLineComments: false,
-                    outputStyle: 'compressed'
-                }
-            }
-        },
-        concat: {
-            options: {separator: ';'},
-            js: {
-                // src: ['./js/includes/*.js'],
-                // dest: './js/compiled.js'
-                src: ['js/includes/*.js'],
-                dest: 'js/compiled.js'
+                    loopfunc: true
+                },
             },
-        },
-        jshint: {
-            // all: ['js/src/'],
-            all: ['js/'],
-            options: {
-                loopfunc: true
-            },
-        },
+            // accessibility: {
+            //     options : {
+            //         accessibilityLevel: 'WCAG2A'
+            //     },
+            //     test : {
+            //         src: ['example/test.html']
+            //     }
+            // },
 
-        // accessibility: {
-        //     options : {
-        //         accessibilityLevel: 'WCAG2A'
-        //     },
-        //     test : {
-        //         src: ['example/test.html']
-        //     }
-        // },
+            // bootlint: {
+            //     options: {
+            //         relaxerror: [],
+            //         showallerrors: false,
+            //         stoponerror: false,
+            //         stoponwarning: false
+            // },
+            //     files: ['path/to/file.html', 'path/to/*.html']
+            // },
 
-        // bootlint: {
-        //     options: {
-        //         relaxerror: [],
-        //         showallerrors: false,
-        //         stoponerror: false,
-        //         stoponwarning: false
-        // },
-        //     files: ['path/to/file.html', 'path/to/*.html']
-        // },
-
-    });
+        }
+    );
 
     grunt.loadNpmTasks('grunt-contrib-compass');
     grunt.loadNpmTasks('grunt-contrib-sass');

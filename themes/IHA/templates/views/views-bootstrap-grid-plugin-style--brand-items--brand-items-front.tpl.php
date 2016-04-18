@@ -14,7 +14,7 @@
 ?>
 
 <div id="views-bootstrap-grid-<?php print $id ?>" class="<?php print $classes ?>">
-  <?php if ($options['alignment'] == 'horizontal'): ?>
+    <?php if ($options['alignment'] == 'horizontal') : ?>
 
     <?php foreach ($items as $row): ?>
       <div class="row">
@@ -26,17 +26,17 @@
       </div>
     <?php endforeach ?>
 
-  <?php else: ?>
+    <?php else: ?>
 
     <div class="row">
-      <?php foreach ($items as $column): ?>
+        <?php foreach ($items as $column): ?>
         <div class="col col-lg-<?php print $column_type ?>">
-          <?php foreach ($column['content'] as $row): ?>
+            <?php foreach ($column['content'] as $row): ?>
             <?php print $row['content'] ?>
-          <?php endforeach ?>
+            <?php endforeach ?>
         </div>
-      <?php endforeach ?>
+        <?php endforeach ?>
     </div>
 
-  <?php endif ?>
+    <?php endif ?>
 </div>

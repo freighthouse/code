@@ -2,24 +2,24 @@
 * html .form-search .form-text {margin: 2px 0 0;}
 *+html .form-search .form-text {margin: 2px 0 0;}
 * html #footer .frame .txt {
-	overflow: visible;
-	height: 185px;
+    overflow: visible;
+    height: 185px;
 }
 * html .lightbox .t {
-	background: none;
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/sites/all/themes/MNI/images/bg-lightbox-t.png', sizingmethod='crop');
+    background: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/sites/all/themes/MNI/images/bg-lightbox-t.png', sizingmethod='crop');
 }
 * html .lightbox .m {
-	background: none;
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/sites/all/themes/MNI/images/bg-lightbox-m.png', sizingmethod='scale');
+    background: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/sites/all/themes/MNI/images/bg-lightbox-m.png', sizingmethod='scale');
 }
 * html .lightbox .b {
-	background: none;
-	filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/sites/all/themes/MNI/images/bg-lightbox-b.png', sizingmethod='crop');
+    background: none;
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/sites/all/themes/MNI/images/bg-lightbox-b.png', sizingmethod='crop');
 }
 * html .nav ul li a {
-	padding: 4px 13px 3px 10px;
-	height: 20px;
+    padding: 4px 13px 3px 10px;
+    height: 20px;
 }
 *+html .nav ul li a {padding: 4px 13px 3px 10px;}
 * html .nav ul li.has-drop a.active {padding: 3px 12px 4px 9px;}

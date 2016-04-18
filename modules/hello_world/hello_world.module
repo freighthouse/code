@@ -3,7 +3,7 @@
 // By Jeremy Cerda @freighthousenyc for Mediacurrent
 
 /**
- * Implements hook_menu(). Because...
+ * Implements hook_menu().
  */
 function hello_world_menu() {
   $items['hello'] = array(
@@ -15,7 +15,7 @@ function hello_world_menu() {
 }
 
 /**
-* Create the block.
+* Implements hook_block_info().
 */
 function hello_world_block_info() {
   $blocks['hello_world_block'] = array(
@@ -28,14 +28,15 @@ function hello_world_block_info() {
   );
   return $blocks;
 }
+
 /**
-* Build it.
+* Implements hook_block_view().
 */
 function hello_world_block_view($delta = '') {
   $block = array();
   switch ($delta) {
     case 'hello_world_block':
-      $block = hello_world_block_content();
+      $block = _hello_world_block_content();
       break;
   }
   return $block;
@@ -45,20 +46,20 @@ function hello_world_block_view($delta = '') {
  * Generate page content. This is extra...
  */
 
-function hello_world_page_content($state = NULL, $node_types = 'hello_world_article') {
-  // instantiate the query using our extended query object
+function hello_world_page_content($section = NULL, $node_types = 'hello_world_article') {
+  // Instantiate the query using our extended query object.
   $query = new NodeEntityFieldQuery();
-  // set up some basic parameters
+  // set up some basic parameters.
   $query
     ->entityCondition('bundle', $node_types);
-  // if $state is defined, add that fieldCondition to the query
+  // If $section is defined, add that fieldCondition to the query.
   if (!empty($section)) {
     $query->fieldCondition('field_sections', 'taxonomy_term', $section);
   }
-  // execute the query
+  // Execute the query.
   $result = $query->execute();
   $output = array();
-  // return nodes as teasers
+  // Return nodes as teasers.
   if (!empty($result['node'])) {
     $output['nodes'] = node_view_multiple(node_load_multiple(array_keys($result['node'])), 'teaser');
     $output['pager']['#markup'] = theme('pager', $query->pager);
@@ -103,7 +104,7 @@ function hello_world_block_content() {
       foreach ($nodes as $node) {
         $options = array('absolute' => TRUE);
         $url = url('node/' . $node->nid, $options);
-        $list[] = '<a href='.$url.'>'.$node->title.'</a>';
+        $list[] = '<a href=' . $url . '>' . $node->title . '</a>';
       }
       $theme_args = array('items' => $list, 'type' => 'ul');
       $content = theme('item_list', $theme_args);
@@ -116,7 +117,10 @@ function hello_world_block_content() {
   return $block;
 }
 
-// Add custom text above $content for each HW Article node in full view mode
+/**
+ * Implements hook_node_view().
+ */
+
 function hello_world_node_view($node, $view_mode, $langcode) {
   if ($node->type == 'hello_world_article' && $view_mode == 'full') {
   $strBody = $node->content['body'][0]['#markup'];
@@ -127,6 +131,7 @@ function hello_world_node_view($node, $view_mode, $langcode) {
 /**
  * Implements hook_theme().
  */
+
 function hello_world_theme($existing, $type, $theme, $path) {
   // Custom template for that overrides the default block.tpl.php (to add attr.)
   $themes['block__hello_world'] = array(

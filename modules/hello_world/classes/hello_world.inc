@@ -1,7 +1,14 @@
 <?php
 
+/**
+ *
+ */
+
+/**
+ *
+ */
+
 class NodeEntityFieldQuery extends EntityFieldQuery {
-  // class defaults
   public function __construct() {
     $this
       ->entityCondition('entity_type', 'node')
@@ -21,4 +28,5 @@ class NodeEntityFieldQuery extends EntityFieldQuery {
     }
     return $this;
   }
+
 }

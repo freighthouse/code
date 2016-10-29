@@ -1,2 +1,2 @@
 # code
-Samples
+Code Samples for Jeremy Michael Cerda

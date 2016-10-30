@@ -1,0 +1,232 @@
+<?php
+
+/**
+ * A module that displays a user's last login time and date in a block.
+ * @author Jeremy Michael Cerda
+ */
+
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ *
+ * @param admin/config/people/weather
+ */
+function weather_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#weather":
+      return
+        '<p>' . t("Displays last login time and date information.") . '</p>' .
+        '<p>' .
+          '<ul>' .
+            '<li>' . t("In the user’s current time-zone.") . '</li>' .
+            '<li>' . t("Automatically placed in left side-rail region (if available).") . '</li>' .
+            '<li>' . t("Not visible for non-logged in users.") . '</li>' .
+            '<li>' . t("Message is configurable by user.") . '</li>' .
+            '<li>' . t("Javascript collapses block after 10 seconds.") . '</li>' .
+            '<li>' . t("Made as a Panels cTools content type in addition to a standard block.") . '</li>' .
+          '</ul>' .
+        '</p>';
+      break;
+  }
+}
+
+/**
+ * Implements hook_user_login().
+ *
+ */
+function weather_user_login(&$edit, $account) {
+  // Save UID and Timestamp in weather table.
+  db_insert('weather')
+    ->fields(array(
+      'uid' => $account->uid,
+      'login' => $account->login,
+    ))
+    ->execute();
+}
+
+/**
+ * Implements hook_permission()
+ */
+function weather_permission() {
+  return array(
+    'change timestamp message' => array(
+      'title' => t('Administer Weather block'),
+      'description' => t('Set custom message'),
+    ),
+    'view weather block' => array(
+      'title' => t('View Weather block'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function weather_menu() {
+  $items = array();
+
+  // Administer >> Site configuration >> Weather settings.
+  $items['admin/config/people/weather'] = array(
+    'title' => 'Weather Settings',
+    'description' => 'Configure Weather block user login message',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('weather_admin_form'),
+    'access callback' => 'user_is_logged_in',
+    'access arguments' => array('view weather block'),
+    'file' => 'weather.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_contextual_links_view_alter
+ *
+ * @see weather_block_view()
+ */
+function weather_contextual_links_view_alter(&$element, &$items) {
+  if (isset($element['#element']['#block']) && $element['#element']['#block']->delta == 'weather') {
+    $element['#links']['weather-links'] = array(
+      'title' => 'Configure message',
+      'href' => url('/admin/config/people/weather', array('absolute' => TRUE)),
+    );
+  }
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function weather_block_info() {
+  $blocks['weather'] = array(
+    'info' => t('Weather Timestamp'),
+    'cache' => DRUPAL_NO_CACHE,
+    'status' => TRUE,
+    'region' => 'sidebar_first',
+    'weight' => 0,
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function weather_block_view($delta = '') {
+  switch ($delta) {
+    case 'weather':
+      if ($last_login = weather_last_login()) {
+        if (user_access('view weather block')) {
+          global $user;
+        }
+
+        $date = weather_report_callback();
+        $block['subject'] = '<none>';
+        $block['content'] = array(
+          '#markup' => variable_get('weather_message') . '<br /><br />' . $date,
+          '#attached' => array(
+            'js' => drupal_add_js(drupal_get_path('module', 'weather') . '/js/weather.js'),
+          ),
+        );
+
+        return $block;
+      }
+  }
+}
+
+/**
+ * Provide data about the last login for a user.
+ *
+ */
+function weather_last_login($account = NULL) {
+  if (empty($account)) {
+    global $user;
+    $account = $user;
+  }
+  $last_login = db_query("SELECT login
+                   FROM {weather}
+                   WHERE uid = :uid
+                   ORDER BY login DESC
+                   LIMIT 1, 1", array(':uid' => $account->uid))->fetchAll();
+
+  return reset($last_login);
+}
+
+/**
+ * Callback function.
+ *
+ */
+function weather_report_callback($account = NULL) {
+  if (empty($account->uid) && !user_access('view weather block')) {
+    global $user;
+    $account = $user;
+  }
+
+  $query = db_select('weather', 'us')->extend('TableSort')->extend('PagerDefault');
+  $query->join('users', 'u', 'us.uid = u.uid');
+
+  if ($account) {
+    $query->condition('us.uid', $account->uid);
+  }
+
+  $result = $query
+    ->fields('us')
+    ->fields('u', array('name'))
+    ->limit(1)
+    ->orderBy('us.login', 'DESC')
+    ->execute()
+    ->fetchAll();
+
+  return weather_output($result);
+}
+
+/**
+ * Render login histories.
+ *
+ */
+function weather_output(array $history) {
+
+      $output = '' . "\n";
+      foreach ((array) $history as $entry) {
+        $row = array(
+            format_date($entry->login, 'login_time'),
+          );
+        $output .= implode($row);
+      }
+
+  return $output;
+}
+
+/**
+* Implements hook_date_format_types().
+*/
+function weather_date_format_types() {
+  return array(
+    'login_time'  => t('Login Time'),
+  );
+}
+/**
+* Implements hook_date_formats().
+*/
+function weather_date_formats() {
+  $formats = array();
+  $formats[] = array(
+    'type'    => 'login_time',
+    'format'  => 'g:i a \o\n l, F j, Y',
+    'locales' => array(),
+  );
+  foreach ($formats as $format) {
+    variable_set('date_format_' . $format['type'], $format['format']);
+  }
+  return $formats;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function weather_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/' . $plugin_type;
+  }
+}

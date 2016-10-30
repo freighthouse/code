@@ -1,0 +1,9 @@
+name = Weather
+description = Displays a block that shows the time the user last logged in.
+core = 7.x
+version = 7.x-1.0
+package = Examples
+dependencies[] = block
+dependencies[] = ctools
+dependencies[] = panels
+configure = admin/config/people/weather

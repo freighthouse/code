@@ -1,15 +1,17 @@
-ul{
-list-style-type:none;
+ul {
+  list-style-type:none;
 }
-li:nth-child(3n), li:nth-child(5n){
+
+li:nth-child(3n), li:nth-child(5n) {
   font-size:0px;
 }
 
-li:nth-child(3n):before{
+li:nth-child(3n):before {
   font-size:16px;
   content:"Fizz";
 }
-li:nth-child(5n):after{
+
+li:nth-child(5n):after {
   font-size:16px;
   content:"Buzz";
 }

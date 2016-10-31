@@ -1,0 +1,60 @@
+#container {
+    width: 70%;
+    margin: 0 auto;
+}
+
+span {
+    border: 1px solid #999;
+    border-radius: 3px;
+    width: 80px;
+    height: 20px;
+    padding: 5px;
+    margin: 5px;
+    float: left;
+    text-align: center;
+    background-color: #fff;
+    display: none;
+}
+
+.fizz {
+    background-color: #ffCC00;
+}
+
+.buzz {
+    background-color: #999;
+}
+
+.fizzbuzz {
+    background-color: lightblue;
+}
+
+#submit {
+    width: 110px;
+    height: 50px;
+    border-radius: 10px;
+    background-color: #666;
+    color: #fff;
+    border: none;
+    margin: 10px;
+    clear: both;
+}
+
+#submit:hover {
+    background-color: #888;
+}
+
+form {
+    text-align: center;
+}
+
+input {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #CCC;
+    height: 30px;
+    margin: 5px;
+}
+.error {
+    color: firebrick;
+}
+

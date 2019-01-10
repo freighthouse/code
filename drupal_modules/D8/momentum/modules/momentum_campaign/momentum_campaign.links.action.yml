@@ -1,0 +1,11 @@
+entity.campaign.add_form:
+  route_name: entity.campaign.add_page
+  title: 'Add Campaign'
+  appears_on:
+    - entity.campaign.collection
+entity.campaign_type.add_form:
+  route_name: entity.campaign_type.add_form
+  title: 'Add Campaign type'
+  appears_on:
+    - entity.campaign_type.collection
+

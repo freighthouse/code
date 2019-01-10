@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * Implements hook_install
+ * We set a weight of 1 to prevent other modules from setting form lables
+ */
+
+function ebay_custom_install() {
+  db_update('system')
+    ->fields(array('weight' => 1))
+    ->condition('name', 'ebay_custom', '=')
+    ->execute();
+}

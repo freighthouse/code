@@ -1,0 +1,288 @@
+.pac-accordion {
+  @extend %clearfix;
+  .content {
+    padding-bottom: 0;
+  }
+}
+
+.pac-accordion-button,
+.pac-contribute-accordion-button,
+.pac-ambassador-accordion-button {
+  @include fontsize(18);
+  @extend %helvetica;
+  display: block;
+  border-top: 1px solid $c-light-grey;
+  padding: 1em 0 0 0;
+  margin-bottom: 1em;
+  width: 100%;
+  color: $c-blue;
+  &:before {
+    @include fontsize(15);
+    @extend %plus-icon;
+    display: inline-block;
+    margin-right: 0.5em;
+  }
+  &.open {
+    &:before {
+      @extend %minus-icon;
+    }
+  }
+}
+
+.pac-contribute-accordion-button {
+  margin-top: 1em;
+}
+
+.accordion-wrapper,
+.pac-contribute-accordion-wrapper,
+.pac-ambassador-accordion-wrapper {
+  @include transition();
+  height: 0;
+  overflow: hidden;
+  &.open {
+    min-height: 50px;
+    height: auto;
+  }
+}
+
+.pac-contribute-column-one,
+.pac-contribute-column-two {
+  float: none;
+  width: 100%;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 50%;
+  }
+}
+
+// .pac-contribute-wrapper,
+// .pac-ambassador-wrapper {
+//   .pac-section-title {
+//     @include fontsize(24);
+//     @extend %helvetica;
+//     @extend %light;
+//     text-transform: uppercase;
+//     text-align: center;
+//   }
+//   border-top: 1px solid $c-light-grey;
+//   padding: 2em 0;
+//   margin: 2em 0;
+// }
+
+.contribute-now .content,
+.ebay-charitable-match {
+  h2 {
+    @include fontsize(36);
+    @extend %light;
+    margin-top: 0;
+    color: $c-blue;
+    text-align: left;
+    text-transform: initial;
+  }
+}
+
+.contribute-text-wrapper {
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 50%;
+  }
+}
+
+.contribute-title {
+
+}
+
+.contribute-text {
+
+}
+
+.contribute-button-wrapper {
+  display: table;
+  padding-top: 1em;
+  padding-bottom: 2em;
+  width: 100%;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 50%;
+    padding-bottom: 0;
+  }
+}
+
+.contribute-button-list {
+  display: table-row;
+  padding: 0;
+  margin: 0;
+}
+
+.button-wrapper {
+  display: block;
+  padding-left: 0;
+  margin-bottom: 3em;
+  list-style-type: none;
+  text-align: center;
+  @include breakpoint($bp-tiny) {
+    padding-left: 2em;
+    margin-bottom: 0;
+    display: table-cell;
+  }
+}
+
+.contribute-button-link,
+.payroll-button-link {
+  display: block;
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    color: $c-white;
+    .contribute-button-text,
+    .payroll-button-text {
+      @include transition();
+      background-color: $c-light-blue;
+    }
+  }
+}
+
+.contribute-button-icon {
+  //@include svg-bg('paypal-logo');
+  background: url('../images/PDF-Icon.png');
+  display: block;
+  margin: 0 auto 2em auto;
+  width: 94px;
+  height: 98px;
+  @include breakpoint($bp-small) {
+    margin: 0 auto 1em auto;
+  }
+}
+
+.payroll-button-icon {
+  //@include svg-bg('paycheck-logo');
+  background: url('../images/paycheck-logo.png');
+  display: block;
+  margin: 0 auto 2em auto;
+  width: 120px;
+  height: 60px;
+  @include breakpoint($bp-small) {
+    margin: 0 auto 1em auto;
+  }
+}
+
+.contribute-button-text {
+  @extend %blue-button;
+  padding: 1em 0.5em;
+  width: 100%;
+  max-width: 225px;
+}
+
+.payroll-button-text {
+  @extend %blue-button;
+  padding: 1em 0.5em;
+  width: 100%;
+  //max-width: 225px;
+  max-width: 315px;
+  margin: 0 auto;
+}
+
+.charitable-match-link-wrapper {
+  margin-bottom: 1em;
+}
+
+.charitable-match-link {
+  @include fontsize(14);
+  @extend %helvetica;
+  color: $c-blue;
+  &:after {
+    @include fontsize(19);
+    @extend %chevron-right;
+    position: relative;
+    top: 4px;
+    margin-left: 1em;
+    display: inline-block;
+  }
+}
+
+.no-mediaqueries .pac-highlights-anon,
+.pac-highlights-anon {
+  margin-top: 2em;
+}
+
+.pac-welcome-block {
+  .content {
+    padding: 1.75em 1.25em 0 0;
+    border: none;
+    background: none;
+  }
+}
+
+.pac-welcome-logo {
+  @include svg-bg('ebay-pac-logo');
+  display: block;
+  width: 100%;
+  max-width: 335px;
+  height: 24px;
+  background-size: 100% 24px;
+  @include breakpoint($bp-tiny) {
+    background-size: 335px 24px;
+  }
+  .no-mediaqueries & {
+    background: none;
+  }
+}
+
+.block-divider.pac-welcome-top {
+  padding-top: 0;
+  margin-bottom: 0;
+}
+
+.pac-welcome-title {
+  @include fontsize(41);
+  @extend %helvetica;
+  @extend %light;
+  color: $c-blue;
+  margin-top: 0.1em;
+  margin-bottom: 0;
+}
+
+.pac-welcome-intro-text {
+
+}
+
+.full-page-block.pac-conversations{
+
+  ul{
+    list-style: none;
+    @extend %clearfix;
+
+    li{
+      float: left;
+      width: 33.3333%;
+      text-align: center;
+
+      img{
+        max-width: 150px;
+      }
+    }
+  }
+}
+
+.block-divider.pac-welcome-bottom {
+  padding-top: 0.5em;
+  margin-bottom: 1em;
+}
+
+h2.pac-welcome-help-title {
+  text-align: left;
+  text-transform: initial;
+  margin-bottom: 0;
+}
+
+.pac-welcome-help-text {
+  margin-top: 0;
+}
+
+.pac-front-login-anon {
+  input[type="text"],
+  input[type="password"],
+  input[type="submit"] {
+    width: 100%;
+  }
+}

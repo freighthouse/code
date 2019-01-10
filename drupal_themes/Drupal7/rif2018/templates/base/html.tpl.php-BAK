@@ -1,0 +1,222 @@
+<?php
+
+/**
+ * @file
+ * Default theme implementation to display the basic html structure of a single
+ * Drupal page.
+ *
+ * Variables:
+ * - $css: An array of CSS files for the current page.
+ * - $language: (object) The language the site is being displayed in.
+ *   $language->language contains its textual representation.
+ *   $language->dir contains the language direction. It will either be 'ltr' or 'rtl'.
+ * - $rdf_namespaces: All the RDF namespace prefixes used in the HTML document.
+ * - $grddl_profile: A GRDDL profile allowing agents to extract the RDF data.
+ * - $head_title: A modified version of the page title, for use in the TITLE
+ *   tag.
+ * - $head_title_array: (array) An associative array containing the string parts
+ *   that were used to generate the $head_title variable, already prepared to be
+ *   output as TITLE tag. The key/value pairs may contain one or more of the
+ *   following, depending on conditions:
+ *   - title: The title of the current page, if any.
+ *   - name: The name of the site.
+ *   - slogan: The slogan of the site, if any, and if there is no title.
+ * - $head: Markup for the HEAD section (including meta tags, keyword tags, and
+ *   so on).
+ * - $styles: Style tags necessary to import all CSS files for the page.
+ * - $scripts: Script tags necessary to load the JavaScript files and settings
+ *   for the page.
+ * - $page_top: Initial markup from any modules that have altered the
+ *   page. This variable should always be output first, before all other dynamic
+ *   content.
+ * - $page: The rendered page content.
+ * - $page_bottom: Final closing markup from any modules that have altered the
+ *   page. This variable should always be output last, after all other dynamic
+ *   content.
+ * - $classes String of classes that can be used to style contextually through
+ *   CSS.
+ *
+ * @see template_preprocess()
+ * @see template_preprocess_html()
+ * @see template_process()
+ *
+ * @ingroup themeable
+ */
+?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
+	"http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php print $language->language; ?>" version="XHTML+RDFa 1.0" dir="<?php print $language->dir; ?>"<?php print $rdf_namespaces; ?>>
+
+<head profile="<?php print $grddl_profile; ?>">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<?php print $head; ?>
+	<title><?php print $head_title; ?></title>
+    <?php header("Access-Control-Allow-Origin: *"); ?>
+	<?php print $styles; ?>
+	<?php print $scripts; ?>
+
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TBZQ6MF');</script>
+    <!-- End Google Tag Manager -->
+
+	<!-- Facebook Pixel Code -->
+	<script>
+		!function (f, b, e, v, n, t, s) {
+			if (f.fbq)return;
+			n = f.fbq = function () {
+				n.callMethod ?
+					n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+			};
+			if (!f._fbq)f._fbq = n;
+			n.push = n;
+			n.loaded = !0;
+			n.version = '2.0';
+			n.queue = [];
+			t = b.createElement(e);
+			t.async = !0;
+			t.src = v;
+			s = b.getElementsByTagName(e)[0];
+			s.parentNode.insertBefore(t, s)
+		}(window, document, 'script',
+			'https://connect.facebook.net/en_US/fbevents.js');
+		fbq('init', '372177719907265');
+		fbq('track', 'PageView');
+	</script>
+	<noscript>
+		<img height="1" width="1"
+			 src="https://www.facebook.com/tr?id=372177719907265&ev=PageView&noscript=1"/>
+	</noscript>
+	<!-- End Facebook Pixel Code -->
+	<!-- <script src="https://use.typekit.net/ylz8rxp.js"></script>
+	<script>try{Typekit.load({ async: true });}catch(e){}</script> -->
+	<!-- <link type="text/css" rel="stylesheet" href="//fast.fonts.net/cssapi/426d205c-dcc7-493d-857d-018a178dd360.css"/> -->
+	<link rel="stylesheet" type="text/css" href="https://cloud.typography.com/6635656/6298392/css/fonts.css" />
+	<link rel="stylesheet" type="text/css" href="/sites/all/themes/custom/rif2018/build/fonts/Branding-Semibold.css" />
+	
+	<link rel="apple-touch-icon" sizes="57x57" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/sites/all/themes/custom/rif2018/build/favicon/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/sites/all/themes/custom/rif2018/build/favicon/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/sites/all/themes/custom/rif2018/build/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/sites/all/themes/custom/rif2018/build/favicon/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/sites/all/themes/custom/rif2018/build/favicon/favicon-16x16.png">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">
+
+	<!-- Google Web-master Tools -->
+	<meta name="google-site-verification" content="BEtURhA2V3UIT-z7v3h80xd8qrseYam_-0ZnxOIiRG4" />
+	<meta name="google-site-verification" content="mVUalI6sjbImMCo_jdoANre7pUP8gtn9o_hbo7hFAtg" />
+
+	<!-- <IFRAME SRC="https://ad.doubleclick.net/ddm/adi/N9539.197812NSO.CODESRV/B20633207.212615426;sz=1x2;ord=[timestamp];dc_lat=;dc_rdid=;tag_for_child_directed_treatment=?" WIDTH=1 HEIGHT=2 MARGINWIDTH=0 MARGINHEIGHT=0 HSPACE=0 VSPACE=0 FRAMEBORDER=0 SCROLLING=no BORDERCOLOR='#000000' style="position:absolute; top: 0; left:0;">
+
+		<SCRIPT language='JavaScript1.1' SRC="https://ad.doubleclick.net/ddm/adj/N9539.197812NSO.CODESRV/B20633207.212615426;abr=!ie;sz=1x2;ord=[timestamp];dc_lat=;dc_rdid=;tag_for_child_directed_treatment=?">
+
+		</SCRIPT>
+
+	</IFRAME> -->
+	<!-- Updated per RIF_UpdatedNSPixel_20180321 -->
+	<SCRIPT language='JavaScript1.1' SRC="https://ad.doubleclick.net/ddm/adj/N9539.197812NSO.CODESRV/B20633207.212615426;sz=1x2;ord=[timestamp];dc_lat=;dc_rdid=;tag_for_child_directed_treatment=?">
+	</SCRIPT>
+	<!--
+		Start of global snippet for True North: Please do not remove
+	-->
+	<!-- Global site tag (gtag.js) - DoubleClick -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=DC-8323324"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'DC-8323324');
+		gtag('config', 'AW-820364726');
+	</script>
+	<!-- End of global snippet for True North: Please do not remove -->
+	<!-- This shows the lc specific and non lc-specific pages where they belong	-->
+	<?php
+		if(arg(0) == "literacy-central" || explode('/', drupal_get_path_alias($_GET['q']))[0] == "literacy-central"){
+			?>
+			<!--
+			Event snippet for RT_Lit Net on https://www.rif.org/literacy-network: Please do not remove.
+			Place this snippet on pages with events you’re tracking.
+			Creation date: 01/03/2018
+			-->
+			<script>
+				gtag('event', 'conversion', {
+					'allow_custom_scripts': true,
+					'send_to': 'DC-8323324/rt/literacy+standard'
+				});
+			</script>
+			<noscript>
+				<img src="https://ad.doubleclick.net/ddm/activity/src=8323324;type=rt;cat=literacy;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;ord=1?" width="1" height="1" alt=""/>
+			</noscript>
+			<!-- End of event snippet: Please do not remove -->
+		<?php
+			} else { ?>
+			<!--
+			Event snippet for RT_Gen on https://www.rif.org/: Please do not remove.
+				Place this snippet on pages with events you’re tracking.
+			Creation date: 01/03/2018
+			-->
+			<script>
+				gtag('event', 'conversion', {
+					'allow_custom_scripts': true,
+					'send_to': 'DC-8323324/rt/gen+standard'
+				});
+			</script>
+			<noscript>
+				<img src="https://ad.doubleclick.net/ddm/activity/src=8323324;type=rt;cat=gen;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;ord=1?" width="1" height="1" alt=""/>
+			</noscript>
+			<!-- End of event snippet: Please do not remove -->
+			<?php
+		}
+		if(arg(0) == "peter-rabbit"){
+			?>
+			<!--
+Event snippet for RT_PeterRabbit on https://www.rif.org/peter-rabbit: Please do not remove.
+Place this snippet on pages with events you’re tracking.
+Creation date: 01/31/2018
+-->
+			<script>
+				gtag('event', 'conversion', {
+					'allow_custom_scripts': true,
+					'send_to': 'DC-8323324/rt/rabbit+standard'
+				});
+			</script>
+			<noscript>
+				<img src="https://ad.doubleclick.net/ddm/activity/src=8323324;type=rt;cat=rabbit;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;ord=1?" width="1" height=1" alt=""/>
+			</noscript>
+			<!-- End of event snippet: Please do not remove -->
+			<?php
+		}
+	?>
+</head>
+<body class="<?php print $classes; ?>" <?php print $attributes;?>>
+<div id="skip-link">
+	<a href="#main-content" class="element-invisible element-focusable"><?php print t('Skip to main content'); ?></a>
+</div>
+<?php print $page_top; ?>
+<?php print $page; ?>
+<?php print $page_bottom; ?>
+
+<script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-59b69392419c04f5"></script>
+
+
+</body>
+
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TBZQ6MF"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+</html>

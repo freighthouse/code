@@ -1,0 +1,6 @@
+name = Microsoft Fix
+package = RepEquity
+description = Provides a Feeds Tamper plugin for dealing with Microsoft characters
+core = 7.x
+
+dependencies[] = transliteration

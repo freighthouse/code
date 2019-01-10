@@ -1,0 +1,7 @@
+momentum.libraries:
+  version: 1.x
+  css:
+    theme:
+      css/momentum.css: {}
+  js:
+    js/momentum.js: {}

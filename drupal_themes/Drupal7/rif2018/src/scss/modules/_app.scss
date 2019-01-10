@@ -1,0 +1,294 @@
+// Global
+//
+// Weight: -1
+//
+// Style Guide: Global
+// Colors
+//
+// Markup: global/colors.html
+//
+// Style Guide Global.Colors
+// Yellow
+//@lighter-yellow:                      #ffd767;
+//@light-yellow:                        #ffcc3a;
+//@yellow:                              #fff200;
+//@dark-yellow:                         #efb100;
+//@darker-yellow:                       #b98900;
+//@rif-yellow:                          #fff200;
+//@rif-dark-yellow:                     #e5d900;
+// Blue
+//@lighter-blue:                        #5ca3d1;
+//@light-blue:                          #368dc5;
+//@blue:                                #127abe;
+//@dark-blue:                           #075f99;
+//@darker-blue:                         #054a77;
+//@rif-blue:                            #0079c2;
+//@rif-dark-blue:                       #0059a9;
+//@rif-darker-blue:                     #003e77;
+// Red
+//@lighter-red:                         #ff8e67;
+//@light-red:                           #ff6d3a;
+//@red:                                 #ff480a;
+//@dark-red:                            #ef3d00;
+//@darker-red:                          #b92f00;
+// Green
+//@lighter-green:                       #c9e109;
+//@light-green:                         #abd700;
+//@rif-light-green:                     #a6ce39;
+//@green:                               #8ac400;
+//@dark-green:                          #6b9700;
+//@darker-green:                        #527500;
+//@rif-purple:                          #52439b;
+// Whites & Blacks & Grey
+//@extra-light-grey:                    #aaaaaa;
+//@light-grey:                          #7c7c7c;
+//@grey:                                #454545;
+//@dark-grey:                           #383838;
+//@rif-grey:                            #666666;
+//@rif-border-grey:                     #e5e5e5;
+//@white:                               #ffffff;
+//@off-white:                           #fafafa;
+//@black:                               #000000;
+//@background:                          @off-white;
+// Mixins
+//
+// Markup: global/mixins.html
+//
+// Style Guide: Global.Mixins
+//@import "mixins.less";
+// Fonts
+//
+// The Various Fonts the site will use
+//
+// Markup: global/fonts.html
+//
+// Style Guide Global.Fonts
+//@default-font-family:                 Arial, sans-serif;
+//@default-font-size:                   18px;
+//@default-font-weight:                 normal;
+//@default-line-height:                 22px;
+//@default-font-color:                  @grey;
+//@alt-sans-serif-font-family:          'Gotham A', 'Gotham B', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+//@alt-serif-font-family:               "museo-slab", "Times New Roman", Georgia, Times, serif;
+
+@font-face {
+//    font-family: 'flexslider-icon';
+//    src: url('../fonts/flexslider-icon.eot');
+//    src: url('../fonts/flexslider-icon.eot?#iefix') format('embedded-opentype'), url('../fonts/flexslider-icon.woff') format('woff'), url('../fonts/flexslider-icon.ttf') format('truetype'), url('../fonts/flexslider-icon.svg#flexslider-icon') format('svg');
+//    font-weight: normal;
+//    font-style: normal;
+}
+
+body {
+//    height: 100%;
+//    width: 100%;
+//    overflow: hidden;
+//    overflow-y: auto;
+//    font-family: @default-font-family;
+//    font-size: @default-font-size;
+//    font-weight: @default-font-weight;
+//    line-height: @default-line-height;
+//    color: @default-font-color;
+//    background-color: @background;
+//    text-rendering: auto !important;
+//    -webkit-font-smoothing: antialiased !important;
+//    -moz-osx-font-smoothing: grayscale !important;
+    &.dark {
+//        background-color: @grey;
+    }
+    &.page-literacy-central-app,
+    &.page-literacy-tracker,
+    &.node-type-lt-reading-groups {
+        background-color: #fff;
+    }
+    &.page-literacy-central-my-favorites,
+    &.node-type-favoritesfolder {
+        background-color: $gray-white;
+//        background-color: #454545;
+    }
+    &.node-type-word-matching,
+    &.node-type-crossword-puzzle,
+    &.node-type-wordfind {
+//        background-color: @darker-blue;
+        background-color: $gray-white;
+        background-color: $blue-dark;
+    }
+    &.page-unauthorized-page {
+//        background-color: #10303C;
+    }
+}
+
+.main-wrapper {
+//    position: relative;
+//    overflow: hidden;
+//    height: 100%;
+//    width: 100%;
+}
+
+// Sections
+//
+// Weight: 1
+//
+// Style Guide: Sections
+//@import "sections/footer.less";
+//@import "sections/navbar.less";
+//@import "sections/body.less";
+//@import "sections/homepage-slider.less";
+//@import "sections/preloader.less";
+//@import "sections/brand_containers/brand-container.less";
+//@import "sections/welcome_message/welcome-message.less";
+//@import "sections/registration/registration.less";
+//@import "sections/literacy-tracker/literacy-tracker.less";
+// Favorites
+//
+// Weight: 3
+//
+// Style Guide: Sections.Favorites
+//@import "sections/favorites-table/favorites-table.less";
+//@import "sections/favorites-create-list/favorites-create-list.less";
+//@import "sections/favorites-list/favorites-list.less";
+//@import "sections/favorites-folder/favorites-folder-teaser.less";
+// Modals
+//
+// Style Guide: Sections.Modals
+//@import "sections/modals/add-to-favorites.less";
+// Elements
+//
+// Weight: 2
+//
+// Style Guide: Defaults
+//@import "elements/slick-slider.less";
+//@import "elements/search-bar/search-bar.less";
+//@import "elements/blocks.less";
+//@import "elements/sort-by.less";
+//@import "elements/pagination.less";
+//@import "elements/modal.less";
+//@import "elements/puzzles.less";
+//@import "elements/defaults/defaults.less";
+//@import "elements/buttons.less";
+//@import "elements/button-container.less";
+//@import "elements/drop-downs/drop-downs.less";
+//@import "elements/breadcrumb.less";
+//@import "elements/tables/table.less";
+//@import "elements/section-menu.less";
+//@import "elements/panel.less";
+//@import "elements/form.less";
+//@import "elements/social-media.less";
+//@import "elements/images.less";
+//@import "elements/custom-headers.less";
+//@import "elements/custom-lists.less";
+// Modules
+//
+// Weight: 3
+//
+// Style Guide: Modules
+//@import "modules/navbar.less";
+//@import "modules/search-resources.less";
+//@import "modules/resource-description.less";
+//@import "modules/resource-cover.less";
+//@import "modules/resource-information.less";
+//@import "modules/featured-resources.less";
+//@import "modules/contextual.less";
+//@import "modules/featured-resources-block.less";
+//@import "modules/newsletter-block.less";
+//@import "modules/header-block.less";
+//@import "modules/admin.less";
+//@import "modules/search.less";
+//@import "modules/book-list-item.less";
+//@import "modules/multisite.less";
+//@import "modules/jumbotron/jumbotron.less";
+//@import "modules/info-well/info-well.less";
+//@import "modules/stay-connected/stay-connected.less";
+//@import "modules/senior-team/senior-team.less";
+//@import "modules/board-of-directors/board-of-directors.less";
+//@import "modules/info-banner/info-banner.less";
+//@import "modules/info-callout/info-callout.less";
+//@import "modules/resource-group/resource-group.less";
+//@import "modules/literacy-network-events/literacy-network-events.less";
+//@import "modules/collections/collections.less";
+//@import "modules/large-hero-image/large-hero-image.less";
+//@import "modules/action_card/action-card.less";
+//@import "modules/image_card/image-card.less";
+//@import "modules/required_reading/required-reading.less";
+//@import "modules/career_opportunity/career-opportunity.less";
+//@import "modules/press_release/press-release.less";
+//@import "modules/blog/blog.less";
+//@import "modules/newsletter/newsletter.less";
+//@import "modules/in-the-news/in-the-news.less";
+//@import "modules/all-events/all-events.less";
+//@import "modules/service-agreements/service-agreements.less";
+//@import "modules/beeline.less";
+//@import "modules/puzzle-games/puzzle-games.less";
+//@import "modules/Calendar/calendar.less";
+//@import "modules/literacy-tracker/student-landing-page.less";
+//@import "modules/literacy-tracker/help-guide-modal.less";
+//@import "modules/reading-challenge/reading-challenge.less";
+
+// Nodes
+//
+// Weight: 4
+//
+// Style Guide: Nodes
+//@import "modules/book_resource/book-resource-teaser.less";
+//@import "modules/book_resource/book-resource-search-results.less";
+// Support Materials
+//
+// Weight: 5
+//
+// StyleGuide Modules.Support Materials
+//@import "modules/support_materials/support-materials.less";
+// Featured Destination
+//
+// Weight: 6
+//
+// StyleGuide Modules.Featured Destination
+//@import "modules/featured-destination/featured-destination.less";
+// Resources
+//
+// Weight: 7
+//
+// StyleGuide Modules.Resources
+//@import "modules/resource-block/resource-block.less";
+//@import "modules/resource-block/resource.less";
+// Sliders
+//
+// Weight: 8
+//
+// Style Guide: Modules.Sliders
+//@import "modules/sliders/default-slider.less";
+//@import "modules/sliders/slider-images.less";
+// Panels
+//
+// Styleguide Modules.Panels
+//@import "modules/panels/panel-tools.less";
+//@import "modules/panels/panel-support-materials.less";
+//@import "modules/filters/filters.less";
+// Tables
+//
+// Styleguide Modules.Tables
+//@import "modules/tables/table-resource-details.less";
+// Banners
+//
+// Style Guide: Modules.Banners
+//@import "modules/banners/landing-page-image.less";
+//@import "modules/banners/hero-image.less";
+//@import "modules/welcome-banner/welcome-banner.less";
+// Piler
+//@import "sections/piler/piler.less";
+//Override the styleguide
+.kss-nav__ref-child {
+//    padding-left: 20px;
+}
+
+.form-item {
+//    padding: 5px 0;
+}
+
+// Rif.org Styles
+//@import "modules/rif-banner.less";
+//@import "modules/rif-slideshow.less";
+//@import "elements/section-border.less";
+
+.preview .node {
+    background-color: $white;
+}

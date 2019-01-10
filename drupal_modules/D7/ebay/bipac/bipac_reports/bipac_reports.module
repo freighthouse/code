@@ -1,0 +1,85 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a BIPAC Reports content
+ */
+
+/**
+ *  hook_theme
+ */
+function bipac_reports_theme() {
+  $items = array();
+  $items['bipac_reports_therm'] = array(
+    'variables' => array('count' => NULL),
+    'template' => 'bipac_reports_therm',
+  );
+  return $items;
+}
+
+/**
+ * hook_block_info
+ */
+function bipac_reports_block_info() {
+  $blocks['bipac_reports_therm'] = array(
+    'info' => t('BIPAC Registration Downloads Thermometer'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function bipac_reports_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'bipac_reports_therm':
+      $count = bipac_reports_registrationdownloads_therm();
+      $block['subject'] = t('BIPAC Registration Downloads Thermometer');
+      $block['content'] = theme('bipac_reports_therm', array('count' => $count));
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Get count from RegistrationDownloads Endpoint
+ */
+function bipac_reports_registrationdownloads_therm() {
+  $object = bipac_object();
+
+  if ($success = $object->RegistrationDownloads()) {
+    $data = $object->RegistrationDownloads_data;
+  }
+  else {
+    return;
+  }
+
+  if ((!empty($data)) && (!empty($data[0])) && (!empty($data[0]['RegistrationFormsDownloaded']))) {
+    return $data[0]['RegistrationFormsDownloaded'];
+  }
+}
+
+function _bipac_reports_dates($zip, &$object) {
+  if ($success = $object->FromZIPListElections($zip)) {
+    $data = $object->FromZIPListElections_data;
+  }
+  else {
+    // Done broke
+  }
+
+  $output = array();
+  if (!empty($data)) {
+    // Now we deal with API weirdness
+    foreach ($data as $chunk) {
+      if ((!empty($chunk['ElectionName'])) && ($chunk['ElectionName'] == 'General')) {
+        $output = $chunk;
+      }
+      // Here we need to check for the primary date chunk and add that to our output array
+      if ((!empty($chunk['ElectionName'])) && ($chunk['ElectionName'] == 'Primary') && (!empty($chunk['PrimaryDate']))) {
+        $output['PrimaryDate'] = $chunk['PrimaryDate'];		// Note, this is guesswork. Hasn't been added to API yet.
+      }
+    }
+  }
+  return $output;
+}

@@ -1,0 +1,61 @@
+
+@mixin title-container {
+  background-color: $blue-light !important;
+  background-image: linear-gradient(to top, $blue-medium, $blue-light) !important;
+  padding: $spacing-large 0;
+  position: relative;
+
+  @media (min-width: 768px) {
+    padding: $spacing-xlarge 0;
+  }
+  @media (min-width: 992px) {
+    padding: $spacing-xlarge 0;
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    display: block;
+    visibility: visible;
+    height: 60px;
+    width: 190px;
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url('../img/title-container-bookwing.svg');
+    background-repeat: no-repeat;
+    background-position: 50% 0;
+    background-size: auto 100%;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+
+    @media (max-width: 991px) {
+      height: 30px;
+    }
+  }
+
+  h1 {
+    color: $white;
+    font-family: $ff-display;
+    @include fs($fs-100);
+    font-weight: $fw-semibold;
+    line-height: 1em;
+    margin: 0;
+    text-transform: none;
+  }
+
+  h2 {
+    margin-top: 0;
+  }
+
+  a {
+    color: $blue-white !important;
+    cursor: pointer;
+    text-decoration: underline;
+
+    &:hover {
+      color: $white !important;
+    }
+  }
+}

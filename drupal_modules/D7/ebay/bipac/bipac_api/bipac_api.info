@@ -1,0 +1,7 @@
+name = BIPAC API
+description = Provides a general API for integrating with BIPAC
+core = 7.x
+package = BIPAC
+dependencies[] = 'bipac'
+
+configure = admin/config/system/site-information

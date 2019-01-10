@@ -1,0 +1,63 @@
+// Colors
+$c-black: #000000;
+$c-white: #ffffff;
+$c-off-black: #333333;
+$c-off-white: #f1f1f1;
+$c-red: #d12300;
+$c-blue: #0064d2;
+$c-light-blue: #2e93ff;
+$c-dark-grey: #666666;
+$c-medium-dark-grey: #7d7d7d;
+$c-medium-grey: #999999;
+$c-light-grey: #cccccc;
+$c-brown: #8a7a67;
+$c-magenta: #e52766;
+$c-yellow: #fcf731;
+
+// Fill your cart with color, colors
+$new-light-blue: #c2f5ff;
+$new-light-green: #5df0ad;
+$new-dark-blue: #0a1c6b;
+
+
+// Ebay Brand Playbook - JC
+// Group 1
+$g1-1: #C2F5FF;
+$g1-2: #5DF0AD;
+$g1-3: #078B89;
+$g1-4: #006EFC;
+$g1-5: #0A1C6B;
+
+// Group 4
+$g4-1: #CFFCF0;
+$g4-2: #5DF0AD;
+$g4-3: #26B066;
+$g4-4: #D166BD;
+$g4-5: #630A47;
+
+
+// Action Center -TMP, JC
+$lp-blue: #0c2069;
+$lp-teal: #5eefae;
+$lp-pink: #cf69bb;
+
+
+// Base Font Size
+$base-font-size: 16;
+
+// Function to convert pixels to ems
+@function px-to-em($px, $denominator: $base-font-size) {
+  @return $px / $denominator * 1em;
+}
+
+// Breakpoints
+$bp-tiny: px-to-em(550);
+$bp-small: px-to-em(769);
+$bp-med: px-to-em(925);
+$bp-large: px-to-em(1024);
+$bp-giant: px-to-em(1100);
+
+// The max-width of the stage on full desktop in pixels (see mixin stagecenter)
+$max-stage-width: 1080;
+
+$no-query: '.no-mediaqueries';

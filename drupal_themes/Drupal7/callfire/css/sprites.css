@@ -1,0 +1,141 @@
+/*------------------------------------------------------------------
+[Sprites Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Description: Styles for sprites used across multiple pages, you can
+add icons to the sprites, but do not alter the order of them
+Last change:  11/09/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. SPRITES
+  A. LARGE
+  B. SMALL
+  C. TINY
+  D. EXTRAS
+  E. HELP OVERRIDES
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @SPRITES
+/*------------------------------------------------------------------*/
+
+.feed-icon {
+  margin: 0 10px;
+}
+
+/*------------------------------------------------------------------*/
+/* @LARGE SPRITES */
+
+[class^="icon-"],
+[class*="icon-"] {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  line-height: 14px;
+  vertical-align: middle;
+  background: url("../images/sprites/glyphicons_000_sprite.png") no-repeat;
+}
+
+  /* if icons are in buttons */
+  .button [class^="icon"],
+  .button [class*="icon"] {
+    vertical-align: top;
+  }
+
+.icon-lightbulb     { background-position: 0px  0px; float: left; }
+.icon-401k          { background-position: 0px  -40px; }
+.icon-dollar        { background-position: 0px  -80px; }
+.icon-mail-add      { background-position: 0px  -120px; }
+
+.icon-warning       { background-position: 0px  -160px; float: left; }
+.icon-commuter      { background-position: 0px  -200px; }
+.icon-utensils      { background-position: 0px  -240px; }
+.icon-trophy        { background-position: 0px  -280px; }
+
+.icon-share         { background-position: 0px  -320px; }
+.icon-airplane      { background-position: 0px  -360px; }
+.icon-medical       { background-position: 0px  -400px; }
+.icon-alarm-clock   { background-position: 0px  -440px; }
+
+/*------------------------------------------------------------------*/
+/* END LARGE SPRITES */
+
+/*------------------------------------------------------------------*/
+/* @SMALL SPRITES */
+
+[class^="icon-small"],
+[class*="icon-small"] {
+    width: 34px;
+    height: 30px;
+    background: url("../images/sprites/glyphicons_000_sprite_small.png") no-repeat;
+}
+
+/*Small Icons*/
+.icon-small-reference       { background-position: 0px      0px; }
+.icon-small-broadcast       { background-position: -34px    0px; }
+.icon-small-share-arrow     { background-position: -68px    0px; }
+.icon-small-sound           { background-position: -101px   0px; }
+.icon-small-checkmark       { background-position: -135px   0px; }
+.icon-small-play-button     { background-position: -169px   0px; }
+.icon-small-question-mark   { background-position: -203px   0px; }
+.icon-small-inbox-in        { background-position: -237px   0px; }
+
+
+.icon-small-film-white      { background-position: 0px      -30px; }
+.icon-small-two-pages       { background-position: -34px    -30px; }
+.icon-small-callfire-flame  { background-position: -68px    -30px; }
+.icon-small-globe           { background-position: -101px   -32px; } /* offset 2px */
+.icon-small-landline-phone  { background-position: -135px   -31px; } /* offset 1px */
+.icon-small-download        { background-position: -169px   -32px; } /* offset 2px */
+.icon-small-phone           { background-position: -203px   -31px; } /* offset 1px */
+
+/*------------------------------------------------------------------*/
+/* END SMALL SPRITES */
+
+/*------------------------------------------------------------------*/
+/* @TINY SPRITES */
+
+[class^="icon-tiny"],
+[class*="icon-tiny"] {
+    width: 12px;
+    height: 12px;
+    background: url("../images/sprites/glyphicons_000_sprite_tiny.png") no-repeat;
+}
+
+/*Really small icons*/
+.icon-tiny-download         { background-position: 0px 0px; }
+.icon-tiny-phone           { background-position: -18px 0; }
+
+/*------------------------------------------------------------------*/
+/* END TINY SPRITES */
+
+/*------------------------------------------------------------------*/
+/* @EXTRAS */
+
+.tablecomparison .icon-small-checkmark { background-position-y: -3px; height: 25px; }
+.play-audio:hover { cursor: hand; cursor: pointer; }
+
+/*------------------------------------------------------------------*/
+/* END EXTRAS */
+
+/*------------------------------------------------------------------*/
+/* @HELP OVERRIDES */
+
+.block-title ~ .content > span[class^="icon-small"],
+.block-title ~ .content > span[class*="icon-small"] {
+    margin-left: -5px;
+}
+
+/*------------------------------------------------------------------*/
+/* END HELP OVERRIDES */
+
+/*------------------------------------------------------------------*/
+/* END SPRITES
+/*------------------------------------------------------------------*/

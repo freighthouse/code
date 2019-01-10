@@ -1,0 +1,414 @@
+%clearfix {
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
+%visuallyhidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+//
+// Fonts
+//
+%sans-serif {
+  font-family: 'MarketSans-Regular-WebS';
+  -webkit-font-smoothing: antialiased;
+}
+
+%serif {
+  font-family: 'MarketSans-Regular-WebS';
+  -webkit-font-smoothing: antialiased;
+}
+
+//
+// Web Fonts
+//
+%univers {
+  font-family:'MarketSans-Regular-WebS';
+  -webkit-font-smoothing: antialiased;
+}
+%helvetica {
+  font-family:'MarketSans-Regular-WebS';
+  -webkit-font-smoothing: antialiased;
+}
+%helvetica-semibold {
+  font-family:'MarketSans-SemiBold-WebS';
+  -webkit-font-smoothing: antialiased;
+}
+//
+// Font Styling
+//
+%light {
+  font-weight: 300;
+}
+
+%bold {
+  font-weight: 700;
+}
+
+%italic {
+  font-style: italic;
+}
+
+//
+// Icons
+//
+%icon {
+  font-family: 'ebaymainstreet'; //declared in the typography partial
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  speak: none;
+}
+
+%social-media-icons {
+  text-decoration: none;
+  &:before {
+    display: inline-block;
+    margin-right: 0.75em;
+    color: $c-dark-grey;
+  }
+  &:hover {
+    &:before {
+      color: $c-blue;
+    }
+  }
+}
+
+%chevron-right {
+  @extend %icon;
+  content: "\e600";
+}
+
+%chevron-left {
+  @extend %icon;
+  content: "\f053";
+}
+
+%plus-icon {
+  @extend %icon;
+  content: "\f067";
+}
+
+%minus-icon {
+  @extend %icon;
+  content: "\f068";
+}
+
+%facebook-square {
+  @extend %icon;
+  content: "\e601";
+}
+
+%linkedin-square {
+  @extend %icon;
+  content: "\e602";
+}
+
+%twitter {
+  @extend %icon;
+  content: "\e603";
+}
+
+%twitter2{
+  @extend %icon;
+  content: "\e901";
+}
+
+%facebook {
+  @extend %icon;
+  content: "\e604";
+}
+
+%subscribe {
+  @extend %icon;
+  content: "\e605";
+}
+
+%googleplus {
+  @extend %icon;
+  content: "\e606";
+}
+
+%linkedin {
+  @extend %icon;
+  content: "\e607";
+}
+
+%document {
+  @extend %icon;
+  content: "\e608";
+}
+
+%external-link {
+  @extend %icon;
+  content: "\e609";
+}
+
+%write {
+  @extend %icon;
+  content: "\e60a";
+}
+
+%letter{
+  @extend %icon;
+  content: "\e900";
+}
+
+%menu {
+  @extend %icon;
+  content: "\f0c9";
+}
+
+%fax {
+  @extend %icon;
+  content: "\f02f";
+}
+
+%location {
+  @extend %icon;
+  content: "\f041";
+}
+
+%phone {
+  @extend %icon;
+  content: "\e903";
+}
+
+%website {
+  @extend %icon;
+  content: "\f109";
+}
+
+%youtube {
+  @extend %icon;
+  content: "\f16a";
+}
+
+%close {
+  @extend %icon;
+  content: "\f057";
+}
+
+%search-icon {
+  @extend %icon;
+  content: "\f002";
+}
+
+%tumblr-icon {
+  @extend %icon;
+  content: "\f173";
+}
+
+%right-arrow{
+  @extend %icon;
+  content: "\ea3c";
+}
+
+%titletext {
+  @include fontsize(24);
+  @extend %helvetica;
+  @extend %light;
+  margin-bottom: 1.5em;
+  margin-top: 1.5em;
+  color: $c-off-black;
+  text-align: center;
+}
+
+%full-page-feature {
+  @extend %clearfix;
+  clear: both;
+  width: auto;
+  margin: 0.5em;
+  @include breakpoint($bp-small) {
+    width: 100%;
+    margin: 0;
+  }
+  & > .content {
+    @extend %clearfix;
+    background-color: $c-white;
+    border: 1px solid $c-light-grey;
+    padding: 2em;
+  }
+  & > h2 {
+    @extend %titletext;
+  }
+}
+
+%half-page-feature {
+  @extend %full-page-feature;
+  @include breakpoint($bp-small) {
+    clear: none;
+    float: left;
+    width: 49.25%;
+  }
+}
+
+%half-page-margin-right {
+  @include breakpoint($bp-small) {
+    margin: 0 0.75% 0 0;
+  }
+}
+
+%half-page-margin-left {
+  @include breakpoint($bp-small) {
+    margin: 0 0 0 0.75%;
+  }
+}
+
+%megamenu-link {
+  a {
+    @include fontsize(16);
+    @extend %helvetica;
+    @extend %light;
+    display: block;
+    margin-top: 0.5em;
+    width: 100%;
+    min-height: 3em;
+    color: $c-white;
+    border-bottom: 1px solid $c-medium-dark-grey;
+
+    &:hover,
+    &:focus {
+      color: $c-white;
+      text-decoration: underline;
+    }
+  }
+
+  &.last a {
+    border: none;
+  }
+}
+
+%learn-more-link {
+  @include fontsize(14);
+  @extend %helvetica;
+  display: block;
+  padding: 0.75em 0;
+  margin-left: 0.5em;
+  border-top: 1px solid $c-light-grey;
+  color: $c-blue;
+  text-align: right;
+  &:after {
+    @include fontsize(18);
+    @extend %chevron-right;
+    display: inline-block;
+    margin-left: 0.5em;
+    line-height: 1.8;
+    vertical-align: middle;
+  }
+}
+%external-more-link {
+  @include fontsize(14);
+  @extend %helvetica;
+  display: block;
+  padding: 0.75em 0;
+  margin-left: 0.5em;
+  border-top: 1px solid $c-light-grey;
+  color: $c-blue;
+  text-align: right;
+  &:after {
+    @include fontsize(18);
+    @extend %external-link;
+    display: inline-block;
+    margin-left: 0.5em;
+    line-height: 1.8;
+    vertical-align: middle;
+  }
+}
+%blue-button {
+  display: inline;
+  @include breakpoint($bp-small) {
+    display: block;
+  }
+  border-radius: 0.3em;
+  background-color: $c-blue;
+  color: $c-white;
+  text-decoration: none;
+  text-align: center;
+  padding: 1em 2em;
+  width: auto;
+  max-width: 300px;
+  &:hover,
+  &:focus {
+    @include transition();
+    text-decoration: none;
+    background-color: $c-light-blue;
+  }
+}
+
+%newbluebutton{
+  transition: all 500ms cubic-bezier(0.39,0.5,0.15,1.36);
+  border: 1px solid $new-dark-blue;
+  color: $new-dark-blue;
+  padding: 8px 15px;
+  @include fontsize(14);
+  box-shadow: $new-dark-blue 0px 0px 0px 0px inset;
+  display: inline-block;
+  background: transparent;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  &:hover{
+    text-decoration: none;
+    color: $c-white;
+    box-shadow: $new-dark-blue 0px 0px 0px 70px inset;
+  }
+
+  &:after{
+    @include fontsize(12);
+    @extend %right-arrow;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+}
+
+%newfilledbutton{
+  transition: all 500ms cubic-bezier(0.39,0.5,0.15,1.36);
+  border: 1px solid $new-dark-blue;
+  color: $new-light-blue;
+  background: $new-dark-blue;
+  padding: 8px 15px;
+  @include fontsize(14);
+  box-shadow: $new-light-blue 0px 0px 0px 0px inset;
+  display: inline-block;
+
+  &:hover{
+    text-decoration: none;
+    color: $new-dark-blue;
+    box-shadow: $new-light-blue 0px 0px 0px 70px inset;
+  }
+
+  &:after{
+    @include fontsize(12);
+    @extend %right-arrow;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+}
+
+%bluebtn {
+  @extend %blue-button;
+  display: inline-block;
+  &:hover,
+  &:focus {
+    color: $c-white;
+  }
+}

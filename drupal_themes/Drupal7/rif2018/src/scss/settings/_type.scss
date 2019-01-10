@@ -1,0 +1,40 @@
+
+// Font Families
+
+$ff-sans: 'Gotham A', 'Gotham B', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+$ff-display: 'Branding-Semibold', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+
+$ff-body: $ff-sans;
+
+// Font Sizes
+
+$font-range: 320px 1680px;
+
+$fs-00: responsive 12px 14px;
+$fs-05: responsive 12px 15px;
+$fs-10: responsive 14px 16px;
+$fs-20: responsive 16px 18px;
+$fs-25: responsive 16px 20px;
+$fs-30: responsive 18px 24px;
+$fs-40: responsive 20px 30px;
+$fs-50: responsive 24px 36px;
+$fs-60: responsive 27px 42px;
+$fs-70: responsive 30px 48px;
+$fs-80: responsive 36px 60px;
+$fs-90: responsive 42px 72px;
+$fs-100: responsive 42px 90px;
+
+$fs-page-title:         $fs-100;
+$fs-page-title-inside:  $fs-80;
+$fs-body-large:         $fs-25;
+$fs-body:               $fs-20;
+$fs-body-small:         $fs-10;
+$fs-body-xsmall:        $fs-05;
+
+// Font Weights
+
+$fw-normal:   400;
+$fw-regular:  400;
+$fw-medium:   500;
+$fw-semibold: 500;
+$fw-bold:     700;

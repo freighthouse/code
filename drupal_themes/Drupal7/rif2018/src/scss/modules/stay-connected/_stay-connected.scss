@@ -1,0 +1,86 @@
+
+.stay-connected-section {
+//  margin-top: 30px;
+  margin-top: $spacing-xlarge;
+
+  .panel {
+    // background-color: transparent;
+  }
+
+  .panel-body {
+//    background-color: #EBEBEB;
+//    padding: 30px;
+    background: transparent;
+
+    h3 {
+//      margin: 0 0 15px;
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size;
+//      font-weight: 900;
+//      line-height: @default-line-height;
+//      color: @rif-blue;
+    }
+    p {
+//      font-family: @default-font-family;
+//      font-size: @default-font-size;
+//      font-weight: normal;
+//      line-height: @default-line-height;
+//      color: @rif-blue;
+//      text-align: left;
+//      padding: 0;
+//      margin: 0;
+      color: $black;
+      font-family: $ff-sans;
+      @include fs($fs-body-small);
+      line-height: 1.5em;
+
+      &:last-child {
+        margin-bottom: 0;;
+      }
+    }
+    .stay-connected-txt {
+//      font-family: @default-font-family;
+//      font-size: @default-font-size;
+//      font-weight: normal;
+//      line-height: @default-line-height;
+//      color: @rif-blue;
+//      text-align: left;
+//      padding: 0;
+//      margin: 0;
+      font-family: $ff-sans;
+      @media (min-width: 1201px) {
+//        min-height: 180px;
+        min-height: auto;
+      }
+      @media (max-width: 1200px) {
+//        min-height: 220px;
+        min-height: auto;
+      }
+      @media (max-width: 992px) {
+        min-height: auto;
+      }
+    }
+  }
+  .image {
+//    margin: -30px -30px 30px;
+//    height: 180px;
+//    background-repeat: no-repeat;
+//    background-position: center center;
+//    background-size: cover;
+//    .border-radiuses(4px, 0, 0, 4px);
+    border-radius: 3px;
+    height: 0;
+    margin: -1px -1px $spacing-large !important;
+    padding-bottom: 240/420*100%;
+  }
+  .stay-connected-btn {
+//    text-align: center;
+//    margin-top: 32px;
+    margin-top: $spacing-medium;    
+    text-align: left;
+    .btn {
+      @include button-small;
+      padding: 6px 24px !important;
+    }
+  }
+}

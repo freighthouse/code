@@ -1,0 +1,38 @@
+// Hide the content area
+.page-node-129696, // /pac/news-and-events
+.page-node-129022  // /pac
+{
+  .node .content {
+    display: none;
+  }
+  .region-content .block-system > .content {
+    display: none;
+  }
+}
+
+// Hide the container styling
+.page-node-129026,
+.page-node-129162,
+.page-node-129023 {
+  .region-content .block-system > .content {
+    padding: 0;
+    border: none;
+    background: none;
+  }
+}
+
+#node-129026, // /pac/contribute-payroll-deduction
+#node-129162, // /pac/charitable-match-program
+#node-129023  // /pac/contribute-paypal
+{
+  @extend %half-page-feature;
+  @extend %half-page-margin-right;
+}
+
+.block-divider {
+  clear: both;
+  padding-top: 2.5em;
+  margin-bottom: 3em;
+  border: none;
+  border-bottom: 1px solid $c-light-grey;
+}

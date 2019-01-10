@@ -1,0 +1,101 @@
+.ebay-custom-join-title {
+  @include fontsize(36);
+  @extend %helvetica;
+  @extend %light;
+  color: $c-blue;
+}
+
+.ebay-custom-join-description {
+  @include fontsize(16);
+  @extend %helvetica;
+  color: $c-dark-grey;
+}
+
+.ebay-custom-join-text-wrapper {
+  width: 100%;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 43%;
+    margin-right: 7%;
+  }
+}
+
+.ebay-custom-join-form-wrapper {
+  width: 100%;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 50%;
+  }
+  label {
+    @include fontsize(16);
+    @extend %helvetica;
+    display: block;
+    margin-top: 2em;
+    margin-bottom: 1em;
+    color: $c-dark-grey;
+  }
+  .form-type-select {
+    display: inline;
+  }
+  .form-select {
+    @include fontsize(14);
+    @extend %helvetica;
+    padding-left: 1em;
+    border: 1px solid $c-dark-grey;
+    margin-top: 0.1em;
+    height: 2.3em;
+    color: $c-off-black;
+    width: 100%;
+    @include breakpoint($bp-med) {
+      width: 18em;
+    }
+  }
+  .form-submit {
+    @include fontsize(16);
+    @extend %helvetica;
+    padding: 0 2.25em;
+    margin-top: 1em;
+    color: $c-white;
+    background: none;
+    text-shadow: none;
+    border-radius: 0;
+    background-color: $c-blue;
+    border-radius: 0.3em;
+    font-weight: normal;
+    line-height: 2;
+    @include breakpoint($bp-med) {
+      margin-top: 0;
+    }
+    &:hover,
+    &:focus {
+      background: none;
+      background-color: $c-light-blue;
+    }
+  }
+}
+
+.ebay-custom-join-form-title {
+  @include fontsize(28);
+  @extend %helvetica;
+  @extend %light;
+  color: $c-off-black;
+  text-transform: uppercase;
+}
+
+.page-join .block.block-system,
+.page-join-184 .block.block-system {
+  @extend %half-page-feature;
+  @extend %half-page-margin-right;
+  input[type="submit"] {
+    width: 100%;
+  }
+  .join-form-footer-text {
+    display: none;
+  }
+}
+
+.page-join {
+  .join-page-video {
+    padding-bottom: 1em;
+  }
+}

@@ -1,0 +1,15 @@
+<?php
+
+/**
+ * @file
+ *   This plugin simply strips Microsoft characters
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function re_tamper_ctools_plugin_directory($owner, $plugin_type){
+  if (($owner == 'feeds_tamper') && ($plugin_type == 'plugins')) {
+    return 'plugins';
+  }
+}

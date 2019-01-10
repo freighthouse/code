@@ -1,0 +1,45 @@
+<?php
+
+define('GET_QUOTE_FORM', 'get_quote');
+
+/**
+ * Implements hook_menu().
+ */
+function sunrun_getquote_menu() {
+	$items['admin/sunrun/quote-form'] = array(
+		'title' => 'Get quote landing',
+    'description' => 'Configuration of blocks and settings related to the Get Quote landing page',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('sunrun_getquote_settings_form'),
+		'access arguments' => array('administer site configuration'),
+        'type' => MENU_NORMAL_ITEM,
+		'file' => 'sunrun_getquote.admin.inc',
+	);
+	return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sunrun_getquote_theme($existing, $type, $theme, $path) {
+  return array(
+    'webform_form_get_quote' => array(
+      'template' => 'webform-form-get-quote',
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function sunrun_getquote_form_alter(&$form, $form_state, $form_id) {
+	if (strpos($form_id, 'webform_client_form_') === 0) {
+		switch ($form['#node']->webform['machine_name']) {
+			case GET_QUOTE_FORM:
+				// Use custom form template.
+				array_unshift($form['#theme'], 'webform_form_get_quote');
+				break;
+		}
+	}
+}

@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains momentum_vote.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function momentum_vote_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the momentum_vote module.
+    case 'help.page.momentum_vote':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Utilizes the Momentum Vote API') . '</p>';
+      return $output;
+
+    default:
+  }
+}

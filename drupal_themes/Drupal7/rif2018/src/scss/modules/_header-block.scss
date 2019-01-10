@@ -1,0 +1,161 @@
+
+.header-block {
+//  position: relative;
+//  background-color: @dark-yellow;
+//  padding: 30px 0;
+
+  &.my-favorites {
+//    background-color: @off-white;
+    background-color: $white;
+
+    svg {
+//      bottom: -29px;
+//      fill: @off-white;
+    }
+    h1 {
+//      color: @dark-blue;
+      color: $blue-dark;
+    }
+    .btn {
+//      .border-radiuses (4px, 4px, 0, 0);
+//      line-height: @default-line-height + 4;
+    }
+  }
+  &.about,
+  &.back-to-school {
+//    background-color: @white;
+
+    h1 {
+//      font-size: @default-font-size + 6;
+//      line-height: @default-line-height + 6;
+//      color: @dark-blue;
+//      text-align: center;
+    }
+    & + .body {
+
+      h2 {
+//        color: @green;
+//        font-weight: 900;
+//        text-align: center;
+//        margin-bottom: 15px;
+      }
+    }
+  }
+  &.back-to-school {
+
+    .text {
+
+      h1 {
+//        padding: 0;
+
+        @media (min-width: 768px) {
+//          text-align: center;
+        }
+        @media (min-width: 992px) {
+//          padding: 4px 0;
+//          text-align: left;
+        }
+        @media (min-width: 1200px) {
+//          padding: 16px 0;
+        }
+      }
+    }
+    .logo {
+//      text-align: center;
+//      margin-bottom: 30px;
+
+      @media (min-width: 992px) {
+//        text-align: right;
+//        margin: 0;
+      }
+    }
+
+    svg {
+//      fill: @white;
+//      bottom: -29px;
+    }
+
+    & + .body {
+//      margin-top: -30px;
+//      padding-top: 60px;
+
+      .support-image {
+
+        @media (max-width: 991px) {
+//          padding-bottom: 30px;
+//          margin: 0 auto;
+//          width: 100%;
+//          max-width: none;
+        }
+      }
+    }
+  }
+  &.reasons-to-register {
+//    background-color: @white;
+//    margin-bottom: 30px;
+
+    h1 {
+//      color: @green;
+//      text-align: center;
+    }
+    svg {
+//      fill: @white;
+//      bottom: -29px;
+    }
+  }
+  &.lc-app {
+//    background-color: @white;
+//    margin-bottom: 30px;
+    @include title-container;
+
+    h1 {
+//      color: @green;
+//      text-align: center;
+
+      @media (max-width: 767px) {
+//        padding-bottom: 30px;
+      }
+    }
+    svg {
+//      fill: @white;
+//      bottom: -29px;
+      display: none;
+      visibility: hidden;
+    }
+  }
+  svg {
+//    position: absolute;
+//    bottom: -1px;
+//    left: 50%;
+//    margin: 0 0 0 -130px;
+//    width: 260px;
+//    height: 30px;
+//    fill-rule: evenodd;
+  }
+  h1 {
+//    margin: 0;
+//    font-family: @alt-sans-serif-font-family;
+//    font-size: @default-font-size + 14;
+//    font-weight: 900;
+//    line-height: @default-line-height + 14;
+    font-family: $ff-display;
+    @include fs($fs-60);
+    font-weight: $fw-semibold;
+    line-height: 1.5em;
+  }
+
+  &.centered-1-col {
+//    background-color: @off-white;
+    h1{
+//      text-align: center;
+//      color: @dark-green;
+    }
+    p {
+//      text-align: center;
+    }
+    svg {
+//      bottom: -29px;
+//      fill: @off-white;
+    }
+  }
+}

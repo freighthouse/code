@@ -1,0 +1,8 @@
+name = BIPAC Campaigns
+description = Provides a campaign content type and a means for integrating with BIPAC's APIs
+core = 7.x
+package = BIPAC
+dependencies[] = ebay_custom
+stylesheets[all][] = css/bipac.css
+
+configure = admin/config/system/bipac

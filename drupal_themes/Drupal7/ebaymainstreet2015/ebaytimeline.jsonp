@@ -1,0 +1,91 @@
+storyjs_jsonp_data = {
+    "timeline":
+    {
+        "headline":"Internet Sales Tax",
+        "type":"default",
+        "text":"<p>eBay globally supports the right of fans who purchase tickets to entertainment and sporting events to resell or give those tickets away without limitations or restrictions.</p>",
+        "startDate":"1992,5,26",
+        "date": [
+            {
+                "startDate":"1992,5",
+                "headline":"May 1992",
+                "text":"<p>The Quill Decision: the U.S. Supreme Court rules that a state may not impose tax collection burdens on a business that does not have a physical presence in that state.</p>",
+            },
+            {
+                "startDate":"2001,2",
+                "headline":"February 2001",
+                "text":"<p>Senators Wyden (D-OR) and Leahy (D-VT) introduce Internet sales tax language that includes a $5 million small business exemption.</p>",
+            },
+      {
+                "startDate":"2001,10,18",
+                "headline":"October 18, 2001",
+                "text":"<p>Senators Enzi (R-WY) and Dorgan (D-ND) introduce Internet sales tax bill that includes a $5 million small business exemption.</p>",
+            },
+      {
+                "startDate":"2005",
+                "headline":"2005",
+                "text":"<p>Senator Dorgan (D-ND) introduces the Streamlined Sales Tax Simplification Act, which allows the Small Business Administration to set the small business threshold.</p>",
+            },
+      {
+                "startDate":"2011,7,1",
+                "headline":"July 1, 2011",
+                "text":"<p>Congressman Delahunt (D-MA) introduces the Main Street Fairness Act, which calls for “small seller exception” and leaves the process to the Governing Board.</p>",
+            },
+      {
+                "startDate":"2011,11,9",
+                "headline":"November 9, 2011",
+                "text":"<p>Senator Enzi (R-WY) introduces the Marketplace Fairness Act, which calls for a $500,000 small business exemption.</p>",
+            },
+      {
+                "startDate":"2011,11,29",
+                "headline":"November 29, 2011",
+                "text":"<p>Tod Cohen, eBay’s Vice President of Global Government Relations, testifies before the United States House of Representatives Committee on the Judiciary on the importance of a robust small business exemption.</p>",
+            },
+      {
+                "startDate":"2013,3,20",
+                "headline":"March 20, 2013",
+                "text":"<p>Senators Enzi (R-WY) and Durbin (D-IL) offer an amendment to the Senate Budget Resolution that would create a framework for future legislative action to create a new Internet sales tax regime.</p>",
+            },
+      {
+                "startDate":"2013,3,22",
+                "headline":"March 22, 2013",
+                "text":"<p>The U.S. Senate includes Internet sales tax amendment in Senate Budget Resolution.</p>",
+            },
+      {
+                "startDate":"2013,4,16",
+                "headline":"April 16, 2013",
+                "text":"<p>The U.S. Senate Introduces the so-called Marketplace Fairness Act, S.743, in an attempt to overturn the Quill Decision.</p>",
+            },
+      {
+                "startDate":"2013,4,21",
+                "headline":"April 21, 2013",
+                "text":"<p>eBay launches what will become the largest corporate grassroots campaign in history by providing U.S. internet-enabled small businesses with the ability to send a letter to their members of Congress in opposition of the Marketplace Fairness Act.</p>",
+            },
+      {
+                "startDate":"2013,5,6",
+                "headline":"May 6, 2013",
+                "text":"<p>The Senate passes the Marketplace Fairness Act, effectively overturning Quill, by a vote of 69-27. Vote moves to the House.</p>",
+            },
+      {
+                "startDate":"2013,5,8",
+                "headline":"May 8, 2013",
+                "text":"<p>House Speaker, John Boehner, tells Bloomberg TV he believes the Internet sales tax bill would impose new burdens on small businesses and that he “probably” won’t support the bill. </p>",
+            },
+      {
+                "startDate":"2013,9,18",
+                "headline":"September 18, 2013",
+                "text":"<p>House Judiciary Committee Chairman, Bob Goodlatte (R-VA) released seven basic principles related to the collection of Internet sales taxes. The principles are intended to guide future discussions in Congress on how to address the issue of Internet sales taxes without overly burdening online businesses and stifling Internet and mobile commerce.</p>",
+            },
+      {
+                "startDate":"2014,2,14",
+                "headline":"February 14, 2014",
+                "text":"<p>Congressman Womack (R-AR) introduces the Marketplace Fairness Act, which includes a $1 million small business exemption.</p>",
+            },
+      {
+                "startDate":"2014,11,10",
+                "headline":"November 10, 2014",
+                "text":"<p>Despite passage of the bill in the Senate, House Speaker John Boehner announces that the House of Representatives will not consider the Marketplace Fairness Act in the 113<sup>th</sup> Session.</p>",
+            }
+        ]
+    }
+}

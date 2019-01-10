@@ -1,0 +1,35 @@
+div.messages {
+  margin: -30px;
+  margin-top: -31px;
+  padding: 30px;
+  padding-left: 90px;
+  background: none;
+  background-position: 30px 30px;
+  background-repeat: no-repeat;
+  background-size: 30px 30px;
+  border: none;
+  color: $black;
+  border-top: 6px solid $green-dark;
+
+  + div.messages {
+    margin-top: 30px;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  &.status {
+    background-image: url('../img/status-ok.png');
+  }
+
+  &.warning {
+    background-image: url('../img/status-warning.png');
+    border-top-color: $red-light;
+  }
+
+  &.error {
+    background-image: url('../img/status-error.png');
+    border-top-color: $red-dark;
+  }
+}

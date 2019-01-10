@@ -1,0 +1,263 @@
+/*------------------------------------------------------------------
+[Help Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. LANDING PAGE
+  A. REGIONS
+II. VIDEOS PAGE
+III. FAQ PAGE
+IV. API DOCUMENTATION
+V. XML DOCUMENTATION
+
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @HELP LANDING PAGE
+/*------------------------------------------------------------------*/
+
+.page-node-187001 .block-title {
+    font-weight: bold;
+}
+
+.page-node-187001 #main h3 {
+    font-size: 15px;
+    font-weight: normal;
+}
+
+.page-node-187001 #main a {
+    font-size: 14px;
+}
+
+a.see-more {
+    color: #249dff;
+    text-transform: uppercase;
+    font-size: 16px;
+}
+
+#button-training-videos {
+    width: 300px;
+    height: 173px;
+    background: url("../images/button-training-videos.png") no-repeat;
+    display: block;
+}
+
+/*------------------------------------------------------------------*/
+/* @REGIONS */
+
+.page-node-187001 .region-highlighted .block {
+    border: 1px solid #d4d4d4;
+    background-color: #fff;
+    width: 278px;
+    border-radius: 4px;
+    display: block;
+    height: 250px;
+    float: left;
+    margin: 0 10px;
+    padding: 5px 10px
+}
+
+.page-node-187001 .region-highlighted .block-title {
+    color: #111;
+    float: right;
+    width: 245px;
+    line-height: 30px;
+}
+
+.page-node-187001 .region-highlighted h3 {
+    margin-bottom: 15px;
+    margin-top: 10px;
+    color: #666;
+    font-weight: normal;
+}
+
+.page-node-187001 .region-highlighted {
+    background: #eee;
+    margin: 0 -20px;
+    padding: 30px 20px;
+    overflow: hidden;
+    border-top: 1px solid #d4d4d4;
+    -moz-box-shadow: inset 0px 1px 0px #fff;
+    -webkit-box-shadow: inset 0px 1px 0px #fff;
+    box-shadow: inset 0px 1px 0px #fff;
+}
+
+.page-node-187001 .all-content {
+  padding-bottom: 0;
+}
+
+.page-node-187001 .region-content-bottom .block.first .block-title {
+  line-height: 30px;
+}
+
+.page-node-187001 .region-content-bottom .block-title {
+    font-size: 24px;
+    line-height: 40px;
+}
+
+.page-node-187001 .region-content-bottom .block.first {
+    background: #0d4582 url("../images/bg-product-slider.jpg");
+    box-shadow: 0 0 250px rgba(0, 0, 0, 1) inset;
+    padding: 30px 20px;
+    margin-bottom: 30px;
+}
+
+.page-node-187001 .region-content-bottom .block.first .block-title {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+/*------------------------------------------------------------------*/
+/* END REGIONS */
+
+/*------------------------------------------------------------------*/
+/* END HELP LANDING PAGE
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @VIDEOS PAGE
+/*------------------------------------------------------------------*/
+
+.view-help-videos h3 {
+  font-size: 24px;
+  color: #111;
+  margin: 0 0 10px 10px;
+  clear: left;
+} 
+
+.view-help-videos .views-row {
+  margin-bottom: 20px;
+}
+
+.view-help-videos .views-row-last {
+  margin-bottom: 40px;
+}
+
+/*------------------------------------------------------------------*/
+/* END VIDEOS PAGE
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @FAQ PAGE
+/*------------------------------------------------------------------*/
+
+#block-views-faq-block-faq-menu {
+  padding: 20px;
+  background-color: #F9F9F9;
+  border: 1px dashed #CCC;
+  margin: 20px 0 40px;
+  font-size: 14px;
+}
+
+  #block-views-faq-block-faq-menu .views-row {
+    margin-bottom: 5px;
+  }
+
+.view-faq .back-to-top {
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+.view-faq h2 {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+  .view-faq .field-content p:last-of-type {
+    margin-bottom: 5px;
+  }
+
+/*------------------------------------------------------------------*/
+/* END FAW PAGE
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @API DOCUMENTATION
+/*------------------------------------------------------------------*/
+
+.section-api-documentation .notice p {
+  margin-bottom: 0;
+}
+
+  .callfire-properties,
+  .callfire-xml-tags {
+    width: 100%;
+    margin: 20px 0;
+  }
+
+  .callfire-properties th,
+  .callfire-xml-tags th {
+    font-weight: bold;
+    background-color: #f6f6f6;
+  }
+  .callfire-properties th,
+
+  .callfire-properties td,
+  .callfire-xml-tags th,
+  .callfire-xml-tags td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .parameter-name,
+  .attribute-name,
+  .attribute-value,
+  .php-variable,
+  .php-keyword,
+  .php-function,
+  .php-string,
+  .view-callfire-xml-reference td.views-field-title {
+    font-family: monospace;
+  }
+
+  .callfire-xml-tags .odd {
+    background-color: transparent;
+  }
+
+  .php-variable {
+    color: #008080;
+  }
+
+  .php-entity.php-function {
+    color: #900;
+    font-weight: bold;
+  }
+
+/*------------------------------------------------------------------*/
+/* END API DOCUMENTATION
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @XML DOCUMENTATION
+/*------------------------------------------------------------------*/
+
+.attribute-name {
+  color: #008080;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.attribute-value,
+.php-string {
+  color: #D14;
+}
+
+.xml-tag {
+  color: #000080;
+  font-family: monospace;
+  font-size: 16px;
+}
+
+/*------------------------------------------------------------------*/
+/* END XML DOCUMENTATION
+/*------------------------------------------------------------------*/

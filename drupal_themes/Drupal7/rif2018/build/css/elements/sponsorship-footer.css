@@ -1,0 +1,9 @@
+.bean-sponsorship-footer {
+  border-top: 1px solid #ccc;
+  text-align: center;
+  margin-top: 40px;
+  padding: 40px; }
+  .bean-sponsorship-footer h2 {
+    color: gray; }
+  .bean-sponsorship-footer .node-sponsor h2 {
+    display: none; }

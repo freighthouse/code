@@ -1,0 +1,97 @@
+<?php
+
+define('SUNRUN_GEOCONTENT_LANDING_TYPE', 	'geo_landing');
+define('SUNRUN_GEOCONTENT_REGIONS_FIELD', 	'field_regions');
+
+/**
+ * Implements hook_init().
+ */
+function sunrun_geocontent_init() {
+  // Adding api key
+  drupal_add_js(array(
+      'sunrun_geocontent' => array(
+          'infodb_key' => variable_get('smart_ip_ipinfodb_key'),
+      ),
+  ), 'setting');
+  drupal_add_js(drupal_get_path('module', 'sunrun_geocontent') . '/' . 'sunrun_geocontent.js');
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sunrun_geocontent_menu() {
+  $items['geo-location'] = array(
+    'title' => 'Geo location service',
+    'page callback' => 'sunrun_geocontent_get_location_callback',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Callback for geolocation service
+ */
+function sunrun_geocontent_get_location_callback(){
+  // Get location
+  $location = smart_ip_get_current_visitor_location_data();
+  // Return as json
+  return drupal_json_output($location);
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function sunrun_geocontent_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && !empty($plugin)) {
+    return "plugins/{$plugin}";
+  }
+}
+
+/**
+ * Load node based on geolocation info
+ */
+function sunrun_geocontent_load_node() {
+	// Get location
+	$location = smart_ip_get_current_visitor_location_data();
+	// If there is a region
+	if(isset($location['region_code'])){
+		// Entity query	
+		$query = new EntityFieldQuery();
+		$query->entityCondition('entity_type', 'node')
+		  ->entityCondition('bundle', SUNRUN_GEOCONTENT_LANDING_TYPE)
+		  ->fieldCondition(SUNRUN_GEOCONTENT_REGIONS_FIELD, 'value', $location['region_code'], '=')
+		  ->propertyOrderBy('created', 'DESC')
+		  ->range(0, 1);
+	    // We try to fetch the content based on location
+		$result = $query->execute();
+		if (isset($result['node'])) {
+			$result = reset($result['node']);
+			// Return node
+			return node_load($result->nid);
+		}
+	}
+	// Fetch the default node (no regions)
+	$query = new EntityFieldQuery();
+	$query->entityCondition('entity_type', 'node')
+      ->propertyCondition('type',   SUNRUN_GEOCONTENT_LANDING_TYPE)
+      ->propertyCondition('status', NODE_PUBLISHED)
+      ->addTag('sunrun_regions_isnull')
+	  ->propertyOrderBy('created', 'DESC')
+	  ->range(0, 1);
+	$result = $query->execute();
+	if (isset($result['node'])) {
+		$result = reset($result['node']);
+		// Return node
+		return node_load($result->nid);
+	}
+	return NULL;
+}
+
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function sunrun_geocontent_query_sunrun_regions_isnull_alter(QueryAlterableInterface $query) {
+	$query->leftJoin('field_data_' . SUNRUN_GEOCONTENT_REGIONS_FIELD, 'o', 'node.nid = o.entity_id');
+	$query->isNull('o.' . SUNRUN_GEOCONTENT_REGIONS_FIELD . '_value');	
+}

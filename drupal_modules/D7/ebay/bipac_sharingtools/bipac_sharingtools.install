@@ -1,0 +1,14 @@
+<?php
+/**
+ * Implements hook_uninstall().
+ */
+function bipac_sharingtools_uninstall() {
+  variable_del('bipac_sharingtools_fb_api_id');
+  variable_del('bipac_sharingtools_social_share_fb_post');
+  variable_del('bipac_sharingtools_social_share_fb_title');
+  variable_del('bipac_sharingtools_social_share_fb_url');
+  variable_del('bipac_sharingtools_social_share_fb_image');
+  variable_del('bipac_sharingtools_social_share_twitter_tweet');
+  variable_del('bipac_sharingtools_social_share_twitter_hashtags');
+  variable_del('bipac_sharingtools_social_share_twitter_url');
+}

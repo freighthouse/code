@@ -1,0 +1,318 @@
+.header {
+  position: relative;
+  background-color: $c-white;
+}
+
+.header-exclude {
+  padding-bottom: 2em;
+}
+
+.header-content {
+  @include stagecenter();
+  position: relative;
+  @include breakpoint($bp-small) {
+    padding: 0 1%;
+    width: 98%;
+  }
+  @include breakpoint($bp-med) {
+    padding: 0;
+  }
+}
+
+.site-logo {
+  position: relative;
+  z-index: 1;
+  padding: 0.5em 0;
+  margin: 0;
+  @include breakpoint($bp-small) {
+    padding: 1em 0 0 0;
+  }
+  a {
+    @include svg-bg('ebay-new-logo');
+    display: block;
+    width: 247px;
+    height: 45px;
+    background-size: 247px 57px;
+    margin: 0px auto;
+    @include breakpoint($bp-small) {
+      //margin-left: -12px;
+    }
+  }
+}
+
+.header-logo-title {
+  @include breakpoint($bp-small) {
+    float: left;
+  }
+}
+
+.header-secondary-menu {
+  @include fontsize(12);
+  @extend %helvetica;
+  line-height: 2;
+  margin: 0;
+  text-align: center;
+  @include breakpoint($bp-small) {
+    float: right;
+    margin: 1em 0 0 0;
+    text-align: right;
+  }
+
+  .content a {
+    color: $c-dark-grey;
+
+    &:after {
+      content: '|';
+      display: inline-block;
+      margin-right: 0.75em;
+      margin-left: 0.75em;
+    }
+
+    &:hover {
+      color: $c-blue;
+      text-decoration: none;
+    }
+  }
+
+  .content .last.leaf a:after {
+    content: none;
+  }
+
+  .content .secondary-menu-ebay-corporate-link {
+     &:after {
+      @extend %external-link;
+      display: inline-block;
+      margin-right: 0;
+      margin-left: 0.5em;
+    }
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    list-style-type: none;
+    display: inline;
+  }
+}
+
+.header-social-links {
+  clear: left;
+  text-align: center;
+  padding: 1em 1em 3em 1em;
+  @include breakpoint($bp-small) {
+    float: right;
+    padding: 0 0 0.25em 0;
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    list-style-type: none;
+    display: inline;
+  }
+}
+
+.header-main-menu, .header-main-menu-1 {
+  @include fontsize(16);
+  @extend %helvetica;
+  position: absolute;
+  top: 11em;
+  z-index: 5;
+  clear: both;
+  padding: 0.5em 0;
+  border-bottom: 3px solid $c-blue;
+  width: 100%;
+  line-height: 2.5;
+  background-color: $c-white;
+  @include breakpoint($bp-small) {
+    line-height: 1.5;
+  }
+  ul li ul {
+    @include breakpoint($bp-small) {
+      display: none;
+    }
+  }
+
+  .not-front & {
+    top: 10em;
+    @include breakpoint($bp-small) {
+      top: 0;
+    }
+  }
+
+  @include breakpoint($bp-small) {
+    position: relative;
+    top: 0;
+    border-top: 1px solid $c-light-grey;
+    border-bottom: none;
+  }
+
+  .content {
+
+    a {
+      color: $c-off-black;
+      margin-right: 3em;
+      display: block;
+      padding-left: 2%;
+      width: 98%;
+      background-color: $c-white;
+
+      @include breakpoint($bp-small) {
+        display: inline;
+        padding: 0;
+      }
+
+      &.selected,
+      &:hover,
+      &.active-trail {
+        color: $c-blue;
+        text-decoration: none;
+
+        @include breakpoint($bp-small) {
+          border-top: 3px solid $c-blue;
+          padding-top: 0.65em;
+        }
+      }
+
+
+    }
+
+    .mobile-menu-link {
+      color: $c-white;
+      background-color: $c-blue;
+
+      &:hover,
+      &:focus {
+        color: $c-white;
+      }
+    }
+
+    .mobile-menu-link,
+    .mobile-menu-home-link {
+      @include breakpoint($bp-small) {
+        display: none;
+      }
+    }
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    list-style-type: none;
+
+    @include breakpoint($bp-small) {
+      display: inline;
+    }
+  }
+}
+
+.mobile-menu-link-block {
+  @extend %clearfix;
+  position: absolute;
+  bottom: 0;
+  z-index: 10;
+  width: 100%;
+}
+
+.mobile-menu-link {
+  display: block;
+  padding-left: 2%;
+  width: 98%;
+  color: $c-white;
+  background-color: $c-blue;
+  line-height: 2.5;
+
+  &:hover,
+  &:focus {
+    color: $c-white;
+    text-decoration: none;
+  }
+
+  &:after {
+    @include fontsize(20);
+    @extend %menu;
+    float: right;
+    margin-right: 1em;
+    line-height: 2;
+  }
+
+  @include breakpoint($bp-small) {
+    display: none;
+  }
+}
+
+.header-main-menu, .header-main-menu-1 {
+  &.hidden {
+    display: none;
+
+    @include breakpoint($bp-small) {
+      display: block;
+    }
+  }
+}
+
+.social-media-facebook {
+  @extend %social-media-icons;
+  &:before {
+    @extend %facebook;
+  }
+}
+
+.social-media-facebook-square {
+  @extend %social-media-icons;
+  &:before {
+    @extend %facebook-square;
+  }
+}
+
+.social-media-twitter {
+  @extend %social-media-icons;
+  &:before {
+    @extend %twitter;
+  }
+}
+
+.social-media-tumblr {
+  @extend %social-media-icons;
+  &:before {
+    @extend %tumblr-icon;
+  }
+}
+
+.social-media-googleplus {
+  @extend %social-media-icons;
+  &:before {
+    @extend %googleplus;
+  }
+}
+
+.social-media-linkedin {
+  @extend %social-media-icons;
+  &:before {
+    @extend %linkedin;
+  }
+}
+
+.social-media-linkedin-square {
+  @extend %social-media-icons;
+  &:before {
+    @extend %linkedin-square;
+  }
+}
+
+.social-media-subscribe {
+  @extend %social-media-icons;
+  &:before {
+    @extend %subscribe;
+    margin-right: 0;
+  }
+}

@@ -1,0 +1,167 @@
+// Global Formalize overrides
+
+form {
+  padding: 1em;
+  @include breakpoint($bp-small) {
+    padding: 0;
+  }
+}
+
+label {
+  @include fontsize(16);
+  @extend %helvetica;
+  @extend %bold;
+  display: block;
+  margin-top: 1em;
+  margin-bottom: 0.2em;
+  color: $c-off-black;
+}
+
+label.option{
+  font-weight: normal;
+}
+
+textarea,
+select,
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="email"],
+input[type="month"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="text"],
+input[type="time"],
+input[type="url"],
+input[type="week"] {
+  @include fontsize(14);
+  @extend %helvetica;
+  padding-left: 1em;
+  border: 1px solid $c-dark-grey;
+  margin-top: 0.1em;
+  height: 2.3em;
+  color: $c-off-black;
+  width: 100%;
+  line-height: 2;
+  @include breakpoint($bp-med) {
+    width: 18em;
+  }
+}
+
+.homepageurl-textfield{
+  display: none !important;
+}
+
+.node-type-bipac-campaign .personal-info .form-item{
+  position: relative;
+  margin: 20px 0;
+
+  &.form-type-textfield{
+    label{
+      margin: 0;
+      padding: 0;
+      font-weight: normal;
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      @include transition();
+      transform: translate3d(0, 0, 0);
+      opacity: .7;
+      pointer-events: none;
+    }
+
+    input{
+      padding: 10px 5px 10px 1em;
+      height: auto;
+    }
+
+    &.component-active{
+      label{
+        @include fontsize(10);
+        transform: translate3d(-0, -8px, 0);
+      }
+
+      input{
+        padding: 18px 5px 2px 1em;
+      }
+    }
+  }
+
+  &.form-type-select{
+    label{
+      margin: 0;
+      padding: 0;
+      font-weight: normal;
+      opacity: .7;
+      @include fontsize(10);
+      position: absolute;
+      top: 6px;
+      left: 15px;
+    }
+
+    select{
+      height: auto;
+      padding: 15px 5px 5px 1em;
+    }
+  }
+}
+
+textarea {
+  height: auto;
+}
+
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+  //@include fontsize(14);
+  //@extend %helvetica;
+  //@extend %bold;
+  //padding: 1em 1em;
+  margin-top: 2em;
+  //color: $c-white;
+  //background: none;
+  //text-shadow: none;
+  //text-transform: uppercase;
+  //border-radius: 0;
+  //background-color: $c-blue;
+  //border-radius: 0.3em;
+  //font-weight: normal;
+  //line-height: 1;
+  //&:hover,
+  //&:focus {
+  //  background: none;
+  //  background-color: $c-light-blue;
+  //}
+  @extend %newbluebutton;
+}
+
+select {
+  padding-bottom: 5px;
+}
+
+.form-item .description {
+  @include fontsize(14);
+  @extend %italic;
+}
+
+.form-type-radios,
+.form-type-checkboxes {
+  margin-top: 1em;
+  label {
+    display: inline;
+  }
+}
+
+.form-type-checkbox,
+.form-type-radio {
+  label {
+    display: inline;
+  }
+}
+
+.ajax-progress-throbber {
+  display: none;
+}

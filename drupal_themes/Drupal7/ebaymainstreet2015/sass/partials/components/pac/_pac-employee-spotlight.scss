@@ -1,0 +1,71 @@
+.view-employee-spotlight {
+  .views-row {
+    text-align: center;
+    &.views-row-first {
+      @include breakpoint($bp-small) {
+        float: left;
+        width: 50%;
+      }
+    }
+    &.views-row-last {
+      @include breakpoint($bp-small) {
+        float: left;
+        width: 50%;
+      }
+    }
+    &.views-row-first.views-row-last {
+      @include breakpoint($bp-small) {
+        float: none;
+        width: 100%;
+      }
+    }
+    img {
+      border-radius: 50%;
+      margin: 1em 0 1.5em 0;
+    }
+    h3 {
+      line-height: 1;
+      text-align: center;
+    }
+    .name {
+      @include fontsize(36);
+      @extend %helvetica;
+      @extend %light;
+      display: block;
+      width: 100%;
+      color: $c-blue;
+    }
+    .job-title {
+      @include fontsize(16);
+      @extend %helvetica;
+      color: $c-dark-grey;
+    }
+    blockquote {
+      @include fontsize(16);
+      @extend %helvetica;
+      border: none;
+      color: $c-dark-grey;
+      text-align: left;
+      > p {
+        margin: 0;
+        &:before {
+          @include fontsize(50);
+          position: relative;
+          top: 0;
+          float: left;
+          margin-left: -28px;
+          color: $c-medium-grey;
+          line-height: 1;
+        }
+        &:after {
+          @include fontsize(50);
+          position: relative;
+          top: 23px;
+          margin-left: 5px;
+          color: $c-medium-grey;
+          line-height: 0;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+<?php
+
+/**
+ * @file
+ * Contains momentum_campaign.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function momentum_campaign_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the momentum_campaign module.
+    case 'help.page.momentum_campaign':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides a campaign content type and integration to the Momentum API.<br />Creates "Issues" taxonomy and corresponding terms for form select lists.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function momentum_campaign_theme() {
+  $theme = [];
+  $theme['campaign'] = [
+    'render element' => 'elements',
+    'file' => 'campaign.page.inc',
+    'template' => 'campaign',
+  ];
+  $theme['campaign_content_add_list'] = [
+    'render element' => 'content',
+    'variables' => ['content' => NULL],
+    'file' => 'campaign.page.inc',
+  ];
+  return $theme;
+}
+
+/**
+* Implements hook_theme_suggestions_HOOK().
+*/
+function momentum_campaign_theme_suggestions_campaign(array $variables) {
+  $suggestions = [];
+  $entity = $variables['elements']['#campaign'];
+  $sanitized_view_mode = strtr($variables['elements']['#view_mode'], '.', '_');
+
+  $suggestions[] = 'campaign__' . $sanitized_view_mode;
+  $suggestions[] = 'campaign__' . $entity->bundle();
+  $suggestions[] = 'campaign__' . $entity->bundle() . '__' . $sanitized_view_mode;
+  $suggestions[] = 'campaign__' . $entity->id();
+  $suggestions[] = 'campaign__' . $entity->id() . '__' . $sanitized_view_mode;
+  return $suggestions;
+}

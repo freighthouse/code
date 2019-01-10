@@ -1,0 +1,25 @@
+smartystreets.settings:
+  type: mapping
+  label: 'SmartyStreets settings'
+  mapping:
+    hostname_us_street_address:
+      type: string
+      label: 'The hostname of the US Street Address API server at SmartyStreets'
+    hostname_us_zip_code:
+      type: string
+      label: 'The hostname of the US ZIP Code API server at SmartyStreets'
+    hostname_us_autocomplete:
+      type: string
+      label: 'The hostname of the US Autocomplete API server at SmartyStreets'
+    auth_id:
+      type: string
+      label: 'SmartyStreets Secret Auth ID'
+    auth_token:
+      type: string
+      label: 'SmartyStreets Secret Auth Token'
+    api_classname:
+      type: string
+      label: 'SmartyStreets API Class Name'
+    test_mode:
+      type: boolean
+      label: 'Whether or not this module is currently in test mode'

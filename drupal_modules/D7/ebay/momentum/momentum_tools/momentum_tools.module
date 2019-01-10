@@ -1,0 +1,445 @@
+<?php
+
+/**
+ * @file
+ *   Basic configuration and tools for Momentum
+ */
+
+/**
+ * Implements hook_init()
+ */
+function momentum_tools_init() {
+  drupal_add_css(drupal_get_path('module', 'momentum_tools') . '/css/momentum.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+}
+
+/**
+ * Implements hook_permission()
+ */
+function momentum_tools_permission() {
+  return array(
+    'admin momentum access' => array(
+      'title' => t('Administrate Momentum configuration'),
+      'description' => t('Set configuration options for Momentum'),
+    ),
+  );
+}
+
+/**
+ * Helper function to format phone numbers
+ */
+function momentum_format_phone($number) {
+  return preg_replace('~.*(\d{3})[^\d]*(\d{3})[^\d]*(\d{4}).*~', '($1) $2-$3', $number);
+}
+
+/**
+ * Helper function to check zip codes
+ */
+function momentum_check_zip($zip) {
+  $result = FALSE;
+  if (preg_match('/^\d{5}(?:[-\s]\d{4})?$/', $zip)) {
+    $result = TRUE;
+  }
+  return $result;
+}
+
+/**
+ * Helper function for standardizing forms
+ */
+function _momentum_forms($type, $values = array(), $required = FALSE) {
+  $form = array();
+  $form['address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address'),
+    '#default_value' => !empty($values['address']) ? $values['address'] : NULL,
+    '#required' => $required,
+  );
+  $form['address_2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address 2'),
+    '#default_value' => !empty($values['address_2']) ? $values['address_2'] : NULL,
+    '#required' => $required,
+  );
+  $form['city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#default_value' => !empty($values['city']) ? $values['city'] : NULL,
+    '#required' => $required,
+  );
+  $form['state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#empty_option' => t('Select'),
+    '#default_value' => !empty($values['state']) ? $values['state'] : NULL,
+    '#options' => momentum_states(),
+    '#required' => $required,
+  );
+  $form['zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip Code'),
+    '#default_value' => !empty($values['zip']) ? $values['zip'] : NULL,
+    '#required' => $required,
+  );
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email Address'),
+    '#default_value' => !empty($values['email']) ? $values['email'] : NULL,
+    '#required' => $required,
+  );
+  $form['prefix'] = array(
+    '#type' => 'select',
+    '#title' => t('Prefix'),
+    '#empty_option' => t('Select'),
+    '#default_value' => !empty($values['prefix']) ? $values['prefix'] : NULL,
+    '#options' => momentum_prefixes(),
+    '#required' => $required,
+  );
+  $form['first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#default_value' => !empty($values['first_name']) ? $values['first_name'] : NULL,
+    '#required' => $required,
+  );
+  $form['last_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#default_value' => !empty($values['last_name']) ? $values['last_name'] : NULL,
+    '#required' => $required,
+  );
+  $form['phone'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone Number'),
+    '#default_value' => !empty($values['phone']) ? $values['phone'] : NULL,
+    '#required' => $required,
+  );
+  /** Spam catcher field that will be hidden from view using CSS **/
+  $form['notes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Notes'),
+    '#required' => FALSE,		// This needs to be FALSE
+    '#attributes' => array('class' => array('sc-notes-field')),
+    '#description' => t('Anything else you would like to tell us'),
+    '#prefix' => '<div class = "sc-notes-field">',
+    '#suffix' => '</div>',
+  );
+  $form['search'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search'),
+    '#attributes' => array('class' => array('momentum_search')),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#attributes' => array('class' => array('momentum_submit')),
+  );
+
+  $element = !empty($form[$type]) ? $form[$type] : array();
+  return $element;
+}
+
+/**
+ * A handler function for Momentum session data across modules
+ * @args
+ *   $key - The storage key to use
+ *   $value - The value to associate with that key
+ *   $reset - How to handle that key
+ * @see
+ *   Inline comments for details
+ */
+function momentum_session($key = NULL, $value = NULL, $reset = FALSE) {
+
+  if (empty($_SESSION['momentum_data'])) {
+    $_SESSION['momentum_data']['init'] = TRUE;
+  }
+  if ($reset === FALSE) {
+    if ((!empty($key)) && (!empty($value))) {
+      // Send through a key and value, and load those into session
+      // Reset is disregarded
+      $_SESSION['momentum_data'][$key] = $value;
+      return TRUE;
+    }
+    elseif ((empty($key)) && (empty($value)) && (!empty($_SESSION['momentum_data']))) {
+      return $_SESSION['momentum_data'];
+    }
+    elseif ((!empty($key)) && (!empty($_SESSION['momentum_data'][$key]))) {
+      // Send through just a key and get the value
+      // Reset is disregarded
+      return $_SESSION['momentum_data'][$key];
+    }
+    return NULL;	// Return NULL if nothing matches; likely no data in given key
+  }
+  else {
+    if ((!empty($key)) && (empty($value))) {
+      // Send through a key and true reset, and clear the key and value
+      // Value is disregarded
+      unset($_SESSION['momentum_data'][$key]);
+    }
+    else {
+      unset($_SESSION['momentum_data']);
+    }
+  }
+  return NULL;
+}
+
+
+/**
+ * Cache api request
+ */
+function momentum_cache($key, $value = NULL){
+  if (cache_get($key) && ($value == NULL)) {
+    //dsm('Cache ID does exist.');
+    return cache_get($key)->data;
+  } else {
+    //dsm('Cache ID does not exist.');
+    cache_set($key, $value, 'cache');
+    return FALSE;
+  }
+
+}
+
+/**
+ * Loop to parse candidates
+ */
+function momentum_parse_candidates($candidates) {
+  /**
+   * @note
+   *   I see no real difference between officials and candidates
+   *   Just renaming candidates function for clarity
+   */
+  return momentum_parse_officials($candidates);
+}
+
+/**
+ * Loop to parse candidates
+ */
+function momentum_parse_candidate($candidate) {
+  /**
+   * @note
+   *   I see no real difference between officials and candidates
+   *   Just renaming candidates function for clarity
+   */
+  return momentum_parse_official($candidate);
+}
+
+/**
+ * Loop to parse officials
+ */
+function momentum_parse_officials($officials) {
+  $content = array();
+  if (!empty($officials)) {
+    foreach ($officials as $type => $delta) {
+      if ((!empty($delta)) && ($type != 'fail')) {
+        foreach ($delta as $official) {
+          if ($storage = momentum_parse_official($official)) {
+            $id = !empty($storage['official_id']) ? $storage['official_id'] : NULL;
+            if (!empty($id)) {
+              $content[$id] = $storage;
+            }
+          }
+        }
+      }
+    }
+  }
+  return $content;
+}
+
+/**
+ * Parse individual official
+ */
+function momentum_parse_official($official) {
+  $storage = array();
+  if (!empty($official['personal'])) {
+    $personal = $official['personal'];
+    $storage['official_id'] = !empty($personal['official_id']) ? $personal['official_id'] : NULL;
+    $storage['full_name'] = !empty($personal['full_name']) ? $personal['full_name'] : NULL;
+    $storage['party'] = !empty($personal['party']) ? $personal['party'] : NULL;
+    $storage['party_abbreviation'] = !empty($personal['party_abbreviation']) ? $personal['party_abbreviation'] : NULL;
+    $storage['photo'] = !empty($personal['photo']) ? $personal['photo'] : NULL;
+  }
+  if (!empty($official['position'])) {
+    $position = $official['position'];
+    $storage['position_type'] = !empty($position['position_type']) ? $position['position_type'] : NULL;
+    $storage['incumbent'] = !empty($position['incumbent']) ? $position['incumbent'] : NULL;
+    $storage['title'] = !empty($position['title']) ? $position['title'] : NULL;
+    if (!empty($position['organization'])) {
+      $storage['organization'] = $position['organization'];
+    }
+    elseif (!empty($position['title'])) {
+      $storage['organization'] = $position['title'];
+    }
+    else {
+      $storage['organization'] = t('Other');
+    }
+    $storage['state'] = !empty($position['state']) ? $position['state'] : NULL;
+    $storage['state_abbreviation'] = !empty($position['state_abbreviation']) ? $position['state_abbreviation'] : NULL;
+    $storage['district'] = !empty($position['district']) ? $position['district'] : NULL;
+    $storage['district_code'] = !empty($position['district_code']) ? $position['district_code'] : NULL;
+    $storage['next_election'] = !empty($position['next_election']) ? $position['next_election'] : NULL;
+    $storage['terms_served'] = !empty($position['terms_served']) ? $position['terms_served'] : NULL;
+    $storage['election_details'] = !empty($position['election_details']) ? $position['election_details'] : null;
+    $storage['seniority'] = !empty($position['seniority']) ? $position['seniority'] : NULL;
+  }
+  if (!empty($official['office'])) {
+    $storage['office'] = $official['office'];
+  }
+  if (!empty($official['social'])) {
+    $storage['social'] = $official['social'];
+    if (!empty($official['social']['Twitter'])) {
+      $replace = array('https://twitter.com/', 'http://twitter.com/', 'https://www.twitter.com/', 'http://www.twitter.com');
+      $handle = str_replace($replace, '', $official['social']['Twitter']);
+      $storage['social']['handle'] = $handle;
+    }
+  }
+  if (!empty($official['committees'])) {
+    $storage['committees'] = $official['committees'];
+  }
+  if (!empty($official['biography'])) {
+    $storage['biography'] = $official['biography'];
+  }
+  if (!empty($official['staffers'][0]['full_name'])) {
+    $storage['staffers'] = $official['staffers'];
+  }
+  if (!empty($official['state_offices'])) {
+    $storage['state_offices'] = $official['state_offices'];
+  }
+  return $storage;
+}
+
+/**
+ * Parse out vote data
+ */
+function momentum_parse_vote($data, $legacy, $legacy_data) {
+  $dates = !empty($data['dates']) ? $data['dates'] : array();
+  $links = !empty($data['links']) ? reset($data['links']) : array();
+
+  $storage = $links;
+  $storage['registration_address'] = !empty($legacy['reg_address']) ? $legacy['reg_address'] : NULL;
+  $storage['registration_city'] = !empty($legacy['reg_city']) ? $legacy['reg_city'] : NULL;
+  $storage['registration_state'] = !empty($legacy['reg_state']) ? $legacy['reg_state'] : NULL;
+  $storage['registration_zip'] = !empty($legacy['reg_zip']) ? $legacy['reg_zip'] : NULL;
+  $storage['registration_phone'] = !empty($legacy['reg_phone']) ? $legacy['reg_phone'] : NULL;
+  $storage['registration_note'] = !empty($legacy['RegistrationNote']) ? $legacy['RegistrationNote'] : NULL;
+  $storage['early_vote_note'] = !empty($legacy['EarlyVoteNote']) ? $legacy['EarlyVoteNote'] : NULL;
+  $storage['state_registration_address'] = !empty($legacy['StateRegAddress1']) ? $legacy['StateRegAddress1'] : NULL;
+  $storage['state_registration_city_state'] = !empty($legacy['StateRegCityStateZip']) ? $legacy['StateRegCityStateZip'] : NULL;
+  $storage['absentee_address'] = !empty($legacy['abs_address']) ? $legacy['abs_address'] : NULL;
+  $storage['absentee_city'] = !empty($legacy['abs_city']) ? $legacy['abs_city'] : NULL;
+  $storage['absentee_state'] = !empty($legacy['abs_state']) ? $legacy['abs_state'] : NULL;
+  $storage['absentee_zip'] = !empty($legacy['abs_zip']) ? $legacy['abs_zip'] : NULL;
+  $storage['absentee_phone'] = !empty($legacy['abs_phone']) ? $legacy['abs_phone'] : NULL;
+  $storage['absentee_fax'] = !empty($legacy['abs_fax']) ? $legacy['abs_fax'] : NULL;
+
+  $nostore = array('type', 'state', 'state_full');
+
+  foreach ($dates as $date) {
+    if (!empty($date['type'])) {
+      $type = strtolower($date['type']);
+      foreach ($date as $a => $b) {
+        if (!in_array($a, $nostore)) {
+          $key = $type . '_' . $a;
+          $storage[$key] = $b;
+        }
+      }
+    }
+  }
+
+  return $storage;
+}
+
+/**
+ * Get prefixes helper function
+ */
+function momentum_prefixes() {
+  return array(
+    '01' => t('Mr.'),
+    '02' => t('Mrs.'),
+    '03' => t('Ms.'),
+    '04' => t('Miss'),
+    '05' => t('Hon.'),
+    '08' => t('Dr.'),
+    '09' => t('Rev.'),
+    '10' => t('Prof.'),
+    '11' => t('Dean'),
+    '12' => t('Pres.'),
+    '30' => t('Rabbi'),
+    '31' => t('Iman'),
+  );
+}
+
+/**
+ * Get states helper function
+ */
+function momentum_states() {
+  return array(
+    'AL'=>"Alabama",
+    'AK'=>"Alaska",
+    'AZ'=>"Arizona",
+    'AR'=>"Arkansas",
+    'CA'=>"California",
+    'CO'=>"Colorado",
+    'CT'=>"Connecticut",
+    'DE'=>"Delaware",
+    'DC'=>"District Of Columbia",
+    'FL'=>"Florida",
+    'GA'=>"Georgia",
+    'HI'=>"Hawaii",
+    'ID'=>"Idaho",
+    'IL'=>"Illinois",
+    'IN'=>"Indiana",
+    'IA'=>"Iowa",
+    'KS'=>"Kansas",
+    'KY'=>"Kentucky",
+    'LA'=>"Louisiana",
+    'ME'=>"Maine",
+    'MD'=>"Maryland",
+    'MA'=>"Massachusetts",
+    'MI'=>"Michigan",
+    'MN'=>"Minnesota",
+    'MS'=>"Mississippi",
+    'MO'=>"Missouri",
+    'MT'=>"Montana",
+    'NE'=>"Nebraska",
+    'NV'=>"Nevada",
+    'NH'=>"New Hampshire",
+    'NJ'=>"New Jersey",
+    'NM'=>"New Mexico",
+    'NY'=>"New York",
+    'NC'=>"North Carolina",
+    'ND'=>"North Dakota",
+    'OH'=>"Ohio",
+    'OK'=>"Oklahoma",
+    'OR'=>"Oregon",
+    'PA'=>"Pennsylvania",
+    'RI'=>"Rhode Island",
+    'SC'=>"South Carolina",
+    'SD'=>"South Dakota",
+    'TN'=>"Tennessee",
+    'TX'=>"Texas",
+    'UT'=>"Utah",
+    'VT'=>"Vermont",
+    'VA'=>"Virginia",
+    'WA'=>"Washington",
+    'WV'=>"West Virginia",
+    'WI'=>"Wisconsin",
+    'WY'=>"Wyoming",
+    'AS'=>"American Samoa",
+    'GU'=>'Guam',
+    'MP'=>"Northern Mariana Islands",
+    'PR'=>"Puerto Rico",
+    'VI'=>"Virgin Islands",
+    'FM'=>"Federated States of Micronesia",
+    'MH'=>"Marshall Islands",
+    'UM'=>"U.S. Minor Outlying Islands");
+}
+
+function momentum_types_officials() {
+  return array(
+      'us_senate' => t('US Senate'),
+      'us_house' => t('US House'),
+      'state_governor' => t('Governor'),
+      'state_senate' => t('State Senate'),
+      'state_house' => t('State House'),
+      'county_executive' => t('County Executive'),
+      'county_legislature' => t('County Legislature'),
+      'municipal_executive' => t('Municipal Executive'),
+      'municipal_legislature' => t('Municipal Legislature'));
+}

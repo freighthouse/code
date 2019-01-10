@@ -1,0 +1,366 @@
+// Adding action center page style updates here
+
+.action-center-tweet-page {
+    .hero-container {
+        .content, .homepage-hero-slider {
+            width: 50%;
+        }
+    }
+    .block-tweetrep {
+        padding-top: 0;
+    }
+    .region-content {
+        background: $c-white;
+        border: 1px solid $c-light-grey;
+        .content {
+            padding: 4em 0;
+            border: none;
+            #tweetrep-form {
+                width: 50%;
+                margin: auto;
+            }
+        }
+    }
+}
+
+
+
+.issue-page-take-action {
+    padding-bottom: 2em;
+}
+
+
+
+#campaign-new {
+    .region-content-bottom {
+        h2 {
+            text-align: center;
+            font-size: 26px;
+            line-height: 36px;
+            margin-top: 2em;
+            font-family: MarketSans-Regular-WebS;
+        }
+    }
+    .take-action-phone {
+        @include fontsize(75);
+        &:before {
+            @extend %phone;
+        }
+    }
+}
+
+
+
+
+
+.view-action-center-spotlight {
+
+    h3 {
+        text-align: center;
+    }
+
+    .take-action-group-wrapper-1 {
+        text-align: center;
+        @include breakpoint($bp-small) {
+            float: left;
+            width: 50%;
+            text-align: right;
+            margin-right: 90px;
+        }
+        &.single-item {
+            @include breakpoint($bp-small) {
+                width: 100%;
+            }
+        }
+        .take-action-group-link {
+            @include fontsize(18);
+            @extend %helvetica;
+            font-weight: bold;
+            &:hover,
+            &:focus {
+                @include transition();
+                color: $c-light-blue;
+                text-decoration: none;
+            }
+        }
+        .take-action-twitter-icon {
+            @include fontsize(65);
+            &:before {
+                @extend %twitter;
+            }
+        }
+        .take-action-twitter-icon-2 {
+            @include fontsize(65);
+            &:before {
+                @extend %twitter2;
+            }
+        }
+        .take-action-write-icon {
+            @include fontsize(75);
+            text-align: right;
+            padding-right: 73px;
+            &:before {
+                @extend %write;
+            }
+        }
+        .take-action-phone {
+            @include fontsize(75);
+            text-align: right;
+            padding-right: 73px;
+            &::before {
+                @extend %phone;
+            }
+        }
+        .take-action-group-wrapper-2 {
+            text-align: center;
+            @include breakpoint($bp-small) {
+                float: left;
+                width: 23%;
+            }
+            &.single-item {
+                @include breakpoint($bp-small) {
+                    width: 100%;
+                }
+            }
+        }
+    }
+
+    .take-action-group-link {
+      @include fontsize(18);
+      @extend %helvetica;
+      font-weight: bold;
+      &:hover,
+      &:focus {
+        @include transition();
+        color: $c-light-blue;
+        text-decoration: none;
+      }
+    }
+
+    .take-action-twitter-icon {
+      @include fontsize(75);
+      &:before {
+        @extend %twitter;
+      }
+    }
+
+    .take-action-write-icon {
+      @include fontsize(75);
+      &:before {
+        @extend %write;
+      }
+    }
+
+}
+.bean-action-center-take-action {
+
+    .content {
+        @extend %clearfix;
+    }
+
+    .field-name-field-title-1 {
+        @extend %helvetica;
+        @extend %light;
+        @include fontsize(32);
+        color: $c-black;
+        margin: 0 0 1em;
+        text-align: center;
+    }
+
+    .field-name-field-take-action-title {
+        font-size: 2rem;
+        color: #333333;
+        text-align: center;
+        line-height: 1.1;
+    }
+
+    .field-name-field-body {
+        @include breakpoint($bp-small) {
+            float: left;
+            width: 50%;
+            margin-right: 3%;
+            padding-right: 7%;
+            border-right: 1px solid #cccccc;
+            box-sizing: border-box;
+        }
+    }
+
+    .field-name-field-title {
+        @extend %clearfix;
+        text-align: center;
+        margin: 1em 0;
+
+        @include breakpoint($bp-small) {
+            float: left;
+            width: 47%;
+            box-sizing: border-box;
+        }
+
+        .field-items {
+            display: flex;
+            width: 70%;
+            margin: 0 auto;
+        }
+
+        .field-item {
+            a {
+                @include fontsize(18);
+                color: #0064d2;
+                display: block;
+                font-weight: bold;
+
+                &:before {
+                    @include fontsize(75);
+                    color: #0064d2;
+                    display: block;
+                    transition: all 0.3s ease;
+                }
+
+                &:active,
+                &:focus,
+                &:hover {
+                    color: #2e93ff;
+                    text-decoration: none;
+
+                    &:before {
+                        color: #2e93ff;
+                    }
+                }
+            }
+            &.even {
+                margin-right: 20px;
+                @include breakpoint($bp-small) {
+                    margin-right: 100px;
+                }
+                a:before {
+                    @extend %write;
+                }
+            }
+            &.odd {
+                a:before {
+                    @extend %twitter;
+                }
+            }
+        }
+    }
+}
+
+// JC Styles
+.twitter-colors {
+    background-color: $g1-5;
+    a {
+        color: $g1-2;
+    }
+}
+.call-colors {
+    background-color: $g4-4;
+    a {
+        color: $c-white;
+    }
+}
+.write-colors {
+    background-color: $g1-2;
+    a {
+        color: $g1-5;
+    }
+}
+.all-take-action-wrapper {
+    align-items: center;
+    margin: 0 auto;
+    @include breakpoint($bp-small) {
+        display: flex;
+    }
+
+    &.double-item{
+        @include breakpoint($bp-small) {
+            width: 66%;
+        }
+    }
+
+
+
+    &.single-item{
+        width: 33.3333%;
+    }
+}
+
+.take-action-group-wrapper {
+    float: none;
+    height: 150px;
+    .double-item &{
+        width: 100%;
+        @include breakpoint($bp-small) {
+            width: 50%;
+        }
+    }
+
+    .triple-item &{
+        width: 33.3333%;
+    }
+}
+.take-action-group-link {
+    @include fontsize(18);
+    @extend %sans-serif;
+    padding: 1.25em;
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    &:hover,
+    &:focus {
+        @include transition();
+        color: $c-white;
+        text-decoration: none;
+    }
+}
+.take-action-twitter-icon {
+    display: inline;
+    @include fontsize(65);
+    &:before {
+        @extend %twitter2;
+    }
+}
+
+.take-action-write-icon {
+    display: flex;
+    text-align: center;
+    @include fontsize(75);
+    &:before {
+        @extend %letter;
+    }
+}
+.take-action-call-icon {
+    display: inline;
+    width: 25%;
+    @include fontsize(75);
+    &:before {
+        @extend %phone;
+    }
+}
+.take-action-group-title {
+    display: flex;
+    padding-left: 1.5em;
+}
+.icon-chevron-right {
+    display: contents;
+    vertical-align: middle;
+    &:after {
+        @extend %chevron-right;
+    }
+}
+
+.take-action-twitter-icon, .take-action-call-icon, .take-action-write-icon {
+    width: 25%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.action-center-call-page {
+    #block-bean-call-your-senator {
+        h2 {
+            text-align: center;
+            color: $g1-5;
+        }
+    }
+}

@@ -1,0 +1,9 @@
+.click-to-call-hours-form .form-item {
+  width: 100px;
+  float: left;
+  margin-right: 50px;
+}
+
+.click-to-call-hours-form .form-item:nth-child(even) {
+  clear: left;
+}

@@ -1,0 +1,1438 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a Momentum Campaigns content type
+ *   along with the code needed to integrate with Momentum
+ *   via its APIs.
+ */
+function momentum_api_init(){
+	drupal_add_css(drupal_get_path('module', 'momentum_api') . '/css/momentum_api.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+	}
+
+function momentum_api_help($path, $arg) {
+  switch ($path) {
+    case 'admin/config/system/momentum':
+      return t('Configuration for Momentum API');
+  }
+}
+function momentum_api_permission() {
+  return array(
+    'admin_momentum' => array(
+      'title' => t('Admin momentum'),
+      'description' => t('Set configuration options for Momentum module'),
+    ),
+    'use_momentum' => array(
+      'title' => t('Guest momentum'),
+      'description' => t('User for public data or requests'),
+    ),
+  );
+}
+/*********MENU*******/
+function momentum_api_menu() {
+
+	$items = array();
+	$items['campaigns/letter'] = array(
+		'title' => 'Campaign ',
+		'description' => t('Campaign page'),
+      	'page callback' => '_momentum_page',
+      	'access arguments' => array('access content'),
+      	'type' => MENU_NORMAL_ITEM,);
+
+	/********ADMIN***********/
+	$items['admin/config/system/momentum'] = array(
+		'title' => 'Momentum settings',
+		'description' => t('Momentum settings'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('_momentum_admin_form'),
+		'access arguments' => array('admin_momentum'),
+		'type' => MENU_NORMAL_ITEM,);
+
+	$items['admin/config/system/momentum/test'] = array(
+		'title' => 'Momentum test ',
+		'page callback' => 'momentum_api_test',
+		'description' => t('Momentum connection test'),
+		'access arguments' => array('admin_momentum'),
+		'type' => MENU_NORMAL_ITEM,
+    );
+	//verify permissions
+	$items['admin/config/system/momentum/reports'] = array(
+		'title' => 'Momentum Reports',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('momentum_api_report_form'),
+		'access callback' => TRUE,
+		'description' => t('Momentum Reports'),
+		'access arguments' => array('admin_momentum'),
+		'type' => MENU_NORMAL_ITEM,);
+
+	/*$items['admin/config/system/momentum/resend'] = array(
+		'title' => 'Momentum resend letters',
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('momentum_api_resend_form'),
+		'access callback' => TRUE,
+		'description' => t('Momentum resend letters'),
+		'access arguments' => array('admin_momentum'),
+		'type' => MENU_NORMAL_ITEM,);
+		*/
+	$items['zip/retreive'] = array(
+      'title' => 'Retrives city and state using an zipcode',
+	  'description' => t('Retrives city and state using an zipcode'),
+      'page callback' => 'momentum_id_zip_api',
+      'access arguments' => array('use_momentum'),
+      'type' => MENU_NORMAL_ITEM,
+    );
+
+	$items['admin/config/system/momentum/reports/data'] = array(
+      'title' => 'Gets data report',
+	  'description' => t('Reports'),
+      'page callback' => 'momentum_id_data_report_api',
+      'access arguments' => array('admin_momentum'),
+      'type' => MENU_NORMAL_ITEM,
+    );
+  return $items;
+}
+/********BLOCKS**********/
+function momentum_api_block_info() {
+  $blocks['momentum_address'] = array(
+    'info' => t('Momentum Address form'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['momentum_letters'] = array(
+    'info' => t('Momentum multiples letters'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['momentum_user_info'] = array(
+    'info' => t('Momentum user information form'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['momentum_result'] = array(
+    'info' => t('Momentum Submission results'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+function momentum_api_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'momentum_address':
+      $content = isset($_SESSION['momentum_data']) ? $_SESSION['momentum_data'] : NULL;
+
+      $block['subject'] = t('Momentum Address form');
+      $block['content'] = _bipac_campaigns_bipac_block();
+      break;
+	 case 'momentum_result':
+      $block['subject'] = t('Momentum campaign Officials');
+      $block['content'] = _momentum_officials_targeted_block();
+      break;
+  }
+  /*
+
+  $blocks[''] = array(
+    'info' => t('Momentum Address form'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['momentum_letters'] = array(
+    'info' => t('Momentum multiples letters'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['momentum_user_info'] = array(
+    'info' => t('Momentum user information form'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['momentum_result'] = array(
+    'info' => t('Momentum submittion resulkt'),
+    'cache' => DRUPAL_NO_CACHE,
+  );*/
+  return $block;
+}
+
+/**
+ * Officials via IDs
+ */
+function momentum_id_zip_api($address) {
+	if($address=="") $address=$_GET["address"];
+	if(strlen($address)<4) return "";
+
+	//Get variables from the URL
+	$zipcode=isset($_GET['zip'])?$_GET['zip']:"";
+	$output=array();
+	if($zipcode !=""){
+	//Select all the Medications based on the search filters
+		$sql="select * from zip_codes where zip_code = '$zipcode'";
+		$zips = db_query($sql);
+
+		while($zip=$zips->fetchObject())
+		{
+			$output[$zip->zip_code]['city']=$zip->city;
+			$output[$zip->zip_code]['state']=$zip->state;
+			$output[$zip->zip_code]['state_name']=$zip->state_name;
+		}
+		drupal_json_output($output);
+	}
+
+  /*
+
+
+// Get cURL resource
+$ch = curl_init();
+
+// Set url
+curl_setopt($ch, CURLOPT_URL, 'https://us-autocomplete.api.smartystreets.com/suggest?auth-id=8935b6e4-810a-76ca-f133-394359bcecdd&auth-token=uIIzLVAJ31IzLgbExvWe&prefix='.urlencode ($address));
+
+// Set method
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+
+// Set options
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+// Set headers
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+  "Authorization: Bearer ",
+ ]
+);
+
+
+// Send the request & save response to $resp
+$resp = curl_exec($ch);
+
+if(!$resp) {
+  die('Error: "' . curl_error($ch) . '" - Code: ' . curl_errno($ch));
+}
+
+// Close request to clear up some resources
+curl_close($ch);
+
+
+$suggestions=json_decode($resp);
+
+  return drupal_json_output($suggestions->suggestions);
+
+  */
+
+}
+function momentum_id_data_report_api() {
+
+	//Get variables from the URL
+	$report=isset($_GET['report'])?$_GET['report']:"letters";
+	$parameters=isset($_GET['parameters'])?$_GET['parameters']:"";
+
+	$output=array();
+
+	switch($report){
+		case "letters":
+			$report=momentum_letters_report($parameters);
+		break;
+		case "update":
+			$report=momentum_letters_update_report($parameters);
+		break;
+	}
+	drupal_json_output($report);
+}
+
+function momentum_api_error_description($code_message) {
+	//Get variables from the URL
+	$output="";
+	$errors_text=variable_get('momentum_api_error_description');
+	if ($errors_text!=""){
+		$errors=explode("\n",variable_get('momentum_api_error_description'));
+		foreach($errors as $error){
+			$error_detail=explode("|",$error);
+			if($error_detail[0]==$code_message){
+				return $error_detail[1];
+			}
+		}
+		return $code_message;
+	}
+	else
+	{return $code_message;}
+
+}
+function momentum_api_get_default_state_field($nid){
+	$node=node_load	($nid);
+	$field = field_info_field('field_bipac_recipient_states');
+ 	$states_field=$field['settings']['allowed_values'];
+	foreach ($states_field as $state_abr=>$state){
+		$default=$state_abr;
+		return $default;
+		break;
+	}
+}
+
+function momentum_api_states_campaign($node_id) {
+	$node = node_load	($node_id);
+	$default=momentum_api_get_default_state_field($node_id);
+
+	$selected_states=isset($node->field_bipac_recipient_states['und'])?$node->field_bipac_recipient_states['und']:$default;
+
+	$states=array(
+		'AL'=>"Alabama",
+		'AK'=>"Alaska",
+		'AZ'=>"Arizona",
+		'AR'=>"Arkansas",
+		'CA'=>"California",
+		'CO'=>"Colorado",
+		'CT'=>"Connecticut",
+		'DE'=>"Delaware",
+		'DC'=>"District Of Columbia",
+		'FL'=>"Florida",
+		'GA'=>"Georgia",
+		'HI'=>"Hawaii",
+		'ID'=>"Idaho",
+		'IL'=>"Illinois",
+		'IN'=>"Indiana",
+		'IA'=>"Iowa",
+		'KS'=>"Kansas",
+		'KY'=>"Kentucky",
+		'LA'=>"Louisiana",
+		'ME'=>"Maine",
+		'MD'=>"Maryland",
+		'MA'=>"Massachusetts",
+		'MI'=>"Michigan",
+		'MN'=>"Minnesota",
+		'MS'=>"Mississippi",
+		'MO'=>"Missouri",
+		'MT'=>"Montana",
+		'NE'=>"Nebraska",
+		'NV'=>"Nevada",
+		'NH'=>"New Hampshire",
+		'NJ'=>"New Jersey",
+		'NM'=>"New Mexico",
+		'NY'=>"New York",
+		'NC'=>"North Carolina",
+		'ND'=>"North Dakota",
+		'OH'=>"Ohio",
+		'OK'=>"Oklahoma",
+		'OR'=>"Oregon",
+		'PA'=>"Pennsylvania",
+		'RI'=>"Rhode Island",
+		'SC'=>"South Carolina",
+		'SD'=>"South Dakota",
+		'TN'=>"Tennessee",
+		'TX'=>"Texas",
+		'UT'=>"Utah",
+		'VT'=>"Vermont",
+		'VA'=>"Virginia",
+		'WA'=>"Washington",
+		'WV'=>"West Virginia",
+		'WI'=>"Wisconsin",
+		'WY'=>"Wyoming",
+		'AS'=>"American Samoa",
+		'GU'=>'Guam',
+		'MP'=>"Northern Mariana Islands",
+		'PR'=>"Puerto Rico",
+		'VI'=>"Virgin Islands",
+		'FM'=>"Federated States of Micronesia",
+		'MH'=>"Marshall Islands",
+		'UM'=>"U.S. Minor Outlying Islands"
+	);
+	$result=array();
+
+	if($selected_states[0]['value'] == $default){
+		return $states;
+	}
+	foreach($selected_states as $state){
+		if(isset($states[$state['value']])){
+			$result[$state['value']] = $states[$state['value']];
+		}
+	}
+	return $result;
+}
+
+function momentum_api_get_campaigns() {
+
+	//Get variables from the URL
+	$output=array();
+	$sql="SELECT
+if (d.revision_id=rev.revision_id,d.field_bipac_camp_topic_value , rev.field_bipac_camp_topic_value) topic_id,
+if (d.revision_id=rev.revision_id,0 , 1) old,
+if (d.revision_id=rev.revision_id,d.field_bipac_camp_topic_value , concat(rev.field_bipac_camp_topic_value,' old version of ',d.field_bipac_camp_topic_value)) label
+FROM field_data_field_bipac_camp_topic d
+right join  field_revision_field_bipac_camp_topic rev on d.entity_id=rev.entity_id order by 3";
+	$titles = db_query($sql);
+
+	while($title=$titles->fetchObject())
+	{
+		$momentum_id= preg_replace('@[^a-z0-9-]+@','-', strtolower($title->topic_id));
+		$output[$momentum_id]=$title->label;
+	}
+	return $output;
+
+}
+
+function momentum_api_test() {
+
+	$result = array();
+  if (($object = momentum_object()) && ($result = $object->test($data, $chambers, $momentum_id, $allow_manual, $test, $save,$states))) {
+    return print_r($result,true)." connecting to the server";
+  }
+  else
+  {
+	   return print_r($result[0],true);
+  }
+
+}
+
+function momentum_api_get_states() {
+
+	$result = array();
+  if (($object = momentum_object()) && ($result = $object->get_states())) {
+    return $result;
+  }
+}
+
+function momentum_get_chambers() {
+  $result = array();
+  if (($object = momentum_object()) && ($chambers = $object->get_chambers())) {
+    $result = $chambers;
+  }
+  return $result;
+}
+
+function momentum_api_report_form(){
+	drupal_add_js(drupal_get_path('module', 'momentum_api') . '/js/momentum_api.js');
+  	drupal_add_css(drupal_get_path('module', 'momentum_api') . '/css/momentum_api.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+ 	 $form['filters'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('User report'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+	$reports=array("letters"=>"Letters","users"=>"Letter Users","campaigns"=>"Campaigns",);
+    /*$form['filters']['report'] = array(
+      '#type' => 'select',
+      '#title' => t('Report'),
+      '#default_value' => 'letters',
+	  '#options'=>$reports,
+      '#description' => t('Select a report.'),
+    );*/
+	$campaigns=momentum_api_get_campaigns();
+	$form['filters']['campaigns'] = array(
+      '#type' => 'select',
+      '#title' => t('campaigns'),
+      '#default_value' => '',
+	  '#options'=>$campaigns,
+      '#description' => t('Select a campaign.'),
+    );
+
+	/*$states=momentum_api_get_states();
+    $form['filters']['states'] = array(
+      '#type' => 'select',
+      '#title' => t('States'),
+	  '#options'=>$states,
+    );
+	*/
+	$chambers=momentum_get_chambers();
+    $form['filters']['chambers'] = array(
+   		'#type' => 'select',
+      '#title' => t('Chambers'),
+	  '#options'=>$chambers,
+    );
+
+	$form['filters']['start_date']=array(
+		'#type' => 'fieldset',
+      '#title' => t('Start date'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+	$form['filters']['start_date']['start_date_day']=array(
+		'#type' => 'select',
+      '#title' => t('Day'),
+	  '#options'=>array('',1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31),
+    );
+	$form['filters']['start_date']['start_date_month']=array(
+		'#type' => 'select',
+      '#title' => t('Month'),
+	  '#options'=>array('',1,2,3,4,5,6,7,8,9,10,11,12),
+    );
+	$form['filters']['start_date']['start_date_year']=array(
+	'#type' => 'textfield',
+	'#title' => t('Year'),
+	'#default_value' => date("Y"),
+	'#size' => 5,
+	'#maxlength' => 10,
+    );
+
+	$form['filters']['end_date']=array(
+		'#type' => 'fieldset',
+      '#title' => t('End date'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+	$form['filters']['end_date']['end_date_day']=array(
+		'#type' => 'select',
+      '#title' => t('Day'),
+	  '#options'=>array('',1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31),
+    );
+	$form['filters']['end_date']['end_date_month']=array(
+		'#type' => 'select',
+      '#title' => t('Month'),
+	  '#options'=>array('',1,2,3,4,5,6,7,8,9,10,11,12),
+    );
+	$form['filters']['end_date']['end_date_year']=array(
+	'#type' => 'textfield',
+	'#title' => t('Year'),
+	'#default_value' => date("Y"),
+	'#size' => 5,
+	'#maxlength' => 10,
+    );
+
+	$form['filters']['search'] = array(
+      '#markup' => "<a href='#' id='momentum_report'>Get data</a><div id='report_table'></div>",
+    );
+	return $form;
+}
+
+function momentum_api_resend_form($form, &$form_state){
+ 	 $form['filters'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('User report'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+	$campaigns=momentum_api_get_campaigns(	);
+	$form['filters']['campaigns'] = array(
+      '#type' => 'select',
+      '#title' => t('campaigns'),
+      '#default_value' => '',
+	  '#options'=>$campaigns,
+      '#description' => t('Select a campaign.'),
+    );
+	$test=array(''=>'All','N'=>'Production','Y'=>'Test');
+	$form['filters']['test_mode'] = array(
+      '#type' => 'select',
+      '#title' => t('Test/Production'),
+      '#default_value' => '',
+	  '#options'=>$test,
+      '#description' => t('Filter Production or Test mode'),
+    );
+	$form['filters']['records'] = array(
+      '#type' => 'textfield',
+      '#title' => t('records'),
+      '#default_value' => 50,
+      '#description' => t('num record to process.'),
+    );
+	$header = array(
+		'bipac_id'=>'bipac_id',
+		'first_name'=>'first name',
+		'last_name'=>'Last name',
+		'address_1'=>'Address ',
+		'address_2'=>'Address 2',
+		'city'=>'City',
+		'state'=>'State',
+		'zip'=>'Zip',
+		'telephone'=>'Telephone',
+		'email'=>'Email',
+		'prefix'=>'Prefix',
+		'issue'=>'Issue',
+		'subject'=>'Subject',
+		'topic'=>'Topic',
+		'message'=>'Message',
+		'chambers'=>'Chambers',
+		'states'=>'States',
+		'allow_manual'=>'Allow_manual',
+		'test'=>'Test',
+		'added'=>'Added',
+		'last_update'=>'Last_update',
+		'status'=>'Status',
+		'save'=>'Save',
+ 	);
+
+	$form['table'] = array(
+	  '#type' => 'tableselect',
+	  '#header' => $header,
+	  '#options' => array(),
+	  '#empty' => t('No data')
+	);
+
+    $form['filters']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Find letters'),
+    );
+	 //with this, I can display the results of the research on the same page
+    if (!empty($form_state['results_table'])) {
+        $form['results_table'] = array('#markup' => $form_state['results_table']);
+
+    }
+	return $form;
+}
+function momentum_api_resend_form_submit($form,&$form_state){
+	$records_to_process=$form_state['values']['records'];
+	$data=momentum_letters_local($form_state['values'],(int)$records_to_process);
+	$header = array(
+		'bipac_id'=>'bipac_id',
+		'first_name'=>'first name',
+		'last_name'=>'Last name',
+		'address_1'=>'Address ',
+		'address_2'=>'Address 2',
+		'city'=>'City',
+		'state'=>'State',
+		'zip'=>'Zip',
+		'telephone'=>'Telephone',
+		'email'=>'Email',
+		'prefix'=>'Prefix',
+		'issue'=>'Issue',
+		'subject'=>'Subject',
+		'topic'=>'Topic',
+		'message'=>'Message',
+		'chambers'=>'Chambers',
+		'states'=>'States',
+		'allow_manual'=>'Allow_manual',
+		'test'=>'Test',
+		'added'=>'Added',
+		'last_update'=>'Last_update',
+		'status'=>'Status',
+		'save'=>'Save',
+ 	);
+	$rows=array();
+	/*foreach($data as $key=>$letter){
+	// 	momentum_letters_send($letter,'N',$key);
+		$row = array();
+		$row[] = array(
+		  'data' => drupal_render($form['rows'][$key]['column_name']),
+		);
+		$row[] = array(
+		  'data' => drupal_render($form['checkboxes'][$key]),
+		  'class' => array('checkbox'),
+		);
+		$rows[] = $row;
+  	}
+
+  	$table_element = array(
+        '#theme' => 'table',
+        '#header' => $header,
+        '#rows' => $rows,
+    );*/
+	$form['table_data']=$data;
+	$form['table'] = array(
+	  '#options' => $data,
+	);
+
+    $form_state['rebuild'] = TRUE;
+
+}
+
+/**
+ * Users report
+ */
+function momentum_users_report($momentum_id,$format=NULL,$states=NULL,$us_house=NULL, $state_senate=NULL, $state_house=NULL, $county_name=NULL, $municipal_name=NULL, $count=NULL, $return=NULL, $send_to = NULL) {
+  $result = array();
+  if (($object = momentum_object()) && $result = $object->users($momentum_id,$format,$states,$us_house, $state_senate, $state_house, $county_name, $municipal_name, $count, $return, $send_to)) {
+    $result = $users;
+  }
+  return $result;
+}
+
+/**
+ * Campaigns report
+ */
+function momentum_campaign_report($momentum_id, $count=NULL, $return=NULL, $format = NULL, $send_to = NULL) {
+  $result = array();
+  if (($object = momentum_object()) && ($campaigns = $object->report_campaigns($momentum_id, $count, $return, $format, $send_to))) {
+    $result = $campaigns;
+  }
+  return $result;
+}
+
+function momentum_letters_report($parameters){
+  $parjson = json_decode($parameters);
+  $params['campaigns']=$parjson->id;
+  $params['start']=$parjson->datestart;
+  $params['end']=$parjson->dateend;
+
+   global $base_url;
+  $path=DRUPAL_ROOT.'/sites/default/files/';
+
+
+  $data_local=momentum_letters_local($params,0);
+
+  $header =array('id', 'created','bipac_id', 'first_name', 'last_name', 'address_1', 'address_2', 'city', 'state', 'zip', 'telephone', 'email', 'prefix', 'issue', 'subject', 'topic', 'message', 'chambers', 'states', 'allow_manual', 'test', 'added', 'last_update', 'status', 'save', 'mom_status','submission_id','submitted','official_id','position','full_name','district','party','gender', 'officials', 'other');
+
+	  $table=theme('table',array('header'=>$header,'rows'=>$data_local));
+	  $newFileName = "Report.xls";
+$newFileContent = $table;
+
+$deleted=unlink($path.$newFileName);
+watchdog(__FUNCTION__,"path  $path$newFileName  $deleted");
+if (file_put_contents($path.$newFileName, $newFileContent) !== false) {
+   $table="Report file: <a href='/sites/default/files/".$newFileName."'>$newFileName</a><br/>".$table;
+} else {
+    echo "	Cannot create file (" . basename($newFileName) . ")";
+}
+
+  return $table;
+}
+
+function momentum_letters_update_report($parameters){
+  $params = json_decode($parameters);
+  $momentum_id=$params->id;
+  $count=isset($params->count)?$params->count:"";
+  $return=isset($params->return)?$params->return:"";
+  $format=isset($params->format)?$params->format:"";
+  $send_to=isset($params->send_to)?$params->send_to:"";
+  $table="";
+  $result = array();
+  if (($object = momentum_object()) && ($campaigns = $object->report_letters($momentum_id, $count, $return, $format, $send_to))) {
+    $result = $campaigns;
+  }
+
+
+  if(isset($result->error)){
+  	return $result;
+  }
+  if(!empty($result)){
+	  $hearder="";
+	  $data="";
+	  foreach($result as $row){
+
+		  $values=array();
+		  if( $email!=$row['email']){
+		  	$email=$row['email'];
+			$report[$email]['added']=$row['added'];
+			$report[$email]['status']=($row['status']==1)?"Sent":"Pending";
+			$submission_id=$row['submission_id'];
+			$submitted=$row['submitted'];
+			$official_id=$row['official_id'];
+			$position=$row['data_3'];
+			$full_name=$row['full_name'];
+			$district=$row['data_1']."-".$row['data_2'];
+			$party=$row['party'];
+			$gender=$row['gender'];
+
+			$officials=array();
+			$other=array();
+		  }
+
+		  $officials[] =trim("Submission:".$row['submission_id']." processed on ".$row['submitted']." to (".$row['official_id'].")".$row['data_3']." ".$row['full_name'].". Dist:".$row['data_1']."-".$row['data_2'].". Party:".$row['party'].". Gender:".$row['gender']."|| ");
+
+
+		  $other[]=trim($row['us_senate']." ".$row['us_house']." ".$row['state_senate']." ".$row['state_house']." ".$row['county_name']." ".$row['municipal_name'].".");
+
+		  $report[$email]['officials']=trim(implode($officials));
+		  $report[$email]['other']=trim(implode($other));
+
+	  }
+	  foreach($report as $email=>$letter){
+		$sql="update letters_ebay set ";
+		$filter="";
+
+		if(!empty($letter['added'])){
+			$filter.=" added='".$letter['added']."', ";
+		}
+		if(!empty($letter['status'])){
+			$filter.=" mom_status='".$letter['status']."', ";
+		}
+		if(!empty($letter['officials'])){
+			$filter.=" officials='".addslashes($letter['officials'])."', ";
+			$filter.=" submission_id='".$submission_id."', ";
+			$filter.=" submitted='".$submitted."', ";
+			$filter.=" official_id='".$official_id."', ";
+			$filter.=" position='".$position."', ";
+			$filter.=" full_name='".$full_name."', ";
+			$filter.=" district='".$district."', ";
+			$filter.=" party='".$party."', ";
+			$filter.=" gender='".$gender."', ";
+		}
+		if(!empty($letter['other'])){
+			$filter.=" other='".$letter['other']."', ";
+		}
+
+		if($filter!=""){
+			$sql=$sql.substr($filter,0,strlen($filter)-2). " where email='$email' and bipac_id='$momentum_id'";
+			$letters = db_query($sql);
+		}
+
+
+	  }
+  }
+  return true;
+}
+function momentum_letters_local($params,$records_count=150){
+  $campaign_id=$params['campaigns'];
+  watchdog(__FUNCTION__,"<pre>".print_r($params,true)."</pre>");
+  $start=isset($params['start'])?$params['start']:"";
+  $end=isset($params['end'])?$params['end']:"";
+  $test=isset($params['test_mode'])?$params['test_mode']:"";
+
+  $sql="select * from letters_ebay where ";
+  if( $test!=''){
+	   $sql.=" test = '$test' and ";
+
+  }
+
+  if( $start!=''){
+	  $sql.=" added >= '$start' and ";
+  }
+
+  if( $end!=''){
+	  $sql.=" added <= '$end' and ";
+  }
+
+
+  $sql.=" bipac_id='$campaign_id' ";
+  watchdog(__FUNCTION__,$sql);
+  if($records_count!=0){ $sql.=" limit $records_count";}
+
+		$letters = db_query($sql);
+		while($letter=$letters->fetchObject())
+		{
+			$output[$letter->id]=array(
+				'id'=>$letter->id,
+				'added'=>$letter->added,
+				'bipac_id'=>$letter->bipac_id,
+				'first_name'=>$letter->first_name,
+				'last_name'=>$letter->last_name,
+				'address_1'=>$letter->address_1,
+				'address_2'=>$letter->address_2,
+				'city'=>$letter->city,
+				'state'=>$letter->state,
+				'zip'=>$letter->zip,
+				'telephone'=>$letter->telephone,
+				'email'=>$letter->email,
+				'prefix'=>$letter->prefix,
+				'issue'=>$letter->issue,
+				'subject'=>$letter->subject,
+				'topic'=>$letter->topic,
+				'message'=>substr($letter->message,0,20)."..." ,
+				'chambers'=>$letter->chambers,
+				'states'=>$letter->states,
+				'allow_manual'=>$letter->allow_manual,
+				'test'=>$letter->test,
+				'added'=>$letter->added,
+				'last_update'=>$letter->last_update,
+				'status'=>$letter->status,
+				'save'=>$letter->save,
+				'mom_status'=>$letter->mom_status,
+				'submission_id'=>$letter->submission_id,
+				'submitted'=>$letter->submitted,
+				'official_id'=>$letter->official_id,
+				'position'=>$letter->position,
+				'full_name'=>$letter->full_name,
+				'district'=>$letter->district,
+				'party'=>$letter->party,
+				'gender'=>$letter->gender,
+				'officials'=>$letter->officials,
+				'other'=>$letter->other,
+				);
+		}
+		return($output);
+
+	}
+
+function momentum_letters_send($letter,$test_mode,$letter_id)
+{
+
+	$bipac_id = $letter['bipac_id'];
+	if($test_mode == 'Y') {
+		dsm($values);
+		}
+	if(empty($letter['subject'])) {
+		watchdog('BIPAC', 'The form needs a subject to be processed.', NULL, WATCHDOG_WARNING);
+		return;
+	  }
+	//momentum API
+	$api_momentum=momentum_object(TRUE);
+	if ($api_momentum === FALSE) {
+		drupal_set_message('Momentum_campaigns '.t('Problem with the Momentum API object.  Are the group and key set?'),"error");
+		return;
+	}
+
+	//request variables
+	$chambers = !empty($letter['chambers']) ? $letter['chambers'] : '';
+	$states = !empty($letter['states']) ? $letter['states'] : "";  // Default to bundled state
+  	//Data Params
+	$officials_data=array();
+	$officials_data['first_name']=$letter['first_name'];
+	$officials_data['last_name']=$letter['last_name'];
+	$officials_data['address_1']=$letter['address_1'];
+	$officials_data['address_2']=$letter['address_2'];
+    $officials_data['city'] =$letter['city'];
+    $officials_data['state'] =$letter['state'];
+    $officials_data['zip']=$letter['zip'];
+	$officials_data['telephone']=$letter['phone'];
+	$officials_data['email']=$letter['email'];
+	$officials_data['prefix']=$letter['prefix'];
+	$officials_data['issue']=$letter['issue'];
+	$officials_data['subject'] = $letter['subject'];
+  	$officials_data['topic'] = $letter['topic'];
+	$officials_data['message'] = $letter['message'];
+	$officials_data['salutation'] = "Sincerely";
+
+	if($test_mode == 'Y') {dsm($officials_data,"REQUEST DATA");}
+   	//BIPAC ID
+	$momentum_id= preg_replace('@[^a-z0-9-]+@','-', strtolower($letter['bipac_id']));
+
+	//Send Momentum a letters
+	$return=momentum_letters($officials_data, $chambers, $momentum_id, 'N', $test_mode, 'Y', $states);
+	if(is_object($return)||is_array($return)){
+
+		if ($test_mode == 'Y') {
+			watchdog('bipac_campaigns', "object  => <pre>".print_r($api_momentum,true)."</pre>");
+			watchdog('bipac_campaigns', "Response  => <pre>".print_r($return,true)."</pre>");
+		}
+		if (!empty($values['silverpop'])) {
+			$silverpop = _ebay_custom_prepare_form_for_silverpop($mapping, $values, '1788739');
+		}
+
+		//if it is a resend sets the test mode to NO in the local site and updates the status to 3 "resend"
+		momentum_api_update_letter_status($letter_id,3);
+		return true;
+	}
+	else
+	{
+		dsm($return);
+		}
+
+	return false;
+
+	}
+
+/**
+ * Officials via IDs
+ */
+function momentum_ids($ids) {
+  $result = array();
+  if (($object = momentum_object()) && ($officials = $object->ids($ids))) {
+    $result = $officials;
+  }
+  return $result;
+}
+
+/**
+ * Officials endpoint
+ */
+function momentum_officials($data, $chambers, $levels) {
+  $result = array();
+  if (($object = momentum_object()) && ($officials = $object->officials($data, $chambers, $levels))) {
+    $result = $officials;
+  }
+  return $result;
+}
+
+
+
+/**
+ * Candidates endpoint
+ */
+function momentum_candidates($data, $chambers) {
+  $result = array();
+  if (($object = momentum_object()) && ($candidates = $object->candidates($data, $chambers,date('Y')))) {
+    $result = $candidates;
+  }
+  return $result;
+}
+
+/**
+ * Candidates via IDs
+ */
+function momentum_candidates_ids($ids) {
+  $result = array();
+  if (($object = momentum_object()) && ($candidates = $object->candidates_ids($ids))) {
+    $result = $candidates;
+  }
+  return $result;
+}
+
+/**
+ * Vote endpoint
+ */
+function momentum_vote($state, $zip = NULL) {
+  $result = array();
+  if (($object = momentum_object()) && ($vote = $object->vote($state, $zip))) {
+    $result = $vote;
+  }
+  return $result;
+}
+
+/**
+ * Issues endpoint
+ */
+function momentum_issues() {
+  $result = array();
+  if (($object = momentum_object()) && ($issues = $object->issues())) {
+    $result = $issues;
+  }
+  return $result;
+}
+
+/**
+ * Letters endpoint
+ */
+function momentum_letters($data, $chambers, $momentum_id, $allow_manual = 'Y', $test = 'N', $save = 'Y',$states="") {
+  $response = array();
+  $debug=variable_get('momentum_api_debug',0);
+
+  if (($object = momentum_object())) {
+		$response = $object->letters($data, $chambers, $momentum_id, $allow_manual, $test, $save,$states);
+
+		if(property_exists($response,"code") && $response->code=='400'){
+			if ($debug) {dsm($response->status_message,"ERROR?");}
+
+			$error = momentum_api_error_description($response->status_message);
+			return $error;
+		}
+		else{
+			return $response;
+		}
+	}
+
+}
+/**
+ * Where to send the letters for processing
+ * This expects $values as in $form_state['values']
+ */
+function momentum_process_letters($values, $uid = NULL) {
+  	$test_mode = $values['mode']=='test'?"Y":"N";
+	$debug=variable_get('momentum_api_debug',0);
+
+	if($debug) {dsm($values,"Values ".__FUNCTION__);}
+
+	// Set error ?
+  	$error = isset($values['error']) ? $values['error'] : variable_get('bipac_campaigns_generic_error', t('Oops.  Either your address didn\'t pass USPS validation or there are no active campaigns in your Congressional District.'));
+
+	//BIPAC ID
+	$momentum_id= preg_replace('@[^a-z0-9-]+@','-', strtolower($values['topic']));
+
+	if(momentum_api_validate_duplicates_letters($momentum_id,$values['writer_email'])){
+		drupal_set_message('Your information was already submitted for this campaign. Thank you for participating! - -',"error");
+		// If UID exists this was likely triggered by batching process
+		//	Update status to 3 to indicate email already submitted a letter
+		if($uid !== NULL) _bipac_campaigns_update_letter($uid, 3);
+		return;
+	}
+
+
+	//Creates the momentum API object
+	$api_momentum=momentum_object(TRUE);
+	if ($api_momentum === FALSE) {
+		watchdog('MOMENTUM', 'Problem with the Momentum API object for campaign:'.$momentum_id.'- API object not created', NULL, WATCHDOG_WARNING);
+		drupal_set_message('Momentum_campaigns '.t('Problem with the Momentum API object.  Are the group and key set?'),"error");
+		return;
+	}
+
+	//Officials targeted selected in the campaign
+	// $chambers = !empty($values['recipient_types']) ? $values['recipient_types'] : '';
+	// $officials=explode(",",$chambers);
+
+	//States targeted in the campaign FED(national)
+	$states = !empty($values['recipient_states']) && $values['recipient_states']!='FED' ? $values['recipient_states'] : "";  // Default to bundled state
+
+	$letters=$values['letters'];
+
+	//run the process for each letter
+	foreach($letters as $letter){
+		//Validations
+		//if no subject sends an error to the log
+		if(empty($letter['subject'])) {
+			watchdog('MOMENTUM', 'Error sending letter for campaign:'.$momentum_id.'- Letter does not have a subject text', NULL, WATCHDOG_WARNING);
+			return;
+		}
+
+		$letter_officials_targeted=$letter['officials'];
+		$letter_chambers="";
+		foreach($letter_officials_targeted as $letter_official){
+			$letter_chambers.=$letter_official['value'].",";
+			$letter_chambers_name.=$letter_official['value']."-";
+		}
+		$letter_chambers=substr($letter_chambers,0,strlen($letter_chambers)-1);
+		$letter_chambers_name=substr($letter_chambers_name,0,strlen($letter_chambers_name)-1);
+		$momentum_id.="-".$letter_chambers_name;
+
+
+		$officials_data=array();
+		$officials_data['first_name']=$values['writer_first_name'];
+		$officials_data['last_name']=$values['writer_last_name'];
+		$officials_data['address_1']=$values['writer_address_1'];
+		$officials_data['address_2']=$values['writer_address_2'];
+		$officials_data['city'] =$values['writer_city'];
+		$officials_data['state'] =$values['writer_state'];
+		$officials_data['zip']= substr($values['writer_zip'], 0, 5);
+		$officials_data['telephone']=$values['writer_phone'];
+		$officials_data['email']=$values['writer_email'];
+		$officials_data['prefix']=$values['writer_prefix'];
+		$officials_data['issue']=$values['letter_issue'];
+		$officials_data['subject'] = $letter['subject'];
+		$officials_data['topic'] = $values['topic'];
+		$officials_data['message'] = $letter['message'];
+		$officials_data['salutation'] = $letter['salutation'];
+
+		if($debug){
+			drupal_set_message("NOT PROCESSING",'warning');
+			dsm($officials_data,"Officials data ".__FUNCTION__);
+			dsm($letter_chambers,"chambersa ".__FUNCTION__);
+			dsm( $momentum_id,"BIPAC_id".__FUNCTION__);
+			dsm($test_mode,"Test mode".__FUNCTION__);
+			dsm($states,"states".__FUNCTION__);
+		}
+
+		//Send Momentum a letters
+		$return=momentum_letters($officials_data, $letter_chambers, $momentum_id, 'N', $test_mode, 'Y', $states);
+
+		// Check if we're batching or sending immediately
+		$store = variable_get('momentum_api_process', 0);
+
+		if(is_array($return)){
+			if ($debug) {
+				watchdog('Momentum', "Momentum Object  => <pre>".print_r($api_momentum,true)."</pre>");
+				watchdog('Momentum', "Momentum Response  => <pre>".print_r($return,true)."</pre>");
+			}
+
+			if($store == '0' || $store == 0){
+				_bipac_campaigns_update_letter($uid, 1);
+			}
+			if($debug) {dsm($return,"RESPONSE DATA");}
+			momentum_api_add_letter_local_report($return,'N', $test_mode, 'Y');
+		}
+		else
+		{
+			$error = "<span id='momentum_error'>". $return ."</span>";
+			watchdog('Momentum', "ERROR in Momentum Response  => <pre>".print_r($return ,true)."</pre>");
+			// If storing letters for batching and error codes are received
+			if($store == '0' || $store == 0){
+
+				_bipac_campaigns_update_letter($uid, 2);
+				watchdog("momentum_error", "Error sending batched letter $uid => <pre>" . print_r($return, true) . "</pre>");
+			}
+			drupal_set_message($error,'error');
+			return false;
+		}
+	}
+
+	return true;
+
+}
+
+function momentum_api_add_letter_local_report($response,$allow_manual,$test,$save){
+	try{
+		$letter = $response['letter'];
+		$group = $response['group'];
+		$chambers = $response['chambers'];
+		$states = $response['states'];
+		$bipac_id = $response['bipac_id'];
+
+		//Insert in the report
+		$nid = db_insert('letters_ebay') // Table name no longer needs {}
+		->fields(array(
+		 'bipac_id'=>$bipac_id,
+		 'first_name'=>$letter['first_name'],
+		 'last_name'=>$letter['last_name'],
+		 'address_1'=>$letter['address_1'],
+		 'address_2'=>$letter['address_2'],
+		 'city'=>$letter['city'],
+		 'state'=>$letter['state'],
+		 'zip'=>$letter['zip'],
+		 'telephone'=>$letter['telephone'],
+		 'email'=>$letter['email'],
+		 'prefix'=>$letter['prefix'],
+		 'issue'=>$letter['issue'],
+		 'subject'=>$letter['subject'],
+		 'topic'=>$letter['topic'],
+		 'message'=>$letter['message'],
+		 'chambers'=>implode(",",$chambers),
+		 'states'=>implode(",",$states),
+		 'allow_manual'=>$allow_manual,
+		 'test'=>$test,
+		 'added'=>date("Y-m-d H:i:s"),
+		 'last_update'=>date("Y-m-d H:i:s"),
+		 'status'=>0,
+		 'save'=>$save
+		))->execute();
+
+	}
+	catch (Exception $e){
+		return false;
+	}
+}
+
+//validate duplicates:
+function momentum_api_validate_duplicates_letters($campaign_id,$email){
+	$sql="select * from letters_ebay where bipac_id like '$campaign_id-%' and email='$email'";
+	$letters = db_query($sql);
+	//dsm($sql);
+	while($letter=$letters->fetchObject())
+		{return true;}
+	return false;
+}
+
+
+//updates the status of the letter in the local report
+function momentum_api_update_letter_status($letter_id,$status){
+	try{
+		if($status!=0){
+			if($status==3){
+				//Changes from test mode to Production
+				$num_updated = db_update('letters_ebay') // Table name no longer needs {}
+				  ->fields(array(
+					'test' => 'N' ))
+				  ->condition('id', $letter_id, '=')
+				  ->execute();
+				}
+			//upadtes the status
+			$num_updated =db_update('letters_ebay')
+			->fields(array(
+					'status' => $status,
+					'last_update'=> date("Y-m-d H:i:s")))
+			->condition('id', $letter_id)
+			->execute();
+		}
+		return $num_updated;
+	}
+	catch (Exception $e){
+		return false;
+	}
+}
+/**
+ * Get Momentum API Object
+ */
+function momentum_object($test = FALSE) {
+
+  if (($url = variable_get('momentum_api_url', NULL)) && ($key = variable_get('momentum_api_api_key', NULL)) && ($g = variable_get('momentum_api_parent', NULL))) {
+    module_load_include('php', 'momentum_api', 'momentum.class');
+    $api = new Momentum($url, $key, $g, $test);
+    return $api;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Get Momentum API Object
+ */
+function bt50_object() {
+    module_load_include('php', 'momentum_api', 'bt50.class');
+    $api = new BT50Request();
+    return $api;
+}
+
+/**
+ * Get Momentum API LEGACY API Object
+ */
+function momentum_legacy($test = FALSE) {
+  if(($key = variable_get('momentum_api_api_key', NULL)) && ($g = variable_get('momentum_api_parent', NULL))) {
+    module_load_include('php', 'momentum_api', 'bipac.legacy');
+    $api = new Legacy($key, $g, $test);
+    return $api;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Add fields to system information settings
+ */
+ function _momentum_admin_form(){
+	 $html= "<h2>Momentum settings</h2><div><ul><li><a href='/admin/config/system/momentum/test'>Momentum test</a></li>
+	 <li><a href='/admin/config/system/momentum/reports'>Momentum reports</a></li></ul>";
+
+	  $form['momentum'] = array(
+	  '#prefix'=>$html,
+      '#type' => 'fieldset',
+      '#title' => t('Momentum Configuration'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['momentum']['momentum_api_api_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('API Key'),
+      '#default_value' => variable_get('momentum_api_api_key', NULL),
+      '#description' => t('You must request this from Momentum'),
+    );
+    $form['momentum']['momentum_api_parent'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Group Name'),
+      '#default_value' => variable_get('momentum_api_parent', NULL),
+      '#description' => t('Parent organization related to your Momentum API key.'),
+    );
+    $form['momentum']['momentum_api_email_address'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Email Address'),
+      '#description' => t('This is the email address associated with your Momentum API key.'),
+      '#default_value' => variable_get('momentum_api_email_address', NULL),
+    );
+    $form['momentum']['momentum_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('API URL'),
+      '#description' => t('The Momentum API URL.  Changing this could break some functionality on your site.'),
+      '#default_value' => variable_get('momentum_api_url', 'http://bapi-stage.reqdigital.com/'),
+    );
+	$process=array(0 =>"Letter batches processed by a cron Job", 1=>"Immediate");
+	$form['momentum']['momentum_api_process'] = array(
+      '#type' => 'radios',
+      '#title' => t('Processing mode'),
+	  '#options'=>$process,
+      '#description' => t('Mode to process letters, batches will process a defined set of letters every 5 - 10 minutes. Immediate will send the letter to Momentum individually.'),
+      '#default_value' => variable_get('momentum_api_process', 0),
+    );
+	$form['momentum']['momentum_api_debug'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Debug Results'),
+      '#description' => t('Display debug results.'),
+      '#default_value' => variable_get('momentum_api_debug', 0),
+    );
+	$form['momentum']['momentum_api_batch_size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Size of the batch to process'),
+      '#description' => t('Number of letter to process.'),
+      '#default_value' => 50,
+    );
+	 $form['momentum_error'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Momentum error texts'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+	$form['momentum_error']['momentum_api_error_description'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Error descriptions'),
+      '#description' => t('Type the error text received then | (pipe char) and the new description.'),
+	  '#default_value' => variable_get('momentum_api_error_description', ""),
+    );
+	return system_settings_form($form);
+ }
+
+/*function momentum_api_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $form['momentum'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Momentum Configuration'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['momentum']['momentum_api_api_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('API Key'),
+      '#default_value' => variable_get('momentum_api_api_key', NULL),
+      '#description' => t('You must request this from Momentum'),
+    );
+    $form['momentum']['momentum_api_parent'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Group Name'),
+      '#default_value' => variable_get('momentum_api_parent', NULL),
+      '#description' => t('Parent organization related to your Momentum API key.'),
+    );
+    $form['momentum']['momentum_api_email_address'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Email Address'),
+      '#description' => t('This is the email address associated with your Momentum API key.'),
+      '#default_value' => variable_get('momentum_api_email_address', NULL),
+    );
+    $form['momentum']['momentum_api_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('API URL'),
+      '#description' => t('The Momentum API URL.  Changing this could break some functionality on your site.'),
+      '#default_value' => variable_get('momentum_api_url', 'http://bapi-stage.reqdigital.com/'),
+    );
+	$process=array(0 =>"Letter batches processed by a cron Job", 1=>"Immediate");
+	$form['momentum']['momentum_api_process'] = array(
+      '#type' => 'radios',
+      '#title' => t('Processing mode'),
+	  '#options'=>$process,
+      '#description' => t('Mode to process letters, batches will process a defined set of letters every 5 - 10 minutes. Immediate will send the letter to Momentum individually.'),
+      '#default_value' => 0,
+    );
+	$form['momentum']['momentum_api_batch_size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Size of the batch to process'),
+      '#description' => t('Number of letter to process.'),
+      '#default_value' => 50,
+    );
+  }
+}*/
+function _momentum_page(){
+    return drupal_get_form('_momentum_address_form');
+}
+function _momentum_address_form(){
+	drupal_add_js(drupal_get_path('module', 'momentum_api') . '/js/momentum_api.js');
+  	drupal_add_css(drupal_get_path('module', 'momentum_api') . '/css/momentum_api.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+
+	drupal_add_js(drupal_get_path('module', 'momentum_api') . '/js/jquery.autocomplete.min.js');
+  /** Form tools **/
+  $form['momentum_form'] = array(
+    '#type' => 'markup',
+	'#markup' => 'Text for the address.',
+  );
+
+  $form['momentum_address_1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address 1'),
+    '#required' => TRUE,
+	//'#autocomplete_path'=>'zip/retreive',
+    '#default_value'=>isset($_SESSION['submitted']['writer_address_1'])?$_SESSION['submitted']['writer_address_1']:"",
+  );
+   $form['momentum_autocomplete'] = array(
+    '#type' => 'select',
+    '#title' => "",
+    '#default_value'=>"",
+  );
+
+  $form['momentum_address_2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address 2'),
+	'#default_value'=>isset($_SESSION['submitted']['writer_address_2'])?$_SESSION['submitted']['writer_address_2']:"",
+  );
+  $form['momentum_city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_city'])?$_SESSION['submitted']['writer_city']:"",
+  );
+
+	$states=momentum_api_states_campaign($nid);
+  $form['momentum_state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#options' => $states,
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_state'])?$_SESSION['submitted']['writer_state']:"",
+  );
+
+ $form['momentum_zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip Code'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_zip'])?$_SESSION['submitted']['writer_zip']:"",
+  );
+  return $form;
+}
+
+
+function _momentum_officials_targeted_block(){
+	$bipac_info = array();
+	if (is_numeric($_GET['campaign_id'])) {
+		$node = node_load($_GET['campaign_id']);
+		if (($node) && ($node->type == 'bipac_campaign')) {
+			$officials=$node->field_bipac_recipient_types['und'];
+
+			foreach($officials as $official){
+				$chambers[]=$official['value'];
+			}
+			$data['address_1']=$_SESSION['bipac_data']['address'];
+			$data['city']= $_SESSION['bipac_data']['city'];
+			$data['state'] = $_SESSION['bipac_data']['state'];
+			$data['zip'] = $_SESSION['bipac_data']['zip'];
+			$data['chambers'] = implode(',', $chambers);
+		}
+
+		//Creates the momentum API object
+		$api_momentum=momentum_object(TRUE);
+		if ($api_momentum === FALSE) {
+		watchdog('MOMENTUM', 'Problem with the Momentum API object for campaign:'.$momentum_id.'- API object not created', NULL, WATCHDOG_WARNING);
+		drupal_set_message('Momentum_campaigns '.t('Problem with the Momentum API object.  Are the group and key set?'),"error");
+		return;
+	}
+		//Send Momentum a letters
+		$officials_div="";
+		$return=momentum_officials($data, $chambers);
+		foreach($return as $officials_section){
+			foreach($officials_section as $officials){
+				$officials_div.="<div class='official_letter'><h3>".$officials['personal']['full_name']."</h3>";
+				$officials_div.="<img src='".$officials['personal']['photo']."'/>";
+				$officials_div.="<div class='official_information'>".$officials['position']['title']."</br>".$officials['position']['district']."<br />". $officials['personal']['party']."</div>";
+				$officials_div.="</div>";
+			}
+		}
+		//dsm($return,__FUNCTION__);
+	}
+	return $officials_div;
+}

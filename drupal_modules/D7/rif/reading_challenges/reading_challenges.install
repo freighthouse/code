@@ -1,0 +1,100 @@
+<?php
+	/**
+	 * Implements hook_schema().
+	 */
+	function reading_challenges_schema() {
+		$schema = array();
+
+		$schema['reading_challenges_completed_challenges'] = array(
+			'description' => 'The base table for storing completed reading challenges',
+			'fields' => array(
+				'id' => array(
+					'description' => 'Primary key of the Reading Challenge',
+					'type' => 'serial',
+					'unsigned' => TRUE,
+					'not null' => TRUE,
+				),
+				'name' => array(
+					'description' => 'Human readable name of the Reading Challenge.',
+					'type' => 'varchar',
+					'length' => '255',
+					'not null' => TRUE,
+				),
+				'reading_passage_id' => array(
+					'description' => 'Reading Passing NID',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'reading_passage_grade_level' => array(
+					'description' => 'The Assigned Reading Grade Level for this passage',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'student_id' => array(
+					'description' => 'Student UID',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'total_words' => array(
+					'description' => 'How many words total in the reading challenge',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'words_incorrect' => array(
+					'description' => 'How many words the reading got wrong',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'words_correct' => array(
+					'description' => 'How many words the reader got correct',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'duration' => array(
+					'description' => 'How long the user took to complete the reading challenge',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'words_correct_per_minute' => array(
+					'description' => 'How many words the reader got correct per minute',
+					'type' => 'int',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'percentile' => array(
+					'description' => 'The percentile the reader scored for the reading passage',
+					'type' => 'float',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'weighted_score' => array(
+					'description' => 'The score the reader was given. The score attempts to guestimate the readers current grade level.',
+					'type' => 'float',
+					'not null' => FALSE,
+					'default' => 0,
+				),
+				'created_at' => array(
+					'description' => 'Date and time the video record was processed.',
+					'type' => 'int',
+					'length' => 10,
+					'not null' => FALSE,
+				),
+				'updated_at' => array(
+					'description' => 'Date and time the video record was last modified.',
+					'type' => 'int',
+					'length' => 10,
+					'not null' => FALSE,
+				),
+			),
+			'primary key' => array('id'),
+		);
+
+		return $schema;
+	}

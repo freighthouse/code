@@ -1,0 +1,186 @@
+// Brand Container
+//
+// Markup: brand-container.html
+//
+// Style Guide: Sections.Brand Containers
+
+.brand-container,
+.related-resources {
+    // position: relative;
+    // min-height: 313px;
+    // background-color: @grey;
+    // padding-top: 31px;
+    background: none;
+    .page--literacy-central-educators &,
+    .page--literacy-central-parents &,
+    .page--literacy-central-volunteers & {
+        padding-bottom: $spacing-xxlarge;
+        padding-top: $spacing-xxlarge;
+        text-align: center;
+        h3 {
+            display: inline-block;
+            font-family: $ff-display;
+            @include fs($fs-70);
+            line-height: 1em;
+            margin: 0 $spacing-large 0;
+            position: relative;
+            text-align: center;
+            // @media (min-width: 768px) {
+                &:before {
+                    background-image: url('../img/blue-wing.png');
+                    // background-repeat: no-repeat;
+                    // background-position: center center;
+                    // background-size: contain;
+                    // content: '';
+                    // display: block;
+                    // left: -36px;
+                    // height: 42px;
+                    // position: absolute;
+                    // top: -42px;
+                    // width: 48px;
+                    background-repeat: no-repeat;
+                    background-position: center center;
+                    background-size: contain;
+                    content: '';
+                    display: inline-block;
+                    margin-left: -36px;
+                    margin-right: -12px;
+                    top: -.5em;
+                    height: 42px;
+                    width: 48px;
+                    position: relative;
+                }
+            // }
+        }
+        .container {
+            text-align: left;
+            margin-top: $spacing-xlarge;
+        }
+        .node-book-resource {
+            margin-bottom: $spacing-xlarge;
+        }
+
+        .col-md-3 {
+            &:nth-child(5) {
+                clear: left;
+            }
+        }
+    }
+
+    .svg {
+        // position: absolute;
+        // top: -1px;
+        // left: 50%;
+        // margin: 0 0 0 -130px;
+        // width: 260px;
+        // height: 30px;
+        // //fill: @off-white;
+        // fill-rule: evenodd;
+        display: none;
+        visibility: hidden;
+    }
+    h3 {
+        // margin: 30px 0 25px;
+        // font-family: @default-font-family;
+        // font-size: @default-font-size + 4;
+        // font-weight: 900;
+        // line-height: @default-line-height + 2;
+        // text-align: center;
+        // color: @white;
+        color: $blue-dark;
+        font-family: $ff-display;
+        @include fs($fs-60);
+        font-weight: $fw-semibold;
+        line-height: 1em;
+        margin: 0 0 $spacing-large;
+    }
+
+    &.brand-container-secondary {
+        .svg {
+            // fill: @off-white;
+        }
+        h3 {
+            // color: @white;
+        }
+    }
+}
+
+.related-resources {
+    background: $gray-white;
+    background: $white;
+    border-top: 1px solid $gray-light;
+    padding-bottom: 60px;
+    padding-top: $spacing-xxxlarge;
+    text-align: center;
+
+    &.contextual-links-region {
+        margin-bottom: -($spacing-xxxlarge); 
+    }
+    svg {
+        display: none;
+        visibility: hidden;
+    }
+    h3.pane-title {
+        display: inline-block;
+        font-family: $ff-display;
+        @include fs($fs-70);
+        line-height: 1em;
+        // line-height: 48px;
+        margin: 0 $spacing-large $spacing-large;
+        position: relative;
+        text-align: center;
+        // Book wing
+        @media (min-width: 768px) {
+            &:before {
+                background-image: url('../img/blue-wing.png');
+                background-repeat: no-repeat;
+                background-position: center center;
+                background-size: contain;
+                content: '';
+                display: block;
+                left: -36px;
+                height: 42px;
+                position: absolute;
+                top: -42px;
+                width: 48px;
+            }
+        }
+    }
+    .pane-content {
+        text-align: left;
+    }
+}
+
+.panel-push-down {
+    // padding-top: 45px;
+    padding-top: $spacing-xxlarge;
+
+    @media (max-width: 991px) {
+        padding-top: $spacing-xlarge;
+    }
+    @media (max-width: 767px) {
+        padding-top: $spacing-xlarge;
+    }
+    .panel-push-down {
+        padding-top: 0;
+    }
+}
+
+.panel-push-bottom-down {
+  padding-bottom: $spacing-xxlarge;
+    // padding-bottom: 45px;
+}
+
+.panel-push-bottom-down-white {
+    // background-color: white;
+}
+
+.panel-push-down-white {
+    // background-color: white;
+}
+
+.related-resources {
+    .svg {
+        // fill: @off-white;
+    }
+}

@@ -1,0 +1,496 @@
+.node-image-card-container {
+//  margin: 8px 0;
+
+  .panelBodyProps {
+//    margin: 0;
+//    text-align: center;
+  }
+
+  .h2Style {
+//    font-family: @alt-sans-serif-font-family;
+//    text-transform: uppercase;
+//    margin-top: 0;
+//    margin-bottom: 19px;
+//    font-weight: 900;
+//    font-size: 36px;
+  }
+
+  .textBox {
+//    height: 350px;
+//    padding: 42px 16px;
+    &.col-sm-push-6 {
+      @media (max-width: 1199px) {
+//        left:auto;
+//        height: 100%;
+//        padding: 32px 16px;
+      }
+    }
+    @media (max-width: 1199px) {
+//      // left:auto;
+//      height: 100%;
+//      padding: 40px 16px;
+    }
+    @media (max-width: 991px) {
+//      height: 100%;
+//      padding: 40px 16px;
+    }
+    @media (max-width: 767px) {
+//      height: 100%;
+//      padding: 40px 16px;
+    }
+  }
+
+  .bodyText {
+//    margin: 0 16px 16px;
+//      font-size: 16px;
+//      font-weight: 700;
+//      line-height: 20px;
+  }
+
+  .urlButton {
+//    margin: 0 0;
+  }
+
+  .imgContainer {
+//    height: 350px;
+//    background-repeat: no-repeat;
+//    background-position: center;
+//    background-size: cover;
+    &.col-sm-pull-6 {
+      @media (max-width: 1199px) {
+//        right: auto;
+      }
+    }
+  }
+}
+
+.short-separator-line-container {
+//    background-color: white;
+    hr.short-separator-line {
+//        border-top: 1px solid #7d7d7d;
+//        margin: 45px 150px;
+        border-top: 1px solid $gray-light;
+        margin: $spacing-xlarge 0;
+        @media (max-width: 767px) {
+          margin: $spacing-large 0;
+        }
+    }
+}
+
+.node-image-card-new-style {
+//    position: relative;
+//    padding: 0 150px;
+      padding: 0;
+
+    @media (max-width: 767px) {
+//      padding: 0 30px;
+    }
+    .h2Style {
+//        margin-top:0;
+//        font-family: @alt-sans-serif-font-family;
+//        text-align: left;
+//        text-transform: uppercase;
+//        font-size: 42px;
+//        font-weight: 900;
+//        color: @rif-blue;
+//        width: 95%;
+
+        @include fs($fs-60);
+        font-family: $ff-display;
+        font-weight: $fw-semibold;
+        text-transform: none;
+
+        &.text-centered {
+//            text-align: center;
+//            margin: 15px auto;
+        }
+    }
+    ol {
+//      margin: 0;
+//      counter-reset: li;
+//      padding-left: 0;
+//      list-style: none;
+
+      li {
+//        position: relative;
+//        margin: 0 0 0 30px;
+//        font-family: @default-font-family;
+//        font-size: @default-font-size - 2;
+//        font-weight: 900;
+//        line-height: @default-line-height + 2;
+//        padding: 0 15px;
+//        list-style: none;
+//        color: @rif-grey;
+        font-family: $ff-sans;
+
+        & + li {
+//          margin-top: 7.5px;
+        }
+        &:before {
+//          content: counter(li);
+//          counter-increment: li;
+//          position: absolute;
+//          left: -24px;
+//          width: 20px;
+//          height: 20px;
+//          font-family: @alt-sans-serif-font-family;
+//          font-size: @default-font-size - 6;
+//          font-weight: 900;
+//          text-align: center;
+//          line-height: @default-line-height - 1;
+//          color: @white;
+//          background: @rif-blue;
+//          .border-radius (20px);
+        }
+      }
+    }
+    ul:not(.dropdown-menu) {
+//      margin: 30px 0 30px 30px;
+//      list-style: none;
+//      padding: 0;
+//      width: 90%;
+
+      li {
+//        padding: 0 15px;
+//        font-family: @default-font-family;
+//        font-size: @default-font-size;
+//        line-height: @default-line-height;
+        font-family: $ff-sans;
+
+        & + li {
+//          margin-top: 7.5px;
+        }
+        &:last-child {
+
+          p {
+
+            &:last-child {
+//              margin: 0;
+            }
+          }
+        }
+        &:before {
+//          content: "\f111";
+//          font-family: FontAwesome;
+//          font-size: @default-font-size - 6;
+//          display: inline-block;
+//          margin-left: -2.5em;
+//          color: @rif-blue;
+//          width: 30px;
+        }
+        h3 {
+//          margin: -24px 0 7.5px;
+//          padding: 0;
+//          font-family: @alt-sans-serif-font-family;
+//          font-weight: 900;
+//          font-size: @default-font-size + 2;
+//          line-height: @default-line-height + 2;
+//          color: @rif-purple;
+//          text-align: left;
+        }
+        h4 {
+//          margin: -24px 0 7.5px;
+//          font-family: @alt-sans-serif-font-family;
+//          font-weight: 900;
+//          font-size: @default-font-size + 2;
+//          line-height: @default-line-height + 2;
+//          color: @rif-purple;
+//          text-transform: uppercase;
+        }
+        p {
+//          padding: 0 !important;
+//          margin: 0 0 15px;
+//          font-size: @default-font-size - 2;
+        }
+      }
+    }
+    p {
+//        text-align: left;
+//        width: 90%;
+      max-width: $w-text;
+      width: auto;
+    }
+    .btn {
+        // float: left;
+        // margin: $spacing-medium $spacing-medium 0 0 !important;
+    }
+    .jumbotron-button-container {
+//        text-align: center;
+//        margin: 10px auto;
+        margin: 0;
+        a {
+//            margin: 0;
+                // margin-right: $spacing-medium;
+                // margin-top: $spacing-medium;
+        }
+
+        + p {
+                margin-top: $spacing-large;
+        }
+    }
+
+    .imgContainer {
+//        background-repeat: no-repeat;
+//        background-position: center;
+//        background-size: cover;
+//        border: 3px solid @rif-yellow;
+//        border-radius: 10px;
+        border: none;
+        border-radius: 6px;
+
+        .img-responsive {
+//          width: 100%;
+//          max-width: none;
+        }
+        @media (max-width: 991px) {
+//          margin-bottom: 30px;
+        }
+        img {
+//            border-radius: 8px;
+        }
+        &.col-sm-pull-6 {
+            @media (max-width: 1199px) {
+//                right: auto;
+            }
+        }
+    }
+    .button-container {
+        &.button-centered {
+//            width: 100%;
+//            text-align: center;
+            a {
+//                width: initial;
+//                margin: 0 auto;
+            }
+        }
+    }
+}
+
+// ^^^^^^css above is for imgCard^^^^^^
+
+.full-background-split {
+//    width: 100%;
+//    position: relative;
+//    padding-bottom: 30px;
+    &:after {
+//      content: "";
+//      display: table;
+//      clear: both;
+    }
+    .literacy-network-container {
+//      text-align: center;
+    }
+    .container {
+      @media (max-width: 992px) {
+          width: inherit; // This makes the image-card container act fluid a breakpoint earlier
+      }
+    }
+    .lc-community-container {
+//      max-width: 585px;
+//      margin: 0 auto;
+    }
+    .left{
+//        width:50%;
+//        height:100%;
+//        position: absolute;
+//        float:left;
+        @media (max-width: 992px ) {
+//            width: 100%;
+//            height: 50%;
+        }
+    }
+    .right {
+//        margin-left: 50%;
+//        width: 50%;
+//        height:100%;
+//        position: absolute;
+//        float:left;
+        @media (max-width: 992px ) {
+//            width: 100%;
+//            margin-left: 0;
+//            height: 50%;
+//            top: 50%;
+        }
+    }
+    .content {
+//      position: relative;
+//      // padding: 0 20px;
+      .hasTitle {
+//        font-family: @alt-sans-serif-font-family;
+//        text-align: center;
+//        margin-top: -80px;
+//        text-transform: uppercase;
+//        font-size: 42px;
+//        font-weight: 900;
+//        color: white;
+      }
+      .noTitle {
+//        font-family: @alt-sans-serif-font-family;
+//        text-align: center;
+//        margin-top: -40px;
+//        text-transform: uppercase;
+//        font-size: 42px;
+//        font-weight: 900;
+//        color: white;
+      }
+      p {
+//        text-align: center;
+//        font-size: @default-font-size + 3;
+//        width: 80%;
+//        margin: 0 auto;
+      }
+
+      .leftTitle {
+//        margin-bottom: 10px;
+        @media (min-width: 1201px ) {
+//          margin-bottom: 20px;
+        }
+        @media (max-width: 1200px ) {
+//          margin-bottom: 30px;
+        }
+        @media (max-width: 992px ) {
+//          margin-bottom: 15px;
+        }
+      }
+      .leftP {
+        @media (min-width: 1201px ) {
+//          margin-bottom: 13px;
+        }
+        @media (max-width: 1200px ) {
+//          margin-bottom: 23px;
+        }
+        @media (max-width: 992px ) {
+//          margin-bottom: 0;
+        }
+      }
+      .noTitleLeftP {
+        @media (min-width: 1201px ) {
+//          margin-bottom: 0px;
+        }
+        @media (max-width: 1200px ) {
+//          margin-bottom: 0px;
+        }
+        @media (max-width: 992px ) {
+//          margin-bottom: 0;
+        }
+      }
+      .jumbotron-button-container {
+//        text-align: center;
+      }
+      .imgContainer {
+//        text-align: center;
+        @media (max-width: 992px ) {
+//          padding-top: 32px;
+        }
+      }
+      .right-imgContainer {
+//        text-align: center;
+        @media (min-width: 1201px ) {
+//          margin-top: 24px;
+        }
+        @media (max-width: 1200px ) {
+//          margin-top: 16px;
+        }
+        @media (max-width: 992px ) {
+//          margin-top: 40px;
+        }
+      }
+      .rif-merch-button {
+        @media (min-width: 1201px ) {
+//          margin-top: 24px;
+        }
+        @media (max-width: 1200px ) {
+//          margin-top: 24px;
+        }
+        @media (max-width: 992px ) {
+//          margin-top: 32px;
+        }
+        @media (max-width: 640px ) {
+//          margin-top: 16px;
+        }
+      }
+      .buttonContainer {
+//        text-align: center;
+//        margin-bottom: 20px;
+        @media (max-width: 1200px ) {
+//          margin-top: -8px;
+//          margin-bottom: 20px;
+        }
+        .lf-anchor-container, .rt-anchor-container {
+//          margin-bottom: 20px;
+        }
+
+        .anchContainer {
+//          margin-top: 32px;
+//          margin-bottom: 20px;
+        }
+      }
+    }
+}
+// ^^^^^^css is for imgcard Pairs & left&right^^^^^^^
+
+// css below is for the teaser
+.node-image-card{
+    &.node-teaser {
+//      min-height: 410px;
+//      position: relative;
+      .image-container {
+//        position: absolute;
+//        height: 100%;
+//        width: 100%;
+        .image {
+//          height: 100%;
+//          background-size: cover;
+//          background-repeat: no-repeat;
+//          background-position: center;
+        }
+      }
+      .content {
+//        position: relative;
+//        padding: 0 20px;
+        h2 {
+//          font-family: @alt-sans-serif-font-family;
+//          text-align: center;
+//          margin-top: 48px;
+//          text-transform: uppercase;
+//          font-size: 36px;
+//          font-weight: 900;
+//          color: white;
+        }
+        .upcoming-events {
+          .upcoming-view-header {
+            h3 {
+//              color: @white;
+//              font-family: @alt-sans-serif-font-family;
+//              text-transform: uppercase;
+//              margin-top: 48px;
+//              margin-bottom: 24px;
+//              font-weight: 900;
+//              font-size: 36px;
+            }
+            p {
+//              margin: 0 auto 32px !important;
+            }
+            @media (max-width: 992px) {
+//              margin-bottom: 40px;
+            }
+          }
+          p {
+//            text-align: center;
+//            width: 89%;
+//            margin: 24px auto 0;
+//            color: @white;
+//            font-size: 21px;
+//            font-weight: 500;
+//            line-height: 22px;
+          }
+        }
+        .event-push-down {
+//          margin-bottom: 30px;
+        }
+        .jumbotron-button-container {
+//          text-align: center;
+        }
+      }
+    }
+}

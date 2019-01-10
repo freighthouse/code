@@ -1,0 +1,32 @@
+.page--literacy-network-password,
+.page--literacy-network-sign-in,
+.page--literacy-network-register {
+  .region-content {
+    .panel {
+      margin-bottom: 0;
+      margin-bottom: $spacing-xxlarge;
+      margin-top: $spacing-xxlarge;
+    }
+    .container {
+      > form {
+        margin-bottom: $spacing-large;
+        margin-top: $spacing-large;
+      }
+    }
+    form {
+      .panel {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      .form-item {
+        margin-top: 0;
+      }
+
+      .text-right {
+        @include fs($fs-body-small);
+        margin-bottom: $spacing-small;
+        z-index: 2;
+      }
+    }
+  }
+}

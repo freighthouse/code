@@ -1,0 +1,494 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a Momentum Candidates search and response 
+ */
+
+/**
+ * hook_theme
+ */
+function momentum_candidates_theme() {
+  $items = array();
+  $items['momentum_candidates_response'] = array(
+    'variables' => array('candidates' => NULL),
+    'template' => 'momentum_candidates_response',
+  );
+  $items['momentum_candidates_banner'] = array(
+    'variables' => array('path' => NULL, 'text' => NULL),
+    'template' => 'momentum_candidates_banner',
+  );
+  $items['momentum_candidates_address'] = array(
+    'variables' => array('office_type' => NULL, 'address_1' => NULL, 'address_2' => NULL, 'address_3' => NULL, 'phone' => NULL, 'fax' => NULL),
+    'template' => 'momentum_candidates_address',
+  );
+  $items['momentum_candidates_committees'] = array(
+    'variables' => array('committee_chamber' => NULL, 'committee_type' => NULL, 'name' => NULL, 'title' => NULL),
+    'template' => 'momentum_candidates_committees',
+  );
+  $items['momentum_candidates_social'] = array(
+    'variables' => array('website' => NULL, 'webform' => NULL, 'Facebook' => NULL, 'Twitter' => NULL, 'YouTube' => NULL, 'handle' => NULL),
+    'template' => 'momentum_candidates_social',
+  );
+  $items['momentum_candidates_staffers'] = array(
+    'variables' => array('full_name' => NULL, 'title' => NULL),
+    'template' => 'momentum_candidates_staffers',
+  );
+  $items['momentum_candidates_list'] = array(
+    'variables' => array('candidates' => NULL),
+    'template' => 'momentum_candidates_list',
+  );
+  $items['momentum_candidates_candidate'] = array(
+    'variables' => array('photo' => NULL, 'full_name' => NULL, 'title' => NULL, 'party' => NULL, 'party_abbreviation' => NULL, 'social' => NULL, 'office' => NULL, 'state_offices' => NULL, 'district_code' => NULL, 'position_type' => NULL, 'organization' => NULL, 'state' => NULL, 'state_abbreviation' => NULL, 'district' => NULL, 'staffers' => NULL, 'committees' => NULL),
+    'template' => 'momentum_candidates_candidate',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu()
+ */
+function momentum_candidates_menu() {
+  $items = array();
+  $candidates_title = variable_get('momentum_candidates_title', t('Find Your Candidates'));
+  $items['candidates'] = array(
+    'title' => $candidates_title,
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',	// This is also provided as a block
+    'page arguments' => array('_momentum_candidates_form'),
+    'access callback' => TRUE,
+  );
+  $items['candidates/list'] = array(
+    'title' => t('Your Candidates'),
+    'type' => MENU_CALLBACK,
+    'page callback' => '_momentum_candidates_list',
+    'access callback' => TRUE,
+  );
+  $items['candidate/%'] = array(
+    'title' => t('Your Candidates'),
+    'type' => MENU_CALLBACK,
+    'page callback' => '_momentum_candidates_candidate',
+    'access callback' => TRUE,
+    'page arguments' => array(1),
+  );
+  return $items;
+}
+
+/**
+ * Return a list of candidates from Momentum data
+ */
+function _momentum_candidates_list() {
+
+  $candidates = momentum_session('candidates');
+
+  if (empty($candidates)) {
+    // This means that the user never went through the form
+    drupal_goto('candidates');
+    return;
+  }
+
+
+  if ($data = momentum_parse_candidates($candidates)) {
+    return theme('momentum_candidates_list', array('candidates' => $data));
+  }  
+}
+
+/**
+ * Display an individual candidate
+ */
+function _momentum_candidates_candidate($id) {
+  $id = trim($id);
+  $id = (int)$id;
+  // All IDs should be numeric.  If not, just 404
+  if (!is_numeric($id)) {
+    return FALSE;
+  }
+
+
+  //cache request and use it if it exists
+  $key = 'candidate-' . $id;
+  if (cache_get($key)) {
+    $candidates = momentum_cache($key);
+  } else {
+    $candidates = momentum_candidates_ids($id);
+    if (!empty($candidates)) {
+      momentum_cache($key, $candidates);
+    } else {
+        drupal_set_message('Unable to find a Candidate with that ID');
+        drupal_goto('candidates');
+    }
+  }
+
+
+  /**
+   * Now we check the session data for the provided ID
+   */
+  $candidate = array();
+  foreach ($candidates as $sector) {
+    // 'sector' being us_government, state_government, local_government
+    if (!empty($sector[$id])) {
+      // it's a hit!
+      $candidate = $sector[$id];
+      break 1;
+    }
+  }
+
+  if (empty($candidate)) {
+    return FALSE;
+  }
+  // Render this into easier data
+  $data = momentum_parse_candidate($candidate);
+  if (empty($data['full_name'])) {
+    // One final check to make sure we have good data
+    return FALSE;
+  }
+
+  // And we return our template with data
+  return theme('momentum_candidates_candidate', array(
+    'photo' => !empty($data['photo']) ? $data['photo'] : NULL,
+    'full_name' => !empty($data['full_name']) ? $data['full_name'] : NULL,
+    'title' => !empty($data['title']) ? $data['title'] : NULL,
+    'party' => !empty($data['party']) ? $data['party'] : NULL,
+    'party_abbreviation' => !empty($data['party_abbreviation']) ? $data['party_abbreviation'] : NULL,
+    'district_code' => !empty($data['district_code']) ? $data['district_code'] : NULL,
+    'district' => !empty($data['district']) ? $data['district'] : NULL,
+    'state' => !empty($data['state']) ? $data['state'] : NULL,
+    'state_abbreviation' => !empty($data['state_abbreviation']) ? $data['state_abbreviation'] : NULL,
+    'position_type' => !empty($data['position_type']) ? $data['position_type'] : NULL,
+    'organization' => !empty($data['organization']) ? $data['organization'] : NULL,
+    'social' => !empty($data['social']) ? $data['social'] : NULL,
+    'office' => !empty($data['office']) ? $data['office'] : NULL,
+    'state_offices' => !empty($data['state_offices']) ? $data['state_offices'] : NULL,
+    'staffers' => !empty($data['staffers']) ? $data['staffers'] : NULL,
+    'incumbent' => !empty($data['incumbent']) ? $data['incumbent'] : NULL,
+    'committees' => !empty($data['committees']) ? $data['committees'] : NULL,
+  ));
+}
+
+/**
+ * hook_block_info
+ */
+function momentum_candidates_block_info() {
+  $blocks['momentum_candidates_block'] = array(
+    'info' => t('Momentum Candidates Search Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['momentum_candidates_response'] = array(
+    'info' => t('Momentum Candidates Response Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['momentum_candidates_banner'] = array(
+    'info' => t('Momentum Candidates Banner'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function momentum_candidates_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'momentum_candidates_response':
+      $candidates = array();
+      $data = array();
+      if ($data = _momentum_candidates_list()) {
+        // This means we have data!
+      }
+      $block['subject'] = t('Your Candidates');
+      $block['content'] = theme('momentum_candidates_list', array($data));
+      break;
+    case 'momentum_candidates_block':
+      $block['subject'] = t('Find Your Candidates');
+      $block['content'] = _momentum_candidates_block();
+      break;
+    case 'momentum_candidates_banner':
+      // I don't think this needs a title.  Leaving it off.
+      $block['content'] = theme('momentum_candidates_banner', array('path' => variable_get('momentum_candidates_banner_path', 'candidates'), 'text' => variable_get('momentum_candidates_banner_text', 'Find Your Candidates')));
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure
+ */
+function momentum_candidates_block_configure($delta = NULL) {
+  $form = array();
+  
+  switch ($delta) {
+    case 'momentum_candidates_banner':
+      $form['momentum_candidates_banner_path'] = array(
+        '#type' => 'textfield',
+        '#default_value' => variable_get('momentum_candidates_banner_path', NULL),
+        '#title' => t('Link Path'),
+        '#required' => TRUE,
+      );
+      $form['momentum_candidates_banner_text'] = array(
+        '#type' => 'textfield',
+        '#default_value' => variable_get('momentum_candidates_banner_text', NULL),
+        '#title' => t('Link Text'),
+        '#required' => TRUE,
+      );
+      break;
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_save
+ */
+function momentum_candidates_block_save($delta = NULL, $edit = array()) {
+  switch ($delta) {
+    case 'momentum_candidates_banner':
+      variable_set('momentum_candidates_banner_text', $edit['momentum_candidates_banner_text']);
+      variable_set('momentum_candidates_banner_path', $edit['momentum_candidates_banner_path']);
+      break;
+  }
+}
+
+/**
+ * Render data into something the template can use
+ */
+function _momentum_candidates_prepare($candidates) {
+  $content = array();
+
+  foreach ($candidates as $type => $delta) {
+    foreach ($delta as $candidate) {
+      if ($storage = _momentum_candidates_parser($candidate)) {
+        $id = !empty($storage['official_id']) ? $storage['official_id'] : NULL;
+        if (!empty($id)) {
+          $content[$id] = $storage;
+        }
+      }
+    }
+  }
+  return $content;
+}
+
+function _momentum_candidates_parser($candidate) {
+  $storage = array();
+  if (!empty($candidate['personal'])) {
+    $personal = $candidate['personal'];
+    $storage['official_id'] = !empty($personal['official_id']) ? $personal['official_id'] : NULL;
+    $storage['full_name'] = !empty($personal['full_name']) ? $personal['full_name'] : NULL;
+    $storage['party'] = !empty($personal['party']) ? $personal['party'] : NULL;
+    $storage['party_abbreviation'] = !empty($personal['party_abbreviation']) ? $personal['party_abbreviation'] : NULL;
+    $storage['photo'] = !empty($personal['photo']) ? $personal['photo'] : NULL;
+  }
+  if (!empty($candidate['position'])) {
+    $position = $candidate['position'];
+    $storage['position_type'] = !empty($position['position_type']) ? $position['position_type'] : NULL;
+    $storage['title'] = !empty($position['title']) ? $position['title'] : NULL;
+    $storage['organization'] = !empty($position['organization']) ? $position['organization'] : NULL;
+    $storage['state'] = !empty($position['state']) ? $position['state'] : NULL;
+    $storage['state_abbreviation'] = !empty($position['state_abbreviation']) ? $position['state_abbreviation'] : NULL;
+    $storage['district'] = !empty($position['district']) ? $position['district'] : NULL;
+    $storage['district_code'] = !empty($position['district_code']) ? $position['district_code'] : NULL;
+  }
+  if (!empty($candidate['office'])) {
+    $storage['office'] = $candidate['office'];
+  }
+  if (!empty($candidate['social'])) {
+    $storage['social'] = $candidate['social'];
+    if (!empty($candidate['social']['Twitter'])) {
+      $replace = array('https://twitter.com/', 'http://twitter.com/', 'https://www.twitter.com/', 'http://www.twitter.com');
+      $handle = str_replace($replace, '', $candidate['social']['Twitter']);
+      $storage['social']['handle'] = $handle;
+    }
+  }
+  if (!empty($candidate['committees'])) {
+    $storage['committees'] = $candidate['committees']; 
+  }
+  if (!empty($candidate['biography'])) {
+    $storage['biography'] = $candidate['biography'];
+  }
+  if (!empty($candidate['staffers'])) {
+    $storage['staffers'] = $candidate['staffers'];
+  }
+  if (!empty($candidate['state_offices'])) {
+    $storage['state_offices'] = $candidate['state_offices'];
+  }
+  return $storage;
+}
+
+/**
+ * 
+ */
+function _momentum_candidates_block() {
+  /**
+   * @note
+   *   These values could be passed through on
+   *   smaller sites and the form pre-filled.
+   *   However, this will require caching tweaks
+   *   and will not work well on big sites.
+   *
+   * $values['zip'] = momentum_session('zip');
+   * $values['address'] = momentum_session('address');
+   * $values['state'] = momentum_session('state');
+   * $values['city'] = momentum_session('city');
+   */
+  return drupal_get_form('_momentum_candidates_form');
+}
+
+/**
+ * Candidates form.  Uses the standard library of Momentum form elements
+ */
+function _momentum_candidates_form($form, &$form_state) {
+  $form = array();
+
+  /**
+   * Start out by ensuring a useful class
+   */
+  if (empty($form['#attributes']['class'])) {
+    $form['#attributes'] = array('class' => array('officials'));
+  }
+  else {
+    $form['#attributes']['class'][] = 'officials';
+  }
+
+  /**
+   * Then add our fields using _momentum_forms
+   *
+   * @note
+   *   Please reuse _momentum_forms elements whenever possible
+   *   This helps maintain consistency
+   */
+  $values = array();
+  $form['momentum_candidates_intro'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . variable_get('momentum_candidates_intro', NULL) . '</p>',
+  );
+  $form['address_1'] = _momentum_forms('address', $values, TRUE);
+  $form['address_2'] = _momentum_forms('address_2', $values, FALSE);
+  $form['city'] = _momentum_forms('city', $values, TRUE);
+  $form['state'] = _momentum_forms('state', $values, TRUE);
+  $form['zip'] = _momentum_forms('zip', $values, TRUE);
+  $form['notes'] = _momentum_forms('notes');
+  $form['search'] = _momentum_forms('search');
+   $form['momentum_candidates_outro'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . variable_get('momentum_candidates_outro', NULL) . '</p>',
+  );
+
+  return $form;
+}
+
+/**
+ * Validation function for momentum_candidates_form
+ */
+function _momentum_candidates_form_validate($form, &$form_state) {
+  $zip = $form_state['values']['zip'];
+  if (!momentum_check_zip($zip)) {
+    form_set_error('zip', t('There is a problem with your zip code.  Please check and retry.'));
+  }
+}
+
+/**
+ * Submit function for momentum_candidates_form
+ */
+function _momentum_candidates_form_submit($form, &$form_state) {
+  // If content in the notes field, discard submission.  This field is only used to catch spambots.
+  if(!empty($form_state['values']['notes'])) {
+    drupal_set_message('Thank you for your submission.');
+    return;
+  }
+
+  $zip = $form_state['values']['zip'];
+  $address = $form_state['values']['address_1'];
+  $city = $form_state['values']['city'];
+  $state = $form_state['values']['state'];
+
+  $hash = md5($address . $city . $state . $zip);
+
+  /**
+   * First, let's see if the user has already submitted this
+   * address.  If so, return cached candidates
+   */
+
+  if (($candidates = momentum_session('candidates')) && ($stored_hash = momentum_session('address_hash')) && ($hash == $stored_hash)) {
+    /**
+     * Nothing happens here!
+     * Somebody is submitting the same address.
+     */
+    drupal_goto('candidates/list');
+    return;
+  }
+
+  // @note - $data is being overriden on the API level
+  $data = array('social', 'personal', 'position', 'office', 'staffers', 'committees', 'state_offices', 'biography');
+
+  $values = array('address_1' => $address, 'city' => $city, 'state' => $state, 'zip' => $zip);
+
+  $chambers = variable_get('momentum_candidates_chambers', array('us_senate', 'us_house'));
+
+  /**
+   * Otherwise, we run the query and load it into the session
+   */
+  $result = momentum_candidates($values, $chambers);
+  //dsm($result);
+  if (!empty($result)) {
+    momentum_session('address_hash', $hash);
+    momentum_session('candidates', $result);
+    momentum_session('zip', $zip);
+    momentum_session('address', $address);
+    momentum_session('city', $city);
+    momentum_session('state', $state);
+    $form_state['redirect'] = 'candidates/list';
+  }
+  else {
+    momentum_session('address_hash', NULL, TRUE);
+    momentum_session('candidates', NULL, TRUE);
+    momentum_session('zip', NULL, TRUE);
+    momentum_session('address', NULL, TRUE);
+    momentum_session('city', NULL, TRUE);
+    momentum_session('state', NULL, TRUE);
+    drupal_set_message(t('No results found for 2017 elections on '.$state.'.'), 'warning');
+  }
+}
+
+/**
+ * Add field to system information settings
+ */
+function momentum_candidates_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    // Additional fields can be added here
+    $form['momentum']['candidates'] = array(
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#title' => t('Momentum Candidates'),
+    );
+    $form['momentum']['candidates']['momentum_candidates_intro'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Introduction text'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('momentum_candidates_intro', NULL),
+    );
+    $form['momentum']['candidates']['momentum_candidates_outro'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Outro text'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('momentum_candidates_outro', NULL),
+    );
+    $form['momentum']['candidates']['momentum_candidates_chambers'] = array(
+      '#type' => 'select',
+      '#options' => array(
+        'us_president' => t('President / VP'),
+        'us_senate' => t('US Senate'),
+        'us_house' => t('US House'),
+        'state_governor' => t('Governor'),
+        'state_senate' => t('State Senate'),
+        'state_house' => t('State House'),
+        'county_executive' => t('County Executive'),
+        'county_legislature' => t('County Legislature'),
+        'municipal_executive' => t('Municipal Executive'),
+        'municipal_legislature' => t('Municipal Legislature'),
+      ),
+      '#default_value' => variable_get('momentum_candidates_chambers', array('us_senate', 'us_house')),
+      '#title' => st('Retrieve Which Chambers?'),
+      '#multiple' => TRUE,
+    );
+  }
+}
+

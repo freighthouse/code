@@ -1,0 +1,11 @@
+{
+  "name": "drupal/smartystreets",
+  "description": "Provides integration with the SmartyStreets API.",
+  "homepage": "http://drupal.org/project/smartystreets",
+  "license": "GPL-2.0+",
+  "autoload": {
+    "psr-0": {
+      "smartystreets": "src/"
+    }
+  }
+}

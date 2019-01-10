@@ -1,0 +1,3 @@
+name = Leaderboard Page
+description = Enable the leaderboard page block to be used in a custom panel.
+core = 7.x

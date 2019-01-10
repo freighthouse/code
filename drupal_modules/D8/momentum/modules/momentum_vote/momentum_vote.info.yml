@@ -1,0 +1,7 @@
+name: 'Momentum Vote'
+type: module
+description: 'Utilizes the Momentum Vote API'
+core: 8.x
+package: 'Momentum'
+dependencies:
+  - momentum

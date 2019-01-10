@@ -1,0 +1,101 @@
+
+.body {
+//  padding-top: 30px;
+  padding-top: 0;
+  padding-top: $spacing-xlarge;
+
+  h2 {
+//    margin-top: 0;
+//    font-family: @default-font-family;
+//    font-size: @default-font-size + 10;
+//    font-weight: 900;
+//    line-height: @default-line-height + 10;
+//    color: @grey;
+  }
+  p {
+//    font-family: @default-font-family;
+//    font-size: @default-font-size;
+//    font-weight: 500;
+//    line-height: @default-line-height;
+    font-family: $ff-sans;
+    @include fs($fs-body);
+    color: $black;
+    font-weight: $fw-regular;
+  }
+  .img-responsive {
+
+    &.pull-right {
+//      padding: 30px;
+    }
+  }
+  .sub-title {
+//    margin-bottom: 45px;
+//    font-family: @alt-sans-serif-font-family;
+//    font-size: @default-font-size + 2;
+//    font-weight: 900;
+//    line-height: @default-line-height + 2;
+//    color: @dark-grey;
+//    text-align: center;
+    font-family: $ff-sans;
+  }
+  .panel {
+//    border-color: #ededed;
+
+    .sub-title {
+//      text-align: left;
+//      margin-bottom: 15px;
+    }
+  }
+  .app-screen,
+  .mobile-app-icon {
+//    padding: 0 0 30px;
+//    max-width: 100%;
+//    height: auto;
+  }
+}
+
+.vertical-tabs {
+//  clear: both;
+}
+
+// Should have gone in leadboard_page.css but got moved to make it global
+.push-behind .section-border {
+//  z-index: 0;
+}
+
+.counter-container .leaderboard-image{
+//  margin: auto;
+}
+.counter-container .results-container {
+//  position: absolute;
+//  width: 100%;
+//  text-align: center;
+//  z-index: 2;
+//  top: 42%;
+}
+.counter-container .results {
+//  font-weight: 900;
+//  font-size: 100px;
+//  font-size: 6.6vw;
+//  letter-spacing: 25px;
+//  letter-spacing: 1.5vw;
+//  font-family: "Arial Black", Gadget, sans-serif;
+//  color: #52439b;
+}
+
+.million-march-image-container {
+//  text-align: center;
+//  margin-top: -175px;
+//  margin-bottom: 30px;
+}
+
+.million-march-image-container img{
+//  z-index: 1;
+//  position: relative;
+}
+
+@media only screen and (min-width : 1600px) {
+  .counter-container .results {
+//    font-size: 100px !important;
+  }
+}

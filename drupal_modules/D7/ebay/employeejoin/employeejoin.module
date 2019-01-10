@@ -1,0 +1,338 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a BIPAC Campaigns content type
+ *   along with the code needed to integrate with BIPAC
+ *   via its APIs.
+ */
+
+/**
+ * hook_block_info
+ */
+function employeejoin_block_info() {
+  $blocks['employeejoin_block'] = array(
+    'info' => t('Mainstreet Join Form'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function employeejoin_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'employeejoin_block':
+      $block['title'] = t('Join Main Street!');
+      $block['content'] = _employeejoin_block();
+  }
+  return $block;
+}
+
+function _employeejoin_block() {
+  $user_info = _employeejoin_user_grab();
+  if (empty($user_info['mainstreet'])) {
+    return drupal_get_form('_employeejoin_mainstreet_form', $user_info['first'], $user_info['last'], $user_info['address'], $user_info['city'], $user_info['state'], $user_info['zip'], $user_info['email'], $user_info['uid'], $user_info['mainstreet']);
+  }
+  else {
+    return "Thank you for being a Mainstreet Member!";
+  }
+}
+
+function _employeejoin_mainstreet_form($form, &$form_state, $first, $last, $address, $city, $state, $zip, $email, $uid) {
+  /** Message **/
+  $form['intro'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . t('Join us on Main Street! By becoming a Main Street Member you will join more than 600,000 eBay customers and employees who are interested in knowing more about important public policy issues that affect our company and our customers.') . '</p>',
+  );
+  /** User Data **/
+  $form['writer_first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#required' => TRUE,
+    '#default_value' => $first,
+  );
+
+  $form['writer_last_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Last Name'),
+      '#required' => TRUE,
+      '#default_value' => $last,
+  );
+
+  $form['writer_address_1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Street Address'),
+    '#required' => TRUE,
+    '#default_value' => $address,
+  );
+
+  $form['writer_address_2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Apartment or Room #'),
+  );
+
+  $form['writer_zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip Code'),
+    '#required' => TRUE,
+    '#default_value' => $zip,
+    '#description' => t('Why do we want your address? Only so we can notify you of relevant issues in your state or Congressional district.'),
+  );
+
+  $form['writer_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email Address'),
+    '#required' => TRUE,
+    '#default_value' => $email,
+    '#description' => t('Please use your employee email address'),
+  );
+  $form['checkboxes'] = array(
+    '#type' => 'item',
+    '#title' => '<p>' . t('With the guidance and help of eBay\'s Government Relations team, which of the following activities would you be willing to undertake to help advocate for our company and our customers (check all that apply):') . '</p>',
+  );
+  $form['meet'] = array(
+    '#type' => 'checkbox',
+    '#return_value' => 'Y',
+    '#default_value' => 'N',
+    '#title' => t('Meet with state or federal legislators'),
+  );
+  $form['call'] = array(
+    '#type' => 'checkbox',
+    '#return_value' => 'Y',
+    '#default_value' => 'N',
+    '#title' => t('Call state or federal legislators'),
+  );
+  $form['letter'] = array(
+    '#type' => 'checkbox',
+    '#return_value' => 'Y',
+    '#default_value' => 'N',
+    '#title' => t('Submit a letter to the editor or OpEd in local or national media outlets'),
+  );
+  $form['events'] = array(
+    '#type' => 'checkbox',
+    '#return_value' => 'Y',
+    '#default_value' => 'N',
+    '#title' => t('Participate in local events hosted by elected officials or similar stakeholders'),
+  );
+  $form['fundraiser'] = array(
+    '#type' => 'checkbox',
+    '#return_value' => 'Y',
+    '#default_value' => 'N',
+    '#title' => t('Attend a fundraising event for state or federal legislators'),
+  );
+
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $uid,
+  );
+  /** Spam catcher field that will be hidden from view **/
+  $form['notes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Notes'),
+    '#required' => FALSE,
+    '#attributes' => array('class' => array('sc-notes-field')),
+    '#description' => t('Anything else you would like to tell us'),
+    '#prefix' => '<div class = "sc-notes-field">',
+    '#suffix' => '</div>',
+  );
+  $form['submit'] = array(
+    '#suffix' => '</div>',
+    '#type' => 'submit',
+    '#value' => t('Join'),
+    '#attributes' => array('class' => array('btn', 'sign')),
+  );
+  return $form;
+}
+
+function _employeejoin_mainstreet_form_validate($form, &$form_state) {
+  if (!(preg_match('([\\w-]+(?:\\.[\\w-]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})', $form_state['values']['writer_email']))) {
+    form_set_error('writer_email', 'Please enter a valid e-mail address.');
+  }
+  $data = array(
+    'zipcode' => $form_state['values']['writer_zip'],
+    'street' => $form_state['values']['writer_address_1'],
+  );
+  $fail = FALSE;
+
+  $json = bipac_campaigns_smartystreets($data, TRUE);
+
+  if (!empty($json)) {
+    if (!empty($json[0]['components']['city_name'])) {
+      $city = $json[0]['components']['city_name'];
+    }
+    else {
+      $city = NULL;
+      $fail = TRUE;
+    }
+    if (!empty($json[0]['components']['state_abbreviation'])) {
+      $state = $json[0]['components']['state_abbreviation'];
+    }
+    else {
+      $state = NULL;
+      $fail = TRUE;
+    }
+  }
+  else {
+    $fail = TRUE;
+  }
+  if ($fail === TRUE) {
+    // form_set_error('writer_zip', t('There was a problem validating your address and zip'));
+    if (isset($_SESSION['smartystreets_data'])) {
+      unset($_SESSION['smartystreets_data']);
+    }
+  }
+  $form_state['values']['writer_state'] = $state;
+  $form_state['values']['writer_city'] = $city;
+  $form_state['values']['country'] = 'United States';
+}
+
+function _employeejoin_mainstreet_form_submit($form, &$form_state) {
+  // If content in the notes field, discard submission.  This field is only used to catch spambots.
+  if(!empty($form_state['values']['notes'])) {
+    drupal_set_message('Thank you for your submission.');
+    return;
+  }
+
+  // Silverpop handling
+  $mapping = array(
+        'writer_first_name' => 'First Name',
+        'writer_last_name' => 'Last Name',
+        'writer_email' => 'Email',
+        'writer_address_1' => 'Home Address',
+        'writer_address_2' => 'Home Address 2',
+        'writer_city' => 'City',
+        'writer_zip' => 'Zip',
+        'writer_state' => 'State',
+        'country' => 'Country',
+        'meet' => 'Meet with state or federal legislators',
+        'call' => 'Call state or federal legislators',
+        'letter' => 'Submit a letter to the editor or OpEd in local or national media outlets',
+        'events' => 'Participate in local events hosted by elected officials or similar stakeholders',
+        'fundraiser' => 'Attend a fundraising event for state or federal legislators',
+  );
+
+  if (!empty($form_state['values']['writer_email'])) {
+    $values = _ebay_custom_prepare_form_for_silverpop($mapping, $form_state['values'], '2560133');
+    if ($values == 1) {
+      $uid = _employeejoin_user_update($form_state['values']);
+      drupal_set_message(t('Thank you for joining eBay Main Street!'));
+    }
+    else {
+      drupal_set_message(t('There was a problem joining eBay Main Street.  Please wait a few minutes and try again'), 'warning');
+    }
+  }
+}
+
+/**
+ * Update user info
+ */
+function _employeejoin_user_update($values) {
+  if (!empty($values['uid'])) {
+    $uid = $values['uid'];
+    $first = !empty($values['writer_first_name']) ? $values['writer_first_name'] : NULL;
+    $last = !empty($values['writer_last_name']) ? $values['writer_last_name'] : NULL;
+    $email = !empty($values['writer_email']) ? $values['writer_email'] : NULL;
+    $address = !empty($values['writer_address_1']) ? $values['writer_address_1'] : NULL;
+    $zip = !empty($values['writer_zip']) ? $values['writer_zip'] : NULL;
+    $city = !empty($values['writer_city']) ? $values['writer_city'] : NULL;
+    $state = !empty($values['writer_state']) ? $values['writer_state'] : NULL;
+
+    $edit = array(
+      'field_user_first_name' => array(LANGUAGE_NONE => array(array('value' => $first))),
+      'field_user_last_name' => array(LANGUAGE_NONE => array(array('value' => $last))),
+      'field_street_and_house_number' => array(LANGUAGE_NONE => array(array('value' => $address))),
+      'field_user_postal_code' => array(LANGUAGE_NONE => array(array('value' => $zip))),
+      'field_user_region' => array(LANGUAGE_NONE => array(array('value' => $state))),
+      'field_user_city' => array(LANGUAGE_NONE => array(array('value' => $city))),
+      'field_user_mainstreet_member' => array(LANGUAGE_NONE => array(array('value' => TRUE))),
+    );
+    $account = user_load($uid);
+    $saved = user_save($account, $edit);
+    return $saved->uid;
+  }
+  return NULL;
+}
+
+/**
+ * Get user info
+ */
+function _employeejoin_user_grab() {
+  global $user;
+  $uid = $user->uid;
+  $user_fields = user_load($user->uid);
+  $first = !empty($user_fields->field_user_first_name['und'][0]['safe_value']) ? $user_fields->field_user_first_name['und'][0]['safe_value'] : NULL;
+  $last = !empty($user_fields->field_user_last_name['und'][0]['safe_value']) ? $user_fields->field_user_last_name['und'][0]['safe_value'] : NULL;
+  $address = !empty($user_fields->field_street_and_house_number['und'][0]['safe_value']) ? $user_fields->field_street_and_house_number['und'][0]['safe_value'] : NULL;
+  $zip = !empty($user_fields->field_user_postal_code['und'][0]['safe_value']) ? $user_fields->field_user_postal_code['und'][0]['safe_value'] : NULL;
+  $state = !empty($user_fields->field_user_region['und'][0]['safe_value']) ? $user_fields->field_user_region['und'][0]['safe_value'] : NULL;
+  $city = !empty($user_fields->field_user_city['und'][0]['safe_value']) ? $user_fields->field_user_city['und'][0]['safe_value'] : NULL;
+  $mainstreet = !empty($user_fields->field_user_mainstreet_member['und'][0]['value']) ? TRUE : FALSE;
+  $email = !empty($user_fields->mail) ? $user_fields->mail : NULL;
+  return array('uid' => $uid, 'mainstreet' => $mainstreet, 'first' => $first, 'last' => $last, 'address' => $address, 'city' => $city, 'state' => $state, 'zip' => $zip, 'email' => $email);
+}
+
+function _employeejoin_states_array() {
+  return array(
+            'AL'=>"Alabama",
+                        'AK'=>"Alaska",
+                        'AZ'=>"Arizona",
+                        'AR'=>"Arkansas",
+                        'CA'=>"California",
+                        'CO'=>"Colorado",
+                        'CT'=>"Connecticut",
+                        'DE'=>"Delaware",
+                        'DC'=>"District Of Columbia",
+                        'FL'=>"Florida",
+                        'GA'=>"Georgia",
+                        'HI'=>"Hawaii",
+                        'ID'=>"Idaho",
+                        'IL'=>"Illinois",
+                        'IN'=>"Indiana",
+                        'IA'=>"Iowa",
+                        'KS'=>"Kansas",
+                        'KY'=>"Kentucky",
+                        'LA'=>"Louisiana",
+                        'ME'=>"Maine",
+                        'MD'=>"Maryland",
+                        'MA'=>"Massachusetts",
+                        'MI'=>"Michigan",
+                        'MN'=>"Minnesota",
+                        'MS'=>"Mississippi",
+                        'MO'=>"Missouri",
+                        'MT'=>"Montana",
+                        'NE'=>"Nebraska",
+                        'NV'=>"Nevada",
+                        'NH'=>"New Hampshire",
+                        'NJ'=>"New Jersey",
+                        'NM'=>"New Mexico",
+                        'NY'=>"New York",
+                        'NC'=>"North Carolina",
+                        'ND'=>"North Dakota",
+                        'OH'=>"Ohio",
+                        'OK'=>"Oklahoma",
+                        'OR'=>"Oregon",
+                        'PA'=>"Pennsylvania",
+                        'RI'=>"Rhode Island",
+                        'SC'=>"South Carolina",
+                        'SD'=>"South Dakota",
+                        'TN'=>"Tennessee",
+                        'TX'=>"Texas",
+                        'UT'=>"Utah",
+                        'VT'=>"Vermont",
+                        'VA'=>"Virginia",
+                        'WA'=>"Washington",
+                        'WV'=>"West Virginia",
+                        'WI'=>"Wisconsin",
+                        'WY'=>"Wyoming",
+                        'AS'=>"American Samoa",
+                        'GU'=>'Guam',
+                        'MP'=>"Northern Mariana Islands",
+                        'PR'=>"Puerto Rico",
+                        'VI'=>"Virgin Islands",
+                        'FM'=>"Federated States of Micronesia",
+                        'MH'=>"Marshall Islands",
+                        'UM'=>"U.S. Minor Outlying Islands"
+                );
+}

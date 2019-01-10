@@ -1,0 +1,6 @@
+name = Main Street Custom Theme Adjustments
+description = A collection of theme-related hooks and functions for custom look and feel
+core = 7.x
+package = Main Street
+files[] = mstweaks.module
+

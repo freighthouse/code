@@ -1,0 +1,61 @@
+
+.resource-description {
+  margin-bottom: $spacing-xlarge;
+
+  @media (max-width: 991px) {
+    margin-bottom: $spacing-medium;
+  }
+
+  h1 {
+//    margin: 0;
+//    font-family: @alt-serif-font-family;
+//    font-size: @default-font-size + 6;
+//    font-weight: 700;
+//    line-height: @default-line-height + 6;
+//    color: @grey;
+
+    color: $blue-dark;    
+    font-family: $ff-display;
+    @include fs($fs-70);
+    font-weight: $fw-semibold;
+    line-height: 1em;
+
+    @media (max-width: 991px) {
+//      text-align: center;
+    }
+  }
+  h2 {
+//    margin: 0;
+//    font-family: @default-font-family;
+//    font-size: @default-font-size - 4;
+//    font-weight: 700;
+//    line-height: @default-line-height + 6;
+//    color: @blue;
+    @include author;
+    a {
+      text-decoration: underline;
+    }
+    & + p {
+//      margin-top: 15px;
+    }
+    @media (max-width: 991px) {
+//      text-align: center;
+    }
+    @media (max-width: 767px) {
+//      margin-top: 6px;
+//      text-align: center;
+//      line-height: @default-line-height;
+    }
+  }
+  .field-name-field-description {
+    line-height: 1.5em;
+  }
+  p {
+//    font-family: @default-font-family;
+//    font-size: @default-font-size - 2;
+//    font-weight: 500;
+//    line-height: @default-line-height - 2;
+//    color: @grey;
+    line-height: 1.5em;
+  }
+}

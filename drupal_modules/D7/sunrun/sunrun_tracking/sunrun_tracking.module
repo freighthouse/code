@@ -1,0 +1,72 @@
+<?php
+
+
+/**
+ * Implements hook_init().
+ */
+function sunrun_tracking_init() {
+    // Only track non-admin paths
+    if (!path_is_admin(current_path())) {
+        drupal_add_js(drupal_get_path('module', 'sunrun_tracking') . '/' . 'sunrun_tracking.js');
+        // Adding analitycs script
+        drupal_add_js(drupal_get_path('module', 'sunrun_tracking') . '/' . 'sunrun_analitycs.js');
+    }
+    // Getting full url
+    $full_url = "https://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    if ($node = menu_get_object()) {
+      // Get the lead_type
+      $lead_type = (isset($node->metatags['en']['lead_type']['value'])) ? $node->metatags['en']['lead_type']['value'] : '';
+      $campid = (isset($node->metatags['en']['campid']['value'])) ? $node->metatags['en']['campid']['value'] : '';
+    }
+    // Adding full url, lead type and campid for tracking
+    drupal_add_js(array(
+        'sunrun_tracking' => array(
+            'full_url' => $full_url,
+            'lead_type' => isset($lead_type) ? $lead_type : '',
+            'campid' => isset($campid) ? $campid : ''
+        ),
+    ), 'setting');
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function sunrun_tracking_preprocess_html(&$variables) {
+    drupal_add_library('system', 'drupal.ajax');
+    // Getting full url
+    $full_url = "https://$_SERVER[HTTP_HOST]" . htmlspecialchars($_SERVER['REQUEST_URI']);
+    // Google analitycs Tracking for not found page
+    $status = drupal_get_http_header('status');
+    if($status == '404 Not Found'){
+        drupal_add_js("ga('send', 'event', 'errors', '404', '$full_url');",
+            array('type' => 'inline', 'scope' => 'footer')
+        );
+    }
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function sunrun_tracking_ctools_plugin_api($owner, $api) {
+    if ($owner == 'metatag' && $api == 'metatag') {
+        return array('version' => 1);
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function sunrun_tracking_menu() {
+    $items = array();
+
+    // A menu callback is required when using ajax outside of the Form API.
+    $items['track'] = array(
+        'title' => 'Track Events',
+        'page callback' => 'sunrun_tracking_track',
+        'access arguments' => array('access content'),
+        'type' => MENU_CALLBACK,
+        'file' => 'sunrun_tracking.pages.inc',
+    );
+
+    return $items;
+}

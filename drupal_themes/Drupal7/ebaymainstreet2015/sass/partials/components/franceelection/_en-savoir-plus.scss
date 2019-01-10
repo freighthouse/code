@@ -1,0 +1,271 @@
+#block-views-news-block-8 {
+	h2 {
+		text-align: center;
+	}
+	.view-display-id-block_8 {
+		background-color: #ffffff;
+    	padding: 2em;
+    	padding-top: 0em;
+    	border: 1px solid #cccccc;
+	}
+	.news-items {
+		list-style: none;
+	}
+
+}
+#block-views-dans-les-media-block {
+	h2 {
+		text-align: center;
+        padding-top: 60px;
+	}
+}
+.view-dans-les-media {
+    
+    background: #fff;
+    padding: 2em;
+	.view-content {
+	}
+    .views-row {
+        float: none;
+    	@include breakpoint($bp-small) {
+    		width: 29%;
+    		display: inline-table;
+    		border-right: 1px solid #cccccc;
+    		padding-right: 20px;
+    		padding-left: 20px;
+    		margin-top: 20px;
+    	}
+        .views-field-field-media-city {
+            @include fontsize(11);
+            display: inline-table;
+            padding-bottom: 20px;
+        }
+        p{
+            @include fontsize(11);
+            display: inline-table;
+            padding-bottom: 20px;
+            &:before {
+                content: "|";
+                padding-right: 5px;
+            }
+        }
+
+        .field-name-field-news-date {
+            @include fontsize(12);
+            display: inline-flex;
+            &:before {
+                content: "|";
+                padding-right: 5px;
+            }
+        }
+        .views-field-title {
+            text-align: left;
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333333;
+        }
+    }
+    .field-name-field-microsite-news-link {
+            margin-bottom: 40px;
+            a{
+                float: right;
+                @include fontsize(0);
+                @extend %external-more-link;
+                border: none;
+                &:hover,
+                &:focus {
+                    color: $c-medium-grey;
+                }
+            }
+        }
+    .views-row-3, .views-row-6, .views-row-9 {
+    	border-right: none;
+    }
+    .view-footer {
+        margin-top : 80px;
+        border-top: 1px solid #cccccc;
+        margin-bottom: 30px;
+        @include breakpoint($bp-small) {
+            margin-top : 30px;
+            border-top: 1px solid #cccccc;
+            margin-bottom: 30px;
+        }
+        a{
+            float: right;
+            @extend %learn-more-link;
+            border: none;
+            &:hover,
+            &:focus {
+                color: $c-medium-grey;
+            }
+        }
+    }
+}
+#block-views-microsite-articles-block-1 {
+    h2 {
+        text-align: center;
+    }
+    .view-microsite-articles {
+        padding: 1.5em;
+        border: 1px solid #ccc;
+        background: #fff;
+        h2 {
+            margin-top: 0px;
+            text-align: left;
+        }
+    }
+    .field-name-field-microsite-image {
+        float: left;
+        padding-top: 10px;
+        margin-right: 30px;
+    }
+    .views-field-view-node {
+        margin-bottom: 40px;
+        a{
+            float: right;
+            @include fontsize(0);
+            @extend %learn-more-link;
+            padding-bottom: 30px;
+            border: none;
+            &:hover,
+            &:focus {
+                color: $c-medium-grey;
+            }
+        }
+    }
+    .view-footer {
+        margin-top : 30px;
+        border-top: 1px solid #cccccc;
+            p {
+                margin-bottom: 0px;
+                a{
+                    @extend %learn-more-link;
+                    border: none;
+                    &:hover,
+                    &:focus {
+                    color: $c-medium-grey;
+                }
+            }
+        }
+    }
+}
+#block-views-microsite-articles-block {
+    h2 {
+        text-align: center;
+    }
+    .view-microsite-articles {
+        position: relative;
+        padding: 2em;
+        border: 1px solid #ccc;
+        background: #fff;
+        h2 {
+            margin-top: 0px;
+            text-align: left;
+        }
+        .field-name-field-microsite-image {
+            float: left;
+            padding-top: 10px;
+            margin-right: 30px;
+        }
+        .views-field-view-node {
+            margin-bottom: 40px;
+            a{
+                float: right;
+                @include fontsize(0);
+                @extend %learn-more-link;
+                padding-bottom: 30px;
+                border: none;
+                &:hover,
+                &:focus {
+                    color: $c-medium-grey;
+                }
+            
+            }
+        }
+        .view-footer {
+            position: absolute;
+            float: right;
+            right: 3%;
+            margin-top: 20px;
+        }
+    }
+}
+//Style for the view page of DANS LES MEDIA 
+.page-ebaysengage-en-savoir-plus-dans-les-medias {
+    .view-dans-les-media {
+        background: #fff;
+        padding: 2em;
+        .views-row {
+            float: none;
+            width: 100%;
+            @include breakpoint($bp-small) {
+                width: 28%;
+                display: inline-block;
+                border-right: 1px solid #cccccc;
+                padding-right: 20px;
+                padding-left: 20px;
+                margin-top: 20px;
+            }
+        }
+        .views-row-3, .views-row-6, .views-row-9 {
+            border-right: none;
+        }
+    }
+}
+.node-type-microsite-articles- {
+    .forward_link {
+        display: none;
+    }
+    .field-type-text-with-summary {
+        margin-top: 30px;
+    }
+}
+
+.view-microsite-articles {
+    padding: 2em;
+    h2 {
+        margin-top: 0px;
+        text-align: left;
+    }
+    .field-name-field-microsite-image {
+        float: left;
+        padding-top: 10px;
+        margin-right: 30px;
+    }
+    .field-type-text-with-summary {
+        p {
+            &:last-child {
+                border-bottom: 1px solid #cccccc;
+                padding-bottom: 40px;
+            }
+        }
+    }
+    .views-field-view-node {
+        margin-bottom: 40px;
+        a{
+            float: right;
+            @include fontsize(0);
+            @extend %learn-more-link;
+            padding-bottom: 30px;
+            border: none;
+            &:hover,
+            &:focus {
+                color: $c-medium-grey;
+            }
+        
+        }
+    }
+    .view-footer {
+        margin-top : 30px;
+        margin-bottom: 30px;
+        a{
+            float: right;
+            @extend %learn-more-link;
+            border: none;
+            &:hover,
+            &:focus {
+                color: $c-medium-grey;
+            }
+        }
+    }
+}

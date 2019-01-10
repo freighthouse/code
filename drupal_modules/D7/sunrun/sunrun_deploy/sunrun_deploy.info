@@ -1,0 +1,5 @@
+name = Sunrun Deploy
+description = Custom deployment module for handling database related updates for the Sunrun Corporate site
+core = 7.x
+package = Sunrun
+version = 7.x-1.0

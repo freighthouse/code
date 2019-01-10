@@ -1,0 +1,6 @@
+name = BIPAC
+description = Basic BIPAC configuration and tools
+core = 7.x
+package = BIPAC
+
+configure = admin/config/system/site-information

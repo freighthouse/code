@@ -1,0 +1,3 @@
+name = Bootpatch
+description = A patch for bootstrap errors in other themes.
+core = 7.x

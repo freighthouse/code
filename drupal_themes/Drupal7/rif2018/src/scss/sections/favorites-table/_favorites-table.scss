@@ -1,0 +1,117 @@
+// Table
+//
+// Markup: favorites-table.html
+//
+// Style Guide: Sections.Favorites.Table
+
+.favorites-table {
+//  margin: -15px;
+margin: 0;
+      margin: -30px;
+
+  .favorites-table-item {
+//    padding: 15px;
+    padding: 15px;
+    @media (min-width: 1440px) {
+      padding: 30px;
+    }
+
+    > .row {
+          > div {
+                &:first-child {
+                      padding-right: 0;
+                }
+          }
+    }
+
+    & + .favorites-table-item {
+//      padding-top: 15px;
+//      border-top: 1px solid darken(@off-white, 10%);
+      padding: 15px;
+    @media (min-width: 1440px) {
+      padding: 30px;
+    }
+    }
+    .image-container {
+//      width: 100%;
+//      height: 75px;
+//      .border-radius (4px);
+//      overflow: hidden;
+    }
+    h2 {
+//      margin: 16.5px 0 0;
+//      font-family: @alt-serif-font-family;
+//      font-size: @default-font-size;
+//      font-weight: 700;
+//      line-height: @default-line-height + 3;
+//      color: @grey;
+//      text-overflow: ellipsis;
+//      white-space: nowrap;
+//      overflow: hidden;
+@include resource-title;
+    }
+    h3 {
+//      margin: 0;
+//      font-family: @default-font-family;
+//      font-size: @default-font-size;
+//      font-weight: 700;
+//      line-height: @default-line-height + 3;
+//      color: @blue;
+//      text-overflow: ellipsis;
+//      white-space: nowrap;
+//      overflow: hidden;
+//      text-align: left;
+@include author;
+
+      & + p {
+//        margin-top: 15px;
+      }
+    }
+    .btn-group {
+//      margin-top: 22.5px;
+//      padding: 0 15px;
+
+      .dropdown-toggle {
+//        .border-radius(15px) !important;
+      }
+    }
+    .toggle {
+//      padding: 0 15px;
+//      line-height: 75px;
+//      color: @light-grey;
+//      text-decoration: none;
+
+      .fa {
+//        font-size: @default-font-size + 4;
+//        vertical-align: middle;
+//        line-height: 75px;
+      }
+      .fa-chevron-down {
+//        display: none;
+      }
+      .fa-chevron-up {
+//        display: block;
+      }
+      &.collapsed {
+        .fa-chevron-down {
+//          display: block;
+        }
+        .fa-chevron-up {
+//          display: none;
+        }
+      }
+    }
+    .favorites-table-item-list {
+//      margin-top: 15px;
+
+      .well {
+//        margin: 0;
+//        padding: 0;
+//        border: none;
+      }
+    }
+    .panel-support-materials {
+      margin-bottom: 0;;
+    }
+  }
+}

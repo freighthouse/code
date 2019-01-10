@@ -1,0 +1,184 @@
+.policy-paper-files {
+  text-align: center;
+  margin: 1em 0 0 0;
+
+  @include breakpoint($bp-small) {
+    float: left;
+    margin: 0 1em 0 0;
+  }
+
+  .policy-paper-files-list {
+    margin: 0;
+    padding: 1em 0 0 0;
+  }
+
+  .policy-paper-file-item {
+    list-style-type: none;
+    padding-bottom: 2em;
+    @include breakpoint($bp-small) {
+      padding-bottom: 1em;
+    }
+  }
+
+  .policy-paper-file-link {
+    @extend %blue-button;
+    text-transform: uppercase;
+  }
+}
+
+.policy-papers-block .content {
+  padding: 0;
+  .view-ems2015-policy-papers {
+    .view-filters {
+      border-bottom: 1px solid $c-light-grey;
+      form {
+        padding: .5em 1em;
+      }
+    }
+  }
+}
+
+.policy-paper-block-wrapper {
+  @extend %clearfix;
+  position: relative;
+  border-bottom: 1px solid $c-light-grey;
+  //margin-bottom: 1em;
+  //padding-bottom: 1em;
+}
+
+.policy-paper-block-container {
+  margin-top: 1em;
+}
+
+.policy-paper-block-link {
+  display: block;
+  padding: 0 2em;
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    .policy-paper-block-read-article {
+      @include transition(background .3s ease);
+      color: $c-medium-grey;
+    }
+  }
+}
+
+.policy-paper-block-title {
+  @extend %clearfix;
+  @include fontsize(24);
+  @extend %helvetica;
+  color: $c-off-black;
+  margin-bottom: 1em;
+  @include breakpoint($bp-med) {
+    margin-bottom: 0;
+  }
+}
+
+.policy-paper-block-regions {
+  @extend %clearfix;
+  @include fontsize(14);
+  @extend %helvetica;
+  position: absolute;
+  bottom: 1em;
+  clear: both;
+  color: $c-dark-grey;
+  padding: 0 2em;
+  &.expand {
+    position: relative;
+    margin-bottom: -3em;
+    @include breakpoint($bp-small) {
+      position: absolute;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.view-ems2015-policy-papers {
+  .policy-paper-block-regions {
+    &.expand {
+      position: relative;
+      margin-bottom: -3em;
+      margin-top: 2em;
+    }
+  }
+}
+
+.policy-paper-block-read-article {
+  @extend %learn-more-link;
+  border: none;
+  padding-bottom: 1.25em;
+  &:after {
+    line-height: 1.5;
+  }
+}
+
+.policy-papers-block-view-more a {
+  @extend %learn-more-link;
+  padding-top: 0.3em;
+  border: none;
+}
+
+.page-policy-papers .block.block-system .content {
+  border-top: none;
+  margin: 0 0.5em;
+  @include breakpoint($bp-small) {
+    margin: 0;
+  }
+}
+
+.view-policy-papers,
+.view-ems2015-policy-papers {
+  label {
+    text-transform: uppercase;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .views-exposed-form .views-exposed-widget {
+    float: none;
+    @include breakpoint($bp-small) {
+      float: left;
+    }
+  }
+  .views-widget {
+    display: inline-block;
+    padding-left: 2em;
+  }
+
+  .views-exposed-form {
+    .form-submit {
+      @include fontsize(16);
+      @extend %helvetica;
+      padding: 0 2em;
+      margin-top: 1em;
+      color: $c-white;
+      background: none;
+      text-shadow: none;
+      border-radius: 0;
+      background-color: $c-blue;
+      border-radius: 0.3em;
+      font-weight: normal;
+      line-height: 2;
+      &:hover,
+      &:focus {
+        background: none;
+        background-color: $c-light-blue;
+      }
+      @include breakpoint($bp-small) {
+        margin-top: 2.6em;
+      }
+    }
+  }
+}
+
+.country-specific-download-wrapper {
+  .column-1,
+  .column-2,
+  .column-3 {
+    width: 100%;
+    @include breakpoint($bp-small) {
+      width: 33%;
+      float: left;
+    }
+  }
+}

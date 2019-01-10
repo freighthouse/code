@@ -1,0 +1,6 @@
+name = prefilter
+description = Allow the use of pre in your posts.
+package = "Input filters"
+core = 7.x
+
+files[] = pre.module

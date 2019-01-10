@@ -1,0 +1,185 @@
+<?php
+
+	/**
+	 * Implements hook_permission()
+	 */
+	function reading_challenges_permission() {
+		return array(
+			'take reading challenges' => array(
+				'title' => t('User can take a reading challenge'),
+				'description' => t('Assign this to any user role who can take the reading challenge.'),
+			),
+			'administer reading challenges' => array(
+				'title' => t('Administer '),
+				'description' => t('Only give this permissions to users who can administer reading challenges.'),
+			)
+		);
+	}
+
+	/**
+	 * Implements hook_menu().
+	 */
+	function reading_challenges_menu() {
+		$items = array();
+
+		/*$items['reading-challenges'] = array(
+			'title' => 'Demo Reading Challenge Page',
+			'page callback' => 'reading_challenges_demo_page',
+			'page arguments' => array(1),
+			'access callback' => TRUE,
+		);*/
+		$items['literacy-tracker/student/completed/%reading_challenges'] = array(
+			'title' => 'Reading Challenge',
+			'file' => 'reading_challenges.student_completed_reading_challenge.inc',
+			'page callback' => 'reading_challenges_view_entity',
+			'page arguments' => array(3),
+			'access callback' => TRUE,
+		);
+		$items['literacy-tracker/student/reading-challenge'] = array(
+			'title' => t('Reading Challenge'),
+			'description' => t('Student Reading Challenge'),
+			'file' => 'reading_challenges.student_reading_challenge.inc',
+			'page callback' => 'build_reading_challenge',
+			'access callback' => TRUE,
+			'type' => MENU_NORMAL_ITEM,
+		);
+		$items['literacy-tracker/student/reading-challenge/%node'] = array(
+			'title' => t('Reading Challenge'),
+			'description' => t('Student Reading Challenge'),
+			'file' => 'reading_challenges.student_reading_challenge.inc',
+			'page callback' => 'build_reading_challenge',
+			'page arguments' => array(3),
+			'access callback' => TRUE,
+			'type' => MENU_NORMAL_ITEM,
+		);
+
+		return $items;
+	}
+
+	function reading_challenges_theme()
+	{
+		return array(
+			'reading_challenges__reading_passage' => array(
+				'template' => 'reading-challenges--reading-passage',
+				'path' => drupal_get_path('module', 'reading_challenges') . '/templates',
+			),
+			'reading_challenges__completed_challenge' => array(
+				'template' => 'reading-challenges--completed-challenge',
+				'path' => drupal_get_path('module', 'reading_challenges') . '/templates',
+			),
+		);
+	}
+
+	// ************************************************************
+	// 		Reading Challenge Entity
+	// ************************************************************
+
+	function literacy_tracker_entity_info() {
+		$info = array();
+		$info['reading_challenge'] = array(
+			'label' => t('Reading Challenge'),
+			'base table' => 'reading_challenges_completed_challenges',
+			'entity keys' => array(
+				'id' => 'id',
+				'label' => 'name',
+			),
+			'entity class' => 'ReadingChallenge',
+			'uri callback' =>  'entity_class_uri',
+			'controller class' => 'ReadingChallengeController',
+			'admin ui' => array(
+				'path' => 'admin/reading-challenges',
+				'controller class' => 'ReadingEntityUIController',
+				'menu wildcard' => '%reading_challenges',
+				'file' => 'reading_challenges.admin.inc'
+			),
+			'module' => 'reading_challenges',
+			'access callback' => 'reading_challenges_access_callback',
+			'fieldable' => TRUE,
+			'bundle keys' => array(
+				'bundle' => 'type',
+			),
+			'bundles' => array(
+				'reading_challenge' => array(
+					'label' => t('Reading Challenge'),
+					'admin' => array(
+						'path' => 'admin/structure/readingchallenge',
+						'access arguments' => array('administer literacy tracker metadata'),
+					),
+				),
+			),
+		);
+		return $info;
+	}
+
+
+	/**
+	 * Menu autoloader for /reading_challenges.
+	 */
+	function reading_challenges_load($id) {
+		$reading_challenge = entity_load('reading_challenge', array($id));
+		return array_pop($reading_challenge);
+	}
+
+	function reading_challenges_access_callback($op, $reading_challenge_entity, $account = NULL) {
+		return TRUE;
+//		if(user_access('administer literacy tracker metadata', $account)) {
+//			return TRUE;
+//		}
+//		return FALSE;
+	}
+
+	/**
+	 * Callback for /reading_challenges page.
+	 *
+	 * Just a place to test reading challenge entities.
+	 */
+	function reading_challenges_demo_page() {
+		$reading_challenge = entity_load('reading_challenge', array(1));
+
+		// Or load it with EFQ.
+		$query = new EntityFieldQuery();
+		$query->entityCondition('entity_type', 'reading_challenge');
+		$results = $query->execute();
+
+		return 'hello there!';
+	}
+
+	class ReadingChallenge extends Entity {
+		protected function defaultUri() {
+			return array('path'=> 'reading-challenge/' . $this->identifier());
+		}
+	}
+
+	class ReadingChallengeController extends EntityAPIController {
+		public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
+			$build = parent::buildContent($entity, $view_mode, $langcode, $content);
+
+			// This is where I would add aditional elements that would be built with this entity
+			/*$build['text'] = array(
+				'#type' => 'markup',
+				'#markup' => "Example Text",
+			);*/
+
+			return $build;
+		}
+
+		/**
+		 * Override save method.
+		 *
+		 * Populate created and updated dates automatically.
+		 */
+		public function save($entity, DatabaseTransaction $transaction = NULL) {
+
+			if (isset($entity->is_new)) {
+				$entity->created_at = REQUEST_TIME;
+			}
+
+			$entity->updated_at = REQUEST_TIME;
+
+			return parent::save($entity, $transaction);
+		}
+	}
+
+	class ReadingEntityUIController extends EntityDefaultUIController {
+
+	}

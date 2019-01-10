@@ -1,0 +1,27 @@
+/*------------------------------------------------------------------
+[Views Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @OVERRIDES CORE VIEW STYLES
+/*------------------------------------------------------------------*/
+
+.item-list .pager li {
+	padding: 0 10px;
+	list-style-type: none;
+	display: inline;
+}
+
+.item-list .pager {
+	clear: both;
+	text-align: center;
+}
+
+.pager-current {
+	font-weight: bold;
+}

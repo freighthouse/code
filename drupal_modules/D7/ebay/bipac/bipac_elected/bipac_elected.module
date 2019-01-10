@@ -1,0 +1,278 @@
+<?php
+
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_theme()
+ */
+function bipac_elected_theme() {
+  return array(
+    'bipac_elected' => array(
+      'template' => 'bipac_elected',
+      'variables' => array('officials' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission()
+ */
+function bipac_elected_permission() {
+  $permissions['bipac_elected search'] = array (
+    'title' => t('View Politicians'),
+    'description' => t('Provide a list of a user\'s elected officials based on ZIP and Address'),
+  );
+  $permissions['bipac_elected configure'] = array (
+    'title' => t('Configure FindReps'),
+    'description' => t('Set BIPAC variables'),
+  );
+  return $permissions;
+}
+
+/**
+ * Initiate address form lookup
+ *
+ * @return
+ *   Drupal form
+ */
+function bipac_elected_prepare_address_form() {
+  // Might send through session data
+  $address = NULL;
+  $zip = NULL;
+  return drupal_get_form('bipac_elected_address_form', $address, $zip);
+}
+
+/**
+ * Form function that sends alerts
+ *
+ * @return
+ *   Drupal form
+ */
+function bipac_elected_address_form($form, $form_state, $address, $zip) {
+  $form = array();
+  $form['markup'] = array(
+    '#markup' => '<p>' . t('Please fill in your address to determine your representative. Both fields are required as a zip code can have more than one representative.') . '</p>',
+  );
+  $form['bipac_elected_address'] = array(
+    '#title' => t('Your Address'),
+    '#description' => t('Street Location'),
+    '#required' => TRUE,
+    '#type' => 'textfield',
+    '#size' => 28,
+    '#default_value' => $address,
+  );
+  $form['bipac_elected_zip'] = array(
+    '#title' => t('Zip Code'),
+    '#required' => TRUE,
+    '#type' => 'textfield',
+    '#size' => 28,
+    '#default_value' => $zip,
+    '#description' => t('5-Digit Code'),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Find Representatives'),
+  );
+  $form['#action'] = "#block-bipac_elected-bipac_elected-connect";
+  return $form;
+}
+
+/**
+ * Validate address form
+ *
+ * @see
+ *   bipac_elected_address_form
+ *   bipac_elected_address_form_submit
+ */
+function bipac_elected_address_form_validate($form, &$form_state) {
+  if((!empty($form_state['values']['bipac_elected_zip'])) && (!is_numeric(trim(str_replace('-', '', $form_state['values']['bipac_elected_zip']))))) {
+    form_set_error('bipac_elected_zip', t('Zip must be numeric (##### or #####-####)'));
+  }
+}
+
+/**
+ * Get Geocode and submit to BIPAC
+ *
+ * @see
+ *   bipac_elected_address_form
+ *   bipac_elected_address_form_validate
+ */
+function bipac_elected_address_form_submit($form, &$form_state) {
+  $address = isset($form_state['values']['bipac_elected_address']) ? trim($form_state['values']['bipac_elected_address']) : NULL;
+  $zip = isset($form_state['values']['bipac_elected_zip']) ? trim($form_state['values']['bipac_elected_zip']) : NULL;
+
+  $_SESSION['bipac_address'] = array('zip' => $zip, 'address' => $address);
+}
+/**
+ * Implements hook_block_info()
+ */
+function bipac_elected_block_info() {
+  $blocks['bipac_elected_connect'] = array(
+    'info' => t('Find Representatives Matches'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['bipac_elected_connect_form'] = array(
+    'info' => t('Find Your Representatives Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view()
+ */
+function bipac_elected_block_view($block_name = '') {
+  switch($block_name) {
+    case 'bipac_elected_connect_form':
+      return array(
+        'subject' => t('Find Your Representatives'),
+        'content' => bipac_elected_prepare_address_form(),
+      );
+      break;
+    case 'bipac_elected_connect':
+      $content = array();
+      $json = bipac_api_smartystreets(NULL);
+      $lat = NULL;
+      $lon = NULL;
+      if (!empty($json)) {
+        if (!empty($json[0]['metadata']['latitude'])) {
+          $lat = $json[0]['metadata']['latitude'];
+        }
+        if (!empty($json[0]['metadata']['longitude'])) {
+          $lon = $json[0]['metadata']['longitude'];
+        }
+        if ((isset($lat)) && (isset($lon))) {
+        }
+      }
+      $refresh = isset($_SESSION['bipac_force']) ? TRUE : FALSE;
+      if (($refresh == TRUE) && ((isset($_SESSION['bipac_representatives'])))) {
+        unset($_SESSION['bipac_representatives']);
+      }
+      $content = bipac_elected_connect($lat, $lon);
+      if($content != FALSE) {
+        return array(
+          'subject' => t('Your Representation'),
+          'content' => theme('bipac_elected',
+            array('officials' => $content)
+          ),
+        );
+      }
+      break;
+  }
+}
+
+/**
+ * Grabs JSON from Connect API and parses into array
+ *
+ * @return
+ *   array    Parsed JSON
+ */
+function bipac_elected_connect($lat = NULL, $lon = NULL) {
+  if ((isset($_SESSION['bipac_representatives'])) && (count($_SESSION['bipac_representatives']) > 0)) {
+    return $_SESSION['bipac_representatives'];
+  }
+  if((isset($lat)) && (isset($lon)) && ($key = variable_get('bipac_api_api_key', NULL)) && ($g = variable_get('bipac_api_parent', NULL))) {
+    // Continue
+  }
+  else {
+    return;
+  }
+  $officials = array();
+
+  $data['apikey'] = $key;
+  $data['g'] = $g;
+  $data['lat'] = $lat;
+  $data['lon'] = $lon;
+  $url = 'https://www.bipac.net/modules/JSON/FromLatLonListLegislators.asp';
+  $options = array('method' => 'POST',
+                   'data' => http_build_query($data),
+                   'timeout' => 15,
+                   'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+                  );
+  if (($result = drupal_http_request($url, $options)) && (!empty($result->data)) && ($json = json_decode($result->data))) {
+    foreach($json as $item) {
+      /**
+       * These values from primary API call
+       */
+      $photo = isset($item->photoURL) ? $item->photoURL : NULL;
+      $title = isset($item->TITLE) ? $item->TITLE : NULL;
+      $district = isset($item->DistrictName) ? $item->DistrictName : NULL;
+      $id = isset($item->leg_id_num) ? $item->leg_id_num : NULL;
+      $first_name = isset($item->FIRST_NAME) ? $item->FIRST_NAME : NULL;
+      $last_name = isset($item->LAST_NAME) ? $item->LAST_NAME : NULL;
+      $party = isset($item->PARTY) ? $item->PARTY : NULL;
+      $phone = isset($item->cap_phone) ? _bipac_format_phone($item->cap_phone) : NULL;
+      /**
+       * All this stuff from subsequent API Call
+       */
+      $additional = isset($id) ? bipac_elected_additional($id, $g, $key) : array();
+      $location = isset($additional->CAP_ADD1) ? $additional->CAP_ADD1 : NULL;
+      $address = isset($additional->CAP_ADD2) ? $additional->CAP_ADD2 : NULL;
+      $city = isset($additional->CAP_CITY) ? $additional->CAP_CITY : NULL;
+      $state = isset($additional->CAP_STATE) ? $additional->CAP_STATE : NULL;
+      $zip = isset($additional->CAP_ZIP) ? $additional->CAP_ZIP : NULL;
+      $fax = isset($additional->CAP_FAX) ? _bipac_format_phone($additional->CAP_FAX) : NULL;
+      $site = isset($additional->Web) ? $additional->Web : NULL;
+      $youtube = isset($additional->Youtube) ? $additional->Youtube : NULL;
+      $twitter = isset($additional->Twitter) ? $additional->Twitter : NULL;
+      $facebook = isset($additional->Facebook) ? $additional->Facebook : NULL;
+      $email = isset($additional->Email) ? $additional->Email : NULL;
+
+      if ($location == 'U.S. Senate') {
+        $type = 'us_senate';
+      }
+      elseif ($location == 'U.S. House of Representatives') {
+        $type = 'us_house';
+      }
+      elseif ($title == 'Governor') {
+        $type = 'governor';
+      }
+      elseif ($title != NULL) {
+        $type = 'state_official';
+      }
+
+      if(($title != NULL) && ($type != 'governor')) {
+        $officials[] = array('photo' => str_replace('maxsize=100', 'maxsize=167', $photo),
+                             'title' => $title,
+                             'first_name' => $first_name,
+                             'last_name' => $last_name,
+                              'party' => $party,
+                              'type' => $type,
+                              'address' => $address,
+                              'city' => $city,
+                              'state' => $state,
+                              'zip' => $zip,
+                              'phone' => $phone,
+                              'fax' => $fax,
+                              'site' => $site,
+                              'youtube' => $youtube,
+                              'twitter' => $twitter,
+                              'facebook' => $facebook);
+      }
+    }  
+    $_SESSION['bipac_representatives'] = $officials;
+    if (isset($_SESSION['bipac_force'])) {
+      unset($_SESSION['bipac_force']);
+    }
+  }
+  return $officials;
+}
+
+function bipac_elected_additional($id, $g, $key) {
+  $data = array();
+  $data['apikey'] = $key;
+  $data['g'] = $g;
+  $data['leg_id_num'] = $id;
+  $url = 'https://www.bipac.net/modules/JSON/FromIDListLegislators.asp';
+  $options = array('method' => 'POST',
+                   'data' => http_build_query($data),
+                   'timeout' => 15,
+                   'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+                  );
+  if (($result = drupal_http_request($url, $options)) && (!empty($result->data)) && ($json = json_decode($result->data))) {
+    return reset($json);
+  }
+  return array();
+}

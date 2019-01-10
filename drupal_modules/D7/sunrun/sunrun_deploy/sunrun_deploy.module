@@ -1,0 +1,114 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implements hook_environment().
+ *
+ * Add new environments so that we can control what modules and functionality
+ * is turned on after deployment.
+ */
+function sunrun_deploy_environment() {
+    return array(
+      'prod' => array(
+        'label' => t('Production'),
+        'allowed' => array(
+          'default' => TRUE,
+        ),
+      ),
+      'test' => array(
+        'label' => t('Staging'),
+        'allowed' => array(
+          'default' => FALSE,
+        ),
+      ),
+      'dev' => array(
+        'label' => t('Development 1'),
+        'allowed' => array(
+          'default' => FALSE,
+        ),
+      ),
+      'dev2' => array(
+        'label' => t('Development 2'),
+        'allowed' => array(
+          'default' => FALSE,
+        ),
+      ),
+      'dev3' => array(
+        'label' => t('Development 3'),
+        'allowed' => array(
+          'default' => FALSE,
+        ),
+      ),
+      'local' => array(
+        'label' => t('Local'),
+        'allowed' => array(
+          'default' => FALSE,
+        ),
+      ),
+    );
+  }
+
+/**
+ * Implements hook_environment_alter().
+ */
+function sunrun_deploy_environment_alter(&$environments) {
+    unset($environments['production']);
+    unset($environments['development']);
+}
+
+/**
+ * Implements hook_environment_switch().
+ */
+function sunrun_deploy_environment_switch($target_env, $current_env,
+                                          $workflow = NULL) {
+
+    $devel_modules = array(
+        'context_ui',
+        'devel',
+        'devel_generate',
+        'devel_node_access',
+        'views_ui',
+        'field_ui',
+        'stage_file_proxy',
+        'dblog',
+        'shield',
+    );
+
+    $prod_modules = array(
+      'acquia_purge',
+      'acquia_purge_cloudflare'
+    );
+
+    switch ($target_env) {
+        case 'prod':
+            module_disable($devel_modules);
+            module_enable(array('syslog'));
+            drupal_set_message('Disabled development modules');
+            return;
+        case 'test':
+            unset($devel_modules['stage_file_proxy']);
+            module_enable($devel_modules);
+            drupal_set_message('Enabled development modules');
+            return;
+        case 'dev':
+            unset($devel_modules['stage_file_proxy']);
+            module_enable($devel_modules);
+            module_disable($prod_modules);
+            drupal_set_message('Enabled development modules');
+            return;
+        case 'dev2':
+        case 'dev3':
+            module_enable($devel_modules);
+            module_disable($prod_modules);
+            drupal_set_message('Enabled development modules');
+            return;
+        case 'local':
+            unset($devel_modules['shield']);
+            module_enable($devel_modules);
+            module_disable($prod_modules);
+            drupal_set_message('Enabled development modules');
+            return;
+    }
+}

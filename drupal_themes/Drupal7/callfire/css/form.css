@@ -1,0 +1,134 @@
+/*------------------------------------------------------------------
+[Forms Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. CORE STYLES -- DO NOT EDIT --
+II. OVERRIDES
+III. CONNECT US SIDEBAR
+IV. NEWSLETTER SIGNUP
+
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @CORE STYLES -- DO NOT EDIT --
+/*------------------------------------------------------------------*/
+
+.form-item { /* Wrapper for a form element (or group of form elements) and its label */
+  margin: 1.5em 0;
+}
+
+.form-item input.error,
+.form-item textarea.error,
+.form-item select.error { /* Highlight the form elements that caused a form submission error */
+  border: 1px solid #c00;
+}
+
+.form-item label { /* The label for a form element */
+  display: block;
+  font-weight: bold;
+}
+
+.form-item label.option { /* The label for a radio button or checkbox */
+  display: inline;
+  font-weight: normal;
+}
+
+.form-required { /* The part of the label that indicates a required field */
+  color: #c00;
+}
+
+.form-item .description { /* The descriptive help text (separate from the label) */
+  font-size: 0.85em;
+}
+
+.form-checkboxes .form-item,
+.form-radios .form-item { /* Pack groups of checkboxes and radio buttons closer together */
+  margin: 0; /* Drupal core uses "0.4em 0" */
+}
+
+.container-inline div,
+.container-inline label { /* Inline labels and form divs */
+  display: inline;
+}
+
+/*------------------------------------------------------------------*/
+/* END CORE STYLES -- YOU MAY EDIT BELOW THIS LINE --
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @OVERRIDES
+/*------------------------------------------------------------------*/
+
+.form-item label {
+  display: block;
+  font-weight: bold;
+}
+
+.form-item label.option {
+  display: inline;
+  font-weight: normal;
+}
+
+/*------------------------------------------------------------------*/
+/* END OVERRIDES
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @CONNECT US SIDEBAR
+/*------------------------------------------------------------------*/
+
+.node-type-webform .connect-with-us img {
+  width: 220px;
+}
+
+.node-type-webform .block .connect-with-us a {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/*------------------------------------------------------------------*/
+/* END CONNECT US SIDEBAR
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @NEWSLETTER SIGNUP (FROM MAILCHIMP CODE)
+/*------------------------------------------------------------------*/
+
+#mc_embed_signup .indicates-required {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+#mc_embed_signup .asterisk {
+  color: #f00;
+}
+
+.mc-field-group label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.mc-field-group input {
+  font-size: 24px;
+  padding: 2px;
+  margin-bottom: 15px;
+}
+
+.mc-field-group .button {
+  font-size: 18px;
+  padding: 14px 24px;
+}
+
+/*------------------------------------------------------------------*/
+/* END NEWSLETTER SIGNUP
+/*------------------------------------------------------------------*/

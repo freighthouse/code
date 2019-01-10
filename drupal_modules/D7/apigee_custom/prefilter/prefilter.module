@@ -1,0 +1,100 @@
+<?php
+
+/**
+ * Implement hook_filter_info
+ */
+function prefilter_filter_info() {
+  $filters['prefilter'] = array(
+    'title' => t('Pre filter'),
+    'description' => t('Allows users to post code verbatim using &lt;pre&gt; tags.'),
+    'prepare callback' => '_prefilter_prepare',
+    'process callback' => '_prefilter_process',
+    'tips callback' => '_prefilter_tips',
+  );
+  return $filters;
+}
+
+function _prefilter_prepare($text, $format) {
+  /* Note: we replace <pre> </pre> to prevent other filters from acting on them. */
+  $text = preg_replace_callback('@<pre>(.+?)</pre>@s', '_prefilter_escape_pre_tag_callback', $text);
+  return $text;
+}
+
+function _prefilter_process($text, $format) {
+  $text = preg_replace_callback('@\[prefilter_pre\](.+?)\[/prefilter_pre\]@s', '_prefilter_process_code_callback', $text);
+  return $text;
+}
+
+function _prefilter_tips($format, $long = FALSE) {
+  if ($long) {
+    return t('To post pieces of pre-filtered code, surround them with &lt;pre&gt;...&lt;/pre&gt; tags.');
+  }
+  else {
+    return t('You may post code using &lt;pre&gt;...&lt;/pre&gt;.');
+  }
+}
+
+/**
+ * Processes chunks of escaped code into HTML.
+ */
+function prefilter_process_code($text) {
+  // Undo linebreak escaping
+  $text = str_replace('&#10;', "\n", $text);
+  // Inline or block level piece?
+  $multiline = strpos($text, "\n") !== FALSE;
+  // Note, pay attention to odd preg_replace-with-/e behaviour on slashes
+  $text = preg_replace("/^\n/", '', preg_replace('@</?(br|p)\s*/?>@', '', str_replace('\"', '"', $text)));
+  // Trim leading and trailing linebreaks
+  $text = trim($text, "\n");
+  // Escape newlines
+  $text = nl2br($text);
+
+  $text = str_replace('&amp;lt;', '&lt;', $text);
+  $text = str_replace('&amp;gt;', '&gt;', $text);
+
+  $text = '<pre>'. pre_fix_spaces(str_replace(' ', '&nbsp;', $text)) .'</pre>';
+  //if ($multiline) $text = '<div class="codeblock">'. $text .'</div>';
+  // Remove newlines to avoid clashing with the linebreak filter
+  return str_replace("\n", '', $text);
+}
+
+/**
+ * Callback to replace content of the <code> elements.
+ */
+function _prefilter_process_code_callback($matches) {
+  return prefilter_process_code($matches[1]);
+}
+
+function pre_fix_spaces($text) {
+  return preg_replace('@&nbsp;(?!&nbsp;)@', ' ', $text);
+}
+
+/**
+ * Escape code blocks during input filter 'prepare'.
+ *
+ * @param $text
+ *   The string to escape.
+ * @param $type
+ *   The type of code block, either 'code' or 'php'.
+ * @return
+ *   The escaped string.
+ */
+function prefilter_escape($text, $type = 'pre') {
+  // Note, pay attention to odd preg_replace-with-/e behaviour on slashes
+  $text = check_plain(str_replace('\"', '"', $text));
+
+  // Protect newlines from line break converter
+  $text = str_replace(array("\r", "\n"), array('', '&#10;'), $text);
+
+  // Add codefilter escape tags
+  $text = "[prefilter_$type]{$text}[/prefilter_$type]";
+
+  return $text;
+}
+
+/**
+ * Callback to escape content of <code> elements.
+ */
+function _prefilter_escape_pre_tag_callback($matches) {
+  return prefilter_escape($matches[1], 'pre');
+}

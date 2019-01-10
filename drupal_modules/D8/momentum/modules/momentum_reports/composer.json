@@ -1,0 +1,14 @@
+{
+  "name": "drupal/momentum_reports",
+  "type": "drupal-module",
+  "description": "Provides the ability to generate reports based on Momentum API data.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/momentum_reports",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/momentum_reports",
+    "source": "http://cgit.drupalcode.org/momentum_reports"
+  },
+  "require": { }
+}

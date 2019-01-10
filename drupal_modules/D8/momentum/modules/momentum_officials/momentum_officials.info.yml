@@ -1,0 +1,7 @@
+name: 'Momentum Officials'
+type: module
+description: 'Provides the ability to find elected officials based on location using the Momentum API.'
+core: 8.x
+package: 'Momentum'
+dependencies:
+  - momentum

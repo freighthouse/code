@@ -1,0 +1,189 @@
+<?php
+
+/**
+ * @file
+ * Customizes the landing page content type.
+ */
+
+/**
+ * Implements hook_preprocess_entity().
+ *
+ * Add classes and styles to paragraph entities.
+ */
+function rif_landing_page_preprocess_entity(&$variables) {
+  try {
+    if ($variables['entity_type'] === 'paragraphs_item') {
+      $entity = $variables['elements']['#entity'];
+      $wrapper = entity_metadata_wrapper('paragraphs_item', $entity);
+      $bundle = $variables['elements']['#bundle'];
+      // Set some defaults.
+      $color = 'blue';
+      $bg_position = 'left';
+      $bg_color = '#ffffff';
+      $separator_type = 'straight-line';
+
+      switch ($bundle) {
+        case 'component_marquee':
+          $marquee_feature = $wrapper->field_marquee_reference;
+          $variables['classes_array'][] = 'marquee';
+
+          if (!empty($marquee_feature->field_marquee_color->value())) {
+            $color = $marquee_feature->field_marquee_color->value();
+            $variables['classes_array'][] = 'marquee--color-' . $color;
+          }
+
+          if (!empty($marquee_feature->field_marquee_bg_position->value())) {
+            $bg_position = $marquee_feature->field_marquee_bg_position->value();
+            $variables['classes_array'][] = 'marquee--image-' . $bg_position;
+            $variables['bg_position'] = $bg_position;
+          }
+
+          // Prepare the wrapper styles.
+          $styles = array();
+          if (!empty($marquee_feature->field_marquee_background_color->value()['rgb'])) {
+            $styles[] = t('background-color: @bg_color;', array(
+              '@bg_color' => $marquee_feature->field_marquee_background_color->value()['rgb'],
+            ));
+          }
+
+          if (!empty($marquee_feature->field_marquee_background_image->value()['uri'])) {
+            $styles[] = t('background-image: url(@bg_image);', array(
+              '@bg_image' => file_create_url($marquee_feature->field_marquee_background_image->value()['uri']),
+            ));
+          }
+
+          $variables['attributes_array']['style'] = implode(' ', $styles);
+          break;
+
+        case 'layout_one_column':
+          $variables['classes_array'][] = 'component';
+          break;
+
+        case 'layout_two_column':
+        case 'layout_three_column':
+          if (!empty($wrapper->field_layout_color->value())) {
+            $color = $wrapper->field_layout_color->value();
+          }
+          $variables['classes_array'][] = 'component';
+          $variables['classes_array'][] = 'component--color-' . $color;
+          break;
+
+        case 'component_separator':
+          if (!empty($wrapper->field_separator_type->value())) {
+            $separator_type = $wrapper->field_separator_type->value();
+          }
+          $variables['classes_array'][] = 'component';
+          $variables['classes_array'][] = 'style--separator--' . $separator_type;
+          break;
+      }
+    }
+  }
+  catch (EntityMetadataWrapperException $exc) {
+    watchdog(
+      'rif_landing_page',
+      'EntityMetadataWrapper exception in %function() <pre>@trace</pre>',
+      array('%function' => __FUNCTION__, '@trace' => $exc->getTraceAsString()),
+      WATCHDOG_ERROR
+    );
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function rif_landing_page_form_landing_page_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['#validate'][] = 'rif_landing_page_form_landing_page_node_form_validate';
+}
+
+/**
+ * Form validate for rif_landing_page_form_landing_page_node_form_alter.
+ */
+function rif_landing_page_form_landing_page_node_form_validate($form, &$form_state) {
+  if (isset($form_state['values']['field_lp_body'][LANGUAGE_NONE])) {
+    $layouts = $form_state['values']['field_lp_body'][LANGUAGE_NONE];
+    $layouts = array_filter(array_keys($layouts), 'is_int');
+    $top_count = 0;
+    $is_top = TRUE;
+    $weights = array();
+
+    // Find the weights of each item.
+    foreach ($layouts as $layout) {
+      $weights[] = $form_state['values']['field_lp_body'][LANGUAGE_NONE][$layout]['_weight'];
+    }
+    // Find the smallest weight.
+    $min = min($weights);
+    // Find out which layout has the smallest weight.
+    $min_key = array_search($min, $weights);
+    foreach ($layouts as $layout) {
+      if (isset($form_state['values']['field_lp_body'][LANGUAGE_NONE][$layout]['entity']->bundle)) {
+        $removed = FALSE;
+        $bundle = $form_state['values']['field_lp_body'][LANGUAGE_NONE][$layout]['entity']->bundle;
+        if (isset($form_state['values']['field_lp_body'][LANGUAGE_NONE][$layout]['entity']->removed)) {
+          $removed = TRUE;
+        }
+        if ($bundle === 'layout_top_of_page' && !$removed) {
+          // Check if the layout IS NOT the top item.
+          if ($layout != $min_key) {
+            $is_top = FALSE;
+          }
+          $top_count++;
+        }
+      }
+    }
+
+    if ($top_count > 1) {
+      form_set_error('field_lp_body', t('You may only use one Top of Page Layout per page. Please remove one Top of Page Layout.', array('@value' => $value)));
+    }
+    if (!$is_top) {
+      form_set_error('field_lp_body', t('You may only use the Top of Page Layout as the first item of content. Please drag the layout to the top.', array('@value' => $value)));
+    }
+  }
+
+}
+
+
+/**
+ * Implements hook_menu()
+ */
+function rif_landing_page_menu() {
+  $items = array();
+
+  $items['literacy-central/example-search'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Literacy Centreal',
+    'description' => '',
+    'page callback' => 'rif_landing_page_example_search_page',
+    'access callback' => TRUE,
+  );
+
+  return $items;
+}
+
+/**
+ * Page callback rif_landing_page_example_search_page.
+ */
+/**
+ * Page callback rif_landing_page_example_search_page.
+ */
+function rif_landing_page_example_search_page() {
+  $vars = array();
+  return theme('rif_example_search', array(
+    'vars' => $vars,
+  ));
+}
+
+/**
+ * Implements hook_theme().
+ */
+function rif_landing_page_theme() {
+  $path = drupal_get_path('module', 'rif_landing_page') . '/templates';
+  return array(
+    'rif_example_search' => array(
+      'path' => $path,
+      'template' => 'rif-example-search',
+      'variables' => array(
+        'vars' => NULL,
+      ),
+    ),
+  );
+}

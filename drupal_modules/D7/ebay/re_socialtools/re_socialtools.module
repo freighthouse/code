@@ -1,0 +1,1513 @@
+<?php
+
+/**
+ * @file
+ * Theme-related functionality for the CFOR site
+ */
+
+/**
+ * An implementation of hook_permission
+ */
+
+function re_socialtools_permission() {
+  return array(
+    'administer RepEquity Social Tools settings' => array(
+	  'title' => t('Administer RepEquity Social Tools custom settings'),
+	  'description' => t('Administer RepEquity Social Tools custom settings'),
+	),
+	'use social links' => array(
+	  'title' => t('Use the Post to Facebook and Twitter links'),
+	  'description' => t('Allow users to access the sharing buttons'),
+	),
+  );
+}
+
+/**
+ * An implementation of hook_menu
+ */
+function re_socialtools_menu()
+{
+  $items['admin/config/system/re_socialtools'] = array(
+    'title' => 'RepEquity Social Tools Custom Settings',
+    'description' => 'Custom settings for RepEquity Social Tools',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('re_socialtools_settings_form'),
+    'access arguments' => array('administer RepEquity Social Tools settings'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_page_alter
+ */
+
+function re_socialtools_page_alter(&$page) {
+  drupal_add_js(array('re_socialtools' => array(
+    're_socialtools_fb_app_id' => check_plain(variable_get('re_socialtools_fb_api_id','')),
+    )), 'setting');
+}
+
+/**
+ * A custom function that defines a settings form
+ */
+
+function re_socialtools_settings_form() {
+  $form = array();
+
+  $form['re_socialtools_fb_api_id'] = array(
+    '#type' => 'textfield',
+	  '#title' => t('Facebook Application ID'),
+	  '#description' => t('Enter your Facebook application ID'),
+	  '#default_value' => variable_get('re_socialtools_fb_api_id', ''),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+  * An implementation of hook_block_info
+  */
+
+ function re_socialtools_block_info() {
+  $blocks['re_socialtools_social_share'] = array(
+    'info' => t('Post to Facebook and Twitter'),
+  );
+  $blocks['re_socialtools_social_share2'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE'),
+  );
+  $blocks['re_socialtools_social_share3'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE 2'),
+  );
+  $blocks['re_socialtools_social_share4'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE 3'),
+  );
+  $blocks['re_socialtools_social_share5'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE 4'),
+  );
+  $blocks['re_socialtools_social_share6'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE 5'),
+  );
+  $blocks['re_socialtools_social_share7'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE 6'),
+  );
+  $blocks['re_socialtools_social_share8'] = array(
+    'info' => t('Post to Facebook and Twitter - CLONE 7'),
+  );
+  $blocks['re_socialtools_forward_hp'] = array(
+    'info' => t('Forward homepage link'),
+  );
+  return $blocks;
+}
+
+/**
+ * An implementation of hook_block_configure
+ */
+
+function re_socialtools_block_configure($delta) {
+  $form = array();
+  switch($delta) {
+    case 're_socialtools_social_share':
+	  $site_url = url('<front>', array('absolute' => TRUE));
+	  // Make sure the user has set the Facebook Application ID
+	  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+	  if (!($app_id)) {
+	    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <A href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+	  }
+	  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags', ''));
+	  $form['re_socialtools_fb'] = array(
+	    '#type' => 'fieldset',
+		'#title' => t('Facebook settings'),
+		'#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+	  );
+	  $form['re_socialtools_fb']['fb_title'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Facebook title/headline'),
+		'#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_title', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_post'] = array(
+	    '#type' => 'textarea',
+		'#title' => t('Facebook text'),
+		'#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_post', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_image'] = array(
+	    '#title' => t('Facebook image'),
+		'#type' => 'managed_file',
+		'#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed      extensions: jpg, jpeg, png, gif.'),
+		'#upload_validators' => array(
+		  'file_validate_extensions' => array('gif png jpg jpeg'),
+		),
+		'#upload_location' => file_default_scheme(). '://',
+		'#default_value' => variable_get('re_socialtools_social_share_fb_image', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_url'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Facebook link'),
+		'#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_url', $site_url),
+	  );
+	  $form['re_socialtools_twitter'] = array(
+	  	'#type' => 'fieldset',
+		'#title' => t('Twitter settings'),
+		'#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+	  );
+	  $form['re_socialtools_twitter']['tweet_text'] = array(
+	    '#type' => 'textarea',
+		'#title' => t('Tweet text'),
+		'#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		'#default_value' => variable_get('re_socialtools_social_share_twitter_tweet', ''),
+	  );
+	  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Tweet hashtags'),
+		'#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		'#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+	  );
+	  $form['re_socialtools_twitter']['tweet_url'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Tweet URL'),
+		'#description' => t('Enter an abolute URL to include in the tweet. '),
+		'#default_value' => variable_get('re_socialtools_social_share_twitter_url', $site_url),
+	  );
+	  break;
+
+	case 're_socialtools_social_share2':
+	  $site_url = url('<front>', array('absolute' => TRUE));
+	  // Make sure the user has set the Facebook Application ID
+	  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+	  if (!($app_id)) {
+	    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <A href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+	  }
+	  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags2', ''));
+	  $form['re_socialtools_fb'] = array(
+	    '#type' => 'fieldset',
+		'#title' => t('Facebook settings'),
+		'#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+	  );
+	  $form['re_socialtools_fb']['fb_title'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Facebook title/headline'),
+		'#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_title2', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_post'] = array(
+	    '#type' => 'textarea',
+		'#title' => t('Facebook text'),
+		'#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_post2', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_image'] = array(
+	    '#title' => t('Facebook image'),
+		'#type' => 'managed_file',
+		'#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed      extensions: jpg, jpeg, png, gif.'),
+		'#upload_validators' => array(
+		  'file_validate_extensions' => array('gif png jpg jpeg'),
+		),
+		'#upload_location' => file_default_scheme(). '://',
+		'#default_value' => variable_get('re_socialtools_social_share_fb_image2', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_url'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Facebook link'),
+		'#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_url2', $site_url),
+	  );
+	  $form['re_socialtools_twitter'] = array(
+	  	'#type' => 'fieldset',
+		'#title' => t('Twitter settings'),
+		'#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+	  );
+	  $form['re_socialtools_twitter']['tweet_text'] = array(
+	    '#type' => 'textarea',
+		'#title' => t('Tweet text'),
+		'#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		'#default_value' => variable_get('re_socialtools_social_share_twitter_tweet2', ''),
+	  );
+	  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Tweet hashtags'),
+		'#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		'#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+	  );
+	  $form['re_socialtools_twitter']['tweet_url'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Tweet URL'),
+		'#description' => t('Enter an abolute URL to include in the tweet. '),
+		'#default_value' => variable_get('re_socialtools_social_share_twitter_url2', $site_url),
+	  );
+	  break;
+
+	case 're_socialtools_social_share3':
+	  $site_url = url('<front>', array('absolute' => TRUE));
+	  // Make sure the user has set the Facebook Application ID
+	  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+	  if (!($app_id)) {
+	    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <A href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+	  }
+	  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags3', ''));
+	  $form['re_socialtools_fb'] = array(
+	    '#type' => 'fieldset',
+		'#title' => t('Facebook settings'),
+		'#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+	  );
+	  $form['re_socialtools_fb']['fb_title'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Facebook title/headline'),
+		'#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_title3', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_post'] = array(
+	    '#type' => 'textarea',
+		'#title' => t('Facebook text'),
+		'#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_post3', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_image'] = array(
+	    '#title' => t('Facebook image'),
+		'#type' => 'managed_file',
+		'#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed extensions: jpg, jpeg, png, gif.'),
+		'#upload_validators' => array(
+		  'file_validate_extensions' => array('gif png jpg jpeg'),
+		),
+		'#upload_location' => file_default_scheme(). '://',
+		'#default_value' => variable_get('re_socialtools_social_share_fb_image3', ''),
+	  );
+	  $form['re_socialtools_fb']['fb_url'] = array(
+	    '#type' => 'textfield',
+	    '#title' => t('Facebook link'),
+		'#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		'#default_value' => variable_get('re_socialtools_social_share_fb_url3', $site_url),
+	  );
+	  $form['re_socialtools_twitter'] = array(
+	  	'#type' => 'fieldset',
+		'#title' => t('Twitter settings'),
+		'#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+	  );
+	  $form['re_socialtools_twitter']['tweet_text'] = array(
+	    '#type' => 'textarea',
+		'#title' => t('Tweet text'),
+		'#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		'#default_value' => variable_get('re_socialtools_social_share_twitter_tweet3', ''),
+	  );
+	  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Tweet hashtags'),
+		'#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		'#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+	  );
+	  $form['re_socialtools_twitter']['tweet_url'] = array(
+	    '#type' => 'textfield',
+		'#title' => t('Tweet URL'),
+		'#description' => t('Enter an abolute URL to include in the tweet. '),
+		'#default_value' => variable_get('re_socialtools_social_share_twitter_url3', $site_url),
+	  );
+	  break;
+
+    case 're_socialtools_social_share4':
+		  $site_url = url('<front>', array('absolute' => TRUE));
+		  // Make sure the user has set the Facebook Application ID
+		  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+		  if (!($app_id)) {
+		    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <a href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+		  }
+		  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags4', ''));
+		  $form['re_socialtools_fb'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Facebook settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_fb']['fb_title'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Facebook title/headline'),
+		    '#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_title4', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_post'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook text'),
+		    '#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_post4', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_image'] = array(
+		    '#title' => t('Facebook image'),
+		    '#type' => 'managed_file',
+		    '#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed extensions: jpg, jpeg, png, gif.'),
+	            '#upload_validators' => array(
+		      'file_validate_extensions' => array('gif png jpg jpeg'),
+		    ),
+		    '#upload_location' => file_default_scheme(). '://',
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_image4', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook link'),
+		    '#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_url4', $site_url),
+		  );
+		  $form['re_socialtools_twitter'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Twitter settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_twitter']['tweet_text'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet text'),
+		    '#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_tweet4', ''),
+		  );
+		  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Tweet hashtags'),
+		    '#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		    '#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+		  );
+		  $form['re_socialtools_twitter']['tweet_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet URL'),
+		    '#description' => t('Enter an abolute URL to include in the tweet. '),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_url4', $site_url),
+		  );
+	  break;
+
+	  case 're_socialtools_social_share5':
+		  $site_url = url('<front>', array('absolute' => TRUE));
+		  // Make sure the user has set the Facebook Application ID
+		  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+		  if (!($app_id)) {
+		    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <a href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+		  }
+		  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags5', ''));
+		  $form['re_socialtools_fb'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Facebook settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_fb']['fb_title'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Facebook title/headline'),
+		    '#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_title5', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_post'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook text'),
+		    '#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_post5', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_image'] = array(
+		    '#title' => t('Facebook image'),
+		    '#type' => 'managed_file',
+		    '#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed extensions: jpg, jpeg, png, gif.'),
+	            '#upload_validators' => array(
+		      'file_validate_extensions' => array('gif png jpg jpeg'),
+		    ),
+		    '#upload_location' => file_default_scheme(). '://',
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_image5', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook link'),
+		    '#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_url5', $site_url),
+		  );
+		  $form['re_socialtools_twitter'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Twitter settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_twitter']['tweet_text'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet text'),
+		    '#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_tweet5', ''),
+		  );
+		  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Tweet hashtags'),
+		    '#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		    '#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+		  );
+		  $form['re_socialtools_twitter']['tweet_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet URL'),
+		    '#description' => t('Enter an abolute URL to include in the tweet. '),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_url5', $site_url),
+		  );
+	  break;
+
+	  case 're_socialtools_social_share6':
+		  $site_url = url('<front>', array('absolute' => TRUE));
+		  // Make sure the user has set the Facebook Application ID
+		  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+		  if (!($app_id)) {
+		    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <a href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+		  }
+		  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags6', ''));
+		  $form['re_socialtools_fb'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Facebook settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_fb']['fb_title'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Facebook title/headline'),
+		    '#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_title6', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_post'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook text'),
+		    '#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_post6', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_image'] = array(
+		    '#title' => t('Facebook image'),
+		    '#type' => 'managed_file',
+		    '#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed extensions: jpg, jpeg, png, gif.'),
+	            '#upload_validators' => array(
+		      'file_validate_extensions' => array('gif png jpg jpeg'),
+		    ),
+		    '#upload_location' => file_default_scheme(). '://',
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_image6', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook link'),
+		    '#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_url6', $site_url),
+		  );
+		  $form['re_socialtools_twitter'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Twitter settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_twitter']['tweet_text'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet text'),
+		    '#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_tweet6', ''),
+		  );
+		  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Tweet hashtags'),
+		    '#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		    '#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+		  );
+		  $form['re_socialtools_twitter']['tweet_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet URL'),
+		    '#description' => t('Enter an abolute URL to include in the tweet. '),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_url6', $site_url),
+		  );
+	  break;
+
+	  case 're_socialtools_social_share7':
+		  $site_url = url('<front>', array('absolute' => TRUE));
+		  // Make sure the user has set the Facebook Application ID
+		  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+		  if (!($app_id)) {
+		    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <a href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+		  }
+		  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags7', ''));
+		  $form['re_socialtools_fb'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Facebook settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_fb']['fb_title'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Facebook title/headline'),
+		    '#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_title7', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_post'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook text'),
+		    '#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_post7', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_image'] = array(
+		    '#title' => t('Facebook image'),
+		    '#type' => 'managed_file',
+		    '#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed extensions: jpg, jpeg, png, gif.'),
+	            '#upload_validators' => array(
+		      'file_validate_extensions' => array('gif png jpg jpeg'),
+		    ),
+		    '#upload_location' => file_default_scheme(). '://',
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_image7', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook link'),
+		    '#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_url7', $site_url),
+		  );
+		  $form['re_socialtools_twitter'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Twitter settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_twitter']['tweet_text'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet text'),
+		    '#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_tweet7', ''),
+		  );
+		  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Tweet hashtags'),
+		    '#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		    '#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+		  );
+		  $form['re_socialtools_twitter']['tweet_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet URL'),
+		    '#description' => t('Enter an abolute URL to include in the tweet. '),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_url7', $site_url),
+		  );
+	  break;
+
+	  case 're_socialtools_social_share8':
+		  $site_url = url('<front>', array('absolute' => TRUE));
+		  // Make sure the user has set the Facebook Application ID
+		  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+		  if (!($app_id)) {
+		    drupal_set_message(t('The "Post to Facebook" link will not work until you configure your Facebook Application ID <a href="/@link">here</a>!', array('@link' => 'admin/config/system/re_socialtools')), 'warning');
+		  }
+		  $default_hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags4', ''));
+		  $form['re_socialtools_fb'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Facebook settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_fb']['fb_title'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Facebook title/headline'),
+		    '#description' => t('Enter a title for the post when it appears on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_title8', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_post'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook text'),
+		    '#description' => t('Enter the text you\'d like to appear on the user\'s Facebook news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_post8', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_image'] = array(
+		    '#title' => t('Facebook image'),
+		    '#type' => 'managed_file',
+		    '#description' => t('Upload an image to accompany with your text on the user\'s Facebook news feed. Allowed extensions: jpg, jpeg, png, gif.'),
+	            '#upload_validators' => array(
+		      'file_validate_extensions' => array('gif png jpg jpeg'),
+		    ),
+		    '#upload_location' => file_default_scheme(). '://',
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_image8', ''),
+		  );
+		  $form['re_socialtools_fb']['fb_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Facebook link'),
+		    '#description' => t('Enter the absolute URL you\'d like to post to the user\'s news feed.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_fb_url8', $site_url),
+		  );
+		  $form['re_socialtools_twitter'] = array(
+		    '#type' => 'fieldset',
+		    '#title' => t('Twitter settings'),
+		    '#collapsible' => TRUE,
+	            '#collapsed' => TRUE,
+		  );
+		  $form['re_socialtools_twitter']['tweet_text'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet text'),
+		    '#description' => t('Enter the tweet text. Must be fewer than 140 characters.'),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_tweet8', ''),
+		  );
+		  $form['re_socialtools_twitter']['tweet_hashtags'] = array(
+		    '#type' => 'textfield',
+		    '#title' => t('Tweet hashtags'),
+		    '#description' => t('Enter the hashtags to send with the tweet. Separate multiple hashtags with a space.'),
+		    '#default_value' => (is_array($default_hashtags)) ? implode(' ' , $default_hashtags) : '',
+		  );
+		  $form['re_socialtools_twitter']['tweet_url'] = array(
+		    '#type' => 'textarea',
+		    '#title' => t('Tweet URL'),
+		    '#description' => t('Enter an abolute URL to include in the tweet. '),
+		    '#default_value' => variable_get('re_socialtools_social_share_twitter_url8', $site_url),
+		  );
+	  break;
+
+  }
+  return $form;
+}
+
+/**
+ * Implementation of hook_block_save
+ */
+
+function re_socialtools_block_save($delta = '', $edit = array()) {
+  switch($delta) {
+   case 're_socialtools_social_share':
+     $hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+     variable_set('re_socialtools_social_share_fb_post', $edit['fb_post']);
+	 variable_set('re_socialtools_social_share_fb_title', $edit['fb_title']);
+	 variable_set('re_socialtools_social_share_fb_url', $edit['fb_url']);
+	 variable_set('re_socialtools_social_share_twitter_tweet', $edit['tweet_text']);
+	 variable_set('re_socialtools_social_share_twitter_hashtags', serialize($hashtags));
+	 variable_set('re_socialtools_social_share_twitter_url', $edit['tweet_url']);
+	 $old_image_fid = variable_get('re_socialtools_social_share_fb_image', '');
+	 if ($edit['fb_image']) {
+	   $file = file_load($edit['fb_image']);
+	   if ($file) {
+	     $file->status = FILE_STATUS_PERMANENT;
+	     file_save($file);
+		 file_usage_add($file, 're_socialtools', 'block', $file->fid);
+		 // Are we replacing an image?
+		 if ($old_image_fid && ($file->fid != $old_image_fid)) {
+		   _re_socialtools_delete_file($old_image_fid);
+		 }
+	     variable_set('re_socialtools_social_share_fb_image', $file->fid);
+	   }
+	 }
+	 else {
+	   if ($old_image_fid) {
+	     _re_socialtools_delete_file($old_image_fid);
+	     variable_del('re_socialtools_social_share_fb_image');
+	   }
+	 }
+     break;
+
+      case 're_socialtools_social_share2':
+      $hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+      variable_set('re_socialtools_social_share_fb_post2', $edit['fb_post']);
+	  variable_set('re_socialtools_social_share_fb_title2', $edit['fb_title']);
+	  variable_set('re_socialtools_social_share_fb_url2', $edit['fb_url']);
+	  variable_set('re_socialtools_social_share_twitter_tweet2', $edit['tweet_text']);
+	  variable_set('re_socialtools_social_share_twitter_hashtags2', serialize($hashtags));
+	  variable_set('re_socialtools_social_share_twitter_url2', $edit['tweet_url']);
+	  $old_image_fid = variable_get('re_socialtools_social_share_fb_image2', '');
+	  if ($edit['fb_image']) {
+	    $file = file_load($edit['fb_image']);
+	    if ($file) {
+	      $file->status = FILE_STATUS_PERMANENT;
+	      file_save($file);
+		  file_usage_add($file, 're_socialtools', 'block', $file->fid);
+		  // Are we replacing an image?
+		  if ($old_image_fid && ($file->fid != $old_image_fid)) {
+		    _re_socialtools_delete_file($old_image_fid);
+		  }
+	      variable_set('re_socialtools_social_share_fb_image2', $file->fid);
+	    }
+	  }
+	  else {
+	   if ($old_image_fid) {
+	     _re_socialtools_delete_file($old_image_fid);
+	     variable_del('re_socialtools_social_share_fb_image2');
+	   }
+	 }
+     break;
+
+    case 're_socialtools_social_share3':
+      $hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+      variable_set('re_socialtools_social_share_fb_post3', $edit['fb_post']);
+	  variable_set('re_socialtools_social_share_fb_title3', $edit['fb_title']);
+	  variable_set('re_socialtools_social_share_fb_url3', $edit['fb_url']);
+	  variable_set('re_socialtools_social_share_twitter_tweet3', $edit['tweet_text']);
+	  variable_set('re_socialtools_social_share_twitter_hashtags3', serialize($hashtags));
+	  variable_set('re_socialtools_social_share_twitter_url3', $edit['tweet_url']);
+	  $old_image_fid = variable_get('re_socialtools_social_share_fb_image3', '');
+	  if ($edit['fb_image']) {
+	    $file = file_load($edit['fb_image']);
+	    if ($file) {
+	      $file->status = FILE_STATUS_PERMANENT;
+	      file_save($file);
+		  file_usage_add($file, 're_socialtools', 'block', $file->fid);
+		  // Are we replacing an image?
+		  if ($old_image_fid && ($file->fid != $old_image_fid)) {
+		    _re_socialtools_delete_file($old_image_fid);
+		  }
+	      variable_set('re_socialtools_social_share_fb_image3', $file->fid);
+	    }
+	  }
+	  else {
+	   if ($old_image_fid) {
+	     _re_socialtools_delete_file($old_image_fid);
+	     variable_del('re_socialtools_social_share_fb_image3');
+	   }
+	 }
+     break;
+
+    case 're_socialtools_social_share4':
+			$hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+			variable_set('re_socialtools_social_share_fb_post4', $edit['fb_post']);
+			variable_set('re_socialtools_social_share_fb_title4', $edit['fb_title']);
+			variable_set('re_socialtools_social_share_fb_url4', $edit['fb_url']);
+			variable_set('re_socialtools_social_share_twitter_tweet4', $edit['tweet_text']);
+			variable_set('re_socialtools_social_share_twitter_hashtags4', serialize($hashtags));
+			variable_set('re_socialtools_social_share_twitter_url4', $edit['tweet_url']);
+			$old_image_fid = variable_get('re_socialtools_social_share_fb_image4', '');
+			if ($edit['fb_image']) {
+			  $file = file_load($edit['fb_image']);
+			  if ($file) {
+			    $file->status = FILE_STATUS_PERMANENT;
+			    file_save($file);
+			  	file_usage_add($file, 're_socialtools', 'block', $file->fid);
+			  	// Are we replacing an image?
+			  	if ($old_image_fid && ($file->fid != $old_image_fid)) {
+			  	  _re_socialtools_delete_file($old_image_fid);
+			  	}
+
+		    	variable_set('re_socialtools_social_share_fb_image4', $file->fid);
+		  	}
+			}
+			else {
+				if ($old_image_fid) {
+					_re_socialtools_delete_file($old_image_fid);
+					variable_del('re_socialtools_social_share_fb_image4');
+				}
+			}
+		break;
+
+		case 're_socialtools_social_share5':
+			$hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+			variable_set('re_socialtools_social_share_fb_post5', $edit['fb_post']);
+			variable_set('re_socialtools_social_share_fb_title5', $edit['fb_title']);
+			variable_set('re_socialtools_social_share_fb_url5', $edit['fb_url']);
+			variable_set('re_socialtools_social_share_twitter_tweet5', $edit['tweet_text']);
+			variable_set('re_socialtools_social_share_twitter_hashtags5', serialize($hashtags));
+			variable_set('re_socialtools_social_share_twitter_url5', $edit['tweet_url']);
+			$old_image_fid = variable_get('re_socialtools_social_share_fb_image5', '');
+			if ($edit['fb_image']) {
+			  $file = file_load($edit['fb_image']);
+			  if ($file) {
+			    $file->status = FILE_STATUS_PERMANENT;
+			    file_save($file);
+			  	file_usage_add($file, 're_socialtools', 'block', $file->fid);
+			  	// Are we replacing an image?
+			  	if ($old_image_fid && ($file->fid != $old_image_fid)) {
+			  	  _re_socialtools_delete_file($old_image_fid);
+			  	}
+
+		    	variable_set('re_socialtools_social_share_fb_image5', $file->fid);
+		  	}
+			}
+			else {
+				if ($old_image_fid) {
+					_re_socialtools_delete_file($old_image_fid);
+					variable_del('re_socialtools_social_share_fb_image5');
+				}
+			}
+		break;
+
+		case 're_socialtools_social_share6':
+			$hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+			variable_set('re_socialtools_social_share_fb_post6', $edit['fb_post']);
+			variable_set('re_socialtools_social_share_fb_title6', $edit['fb_title']);
+			variable_set('re_socialtools_social_share_fb_url6', $edit['fb_url']);
+			variable_set('re_socialtools_social_share_twitter_tweet6', $edit['tweet_text']);
+			variable_set('re_socialtools_social_share_twitter_hashtags6', serialize($hashtags));
+			variable_set('re_socialtools_social_share_twitter_url6', $edit['tweet_url']);
+			$old_image_fid = variable_get('re_socialtools_social_share_fb_image6', '');
+			if ($edit['fb_image']) {
+			  $file = file_load($edit['fb_image']);
+			  if ($file) {
+			    $file->status = FILE_STATUS_PERMANENT;
+			    file_save($file);
+			  	file_usage_add($file, 're_socialtools', 'block', $file->fid);
+			  	// Are we replacing an image?
+			  	if ($old_image_fid && ($file->fid != $old_image_fid)) {
+			  	  _re_socialtools_delete_file($old_image_fid);
+			  	}
+
+		    	variable_set('re_socialtools_social_share_fb_image6', $file->fid);
+		  	}
+			}
+			else {
+				if ($old_image_fid) {
+					_re_socialtools_delete_file($old_image_fid);
+					variable_del('re_socialtools_social_share_fb_image6');
+				}
+			}
+		break;
+
+		case 're_socialtools_social_share7':
+			$hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+			variable_set('re_socialtools_social_share_fb_post7', $edit['fb_post']);
+			variable_set('re_socialtools_social_share_fb_title7', $edit['fb_title']);
+			variable_set('re_socialtools_social_share_fb_url7', $edit['fb_url']);
+			variable_set('re_socialtools_social_share_twitter_tweet7', $edit['tweet_text']);
+			variable_set('re_socialtools_social_share_twitter_hashtags7', serialize($hashtags));
+			variable_set('re_socialtools_social_share_twitter_url7', $edit['tweet_url']);
+			$old_image_fid = variable_get('re_socialtools_social_share_fb_image7', '');
+			if ($edit['fb_image']) {
+			  $file = file_load($edit['fb_image']);
+			  if ($file) {
+			    $file->status = FILE_STATUS_PERMANENT;
+			    file_save($file);
+			  	file_usage_add($file, 're_socialtools', 'block', $file->fid);
+			  	// Are we replacing an image?
+			  	if ($old_image_fid && ($file->fid != $old_image_fid)) {
+			  	  _re_socialtools_delete_file($old_image_fid);
+			  	}
+
+		    	variable_set('re_socialtools_social_share_fb_image7', $file->fid);
+		  	}
+			}
+			else {
+				if ($old_image_fid) {
+					_re_socialtools_delete_file($old_image_fid);
+					variable_del('re_socialtools_social_share_fb_image7');
+				}
+			}
+		break;
+
+		case 're_socialtools_social_share8':
+			$hashtags = explode(' ' , check_plain($edit['tweet_hashtags']));
+			variable_set('re_socialtools_social_share_fb_post8', $edit['fb_post']);
+			variable_set('re_socialtools_social_share_fb_title8', $edit['fb_title']);
+			variable_set('re_socialtools_social_share_fb_url8', $edit['fb_url']);
+			variable_set('re_socialtools_social_share_twitter_tweet8', $edit['tweet_text']);
+			variable_set('re_socialtools_social_share_twitter_hashtags8', serialize($hashtags));
+			variable_set('re_socialtools_social_share_twitter_url8', $edit['tweet_url']);
+			$old_image_fid = variable_get('re_socialtools_social_share_fb_image8', '');
+			if ($edit['fb_image']) {
+			  $file = file_load($edit['fb_image']);
+			  if ($file) {
+			    $file->status = FILE_STATUS_PERMANENT;
+			    file_save($file);
+			  	file_usage_add($file, 're_socialtools', 'block', $file->fid);
+			  	// Are we replacing an image?
+			  	if ($old_image_fid && ($file->fid != $old_image_fid)) {
+			  	  _re_socialtools_delete_file($old_image_fid);
+			  	}
+
+		    	variable_set('re_socialtools_social_share_fb_image8', $file->fid);
+		  	}
+			}
+			else {
+				if ($old_image_fid) {
+					_re_socialtools_delete_file($old_image_fid);
+					variable_del('re_socialtools_social_share_fb_image8');
+				}
+			}
+		break;
+
+  }
+}
+
+/**
+ * An implementation of hook_block_view
+ */
+
+function re_socialtools_block_view($delta = '') {
+  $block = array();
+  switch($delta) {
+    case 're_socialtools_social_share':
+	  if (user_access('use social links')) {
+	    $block['subject'] = t('Share this site on Facebook and Twitter');
+	    $block['content'] = array(
+		  '#markup' => _re_socialtools_social_links(),
+		  '#attached' => array(
+		    'js' => _re_socialtools_compile_js(),
+		  ),
+		);
+	  }
+	  break;
+
+	case 're_socialtools_social_share2':
+	  if (user_access('use social links')) {
+	    $block['subject'] = t('Share this site on Facebook and Twitter');
+	    $block['content'] = array(
+		  '#markup' => _re_socialtools_social_links2(),
+		  '#attached' => array(
+		    'js' => _re_socialtools_compile_js2(),
+		  ),
+		);
+	  }
+	  break;
+
+    case 're_socialtools_social_share3':
+	  if (user_access('use social links')) {
+	    $block['subject'] = t('Share this site on Facebook and Twitter');
+	    $block['content'] = array(
+		  '#markup' => _re_socialtools_social_links3(),
+		  '#attached' => array(
+		    'js' => _re_socialtools_compile_js3(),
+		  ),
+		);
+	  }
+	  break;
+
+    case 're_socialtools_social_share4':
+		  if (user_access('use social links')) {
+		    $block['subject'] = t('Share this site on Facebook and Twitter');
+		    $block['content'] = array(
+				  '#markup' => _re_socialtools_social_links4(),
+				  '#attached' => array(
+				    'js' => _re_socialtools_compile_js4(),
+				  ),
+				);
+		  }
+	  break;
+
+	  case 're_socialtools_social_share5':
+		  if (user_access('use social links')) {
+		    $block['subject'] = t('Share this site on Facebook and Twitter');
+		    $block['content'] = array(
+				  '#markup' => _re_socialtools_social_links5(),
+				  '#attached' => array(
+				    'js' => _re_socialtools_compile_js5(),
+				  ),
+				);
+		  }
+	  break;
+
+	  case 're_socialtools_social_share6':
+		  if (user_access('use social links')) {
+		    $block['subject'] = t('Share this site on Facebook and Twitter');
+		    $block['content'] = array(
+				  '#markup' => _re_socialtools_social_links6(),
+				  '#attached' => array(
+				    'js' => _re_socialtools_compile_js6(),
+				  ),
+				);
+		  }
+	  break;
+
+	  case 're_socialtools_social_share7':
+		  if (user_access('use social links')) {
+		    $block['subject'] = t('Share this site on Facebook and Twitter');
+		    $block['content'] = array(
+				  '#markup' => _re_socialtools_social_links7(),
+				  '#attached' => array(
+				    'js' => _re_socialtools_compile_js7(),
+				  ),
+				);
+		  }
+	  break;
+
+	  case 're_socialtools_social_share8':
+		  if (user_access('use social links')) {
+		    $block['subject'] = t('Share this site on Facebook and Twitter');
+		    $block['content'] = array(
+				  '#markup' => _re_socialtools_social_links8(),
+				  '#attached' => array(
+				    'js' => _re_socialtools_compile_js8(),
+				  ),
+				);
+		  }
+	  break;
+
+  }
+  return $block;
+}
+
+/**
+ * A custom function that deletes a file based on a file id
+ */
+
+function _re_socialtools_delete_file($fid) {
+  if ($fid && is_numeric($fid)) {
+    $file = file_load($fid);
+		if ($file) {
+		  file_usage_delete($file, 're_socialtools');
+		  file_delete(file_load($file->fid));
+		}
+  }
+}
+
+/*
+	=========================== CUSTOM FUNCTIONS TO GENERATE CONTENT OF BLOCK =======
+ */
+
+/**
+ * A custom function that generates the content of our social sharing block
+ */
+
+function _re_socialtools_social_links() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+/**
+ * A custom function that generates the content of our social sharing block
+ */
+
+function _re_socialtools_social_links2() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url2', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet2', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url2', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags2', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+function _re_socialtools_social_links3() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url3', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet3', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url3', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags3', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+function _re_socialtools_social_links4() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url4', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet4', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url4', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags4', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+function _re_socialtools_social_links5() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url5', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet5', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url5', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags5', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+function _re_socialtools_social_links6() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url6', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet6', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url6', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags6', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+function _re_socialtools_social_links7() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url7', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet7', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url7', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags7', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+function _re_socialtools_social_links8() {
+  // Facebook handling; most occurs in _re_socialtools_compile_js()
+  global $base_url;
+  $fb_url = variable_get('re_socialtools_social_share_fb_url8', $base_url);
+  $links[] = l(t('Share on <strong>Facebook</strong>'), 'http://www.facebook.com/share.php?u=' . $base_url, array('attributes' => array('id' => 'post-to-fb', 'target' => '_blank'), 'html' => TRUE));
+
+  // Twitter-related handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet8', FALSE);
+  if ($tweet_text){
+    $tweet_text = str_replace(' ', '+', substr(check_plain($tweet_text), 0 , 150));
+	$tweet_url = variable_get('re_socialtools_social_share_twitter_url8', $base_url);
+	$hashtags = unserialize(variable_get('re_socialtools_social_share_twitter_hashtags8', ''));
+	$hashtags = (is_array($hashtags)) ? implode(',', $hashtags) : '';
+	$links[] = '<a id="post-to-twitter" href="http://www.twitter.com/intent/tweet?text=' . $tweet_text . '&hashtags=' . $hashtags . '&url=' . $tweet_url . '" target="_blank">Share on <strong>Twitter</strong></a>';
+  }
+  if ($links) {
+    return theme('item_list', array('items' => $links, 'type' => 'ul'));
+  }
+}
+
+
+/*
+	================ JS Compilation Functions ===================
+ */
+
+/**
+ * A custom function that compiles the needed JS for our social share block
+ */
+
+function _re_socialtools_compile_js() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * A custom function that compiles the needed JS for our social share block
+ */
+
+function _re_socialtools_compile_js2() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title2', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post2', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url2', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image2', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet2', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * A custom function that compiles the needed JS for our social share block
+ */
+
+function _re_socialtools_compile_js3() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title3', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post3', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url3', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image3', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet3', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * A custom function that compiles the needed JS for our social share block
+ */
+
+function _re_socialtools_compile_js4() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title4', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post4', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url4', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image4', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet4', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+
+function _re_socialtools_compile_js5() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title5', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post5', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url5', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image5', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet5', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+function _re_socialtools_compile_js6() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title6', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post6', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url6', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image6', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet6', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+function _re_socialtools_compile_js7() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title7', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post7', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url7', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image7', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet7', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}
+
+function _re_socialtools_compile_js8() {
+  // Facebook handling
+  global $base_url;
+  $site_name = variable_get('site_name', 'Drupal');
+  $app_id = variable_get('re_socialtools_fb_api_id', FALSE);
+  $fb_title = variable_get('re_socialtools_social_share_fb_title8', $site_name);
+  $fb_text = variable_get('re_socialtools_social_share_fb_post8', FALSE);
+  $fb_url = variable_get('re_socialtools_social_share_fb_url8', $base_url);
+  if ($fb_text && $app_id) {
+	$fb_image_fid = variable_get('re_socialtools_social_share_fb_image8', FALSE);
+    if ($fb_image_fid) {
+      $fb_image = file_load($fb_image_fid);
+	  $fb_image_path = file_create_url($fb_image->uri);
+    }
+    else {
+      $fb_image_path = '';
+    }
+    $inline_js = 'jQuery(function() {jQuery("#post-to-fb").click(function(){ FB.ui({method: "feed", link: "' . $fb_url . '", picture: "' . $fb_image_path . '", name: "' . $fb_title . '", description: "' . check_plain($fb_text) . '" }); return false; });});';
+    $js['http://connect.facebook.net/en_US/all.js'] = array('type', 'external');
+    $js[drupal_get_path('module', 're_socialtools') . '/re_socialtools.js'] = array();
+	$js[$inline_js] = array('type' => 'inline');
+  }
+
+  // Twitter handling
+  $tweet_text = variable_get('re_socialtools_social_share_twitter_tweet8', FALSE);
+  if($tweet_text) {
+    // $js['http://platform.twitter.com/widgets.js'] = array('type' => 'external');
+  }
+  if (is_array($js)) {
+    return $js;
+  }
+  else {
+    return array();
+  }
+}

@@ -1,0 +1,3 @@
+services:
+  smartysteets.address_lookup:
+    class: Drupal\smartystreets\SmartyStreetsAddressLookup

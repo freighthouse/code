@@ -1,0 +1,20 @@
+momentum.settings:
+    type: mapping
+    label: Settings
+    mapping:
+        momentum_api_key:
+            type: string
+        momentum_parent:
+            type: string
+        momentum_email:
+            type: string
+        momentum_url:
+            type: string
+        momentum_process:
+            type: integer
+        momentum_debug:
+            type: integer
+        momentum_batch_size:
+            type: interger
+        momentum_error_description:
+            type: string

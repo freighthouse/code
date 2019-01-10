@@ -1,0 +1,7 @@
+name: 'Momentum Candidates'
+type: module
+description: 'Provides the ability to find candidates based on location using the Momentum API.'
+core: 8.x
+package: 'Momentum'
+dependencies:
+  - momentum

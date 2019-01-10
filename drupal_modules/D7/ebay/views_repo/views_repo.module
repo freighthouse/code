@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * @author
+ *   Jeremy Cerda - jcerda@req.co
+ */
+
+
+/**
+* Implements hook_views_api().
+*/
+function views_repo_views_api() {
+    return array(
+        'api' => '3.0',
+        'path' => drupal_get_path('module', 'views_repo') . '/views'
+    );
+}
+
+/**
+ * Implements hook_views_default_views().
+ *
+ * Imports views from the /views directory.
+ */
+function views_repo_views_default_views() {
+    $path = __DIR__ . '/views/*.view.inc';
+    $views = array();
+    foreach (glob($path) as $views_filename) {
+        $view = FALSE;
+        require_once($views_filename);
+        $views[$view->name] = $view; // $view exists in the included file.
+        unset($view);
+    }
+    return $views;
+}

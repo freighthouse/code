@@ -1,0 +1,75 @@
+.page--support-rif-ways-to-give,
+.page--support-rif-ways-to-give-support-rif-ways-to-give {
+  .pane-2 {
+    img {
+      height: auto;
+      max-width: 100%;
+      width: auto;
+    }
+
+    h3 {
+      font-family: $ff-display;
+      font-weight: $fw-semibold;
+      margin: 0;
+
+      b {
+        font-weight: $fw-semibold;
+      }
+    }
+
+    p {
+      > a {
+        color: $blue-light !important;
+        display: block;
+        font-weight: $fw-bold;
+        letter-spacing: .05em;
+        line-height: 20px;
+        text-transform: uppercase;
+        margin-top: $spacing-small;
+
+        font-size: 14px;
+        letter-spacing: 1px;
+        line-height: 20px;
+        text-transform: uppercase;
+        text-decoration: none;
+
+        &:after {
+          content: "\f061";
+          font: normal normal normal 14px/1 FontAwesome;
+          display: inline-block;
+          vertical-align: middle;
+          @include transitions(margin-left);
+          color: $blue-light;
+          margin-left: 6px;
+        }
+
+        &:hover,
+        &:focus {
+          text-decoration: none;
+
+          &:after {
+            margin-left: 9px;
+          }
+        }
+      }
+    }
+
+    .col-md-6 {
+      margin-bottom: $spacing-xlarge;
+    }
+
+    br {
+      display: none;
+      visibility: hidden;
+    }
+
+    .row {
+      .row {
+        margin: 0;
+        .row {
+          margin: 0;
+        }
+      }
+    }
+  }
+}

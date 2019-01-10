@@ -1,0 +1,40 @@
+.push-behind .section-border {
+    z-index: 0;
+}
+
+.counter-container .leaderboard-image{
+    margin: auto;
+}
+.counter-container .results-container {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    top: 42%;
+}
+.counter-container .results {
+    font-weight: 900;
+    font-size: 100px;
+    font-size: 6.6vw;
+    letter-spacing: 25px;
+    letter-spacing: 1.5vw;
+    font-family: "Arial Black", Gadget, sans-serif;
+    color: #52439b;
+}
+
+.million-march-image-container {
+    text-align: center;
+    margin-top: -175px;
+    margin-bottom: 30px;
+}
+
+.million-march-image-container img{
+    z-index: 1;
+    position: relative;
+}
+
+@media only screen and (min-width : 1600px) {
+    .counter-container .results {
+        font-size: 100px !important;
+    }
+}

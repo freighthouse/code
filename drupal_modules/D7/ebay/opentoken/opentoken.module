@@ -1,0 +1,136 @@
+<?php
+
+/**
+ * @file
+ *
+ * Enables SSO for eBay's internal users using PingFederate OpenToken.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function opentoken_permission() {
+  return array(
+    'administer opentoken' => array(
+      'title' => t('Administer opentoken'),
+      'description' => t('Configure opentoken module.'),
+    )
+  );
+}
+
+
+/**
+ * Implements hook_init().
+ */
+function opentoken_init() {
+  $args = arg();
+  if (user_is_anonymous()) {
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/agent');
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/helpers/config');
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/helpers/keyvalueserializer');
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/helpers/multistringarray');
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/helpers/passwordkeygenerator');
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/helpers/token');
+    module_load_include('php', 'opentoken', 'pingidentity/opentoken/helpers/opentoken');
+    $myagent = new \pingidentity\opentoken\Agent();
+    $parameters = $myagent->readTokenFromHTTPRequest();
+    if ($parameters != NULL) {
+      if (!empty($parameters['subject'])) {
+        $name = $parameters['subject'];
+        $mail = !empty($parameters['email']) ? $parameters['email'] : NULL;
+        $role = NULL;
+        if (!empty($parameters['employeetype'])) {
+          $role = $parameters['employeetype'] == 'Contractor' ? 9 : 8;
+        }
+watchdog('sso', $mail . ' ' . $role, array());
+        if ((empty($mail)) || (empty($role)) || ($role != 8)) {
+          // Just return?
+          return;
+        }
+watchdog('sso', '4' . json_encode($parameters), array());
+        $account = user_load_by_name($name) ? user_load_by_name($name) : user_load_by_mail($mail);
+        if (!$account) {
+          $name = $parameters['subject'];
+          $pass = md5(microtime());
+          $account = user_save('', array(
+            'name' => $name,
+            'mail' => $mail,
+            'init' => $name,
+            'pass' => $pass,
+            'status' => 1,
+            'roles' => array(
+              DRUPAL_AUTHENTICATED_RID => DRUPAL_AUTHENTICATED_RID,
+              $role => $role,
+            ),
+          ), 'account');
+        }
+        elseif (!empty($account->roles)) {
+watchdog('sso', '5' . json_encode($parameters), array());
+          // This adds Employee role to users who who should have it but don't already
+          // I.e., PAC users
+          if (($role == 8) && (!in_array('employee', $account->roles))) {
+            user_multiple_role_edit(array($account->uid), 'add_role', 8);
+          }
+        }
+        $uid = $account->uid;
+        $form_state = array('uid' => $uid);
+        user_login_submit(array(), $form_state);
+        drupal_goto(request_uri());
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function opentoken_menu() {
+  $items = array();
+  $items['employees/login'] = array(
+    'title' => 'Ebay Log in',
+    'page callback' => 'opentoken_ebay_login',
+    'access callback' => TRUE,
+    'weight' => -10,
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/config/system/opentoken'] = array(
+    'title' => 'Open Token',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('opentoken_settings_form'),
+    'file' => 'opentoken.admin.inc',
+    'access arguments' => array('administer opentoken'),
+    'type' => MENU_NORMAL_ITEM,
+    'description' => t('Configure opentoken module.'),
+  );
+  return $items;
+}
+
+/**
+ * Returns Open Token base SSO URL.
+ */
+function get_opentoken_base_sso_url($path) {
+  global $base_url;
+  $parsed = parse_url($base_url);
+  if ($parsed['scheme'] == 'http') {
+    $url = str_replace('http', 'https', $base_url);
+  }
+  else {
+    $url = $base_url;
+  }
+  $route = $url . '/' . $path;
+  return variable_get('opentoken_sso_url') . '&TargetResource=' . urlencode($route);
+}
+
+/**
+ * Redirect the user to PingFederate server if he is not logged in, otherwise let him see his account.
+ */
+function opentoken_ebay_login() {
+  global $user;
+  $path = !empty($_GET['destination']) ? $_GET['destination'] : 'employees';
+  if ($user->uid) {
+    drupal_goto($path);
+  }
+  else {
+    drupal_goto(get_opentoken_base_sso_url($path));
+  }
+}

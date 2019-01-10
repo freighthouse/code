@@ -1,0 +1,115 @@
+.node-type-countable-campaign-1 {
+  .region-content .block-system > .content {
+    border: none;
+    background: none;
+  }
+  .countable-page-wrapper {
+    background-color: #ffffff;
+    padding: 2em;
+    padding-bottom: 40px;
+    padding-top: 0em;
+    border: 1px solid #cccccc;
+  }
+  .countable-fields-wrapper {
+    @include breakpoint($bp-small) {
+      background-color: #ffffff;
+      padding: 2em;
+      padding-top: 0em;
+      float: left;
+      border: 1px solid #cccccc;
+    }
+    .field-name-field-gallery {
+      margin-top: 40px;
+      .field-name-field-video-url a{
+            position: relative;
+            z-index: 3;
+          &:before {
+            content: '';
+                    position: absolute;
+                    top: -115px;
+                    right: 0;
+                    bottom: 0;
+                    left: 38%;
+                    background: url("/sites/all/themes/ebaymainstreet2015/images/play.png") no-repeat;
+                    z-index: 15;
+                    display: block;
+          }
+      }
+    }
+    .field-name-field-gallery > .field-items > .field-item {
+      @include breakpoint($bp-small) {
+        width: 30%;
+        margin-right: 30px;
+        float: left;
+      }
+    }
+    .field-name-field-location-city-state- {
+      display: inline-flex;
+    }
+    .field-name-field-gallery-name {
+      display: inline-flex;
+      margin-right: 40px;
+    }
+    .field-name-field-ebay-store {
+      display: inline-flex;
+    }
+  }
+  .addtoany_list.a2a_kit_size_32 > a {
+    font-size: 32px;
+    margin-top: 20px;
+  }
+	.field-name-field-featured-video-url {
+		@include breakpoint($bp-small) {
+			width: 63%;
+    		float: left;
+    		margin-top: 35px;
+    		margin-right: 40px;
+    	}
+    }
+      .field-name-field-featured-video-url a { 
+            position: relative;
+            z-index: 3;
+          &:before {
+            content: '';
+            position: absolute;
+            top: -196px;
+            right: 0;
+            bottom: 0;
+            left: 45%;
+            background: url("/sites/all/themes/ebaymainstreet2015/images/play.png") no-repeat;
+            z-index: 15;
+            display: block;
+          }
+      }
+	.field-name-field-button-text-video {
+		a {
+			@include fontsize(14);
+  			@extend %helvetica;
+  			@extend %bold;
+  			padding: 1em 1em;
+  			margin-top: 2em;
+  			color: $c-white;
+  			background: none;
+  			text-shadow: none;
+  			text-transform: uppercase;
+  			border-radius: 0;
+  			background-color: $c-blue;
+  			border-radius: 0.3em;
+  			font-weight: normal;
+  			line-height: 1;
+  			&:hover,
+  			&:focus {
+    			background: none;
+    			background-color: $c-light-blue;
+    			text-decoration: none;
+    			color: $c-white;
+    		}
+
+  		}
+	}
+}
+#cboxLoadedContent {
+  .embedded-video {
+    position: initial !important;
+  }
+}

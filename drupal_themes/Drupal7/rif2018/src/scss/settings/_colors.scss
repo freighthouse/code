@@ -1,0 +1,25 @@
+
+
+/* Gray */
+$black:         #000000;
+$gray-dark:     #5C626B;
+$gray-medium:   #848D9C;
+$gray-light:    #CDD4DB;
+$gray-white:    #F2F4F6;
+$white:         #FFFFFF;
+/* Blue */
+$blue-black:    mix(#002C76, $black, 25%);
+$blue-dark:     #002C76;
+$blue-medium:   #0066AC;
+$blue-light:    #00A2E3;
+$blue-white:    mix($blue-light, $white, 25%);
+/* Green */
+$green-dark:    #007233;
+$green-medium:  #509B33;
+$green-light:   #A3C534;
+/* Red */
+$red-dark:      #C13814;
+$red-medium:    #E08A0A;
+$red-light:     #FFDE00;
+
+$clr-body:      $black;

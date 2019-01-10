@@ -1,0 +1,11 @@
+name: 'Momentum'
+type: module
+description: 'Momentum advocacy feature enabling users to send correspondence to elected government personnel. Provides a general API for integratin with Momentum. Includes configuration.'
+core: 8.x
+package: 'Momentum'
+
+dependencies:
+  - drupal:toolbar
+  - drupal:admin_toolbar
+
+configure: momentum.config

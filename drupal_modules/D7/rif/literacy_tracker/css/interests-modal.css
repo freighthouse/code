@@ -1,0 +1,30 @@
+.interests-checkbox label{
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.interests-checkbox input {
+    display: none;
+}
+
+.interests-checkbox input:checked ~ .icon {
+    display: none;
+}
+
+.interests-checkbox input:checked ~ .icon-highlighted {
+    display: block;
+}
+
+.interests-checkbox .icon {
+    margin: auto;
+}
+
+.interests-checkbox .icon-highlighted {
+    display: none;
+}
+.interests-checkbox .icon-highlighted {
+    background-size: cover;
+}

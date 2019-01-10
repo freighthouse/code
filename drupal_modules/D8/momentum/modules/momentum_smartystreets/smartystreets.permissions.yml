@@ -1,0 +1,4 @@
+administer SmartyStreets:
+  title: 'Administer SmartyStreets'
+  description: 'Access SmartyStreets configuration options.'
+  restrict access: TRUE

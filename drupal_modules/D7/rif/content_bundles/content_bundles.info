@@ -1,0 +1,3 @@
+name = Content Bundles
+description = Module to give administrators ability to schedule content bundles to display throughout rif
+core = 7.x

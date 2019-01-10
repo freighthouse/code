@@ -1,0 +1,6 @@
+name = Rif Registration
+description = Module to work with Profile2 to display extremely customized registration pages
+core = 7.x
+
+dependencies[] = devel
+dependencies[] = profile2

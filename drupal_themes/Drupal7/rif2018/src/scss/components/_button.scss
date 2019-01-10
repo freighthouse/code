@@ -1,0 +1,56 @@
+
+.btn {
+  &.btn-yellow,
+  &.btn-yellow-rif,
+  &.btn-green,
+  &.btn-green-rif,
+  .component--color-green & {
+    @include button-small;
+    @include button-green;
+  }
+
+  &.btn-red,
+  &.btn-red-rif,
+  &.btn-yellow-dark,
+  .component--color-red & {
+    @include button-small;
+    @include button-red;
+  }
+
+  &.btn-blue,
+  &.btn-blue-rif,
+  &.btn-blue-dark,
+  .component--color-blue & {
+    @include button-small;
+    @include button-blue;
+    &.blue-border {
+      border: none;
+    }
+  }
+
+  &.btn-white,
+  &.btn-white-rif,
+  .component--color-white & {
+    @include button-small;
+    @include button-white;
+  }
+
+  &.btn-grey,
+  &.btn-grey-rif,
+  .component--color-grey & {
+    @include button-small;
+    @include button-gray;
+  }
+
+  &.disabled {
+    @include button-disabled;
+  }
+}
+
+.puzzle-button {
+  &.blue,
+  &.light-blue {
+    @include button-xsmall;
+    @include button-blue;
+  }
+}

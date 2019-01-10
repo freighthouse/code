@@ -1,0 +1,98 @@
+.front .header-search-form {
+  &.open {
+    @include breakpoint($bp-small) {
+      bottom: 103px;
+    }
+  }
+}
+
+.header-search-form {
+  @include transition();
+  display: none;
+  &.open {
+    display: block;
+    position: relative;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+    input[type="search"] {
+      width: 0;
+    }
+    @include breakpoint($bp-small) {
+      position: absolute;
+      right: 400px;
+      bottom: 90px;
+    }
+  }
+  .form-actions {
+    display: none;
+  }
+  input[type="search"] {
+    @include transition();
+    height: 1.5em;
+    line-height: 1.4;
+    padding-right: 1.5em;
+    width: 0;
+  }
+}
+
+.header-search-item a span {
+  @extend %visuallyhidden;
+}
+
+.header-secondary-menu .content .header-search-link {
+   &:after {
+    @extend %search-icon;
+    @include fontsize(18);
+    display: inline-block;
+    padding-right: 1em;
+    margin: 0;
+    top: 0.15em;
+    font-size: 18px;
+    position: relative;
+  }
+}
+
+.header-search-link {
+  display: inline-block;
+  margin-right: 1em;
+  width: 18px;
+}
+
+.page-search {
+  .form-type-searchfield {
+    label {
+      line-height: 2.5;
+    }
+  }
+  .form-submit {
+    margin: 0;
+  }
+  .search-result {
+    text-align: left;
+  }
+  h3.title {
+    text-align: left;
+  }
+  .search-info {
+    display: none;
+  }
+  .search-publication-date {
+    @include fontsize(14);
+    @extend %italic;
+    color: $c-medium-grey;
+  }
+  .form-checkboxes,
+  .form-radios {
+    margin: 1em 1em;
+  }
+  .form-checkboxes .option,
+  .form-radios .option {
+    font-weight: 400;
+    margin-left: 0.5em;
+  }
+  .form-type-checkbox,
+  .form-type-radio {
+    margin: 0.5em 0;
+  }
+}

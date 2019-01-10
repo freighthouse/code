@@ -1,0 +1,91 @@
+
+.landing-page-component-video {
+
+  h2 {
+    @include fs($fs-70);
+    line-height: 1em;
+    margin: 0;
+    @media (min-width: 992px) {
+      margin-bottom: $spacing-large;
+    }
+  }
+  &.video--color-blue {
+    h2 {
+      color: $blue-dark;
+    }
+  }
+  &.video--color-green {
+    h2 {
+      color: $green-dark;
+    }
+  }
+  &.video--color-red {
+    h2 {
+      color: $red-dark;
+    }
+  }
+
+  .field-name-field-video-button {
+    margin-top: $spacing-large;
+
+    .btn {
+      @include button-large;
+    }
+  }
+}
+
+.component__video__image {
+  position: relative;
+
+  @media (max-width: 991px) {
+    margin-bottom: $spacing-large;
+  }
+
+  img {
+    display: block;
+    height: auto;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 100%;
+  }
+
+  .btn {
+    @include button-large;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 5px inset $white, 0 1px 10px rgba($blue-dark, .25);
+
+    &:active {
+      box-shadow: 0 1px 1px inset rgba($blue-light, .5), 0 1px 10px rgba($blue-dark, .25);
+
+      &:after {
+        margin-top: 1px;
+      }
+    }
+    @media (min-width: 768px) {
+      padding-right: 90px;
+      padding-left: 30px;
+
+      &:after {
+        content: "\f04b";
+        font: normal normal normal 14px/1 FontAwesome;
+        position: absolute;
+        top: 50%;
+        right: 30px;
+        transform: translate(50%, -50%);
+      }
+
+      &:before {
+        content: "";
+        width: 1px;
+        height: 100%;
+        top: 0;
+        right: 60px;
+        background-color: $blue-white;
+        position: absolute;
+      }
+    }
+  }
+}

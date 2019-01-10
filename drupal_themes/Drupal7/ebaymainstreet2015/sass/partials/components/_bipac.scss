@@ -1,0 +1,587 @@
+.block-tweetrep {
+  padding-top: 1em;
+}
+
+.block-findreps .content {
+  padding: 1em;
+  @include breakpoint($bp-small) {
+    padding: 2em;
+  }
+}
+
+.official.row-odd {
+  clear: none;
+  margin-right: 0;
+  @include breakpoint($bp-small) {
+    clear: left;
+    margin-right: 1%;
+  }
+}
+
+.official.row-even {
+  clear: none;
+  margin-left: 0;
+  @include breakpoint($bp-small) {
+    clear: right;
+    margin-left: 1%;
+  }
+}
+
+.official-profile-link {
+  &:hover,
+  &:focus {
+    .official-name {
+      color: $c-light-blue;
+    }
+  }
+}
+
+.official {
+  position: relative;
+  float: left;
+  padding: 2%;
+  border: none;
+  border-bottom: 1px solid $c-light-grey;
+  margin-bottom: 1em;
+  width: 98%;
+  min-height: 6.5em;
+  @include breakpoint($bp-tiny) {
+    border: 1px solid $c-light-grey;
+  }
+  @include breakpoint($bp-small) {
+    width: 44%;
+  }
+}
+
+.official-image {
+  float: none;
+  width: 100%;
+  max-width: 75px;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 20%;
+  }
+}
+
+.official--photo {
+  display: block;
+  @include breakpoint($bp-small) {
+    float: left;
+    margin-right: 2%;
+    width: 15%;
+    max-width: 165px;
+  }
+}
+
+.official-text {
+  float: none;
+  width: 100%;
+  padding-left: 0;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 79%;
+    padding-left: 1%;
+  }
+
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.official-subtitle {
+  @extend %bold;
+  @include fontsize(13);
+  padding-top: 2em;
+  margin: 0;
+  color: $c-red;
+  text-transform: uppercase;
+}
+
+.official-text-content {
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 83%;
+  }
+}
+
+.official--level {
+  color: $c-blue;
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: 1em;
+}
+
+.official-name {
+  @include fontsize(18);
+  @extend %bold;
+  color: $c-blue;
+  margin: 0;
+  text-transform: uppercase;
+  line-height: 1.2;
+  @include breakpoint($bp-small) {
+    @include fontsize(22);
+  }
+}
+
+.official--social-media-list {
+  padding: 0;
+  margin: 0;
+  word-wrap: break-word;
+  @include breakpoint($bp-small) {
+    width: 50%;
+    float: left;
+    margin-bottom: 1em;
+  }
+  li {
+    @include fontsize(14);
+    list-style-type: none;
+    margin: 1em 0;
+    word-break: break-all;
+    @include breakpoint($bp-small) {
+      margin: 0;
+    }
+  }
+}
+
+.official--contact-info {
+  padding: 0;
+  margin: 0;
+  word-wrap: break-word;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 50%;
+  }
+  li {
+    @include fontsize(14);
+    list-style-type: none;
+    @include breakpoint($bp-small) {
+      width: 50%;
+    }
+  }
+}
+
+.official-icon-item:before {
+  width: 1.5em;
+  text-align: center;
+  display: inline-block;
+  color: $c-blue;
+  margin: 0.5em 0;
+}
+
+.official-website-icon {
+  &:before {
+    @extend %website;
+  }
+}
+
+.official-facebook-icon {
+  &:before {
+    @extend %facebook;
+  }
+}
+
+.official-twitter-icon {
+  &:before {
+    @extend %twitter;
+  }
+}
+
+.official-youtube-icon {
+  &:before {
+    @extend %youtube;
+  }
+}
+
+.official-location-icon {
+  &:before {
+    @extend %location;
+  }
+}
+
+.official-phone-icon {
+  &:before {
+    @extend %phone;
+  }
+}
+
+.official-fax-icon {
+  &:before {
+    @extend %fax;
+  }
+}
+
+.tweet-rep-full-page-block {
+  h3 {
+    margin-top: 0;
+  }
+  textarea,
+  select,
+  input[type="date"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="email"],
+  input[type="month"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="time"],
+  input[type="url"],
+  input[type="week"] {
+    width: 100%;
+  }
+  .preview textarea {
+    @include fontsize(18);
+    width: 100%;
+    line-height: 1.4;
+    resize: none;
+    overflow: auto;
+    padding: 1em;
+    margin: 0 0 1em 0;
+    color: $c-off-black;
+    border-color: $c-light-grey;
+    background-color: $c-white;
+  }
+  .link #post-to-twitter {
+    @extend %blue-button;
+    @include fontsize(20);
+    text-transform: uppercase;
+    padding: 0.75em 1em 0.5em 1em;
+    margin-bottom: 1em;
+    &:before {
+      @extend %twitter;
+      @include fontsize(36);
+      margin-right: 0.5em;
+      vertical-align: middle;
+      bottom: 5px;
+      position: relative;
+    }
+  }
+}
+
+// Markup for the block
+/*
+
+  Block classes: thank-you-page-tweet-block half-page-left-block
+
+  <div class="thank-you-page-tweet-block-content">
+    <a href="/action-center/tweet?campaign_id=129965">
+      <span class="tweet-icon"></span>
+      Tweet Your Members of Congress
+    </a>
+  </div>
+
+*/
+.thank-you-page-tweet-block {
+  .thank-you-page-tweet-block-content {
+    .tweet-icon {
+      &:before {
+        @extend %twitter;
+        @include fontsize(44);
+        display: block;
+        padding: 1em;
+        border-radius: 50%;
+        margin: 0 auto 0.5em auto;
+        width: 44px;
+        height: 44px;
+        color: $c-white;
+        background-color: $c-blue;
+      }
+    }
+    a {
+      @include fontsize(20);
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      &:hover {
+        @include transition();
+        color: $c-light-blue;
+        .tweet-icon:before {
+          background-color: $c-light-blue;
+        }
+      }
+    }
+  }
+}
+
+.tweet-page-write-a-letter {
+  .tweet-page-write-a-letter-content {
+    .write-icon {
+      &:before {
+        @extend %write;
+        @include fontsize(44);
+        display: block;
+        padding: 1em;
+        border-radius: 50%;
+        margin: 0 auto 0.5em auto;
+        width: 44px;
+        height: 44px;
+        color: $c-white;
+        background-color: $c-blue;
+      }
+    }// .write-icon
+
+    .take-action-twitter-icon {
+      @include fontsize(20);
+
+      &:before {
+        @include fontsize(44);
+        display: block;
+        padding: 1em;
+        border-radius: 50%;
+        margin: 0 auto 0.5em auto;
+        width: 44px;
+        height: 44px;
+        color: $c-white;
+        background-color: $c-blue;
+      }
+    }// .twitter-icon
+
+    a {
+      @include fontsize(20);
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      &:hover {
+        @include transition();
+        color: $c-light-blue;
+        .write-icon:before {
+          background-color: $c-light-blue;
+        }
+      }
+    }
+  }
+}
+
+.block-re-socialtools {
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    list-style-type: none;
+    text-align: center;
+  }
+
+  #post-to-fb {
+    &:before {
+      @extend %facebook;
+    }
+  }
+
+  #post-to-twitter {
+    &:before {
+      @extend %twitter;
+    }
+  }
+
+  #post-to-fb,
+  #post-to-twitter {
+    @extend %blue-button;
+    position: relative;
+    display: block;
+    margin: 0 auto 1em auto;
+    &:before {
+      @include fontsize(44);
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      left: 0.1em;
+      bottom: 0.1em;
+      @include breakpoint($bp-tiny) {
+        left: 1em;
+      }
+    }
+  }
+}
+
+// officials section
+
+.official.profile-page {
+  @extend %clearfix;
+  float: none;
+  clear: both;
+  border: 1px solid $c-light-grey;
+  padding: 2%;
+  width: 96%;
+}
+
+.official-profile-info-wrapper {
+  text-align: center;
+  @include breakpoint($bp-small) {
+    text-align: left;
+  }
+}
+
+.official-back-button-link {
+  @extend %blue-button;
+  display: block;
+  padding: 1em;
+  margin: 1em auto;
+  width: 100%;
+  max-width: 200px;
+  &:hover,
+  &:focus {
+    color: $c-white;
+  }
+  @include breakpoint($bp-small) {
+    display: inline;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    margin: 0;
+  }
+}
+
+.officia-intro-wrapper {
+  width: 96%;
+  @include breakpoint($bp-small) {
+    display: inline-block;
+    padding: 0 2%;
+    width: 75%;
+  }
+}
+
+.official-text {
+  display: block;
+  float: none;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 70%;
+    padding-left: 1%;
+  }
+}
+
+.offical-image {
+  float: none;
+  width: 100%;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 20%;
+  }
+}
+
+.officials-info-wrapper {
+  padding-bottom: 2em;
+}
+
+.officials-committees-list,
+.officials-bio-list {
+  margin: 0;
+  padding: 0;
+  @include breakpoint($bp-small) {
+    margin: 1em;
+  }
+}
+
+.officials-info-content {
+  @extend %clearfix;
+}
+
+.officials-committees-wrapper,
+.officials-bio-wrapper {
+  float: none;
+  width: 100%;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 50%;
+  }
+}
+
+.committee-footnote {
+  @include fontsize(12);
+}
+
+.official-full-text > .official-address {
+  clear: both;
+}
+
+.officials-social-wrapper {
+  float: none;
+  width: 100%;
+  padding-left: 0;
+  text-align: center;
+  @include breakpoint($bp-small) {
+    float: left;
+    width: 70%;
+    padding-left: 1%;
+    text-align: left;
+  }
+}
+
+.official-social {
+  @extend %clearfix;
+  padding: 0;
+  margin: 0;
+}
+
+.officials-social-wrapper .official-social li {
+  display: inline-block;
+  margin: 1em .5em;
+}
+
+.official-social-website-link,
+.official-social-webform-link,
+.official-social-facebook-link,
+.official-social-twitter-link,
+.official-social-youtube-link {
+  &:before {
+    @include fontsize(32);
+    display: inline-block;
+  }
+}
+
+.official-social-website-link:before {
+  @extend %website;
+}
+
+.official-social-webform-link:before {
+  @extend %write;
+}
+
+.official-social-facebook-link:before {
+  @extend %facebook;
+}
+
+.official-social-twitter-link:before {
+  @extend %twitter;
+}
+
+.official-social-youtube-link:before {
+  @extend %youtube;
+}
+
+.officials-bio-list, .officials-committees-list {
+  list-style: none;
+}
+
+.official-full-text {
+
+  .ctools-collapsible-title {
+    line-height: 0.75;
+  }
+
+  .ctools-collapsible-content {
+    @extend %clearfix;
+
+    .official-address {
+      float: none;
+      width: 100%;
+      padding: 1em;
+      @include breakpoint($bp-small) {
+        float: left;
+        width: 30%;
+      }
+    }
+
+    .bold {
+      @extend %bold;
+    }
+
+  }
+
+}
+

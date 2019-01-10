@@ -1,0 +1,9 @@
+name = Iterable
+description = Module to communicate with Iterable API
+core = 7.x
+package = Iterable
+
+files[] = iterable.module
+files[] = iterable.inc
+
+configure = admin/config/iterable

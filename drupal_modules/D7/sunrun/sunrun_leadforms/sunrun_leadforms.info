@@ -1,0 +1,4 @@
+name = Sunrun Leadforms
+description = Sunrun implementation for various lead forms.
+core = 7.x
+files[] = tests/sunrun_leadforms.test

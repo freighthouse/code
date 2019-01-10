@@ -1,0 +1,38 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function sunrun_getquote_install() {
+	$variables = sunrun_getquote_default_variables();
+	foreach ($variables as $name => $value) {
+		variable_set($name, $value);
+	}	
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function sunrun_getquote_uninstall() {
+	$variables = sunrun_getquote_default_variables();
+	foreach ($variables as $name => $value) {
+		variable_del($name);
+	}	
+}
+
+/**
+ * Helper, get variables
+ */
+function sunrun_getquote_default_variables(){
+	$variables = array(
+		'quote_main_phone'  => 'Call 555-555-5555',
+		'quote_form_title'  => 'Say yes to lower electric bills',
+		'quote_form_text' 	=> '<ul>
+  <li>Get started for as little as $1 down</li>
+  <li>Lock in low monthly payments<br> for 20 years</li>
+  <li>If we can\'t save you money with<br> solar, we won\'t sell it to you</li>
+  <li>Get a custom system<br> that\'s perfect for your roof</li>
+</ul>'	
+	);
+	return $variables;	
+}

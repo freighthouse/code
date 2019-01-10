@@ -1,0 +1,7 @@
+name = BIPAC Vote
+description = Utilizes the BIPAC GOTV API
+core = 7.x
+package = BIPAC
+dependencies[] = bipac_api
+
+configure = admin/config/system/site-information

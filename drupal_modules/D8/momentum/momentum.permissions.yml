@@ -1,0 +1,6 @@
+administer_momentum:
+    title: 'Administer momentum'
+    description: 'Set configuration options for the Momentum module.'
+use_momentum:
+    title: 'Use Momentum'
+    description: 'Send requests.'

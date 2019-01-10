@@ -1,0 +1,817 @@
+/*------------------------------------------------------------------
+[Blocks Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Description: This file is shared and applies to blocks used across all templates/pages.
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. TEAM MEMBERS
+  A. LEADERSHIP 
+  B. BIOS
+II. BOOK NAVIGATION
+III. JOBS
+  A. CAREERS SLIDER
+  B. DEPARTMENTS
+  C. OPEN POSITIONS
+  D. RECENT JOBS
+  E. BENEFITS
+IV. QUOTES
+V. CONTACT US SIDEBAR
+VI. HELP
+  A. TRAINING
+  B. LATEST/POPULAR
+VII. SEO PAGES
+  A. PRODUCT FEATURE
+  B. SIDEBAR
+VIII. RELATED DOCUMENTS
+
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @TEAM MEMBERS
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @LEADERSHIP */
+
+.leadership-bio em { 
+  font-style: normal;
+  color: #666;
+}
+
+.leadership-bio img {
+    width: 140px;
+}
+
+.leadership-bio p,
+.leadership-bio em,
+.leadership-bio a { font-size: 14px; }
+
+/*------------------------------------------------------------------*/
+/* END LEADERSHIP */
+
+/*------------------------------------------------------------------*/
+/* @BIOS */
+
+.view-team .views-row {
+  margin-bottom: 25px;
+}
+
+.views-field-picture {
+  float: left;
+  width: 140px;
+  margin-right: 10px;
+}
+
+#block-views-team-members-block .views-field-field-firstname,
+#block-views-team-members-block .views-field-field-lastname {
+  display: inline-block;
+  font-weight: bold; 
+}
+
+.views-field-field-job-title,
+.views-field-field-biography {
+  font-size: 14px;
+  margin: 0 0 15px 150px;
+}
+
+  .views-field-field-job-title {
+    color: #999;
+  }
+
+.view-team .views-row:nth-child(2n+1) {
+  clear: left;
+}
+
+/*------------------------------------------------------------------*/
+/* @END BIOS */
+
+/*------------------------------------------------------------------*/
+/* END TEAM MEMBERS
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @BOOK NAVIGATION
+/*------------------------------------------------------------------*/
+
+#block-book-navigation ul.menu {
+    padding-left: 15px;
+}
+
+    #block-book-navigation ul.menu a {
+        padding: 5px 0;
+        display: block;
+        font-size: 14px;
+        color: #222;
+    }
+
+    #block-book-navigation ul.menu a.active-trail,
+    li a.active-trail,
+    #block-views-blog-archives-block a.active,
+    #block-views-blog-archives-block a.active-trail {
+    font-weight: bold;
+    color: #DA6200;
+    }
+    
+        #block-book-navigation ul.menu a:hover {
+        color: #1981D6;
+        }
+
+#block-book-navigation ul li.leaf,
+#block-book-navigation ul li.collapsed {
+    list-style-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHAQMAAAD+nMWQAAAABlBMVEX///8AAABVwtN+AAAAAXRSTlMAQObYZgAAABFJREFUCB1jVmCGQClmEWYOAAZ8AMy3HPLXAAAAAElFTkSuQmCC');
+    list-style-type: disc;
+}
+
+#block-book-navigation ul li.expanded {
+  list-style-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHAQMAAAD+nMWQAAAABlBMVEX///8AAABVwtN+AAAAAXRSTlMAQObYZgAAABJJREFUeJxj+MdQw2DBIMAABgAUsAHD3c3BpwAAAABJRU5ErkJggg==');
+  list-style-type: circle;
+}
+
+.section-api-documentation #block-book-navigation,
+.section-help #block-book-navigation {
+  background: url("../images/bg-bluecross.gif") repeat scroll 0 0 transparent;
+    font-size: 12px;
+}
+
+.section-api-documentation #block-book-navigation ul.menu,
+.section-help #block-book-navigation ul.menu {
+    padding-left: 10px;
+}
+
+.section-api-documentation #block-book-navigation ul.menu a,
+.section-help #block-book-navigation ul.menu a {
+    font-size: 12px;
+}
+
+#block-views-help-docs-index-block {
+    line-height: 1.75;
+}
+
+#block-views-help-docs-index-block .depth-2 {
+    list-style-type: none;
+    margin-bottom: 5px;
+}
+
+#block-views-help-docs-index-block .depth-2 a {
+    color: #da6200;
+    font-size: 18px;
+}
+#block-views-help-docs-index-block .depth-3 {
+    list-style-type: none;
+}
+
+#block-views-help-docs-index-block .depth-4 a,
+#block-views-help-docs-index-block .depth-5 a,
+#block-views-help-docs-index-block .depth-6 a {
+    color: #1261a2;
+}
+
+/*------------------------------------------------------------------*/
+/* END BOOK NAVIGATION
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @JOBS
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @CAREERS SLIDER  */
+
+#block-views-featured-slider-block { 
+    margin: 0;
+    background-color: #032745;
+    line-height: normal;
+}
+
+#views_slideshow_cycle_teaser_section_featured_slider-block {
+    max-height: 500px;
+}
+
+.view-featured-slider .views-field-field-slider-image img {
+    -webkit-border-top-left-radius: 10px;
+    -webkit-border-top-right-radius: 10px;
+  -moz-border-radius-topleft: 10px;
+  -moz-border-radius-topright: 10px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.view-featured-slider {margin-top: 10px; }
+
+.slider .text.field-content {
+    position: relative;
+    top: -104px;
+}
+.slider .slider_image_background {
+    background: #000;
+    opacity:0.5;
+    *filter:alpha(opacity=50); /* For IE8 and earlier */
+    width: 1000px;
+    height: 100px;
+    position: absolute;
+}
+
+.slider .slider_image_content {
+    color: #fff;
+    padding: 30px;
+    font-weight: bold;
+    font-size: 20px;
+    z-index: 10;
+    position: absolute;
+}
+
+.view-featured-slider .slider_image_content {
+    font-size: 48px;
+    padding: 10px 30px;
+}
+
+.view-featured-slider .row-weight-1 {
+    width: 680px;
+    top: -390px;
+    color: #111;
+}
+
+.view-featured-slider .row-weight-2 {
+    top: -380px;
+    left: 300px;
+}
+
+.view-featured-slider .row-weight-3 {
+    color: #111;
+}
+
+.view-featured-slider .row-weight-6 {
+    right: 0;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 1);
+}
+
+.view-featured-slider .row-weight-7 {
+    top: -220px;
+    left: 295px;
+}
+
+.slider_image_content h2{
+    color: #fff;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+/*------------------------------------------------------------------*/
+/* END CAREERS SLIDER  */
+
+/*------------------------------------------------------------------*/
+/* @DEPARTMENTS  */
+
+.section-careers #block-views-departments-block {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #ccc;
+    margin-bottom: 5px;
+}
+
+.section-careers .view-departments .department {
+    width: 193px;
+    margin: 0 10px 15px 10px;
+    padding: 0;
+    float: left;
+}
+
+  .section-careers .view-departments .views-row-1,
+  .section-careers .view-departments .views-row-4 {
+    margin-left: 0;
+  }
+
+  .section-careers .view-departments .views-row-3,
+  .section-careers .view-departments .views-row-6 {
+    margin-right: 0;
+  }
+
+  .section-careers .view-departments .views-row-4 {
+    clear: left;
+  }
+
+.section-careers .view-departments .department div[class$="title"] {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.section-careers .view-departments .department div[class$="body"] {
+    font-size: 13px;
+    line-height: 20px;
+    padding-bottom: 5px;
+    color: #666;
+}
+
+.section-careers .view-departments .department .path a {
+    color: #2789d8;
+    font-size: 13px;
+}
+
+/*------------------------------------------------------------------*/
+/* END DEPARTMENTS  */
+
+/*------------------------------------------------------------------*/
+/* @OPEN POSITIONS  */
+
+.section-careers #block-views-all-jobs-block {
+    float: left;
+}
+
+.section-careers #block-views-all-jobs-block .block-title {
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+    font-size: 24px;
+    color: #333;
+    font-weight: bold;
+}
+
+.section-careers .view-all-jobs h3 {
+    font-size: 16px;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: normal;
+    margin: 20px 0 0;
+}
+
+.section-careers .view-all-jobs .views-row {
+    margin: 0 0 10px;
+}
+
+.section-careers .view-all-jobs .views-field-title a{
+    font-size: 24px;
+}
+
+.section-careers .view-all-jobs .views-field-body {
+    font-size: 13px;
+}
+
+/*------------------------------------------------------------------*/
+/* END OPEN POSITIONS  */
+
+/*------------------------------------------------------------------*/
+/* @RECENT JOBS  */
+
+#block-views-recent-job-postings-block .views-row a,
+#block-views-featured-job-postings-block .views-row a {
+  line-height: 18px;
+}
+
+#block-views-recent-job-postings-block .views-row,
+#block-views-featured-job-postings-block .views-row {
+  padding-bottom: 6px;
+}
+
+/*------------------------------------------------------------------*/
+/* END RECENT JOBS  */
+
+/*------------------------------------------------------------------*/
+/* @BENEFITS  */
+
+.section-careers .benefits li {
+    padding-top: 10px;
+    font-size: 14px;
+    color: #333;
+}
+
+  .section-careers .benefits ul li:first-child {
+    padding-top: 0;
+  }
+
+.section-careers .benefits span {
+    margin-right: 5px;
+}
+
+/*------------------------------------------------------------------*/
+/* END BENEFITS  */
+
+/*------------------------------------------------------------------*/
+/* END JOBS
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @QUOTES
+/*------------------------------------------------------------------*/
+
+.node-type-product-page #block-views-quotes-block {
+  margin-top: 0;
+}
+
+#block-views-quotes-block {
+    background: url("../images/bg-bluecross.gif") repeat;
+    margin: -40px 0 0 0;
+    padding: 30px 20px 40px;
+    width: 960px;
+}
+
+#block-views-quotes-block:after {
+    clear: both;
+    content: ".";
+    display: block;
+    height: 0;
+    visibility: hidden;
+}
+
+#block-views-quotes-block .block-title {
+    font-size: 26px;
+    color: #322D50;
+    font-weight: bold;
+    margin-bottom: 20px;
+    margin-left: 10px;
+    line-height: 1;
+}
+
+#block-views-quotes-block .views-row {
+    float: left;
+    width: 460px;
+    margin: 0 10px;
+    font-style: italic;
+    font-size: 18px;
+    font-family: "Times New Roman",Times,serif;
+}
+
+#block-views-quotes-block .views-field-body {
+    border: 1px solid #fff;
+}
+
+#block-views-quotes-block .quote-content {
+    padding: 10px;
+    margin: 4px;
+    background: #fff;
+    height: 150px;
+}
+
+#block-views-quotes-block .quote-text {
+    margin-top: 10px;
+    line-height: 1.3;
+}
+
+#block-views-quotes-block .quotee {
+    font-size: 11px;
+    font-style: normal;
+    line-height: 1.5;
+    color: #666;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: 5px;
+}
+
+#block-views-quotes-block .views-field-field-image {
+    float: left;
+    margin-right: 20px; 
+}
+
+#block-views-quotes-block .views-field-field-image img {
+    margin: 15px 0;
+}
+
+/*------------------------------------------------------------------*/
+/* END QUOTES
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @CONTACT US SIDEBAR
+/*------------------------------------------------------------------*/
+
+#contact-us {
+    font-size: 14px;
+    color: #666;
+}
+
+.lt-ie9 #contact-us {
+    font-size: 12px;
+}
+
+#contact-us a { color: #333; }
+
+#contact-us em { font-style: normal; }
+
+.contact-us-question {
+    background: #d6e8f8;
+    width: 298px;
+    height: 115px;
+    margin-bottom: 15px;
+    margin-left: -10px;
+    -moz-box-shadow: inset 0px 0px 27px rgba(122,122,122,0.15);
+    -webkit-box-shadow: inset 0px 0px 27px rgba(122,122,122,0.15);
+    box-shadow: inset 0px 0px 27px rgba(122,122,122,0.15);
+    text-align: center;
+    padding-top: 15px;
+}
+
+#main .contact-us-question a {
+    font-size: 18px;
+}
+
+.contact-us-question em {
+    color: #666;
+}
+
+/*------------------------------------------------------------------*/
+/* END CONTACT US SIDEBAR
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @HELP
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @TRAINING */
+
+#block-training {
+    color: #fff;
+    font-size: 15px;
+}
+
+#block-training .schedule {
+    width: 610px;
+    margin-left: 10px;
+    margin-right: 20px;
+}
+
+#block-training tbody {
+    border: none;
+}
+
+#block-training .table-training {
+    width: 600px;
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+#block-training .table-training td {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+#block-training .table-training td.day {
+    color: #faa526;
+    text-transform: uppercase;
+    vertical-align: top;
+}
+
+#block-training .table-training td.time-of-day {
+    font-weight: normal;
+}
+
+#block-training .table-training tr:first-child td {
+    border: none;
+}
+
+#block-training .table-training td.time-of-day,
+#block-training .table-training td.subject,
+#block-training .table-training td.register {
+    border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+#block-training .table-training td.register a {
+    color: #fffcd5;
+}
+
+#block-training .table-training td.notice { 
+    font-size: 12px; 
+    font-weight: normal
+}
+
+#block-training .table-training td.time-of-day .subscript {
+    font-weight: bold;
+}
+
+#block-training .video-training {
+    background: rgba(0,0,0,0.3);
+    width: 290px;
+    padding: 30px 30px 0px 20px;
+    margin: -30px -20px -30px 0;
+    position: relative;
+    min-height: 435px;
+}
+
+.lt-ie8 #block-training .video-training {
+  min-height: 421px;
+  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#4c000000, endColorstr=#4c000000);
+}
+
+
+.lt-ie9 #block-training .video-training {
+  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#4c000000, endColorstr=#4c000000)";
+}
+
+#block-training .video-training h2 {
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 15px;
+    line-height: 30px;
+}
+
+#block-training .video-training a.button-image:hover{
+    text-decoration: none;
+}
+
+#block-training .video-training p {
+    margin: 20px 0;
+}
+
+/*------------------------------------------------------------------*/
+/* END TRAINING */
+
+/*------------------------------------------------------------------*/
+/* @LATEST/POPULAR */
+
+#block-views-latest-help-documents-block,
+#block-views-popular-block {
+    margin: 0 10px;
+    width: 460px;
+    float: left;
+    font-size: 14px;
+}
+
+#block-views-popular-block {
+  padding-left: 20px;
+}
+
+#block-views-latest-help-documents-block {
+  padding-right: 20px;
+}
+
+#block-views-latest-help-documents-block .block-title,
+#block-views-popular-block .block-title {
+    color: #da6200;
+    background: url("../images/sprites/glyphicons_000_sprite.png") no-repeat;
+    padding-left: 45px;
+    background-position: 0px -280px;
+}
+
+#block-views-latest-help-documents-block .block-title {
+    background-position: 0px -440px;
+}
+
+#block-views-latest-help-documents-block .views-field-title a,
+#block-views-popular-block .views-field-title a {
+    font-size: 18px!important;
+    margin-bottom: 10px;
+}
+
+#block-views-latest-help-documents-block .views-row,
+#block-views-popular-block .views-row {
+    margin: 20px 0;
+}
+
+#block-views-latest-help-documents-block .views-field-title,
+#block-views-popular-block .views-field-title {
+    margin-bottom: 10px;
+}
+
+#block-views-latest-help-documents-block .views-field-body,
+#block-views-popular-block .views-field-body {
+    margin-bottom: 5px;
+}
+
+/*------------------------------------------------------------------*/
+/* END LATEST/POPULAR */
+
+/*------------------------------------------------------------------*/
+/* END HELP
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @SEO PAGES
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @PRODUCT FEATURE */
+
+#block-views-product-featured-block {
+  margin-bottom: 0;
+}
+
+#block-views-product-featured-block .Voice.Broadcast{
+  background: url('../images/tour/voice-broadcast-300x300.png') center left no-repeat;
+}
+
+#block-views-product-featured-block .Cloud.Call.Center{
+  background: url('../images/tour/cloud-call-center-300x300.png') center left no-repeat;
+}
+
+#block-views-product-featured-block .Text.Messaging{
+  background: url('../images/tour/text-messaging-300x300.png') center left no-repeat;
+  min-height: 280px;
+}
+
+#block-views-product-featured-block .Interactive.Voice.Response{
+  background: url('../images/tour/ivr-300x300.png') center left no-repeat;
+}
+
+#block-views-product-featured-block .Call.Tracking{
+  background: url('../images/tour/call-tracking-300x300.png') center left no-repeat;
+}
+
+#block-views-product-featured-block ul,
+#block-views-product-featured-block ol {
+  margin-left: 20px;
+}
+
+#block-views-product-featured-block .product {
+  background-color: #eee;
+  border-top: 1px solid #D4D4D4;
+  box-shadow: inset 0px 1px 0px white;
+  color: #333;
+  padding: 30px 20px;
+  margin: 0;
+}
+
+.lt-ie8 #block-views-product-featured-block .product {
+  float: left;
+}
+
+/*------------------------------------------------------------------*/
+/* END PRODUCT FEATURE */
+
+/*------------------------------------------------------------------*/
+/* @SIDEBAR */
+
+#block-views-seo-sidebar-second-block a,
+.node-seo-page .sidebar .region-sidebar-second .block {
+  font-size: 13px;
+  line-height: 1.75
+}
+
+  .node-seo-page .sidebar .region-sidebar-second .block h3 {
+    font-size: 14px;
+    color: #333;
+  }
+
+#block-views-seo-sidebar-second-block ul {
+  margin-bottom: 20px;
+}
+
+#block-views-seo-sidebar-second-block ul.list-style {
+  margin-left: 20px;
+}
+
+#block-views-seo-sidebar-second-block ul.list-style li {
+  list-style-type: disc;
+}
+
+#block-views-seo-sidebar-second-block p {
+  margin-bottom: 10px;
+}
+
+/*------------------------------------------------------------------*/
+/* END SIDEBAR */
+
+/*------------------------------------------------------------------*/
+/* @WHY TRY CALLFIRE */
+
+/* NOTE: You can find the base styles for this in the landing page styles */
+
+#block-block-13001,
+#block-block-14001 {
+    width: 300px;
+}
+
+#block-block-13001 .callfire-benefits {
+    padding: 10px 15px 0;
+}
+
+#block-block-14001 .callfire-benefits {
+    padding: 5px 15px 10px;
+}
+
+
+/*------------------------------------------------------------------*/
+/* END WHY TRY CALLFIRE */
+
+/*------------------------------------------------------------------*/
+/* END SEO PAGES
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @RELATED DOCUMENTS
+/*------------------------------------------------------------------*/
+
+.view-related-documents {
+    margin: 20px 0 0;
+    background-color: #e3eff5;
+    padding: 10px 15px 15px;
+    border: 1px dashed #ccc;
+}
+
+.view-related-documents h2.block-title {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 5px;
+    margin-top: 0px;
+}
+
+/*------------------------------------------------------------------*/
+/* END RELATED DOCUMENTS
+/*------------------------------------------------------------------*/

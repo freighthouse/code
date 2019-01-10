@@ -1,0 +1,5 @@
+name = Sunrun Tracking
+description = Manage tracking cookies and events
+core = 7.x
+package = Sunrun
+dependencies[] = metatag

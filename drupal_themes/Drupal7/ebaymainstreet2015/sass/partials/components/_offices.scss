@@ -1,0 +1,21 @@
+.office {
+  float: left;
+  width: 50%;
+  margin-bottom: 2em;
+  @include breakpoint($bp-med) {
+    width: 33%;
+  }
+  h4 {
+    @include fontsize(20);
+    margin: 0;
+    @include breakpoint($bp-med) {
+      @include fontsize(24);
+    }
+  }
+  .location {
+    @include fontsize(12);
+    @include breakpoint($bp-med) {
+      @include fontsize(14);
+    }
+  }
+}

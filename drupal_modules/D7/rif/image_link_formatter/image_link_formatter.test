@@ -1,0 +1,353 @@
+<?php
+
+/**
+ * @file
+ * Test the Image Link Formatter module.
+ */
+
+/**
+ * Provides common functionality for the Image Link Formatter test classes.
+ */
+class ImageLinkFormatterTestCase extends DrupalWebTestCase {
+
+  /**
+   * User object to perform site browsing.
+   *
+   * @var object
+   */
+  protected $privilegedUser;
+
+  /**
+   * Name of the Link field attached to the content to be tested.
+   *
+   * @var string
+   */
+  protected $fieldLinkName;
+
+  /**
+   * Name of the Image field attached to the content to be tested.
+   *
+   * @var string
+   */
+  protected $fieldImageName;
+
+  /**
+   * Name of an existing content type for the content to be tested.
+   *
+   * @var string
+   */
+  protected $bundle = 'page';
+
+  /**
+   * Permissions required by the user to perform the tests.
+   *
+   * @var array
+   */
+  protected $permissions = array();
+
+  /**
+   * Enable modules and create user with specific permissions.
+   *
+   * By default Test Cases are carried on the 'page' content type.
+   */
+  public function setUp() {
+    // Merge inherited classes modules, see FieldUITestCase for an example.
+    $modules = func_get_args();
+    if (isset($modules[0]) && is_array($modules[0])) {
+      $modules = $modules[0];
+    }
+    $modules[] = 'image_link_formatter';
+    // Initialize the permissions required for the tests.
+    $this->permissions = array_merge($this->permissions, array(
+      'access content',
+      // Permissions needed by createNodeWithLinkImage, see its Doc comment.
+      'create ' . $this->bundle . ' content',
+      'edit own ' . $this->bundle . ' content',
+    ));
+    parent::setUp($modules);
+
+    // Authenticate test user.
+    $this->privilegedUser = $this->drupalCreateUser($this->permissions);
+    $this->drupalLogin($this->privilegedUser);
+    // Initialize field names if they have not been overriden.
+    if (empty($this->fieldLinkName)) {
+      $this->fieldLinkName = strtolower($this->randomName());
+    }
+    if (empty($this->fieldImageName)) {
+      $this->fieldImageName = strtolower($this->randomName());
+    }
+  }
+
+  /**
+   * Programmatically create a field and its instance, attached to nodes.
+   *
+   * @param string $field_name
+   *   The name of the new field (all lowercase), exclude the "field_" prefix.
+   * @param string $field_type
+   *   The storage backend specified in the 'field_storage_default' system
+   *   variable.
+   * @param string $widget_type
+   *   The default widget specified in hook_field_info().
+   * @param array $field_settings
+   *   A list of field settings that will be added to the defaults.
+   * @param array $instance_settings
+   *   A list of instance settings that will be added to the instance defaults.
+   * @param array $display
+   *   Settings for the 'default' view mode will be added if not present, and
+   *   each view mode in the definition will be completed with the following
+   *   default values:
+   *   - label: 'above'
+   *   - type: the default formatter specified in hook_field_info().
+   *   - settings: each omitted setting is given the default value specified in
+   *     hook_field_formatter_info().
+   * @param array $widget_settings
+   *   A list of widget settings that will be added to the widget defaults.
+   *
+   * @return array
+   *   Field instance attached to a node content type.
+   *
+   * @see field_create_field()
+   * @see field_create_instance()
+   */
+  protected function createField($field_name, $field_type, $widget_type, $field_settings = array(), $instance_settings = array(), $display = array(), $widget_settings = array()) {
+    // Create field with a cardinality assumed to be 1 by default.
+    $field = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+      'settings' => $field_settings,
+      'cardinality' => !empty($field_settings['cardinality']) ? $field_settings['cardinality'] : 1,
+    );
+    field_create_field($field);
+
+    // Create field instance attached to nodes.
+    $instance = array(
+      'field_name' => $field['field_name'],
+      'entity_type' => 'node',
+      'label' => $field_name,
+      'bundle' => $this->bundle,
+      'required' => !empty($instance_settings['required']),
+      'settings' => $instance_settings,
+      'display' => $display,
+      'widget' => array(
+        'type' => $widget_type,
+        'settings' => $widget_settings,
+      ),
+    );
+
+    return field_create_instance($instance);
+  }
+
+  /**
+   * Create a node with a link and an image attached.
+   *
+   * The creation process of a node with an image attached is easier to code
+   * when it goes through submission of the creation form, rather than
+   * programmatically. Which is why this function uses the interface: node/add.
+   * However, it requires to grant test user the permissions to create and edit
+   * page content.
+   *
+   * @return bool|int
+   *   The nid of the created node if successful, otherwise FALSE.
+   */
+  public function createNodeWithLinkImage() {
+    // Get the first file returned as a test image.
+    $image = current($this->drupalGetTestFiles('image'));
+
+    // Create a node with test link and image data.
+    $edit = array(
+      // Link field values: title and URL.
+      'title' => $this->randomName(),
+      $this->fieldLinkName . '['. LANGUAGE_NONE . '][0][title]' => 'Link ILF test',
+      $this->fieldLinkName . '['. LANGUAGE_NONE . '][0][url]' => 'http://www.example.com/?example=query#example_fragment',
+      // Image field value.
+      'files[' . $this->fieldImageName . '_' . LANGUAGE_NONE . '_0]' => drupal_realpath($image->uri),
+    );
+    $this->drupalPost('node/add/' . $this->bundle, $edit, t('Save'));
+
+    // Check the node was saved successfully.
+    $types = node_type_get_types();
+    $this->assertText(t('@node_type @node_title has been created.', array(
+      '@node_type' => $types[$this->bundle]->name,
+      '@node_title' => $edit['title'],
+    )));
+
+    // Since the node is not created programmatically but by submitting a form,
+    // the newly created node's ID is not returned so it needs to be retrieved
+    // through the current page's URL.
+    $matches = array();
+    preg_match('/node\/([0-9]+)/', $this->getUrl(), $matches);
+    return isset($matches[1]) ? $matches[1] : FALSE;
+  }
+
+  /**
+   * Assert whether an Image wrapped in a Link is found in page's raw markup.
+   *
+   * The markup generated by Image Link Formatter is programmatically generated
+   * to what it should be in 'theory' and then compared with what is actually
+   * generated by the module and displayed in the page, in the raw HTML markup.
+   *
+   * @param object $node
+   *   The node to which the Image and Link fields are attached.
+   * @param array $link_field
+   *   Link field instance attached to the content type of the node.
+   * @param $message
+   *   (optional) The message to display upon assertion.
+   * @param int $delta
+   *   (optional) The index of the field value, whether Image or Link fields.
+   */
+  public function assertRawImageLink($node, $link_field, $message = '', $delta = 0) {
+    // Create programmatically the markup that should be generated by ILF.
+    // Create the HTML markup for the Image.
+    $image_info = array(
+      'path' => $node->{$this->fieldImageName}[LANGUAGE_NONE][$delta]['uri'],
+      'width' => 40,
+      'height' => 20,
+    );
+    // Add to the image its ALT attribute if there is any.
+    if (!empty($node->{$this->fieldImageName}[LANGUAGE_NONE][$delta]['alt'])) {
+      $image_info['alt'] = $node->{$this->fieldImageName}[LANGUAGE_NONE][$delta]['alt'];
+    }
+    // Add to the image its TITLE attribute if there is any.
+    if (!empty($node->{$this->fieldImageName}[LANGUAGE_NONE][$delta]['title'])) {
+      $image_info['title'] = $node->{$this->fieldImageName}[LANGUAGE_NONE][$delta]['title'];
+    }
+	  // Programmatically create the image markup.
+    $default_image_output = theme('image', $image_info);
+
+    // Create the HTML markup of the Link.
+    // Parse the URL to separate its components: query, fragment, etc...
+    $url = drupal_parse_url($node->{$this->fieldLinkName}[LANGUAGE_NONE][$delta]['url']);
+
+    // Test fragment, query, rel, class, title and target attributes.
+    $options = array (
+      'html' => TRUE,
+      'fragment' => $url['fragment'],
+      'query'=> $url['query'],
+      'attributes' => array(),
+    );
+    // Watchout: the order of the attributes is important.
+    // Add to the link its TARGET attribute if there is any.
+    if (!empty($node->{$this->fieldLinkName}[LANGUAGE_NONE][$delta]['attributes']['target'])) {
+      $options['attributes']['target'] = $node->{$this->fieldLinkName}[LANGUAGE_NONE][$delta]['attributes']['target'];
+    }
+    // Add to the link its TITLE attribute if there is any.
+    if (!empty($node->{$this->fieldLinkName}[LANGUAGE_NONE][$delta]['attributes']['title'])) {
+      $options['attributes']['title'] = $node->{$this->fieldLinkName}[LANGUAGE_NONE][$delta]['attributes']['title'];
+    }
+    // Add to the link its REL attribute if there is any.
+    if (!empty($link_field['settings']['attributes']['rel'])) {
+      $options['attributes']['rel'] = $link_field['settings']['attributes']['rel'];
+    }
+    // Add to the link its CLASS attribute if there is any.
+    if (!empty($link_field['settings']['attributes']['class'])) {
+      $options['attributes']['class'] = $link_field['settings']['attributes']['class'];
+    }
+    // Programmatically create the markup for the image with the link.
+    $link_output = l($default_image_output, $url['path'], $options);
+
+    // Check if the image link formatter generated the expected markup.
+    $this->assertRaw($link_output, format_string("!message</br>The <em>Image Link Formatter</em> markup found was:<br/><pre>@link_output</pre>", array(
+      '!message' => $message,
+      '@link_output' => $link_output
+    )));
+    // Print the markup output, just for debugging purposes.
+    $this->verbose(t("The <em>Image Link Formatter</em> markup found was:<br/><pre>!link_output</pre>", array(
+      '!link_output' => $link_output
+    )));
+  }
+}
+
+
+/**
+ * Test Image Link Formatter's form and summary on the Manage display pages.
+ */
+class ImageLinkFormatterFieldUITestCase extends ImageLinkFormatterTestCase {
+
+  /**
+   * Implements DrupalWebTestCase::getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Manage display formatter configuration',
+      'description' => 'Test the configuration of the Image Link Formatter display settings on the Manage display page.',
+      'group' => 'Image Link Formatter',
+    );
+  }
+
+  /**
+   * Enable modules and create user with specific permissions.
+   */
+  public function setUp() {
+    // Add permission required to access Field UI and administration pages.
+    // The test user needs to access the Manage display pages.
+    $this->permissions[] = 'administer content types';
+    // Include the Field UI module and its dependencies to be loaded.
+    parent::setUp('field_ui');
+  }
+
+  /**
+   * Test Image Link formatter manage display settings.
+   *
+   * Ensure Image Link Formatter can be selected from the manage display pages
+   * and its settings form can be displayed and saved correctly. Check that the
+   * summary displays correctly and then test the display of a node's Image
+   * combined with a Link.
+   */
+  public function testFormatterManageDisplaySettings() {
+    $formatter = 'image_link_formatter';
+    // Create a single value, not required, Link field.
+    $link_field = $this->createField($this->fieldLinkName, 'link_field', 'link_field');
+    // Create a single value, not required, Image field.
+    $this->createField($this->fieldImageName, 'image', 'image_image', array('uri_scheme' => 'public'));
+
+    // Now that the fields have been created, let's test the formatter.
+	  // Browse to the Manage Display page.
+    $this->drupalGet("admin/structure/types/manage/{$this->bundle}/display");
+
+    // Change Image field's formatter to select image_link_formatter.
+    $edit = array(
+      'fields['. $this->fieldImageName .'][type]' => $formatter,
+      'refresh_rows' => $this->fieldImageName,
+    );
+    // Process the change through the AJAX form of the page.
+    $this->drupalPostAJAX(NULL, $edit, array('op' => t('Refresh')));
+    // Check if expected formatter is selected.
+    $this->assertFieldByName('fields['. $this->fieldImageName .'][type]', $formatter, 'The Image Link Formatter is selected.');
+
+    // Now edit the Image Link Formatter settings form.
+    $this->drupalPostAJAX(NULL, array(), $this->fieldImageName . '_formatter_settings_edit');
+    // Display the page with the formatter settings form.
+    $this->verbose($this->drupalGetContent());
+    // No value should be selected for the image link.
+    $this->assertFieldByName('fields['. $this->fieldImageName .'][settings_edit_form][settings][image_link]', "", 'Formatter <em>"Link image to"</em> is not yet configured.');
+
+    // Select to link the image to the link field and submit the settings form.
+    $edit = array(
+      'fields['. $this->fieldImageName .'][settings_edit_form][settings][image_link]' => $this->fieldLinkName,
+    );
+    $this->drupalPostAJAX(NULL, $edit, array($this->fieldImageName . '_formatter_settings_update' => t('Update')));
+    // Display the page with the correct formatter summary.
+    $this->verbose($this->drupalGetContent());
+
+    // Hide the link and save all the formatter settings edited so far.
+    $edit = array(
+      'fields['. $this->fieldLinkName .'][type]' => 'hidden',
+    );
+    $this->drupalPost(NULL, $edit, t('Save'));
+	  $this->assertRaw('Your settings have been saved.');
+
+    // Check the formatter summary of the image field contains selected link.
+    $link_field = field_info_instance('node', $this->fieldLinkName, $this->bundle);
+    $this->assertText("{$link_field['label']} ({$this->fieldLinkName})", format_string('The expected summary is displayed to <em>link image to</em> field: @field_label (@field_name).', array(
+      '@field_label' => $link_field['label'],
+      '@field_name' => $this->fieldLinkName
+    )));
+
+    // Now check if these display settings display correctly in the front-end.
+    // Create a new node with a single image and link.
+    $nid = $this->createNodeWithLinkImage();
+    $node = node_load($nid, NULL, TRUE);
+    // Check the Image and Link values displayed with ILF for a single value.
+    $this->assertRawImageLink($node, $link_field, format_string('The correct output was found for Image field <em>@field_name</em> displayed through the Image Link Formatter.', array('@field_name' => $this->fieldImageName)));
+  }
+}

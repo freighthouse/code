@@ -1,0 +1,189 @@
+.node-resource-group-container {
+  margin-left: -15px;
+  margin-right: -15px;
+  @media (min-width: 1440px) {
+    margin-left: -30px;
+    margin-right: -30px;
+  }
+
+  > div {
+    > .row + .row {
+      margin-top: $spacing-xlarge;
+    }
+  }
+  
+}
+.node-resource-group {
+//  background-clip: padding-box;
+//  margin-bottom: 30px;
+  // margin-left: -15px;
+  // margin-right: -15px;
+  // @media (min-width: 1440px) {
+  //   margin-left: -30px;
+  //   margin-right: -30px;
+  // }
+  // margin-bottom: $spacing-xlarge;
+  margin-bottom: 0;
+  a:hover,
+  a:focus {
+//      text-decoration: none;
+  }
+  .resource-group-link {
+    background-color: $white;
+    border-radius: 6px;
+    border: 1px solid $gray-light;
+    display: block;
+    float: left;
+    width: 100%;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 0 10px rgba($black, 0);
+    transition: box-shadow .15s linear;
+    min-height: 540px;
+
+    &:hover {
+      border-color: $blue-light;
+      box-shadow: 0 5px 50px rgba($black, .25);
+      z-index: 10;
+    }
+  }
+  .resource-image {
+//      height: 124px;
+//      overflow: hidden;
+//      .border-radius(4px);
+      height: 0;
+      padding-bottom: 60%;
+      border-radius: 3px;
+      margin-bottom: $spacing-medium;
+      @media (max-width: 767px) {
+          // height: 250px; //height: initial; //This looks pretty good to.
+      }
+      img {
+//          display: block;
+//          height: auto;
+//          margin: 0 auto;
+          width: 100%;
+      }
+  }
+  .book-title {
+//      margin-bottom: 0;
+//      display: block;
+//      font-family: Arial, sans-serif;
+//      font-size: @default-font-size - 4;
+//      font-weight: 900;
+//      line-height: 18px;
+//      text-transform: uppercase;
+//      color: #075f99;
+    @include resource-title-small;
+  }
+  .author {
+//      margin-top: 0;
+//      font-family: Arial, sans-serif;
+//      font-size: @default-font-size - 2;
+//      font-weight: 500;
+//      line-height: 20px;
+//      color: #454545;
+    @include author;
+  }
+  .description {
+//      font-family: Arial, sans-serif;
+//      font-size: @default-font-size - 2;
+//      font-weight: 500;
+//      line-height: 18px;
+//      color: #454545;
+    @include description;
+  }
+  .grade-level {
+//      margin: 0;
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size - 2;
+//      font-weight: 900;
+//      line-height: 18px;
+//      text-transform: uppercase;
+//      color: #929292;
+    @include grade-level;
+  }
+
+  .panel-support-materials {
+    margin: 0;
+  }
+
+  .support-material-container {
+//      margin: 20px 0 15px;
+//      text-align: center;
+      margin: 0;
+      .support-material-inner-container {
+//          padding: 20px 0 15px;
+        padding: 0;
+        a {
+          border-radius: 6px;
+          display: block;
+          float: left;
+          width: 100%;
+          padding: 30px 15px;
+          position: relative;
+          box-shadow: 0 0 10px rgba($black, 0);
+          transition: box-shadow .15s linear;
+          min-height: 360px;
+
+          &:hover {
+            box-shadow: 0 5px 50px rgba($black, .25);
+            z-index: 10;
+          }
+
+          @media (min-width: 1440px) {
+            padding-left: 0;
+            padding-right: 0;
+          }
+        }
+      }
+      .image-container {
+//          text-align: center;
+//          margin-bottom: 20px;
+          background-color: $gray-white;
+          background-color: rgba($blue-white, .5);
+          border-radius: 3px;
+          height: 0;
+          padding-bottom: 60%;
+          margin-bottom: $spacing-medium;
+          position: relative;
+          img {
+//              max-height: 40px;
+            max-height: 40%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+      }
+      h4 {
+//          margin: 0 0 5px;
+//          font-family: Arial, sans-serif;
+//          font-size: 18px;
+//          font-weight: 900;
+//          line-height: 18px;
+//          color: #075f99;
+//          text-align: left;
+        @include resource-title-small;
+
+        + p {
+          margin-top: $spacing-xsmall;
+        }
+      }
+      p {
+//          font-weight: 500;
+//          color: #454545;
+//          font-size: @default-font-size - 2;
+//          text-align: left;
+        // color: $gray-dark;          
+        // @include fs($fs-body-small);
+        // font-weight: $fw-regular;
+        // line-height: 1.25em;
+        @include description;
+      }
+  }
+}
+
+.resource-group-container-content {
+//  margin-top: 30px;
+}

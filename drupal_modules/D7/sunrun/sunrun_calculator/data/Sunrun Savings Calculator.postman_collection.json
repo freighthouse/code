@@ -1,0 +1,51 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Sunrun Savings Calculator",
+		"_postman_id": "54288e3f-39ec-4f58-8a9e-c722cbef5430",
+		"description": "Services for Sunrun Savings Calculator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Savings Analysis",
+			"request": {
+				"url": "{{SR_URL}}/rest/v1/savings-analysis",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"street_address\" : \"string\",\n\t\"zipcode\" : \"string\",\n\t\"est_monthly_bill\" : 100,\n\t\"state\" : \"two-letter-string\"\n}"
+				},
+				"description": "Retrieve an initial solar savings analysis calculation."
+			},
+			"response": []
+		},
+		{
+			"name": "Financial Estimate",
+			"request": {
+				"url": "{{SR_URL}}/rest/v1/financing-estimate",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"account_id\" : \"string\",\n\t\"lse_id\" : 100,\n\t\"state\" : \"two-letter-string\",\n\t\"est_monthly_bill\" : 100\n}"
+				},
+				"description": "Retrieve an updated savings analysis. Requires that a __savings-analysis__ is run first in order to retrieve the `account_id` and `lse_id`."
+			},
+			"response": []
+		}
+	]
+}

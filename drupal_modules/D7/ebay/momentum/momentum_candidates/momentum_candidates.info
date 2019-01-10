@@ -1,0 +1,8 @@
+name = Momentum Candidates
+description = Utilizes the Momentum Candidates API
+core = 7.x
+package = BIPAC
+dependencies[] = momentum_api
+dependencies[] = imagecache_external
+
+configure = admin/config/system/site-information

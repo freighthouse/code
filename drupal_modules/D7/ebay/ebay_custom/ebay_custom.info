@@ -1,0 +1,13 @@
+name = "eBay Mainstreet Custom"
+description = "A module written by RepEquity that provides custom functionality for the eBay Mainsteet site. "
+core = 7.x
+package = eBay
+configure = admin/config/user-interface/ebay_custom
+dependencies[] = twitter_pull_oauth
+dependencies[] = elements
+scripts[] = js/bipac.js
+files[] = ebay_custom.module
+
+
+
+

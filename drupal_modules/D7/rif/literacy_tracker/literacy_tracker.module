@@ -1,0 +1,773 @@
+<?php
+
+	/**
+	 * Implements hook_permission()
+	 */
+	function literacy_tracker_permission()
+	{
+		return array(
+			'administer literacy tracker metadata' => array(
+				'title' => t('Administer Literacy Tracker'),
+				'description' => t('only give this permission to highest admin levels who need to administer Literacy Tracker content.'),
+			)
+		);
+	}
+
+	/**
+	 * Implements hook_menu().
+	 */
+	function literacy_tracker_menu()
+	{
+		$items = array();
+        $items['admin/config/content/literacy-tracker-passwords'] = array (
+          'title' => 'Password List for Literacy Tracker',
+          'description' => t('Configure the list of possible passwords to be randomly generated for new users.'),
+          'page callback' => 'drupal_get_form',
+          'page arguments' => array('literacy_tracker_password_config'),
+          'access arguments' => array('administer literacy tracker metadata'),
+          'file' => 'literacy_tracker.config.inc',
+        );
+		$items['literacy-tracker/add-lt-group/%ctools_js'] = array(
+			'title' => 'Add Literacy Tracker Group',
+			'page callback' => 'literacy_tracker_add_callback',
+			'file' => 'literacy_tracker.add_reading_group_modal.inc',
+			'page arguments' => array(2),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+		$items['literacy-tracker/edit-lt-group/%ctools_js/%node'] = array(
+			'title' => 'Edit Literacy Tracker Group',
+			'page callback' => 'literacy_tracker_edit_callback',
+			'file' => 'literacy_tracker.edit_reading_group_modal.inc',
+			'page arguments' => array(2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+		$items['literacy-tracker/add_users_multiple/%ctools_js/%node'] = array(
+			'title' => t('Add Multiple Users'),
+			'description' => 'Add Multiple Users to Reading Group',
+			'page callback' => 'literacy_tracker_add_users_multiple_callback',
+			'file' => 'literacy_tracker.add_users_multiple_modal.inc',
+			'page arguments' => array(2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_NORMAL_ITEM,
+		);
+		$items['literacy-tracker/edit-user/%ctools_js/%user'] = array(
+			'title' => t('Edit User'),
+			'description' => 'Edit User in Reading Group',
+			'page callback' => 'literacy_tracker_edit_user_callback',
+			'file' => 'literacy_tracker.edit_user_modal.inc',
+			'page arguments' => array(2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+		$items['literacy-tracker/delete-user/%ctools_js/%user'] = array(
+			'title' => t('Delete User'),
+			'description' => 'Delete User From Reading Group',
+			'page callback' => 'literacy_tracker_delete_user_callback',
+			'file' => 'literacy_tracker.delete_user_modal.inc',
+			'page arguments' => array(2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+		$items['literacy-tracker/remove-lt-group/%ctools_js/%node'] = array(
+			'title' => 'Remove Literacy Tracker Group',
+			'page callback' => 'literacy_tracker_remove_callback',
+			'file' => 'literacy_tracker.remove_reading_group_modal.inc',
+			'page arguments' => array(2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+		$items['delete-reading-group/%ctools_js/%node'] = array(
+			'title' => 'Delete Group',
+			'page callback' => 'literacy_tracker_delete_callback',
+			'file' => 'literacy_tracker.delete_reading_group_modal.inc',
+			'page arguments' => array(1, 2),
+			'access callback' => 'node_access',
+			'access arguments' => array('delete', 2),
+			'type' => MENU_CALLBACK,
+		);
+		$items['literacy-tracker/student/sign-in'] = array(
+			'title' => t('Student Sign In'),
+			'description' => 'LT Sign In Page',
+			'page callback' => 'get_sign_in_page_lt',
+			'access callback' => TRUE,
+			'type' => MENU_NORMAL_ITEM,
+			'file' => 'literacy_tracker_student_sign_in_page.inc',
+		);
+		$items['edit-lt-readers-interests/%ctools_js'] = array(
+			'title' => 'Add Interests',
+			'page callback' => 'literacy_tracker_edit_lt_readers_interests_callback',
+			'file' => 'literacy_tracker.edit_lt_readers_interests_modal.inc',
+			'page arguments' => array(1),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+		$items['literacy-tracker/student/view_history/%ctools_js/%user'] = array(
+			'title' => 'View Student History',
+			'page callback' => 'literacy_tracker_view_student_history',
+			'file' => 'literacy_tracker.view_student_history.inc',
+			'page arguments' => array(3,4),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+
+		return $items;
+	}
+
+	/* ****************************************
+	 * 		Define Themeable elements
+	 * **************************************** */
+	function literacy_tracker_theme() {
+		return array(
+			'literacy_tracker__reading_groups' => array(
+				'template' => 'literacy-tracker--reading-groups',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates',
+			),
+			'literacy_tracker__header_block' => array(
+				'template' => 'literacy-tracker--header-block',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates',
+			),
+			'literacy_tracker__nav_block' => array(
+				'template' => 'literacy-tracker--nav-block',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates',
+			),
+			'literacy_tracker__front_page' => array(
+				'template' => 'literacy-tracker--front-page',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates',
+			),
+			'literacy_tracker__dashboard__header' => array(
+				'template' => 'literacy-tracker--dashboard--header',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates/dashboard',
+			),
+			'literacy_tracker__dashboard_jumbotron' => array(
+				'template' => 'literacy-tracker--dashboard--jumbotron',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates/dashboard',
+			),
+			'literacy_tracker__dashboard__rewards' => array(
+				'template' => 'literacy-tracker--dashboard--rewards',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates/dashboard',
+			),
+			'literacy_tracker__dashboard__book_list' => array(
+				'template' => 'literacy-tracker--dashboard--book-list',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates/dashboard',
+			),
+			'literacy_tracker__dashboard__about_me' => array(
+				'template' => 'literacy-tracker--dashboard--about-me',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates/dashboard',
+			),
+			'literacy_tracker__view_student_history' => array(
+				'template' => 'literacy-tracker--view-student-history',
+				'path' => drupal_get_path('module', 'literacy_tracker') . '/templates',
+			),
+		);
+	}
+
+	function literacy_tracker_preprocess_literacy_tracker__reading_groups(&$variables)
+	{
+		$_debug_var = $variables;
+	}
+
+	/* ****************************************
+	 * 		Set up Blocks
+	 * **************************************** */
+	/**
+	 * Implements hook_block_info().
+	 *
+	 * This hook defines blocks to be recognized by the system
+	 */
+	function literacy_tracker_block_info() {
+		$blocks['lt_reading_groups'] = array(
+			'info' => t('LT Reading Groups'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_header_block'] = array(
+			'info' => t('LT Header'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_nav_block'] = array(
+			'info' => t('LT Nav'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_dashboard_header'] = array(
+			'info' => t('LT Dashboard Header'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_dashboard_jumbotron'] = array(
+			'info' => t('LT Dashboard Jumbotron'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_dashboard_rewards'] = array(
+			'info' => t('LT Dashboard Rewards'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_dashboard_book_list'] = array(
+			'info' => t('LT Dashboard Book List'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lt_dashboard_about_me'] = array(
+			'info' => t('LT Dashboard About Me'),
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		return $blocks;
+	}
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function literacy_tracker_block_view($delta = '') {
+		$block = array();
+		switch ($delta) {
+			case 'lt_reading_groups' :
+				$block['subject'] = t('Literacy Tracker Reading Groups');
+				$block['content'] = _get_lt_reading_groups();
+				break;
+			case 'lt_header_block' :
+				$block['subject'] = t('Literacy Tracker Header Block');
+				$block['content'] = _get_lt_header_block();
+				break;
+			case 'lt_nav_block' :
+				$block['subject'] = t('Literacy Tracker Nav Block');
+				$block['content'] = _get_lt_nav_block();
+				break;
+			case 'lt_dashboard_header' :
+				$block['subject'] = t('Literacy Tracker Dashboard Header');
+				$block['content'] = _get_lt_db_header();
+				break;
+			case 'lt_dashboard_jumbotron' :
+				$block['subject'] = t('Literacy Tracker Dashboard Jumbotron');
+				$block['content'] = _get_lt_db_jumbotron();
+				break;
+			case 'lt_dashboard_rewards' :
+				$block['subject'] = t('Literacy Tracker Dashboard Rewards');
+				$block['content'] = _get_lt_db_rewards();
+				break;
+			case 'lt_dashboard_book_list' :
+				$block['subject'] = t('Literacy Tracker Dashboard Book List');
+				$block['content'] = _get_lt_db_book_list();
+				break;
+			case 'lt_dashboard_about_me' :
+				$block['subject'] = t('Literacy Tracker Dashboard About Me');
+				$block['content'] = _get_lt_db_about_me();
+				break;
+
+		}
+
+		return $block;
+	}
+
+	/* ****************************************
+	 * 		Block Helper Methods
+	 * **************************************** */
+	function literacy_tracker_custom_theme() {
+		$admin_theme = variable_get('admin_theme', '0');
+	}
+
+	function _get_lt_reading_groups()
+	{
+		global $user;
+		
+		if(!user_is_logged_in()) {
+			drupal_goto('literacy-central/sign-in', array('query' => array('destination' => 'literacy-tracker/main')));
+		} else {
+
+			$type = 'lt_reading_groups';
+			$rows = array();
+			$query = new EntityFieldQuery;
+			$result = $query
+				->entityCondition('entity_type', 'node')
+				->propertyCondition('status', 1)
+				->propertyCondition('type', $type)
+				->propertyCondition('uid', $user->uid)
+				->execute();
+
+			$user_fields = user_load($user->uid);
+			$variables['first_name'] = $user_fields->field_first_name['und']['0']['value'];
+
+			$table_output = null;
+
+			if (!empty($result)) {
+				$headers = array('Created Date', 'Reading Group Name', 'School Year', 'Students', 'Actions');
+
+				//$bundle_data = entity_get_info('node');
+				foreach ($result['node'] as $nid => $item) {
+					$emw_node = entity_metadata_wrapper('node', $nid);
+
+					// Set up table values
+					$nodeID = $emw_node->nid->value();
+					$created_date = date('m/d/y', $emw_node->created->value());
+					$group_name = $emw_node->field_group_name->value();
+					$_debug_val = _wrapper_debug($emw_node);
+					$group_name_linked = '<a href="'.$emw_node->url->value().'">'.$group_name.'</a>';
+					if(!empty($emw_node->field_school_year->value())) {
+						$school_year = $emw_node->field_school_year->name->value();
+					}
+
+					//Get number of Users from entity wrapper
+					$user_count = count($emw_node->field_associated_users);
+
+                    // This horrific looking snippet is because deleted entities are not updated in entitiy references.
+                    // We could have updated the delete function to also delete the referenced entity in the group; however, this would not fix the pre-existing accounts that already have empty users nor would it address users deleted via the admin.
+                    $user_count = 0;
+                    foreach($emw_node->field_associated_users->getIterator() as $account) {
+                        $user_account = user_load($account->getIdentifier());
+                        if($user_account != NULL) {
+                          $user_count += 1;
+                        }
+                    }
+
+
+					$node_actions = '
+						<div class="dropdown dropdown-table">
+							<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Select Action...<span class="caret"></span></button>
+							<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+								<li><a href="' . $emw_node->url->value() . '" target="_blank">View</a></li>
+								<li>'._literacy_tracker_build_edit_lt_reading_groups_link('Edit',$nodeID).'</li>
+								<li>'._literacy_tracker_build_remove_lt_reading_groups_link('Delete',$nodeID).'</li>
+							</ul>
+						</div>
+					';
+
+					$rows[] = array($created_date, $group_name_linked, $school_year, $user_count, $node_actions);
+				}
+				$table = array(
+					'header' => $headers,
+					'rows' => $rows,
+					'sticky' => FALSE,
+					'attributes' => array('class' => array('table', 'table-bordered', 'table-styled')),
+				);
+
+				$table_output = theme('table', $table);
+			}
+
+			setup_lt_modal_js();
+
+			$output = theme('literacy_tracker__reading_groups', array(
+				'first_name' => $variables['first_name'],
+				'table_output' => $table_output,
+				'test_var' => 'test data',
+				'add_group_button' => _literacy_tracker_build_add_lt_reading_groups_link("Add Group", 4), // TODO: This 4 looks hardcoded... We should fix this.
+			));
+
+			return $output;
+		}
+	}
+
+	function _get_lt_header_block() {
+		$output = theme('literacy_tracker__header_block', array());
+		return $output;
+	}
+
+	function _get_lt_nav_block() {
+		global $user;
+		$name = $user->name;
+		$output = theme('literacy_tracker__nav_block', array('username'=>$name));
+		return $output;
+	}
+
+	function _get_lt_db_header() {
+		$output = theme('literacy_tracker__dashboard__header', array());
+		return $output;
+	}
+	function _get_lt_db_jumbotron() {
+		$output = theme('literacy_tracker__dashboard_jumbotron', array());
+		return $output;
+	}
+	function _get_lt_db_rewards() {
+		$star_levels = array(
+			'minutes'=> array(
+				1 => 5,
+				2 => 50,
+				3 => 100,
+				4 => 200,
+			),
+			'challenges' => array(
+				1 => 3,
+				2 => 10,
+				3 => 25,
+				4 => 50,
+			),
+		);
+		global $user;
+
+		$user_query = new EntityFieldQuery();
+		$user_query->entityCondition('entity_type', 'reading_challenge')
+			->propertyCondition('student_id', $user->uid, '=');
+		$results = $user_query->execute();
+
+		$challenge_minutes_stars = 0;
+		$challenge_completed_stars = 0;
+		
+
+		$total_minutes = 0;
+		$total_challenges = 0;
+		
+
+		// Use the results Field to get the Reward Values
+		if(isset($results['reading_challenge'])) {
+			$reading_challenges = entity_load('reading_challenge', array_keys($results['reading_challenge']));
+			$total_challenges = count($reading_challenges);
+			$total_seconds = 0;
+			foreach($reading_challenges as $index => $reading_challenge) {
+				$total_seconds += $reading_challenge->duration;
+			}
+
+			$total_minutes = $total_seconds % 60;
+			// Get the timestamp since the most recent Sunday Morning at 00:00:00
+			$last_sunday_timestamp = strtotime("last Sunday");
+			// Rerun the query with the new condition of created at > timestamp
+			$user_query->propertyCondition('created_at', $last_sunday_timestamp, '>');
+			// Use the count of that query to fill out the days variable.
+			$results_since_last_week = $user_query->execute();
+			$reading_challenges_since_last_week = entity_load('reading_challenge', array_keys($results_since_last_week['reading_challenge']));
+			$days_with_challenge = array();
+			foreach($reading_challenges_since_last_week as $index => $reading_challenge){
+				$week_string = date("D", $reading_challenge->created_at);
+				$days_with_challenge[$week_string] = true;
+			}
+			$days_this_week_with_challenges = count($days_with_challenge);
+
+			// TODO: Calculate the number of stars for each reward value
+			foreach($star_levels['minutes'] as $next_level) {
+				if($total_minutes >= $next_level){
+					$challenge_minutes_stars++;
+				} else { break; }
+			}
+			foreach($star_levels['challenges'] as $next_level) {
+				if($total_challenges >= $next_level) {
+					$challenge_completed_stars++;
+				} else { break; }
+			}
+		}
+
+		$output = theme('literacy_tracker__dashboard__rewards', array(
+			'minutes_read' => $total_minutes,
+			'challenges_completed' => $total_challenges,
+			'reading_challenges_this_week' => $days_this_week_with_challenges,
+			'challenge_minutes_stars' => $challenge_minutes_stars,
+			'challenge_completed_stars' => $challenge_completed_stars,
+			'challenge_days_stars' => $challenge_days_stars,
+		));
+		return $output;
+	}
+	function _get_lt_db_book_list() {
+		global $user;
+
+		$reader_profile = profile2_load_by_user($user->uid, 'literacy_tracker_reader');
+
+		if($reader_profile) {
+			$interest_array = $reader_profile->wrapper()->field_reader_interests->value();
+			$has_interests = (!empty($interest_array));
+			$user_name = $reader_profile->wrapper()->field_first_name->value();
+			$vocabulary = 'themes';
+			$interests = array();
+			$interest_names = array();
+
+			foreach($interest_array as $interest) {
+				$name = $interest->name;
+				$interest_names[] = $name;
+				$term = taxonomy_get_term_by_name($name, $vocabulary);
+				if(isset($term)) {
+					$tid = reset($term)->tid;
+					$interests[] = $tid;
+				}
+
+			}
+
+			if($has_interests) {
+				$type = 'book_resource';
+				$query = new EntityFieldQuery;
+				$result = $query
+					->entityCondition('entity_type', 'node')
+					->propertyCondition('status', 1)
+					->propertyCondition('type', $type)
+					->fieldCondition('field_themes', 'tid', $interests, 'IN')
+					->execute();
+
+				if(empty($result)) {
+					// TODO: Throw a graceful error
+					return "There are no books matching your interests.";
+				}
+				$books = array();
+				$books_for_print = array();
+				$node = $result['node'];
+				shuffle($node);
+				$i = 0;
+				foreach($node as $item) {
+					if($i == 10) {break;}
+					$nid = reset($item);
+					$books[] = $nid;
+					$loaded_node = node_load($nid);
+					$book_cover_filename = $loaded_node->field_book_cover_file_name['und'][0]['value'];
+					$book_cover_uri = 'public://Book_Covers/' . $book_cover_filename;
+					$file_url = file_create_url($book_cover_uri);
+					$title = $loaded_node->title;
+					$book_link = drupal_get_path_alias('node/' . $loaded_node->nid);
+					$author_tid = $loaded_node->field_author['und'][0]['tid'];
+					$author_name = taxonomy_term_load($author_tid)->name;
+					$books_for_print[] = array(
+						'book_title'=>$title,
+						'book_author'=>$author_name,
+						'book_cover'=>$file_url,
+						'book_link'=>$book_link,
+					);
+					$i++;
+				}
+			} else {
+				$books = [];
+				$books_for_print = [];
+
+			}
+
+            $query = new EntityFieldQuery();
+            $query->entityCondition('entity_type', 'reading_challenge')
+              ->propertyCondition('student_id', $user->uid, '=');
+            $results = $query->execute();
+            if(isset($results['reading_challenge'])) {
+                $reading_challenges = entity_load('reading_challenge', array_keys($results['reading_challenge']));
+                $total_challenges = count($reading_challenges);
+            }
+
+			$output = theme('literacy_tracker__dashboard__book_list',
+				array(
+					'has_interests'=>$has_interests,
+                    'completed_challenges'=>$total_challenges,
+					'books'=>$books,
+					'books_for_print'=>$books_for_print,
+					'user_name'=>$user_name,
+					'interest_names'=>implode(', ', $interest_names),
+					));
+			return $output;
+		} else {
+			return "Viewing block as Admin: View as a student to see book list block.";
+            drupal_goto("/literacy-tracker/student/sign-in");
+		}
+
+	}
+	function _get_lt_db_about_me() {
+		global $user;
+		$user_fields = user_load($user->uid);
+
+		$type = 'lt_reading_groups';
+		$query = new EntityFieldQuery;
+		$result = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('status', 1)
+			->propertyCondition('type', $type)
+			->fieldCondition('field_associated_users', 'target_id', $user->uid, '=')
+			//->propertyCondition('uid', $user->uid)
+			->execute();
+
+		if(empty($result)) {
+			// TODO: Throw a graceful error if this student is somehow no longer associated with a teacher.
+			return "You are viewing the about block as a non-reader user.";
+		}
+		$reading_group_nid = reset($result['node'])->nid;
+		$reading_group_emw = entity_metadata_wrapper('node', $reading_group_nid);
+		$reader_profile = profile2_load_by_user($user->uid, 'literacy_tracker_reader');
+		$interest_array = $reader_profile->wrapper()->field_reader_interests->value();
+		$interests = array();
+		foreach($interest_array as $index => $interest) {
+			$interests[] = $interest->name;
+		}
+		$interests = implode(', ', $interests);
+
+		$name = $reader_profile->wrapper()->field_first_name->value() . ' ' . $reader_profile->wrapper()->field_last_initial->value();;
+		$grade_level = $reader_profile->wrapper()->field_grade_level->value()->name;
+		$managing_user = $reading_group_emw->author->field_first_name->value() . ' ' . $reading_group_emw->author->field_last_name->value();
+		$reading_group = $reading_group_emw->field_group_name->value();
+		setup_lt_modal_js();
+		$interests_modal = _literacy_tracker_build_readers_interests_link();
+		$output = theme('literacy_tracker__dashboard__about_me', array(
+			'name' => $name,
+			'managing_user' => $managing_user,
+			'reading_group' => $reading_group,
+			'grade_level' => $grade_level,
+			'interests' => $interests,
+			'interests_modal_link' => $interests_modal,
+		));
+		return $output;
+	}
+
+	/* ****************************************
+	 * 		Form Alter
+	 * **************************************** */
+	function literacy_tracker_form_lt_reading_groups_node_form_alter(&$form, &$form_state){
+		// Note: this file handles both add and edit lt reading group forms
+		global $theme;
+		if($theme == 'rif') {
+			//$form['additional_settings']['#access'] = false;
+			$form['additional_settings']['#prefix'] = '<div class="hidden">';
+			$form['additional_settings']['#suffix'] = '</div>';
+			$form['actions']['submit']['#attributes'] = array('class'=> array('btn btn-green'));
+			$form['actions']['delete']['#attributes'] = array('class'=> array('btn btn-red pull-right'));
+		}
+		hide($form['field_associated_users']);
+		hide($form['field_user_metadata']);
+		$form['status'] = array(
+			'#type'=>'value',
+			'#value'=>1
+		);
+		$form['#validate'][] = 'add_lt_reading_group_validate';
+		$form['#submit'][] = 'add_lt_reading_group_submit';
+	}
+
+	function literacy_tracker_form_node_delete_confirm_alter(&$form, &$form_state) {
+		$_debug_val = 'true';
+		if(isset($form['#node']) && $form['#node']->type == 'lt_reading_groups'){
+			$form['actions']['submit']['#attributes']['class'][] = 'btn btn-red pull-right';
+			$form['actions']['cancel']['#type'] = 'button';
+			$form['actions']['cancel']['#value'] = 'Cancel';
+			$form['actions']['cancel']['#attributes']['class'] = array('btn btn-green');
+			$form['actions']['cancel']['#attributes']['onclick'] = array('Drupal.CTools.Modal.dismiss()');
+		}
+	}
+
+	// TODO: Add hook alters for edit and delete forms (We might need to do our validation for those as well)
+	// NOTE: The edit form might be the same as the create form.
+
+	function add_lt_reading_group_validate($form, &$form_state) {
+		$form_values = $form_state['values'];
+		// TODO: Check that THIS user has no other reading groups with the same name.
+	}
+	function add_lt_reading_group_submit($form, &$form_state) {
+		// $form_values = $form_state['values'];
+		// This placeholder is here so that we can redirect the user to their new page if we decide to do that.
+	}
+
+	/* ****************************************
+	 * 		Modal Style Setup
+	 * **************************************** */
+	function setup_lt_modal_js(){
+		static $added = FALSE;
+		if($added == FALSE) {
+			$added = TRUE;
+		}
+		ctools_include('ajax');
+		ctools_include('modal');
+		ctools_modal_add_js();
+
+		// Create the style array to pass to the ctools js
+		$add_lt_group_style = array(
+			'add-lt-group-modal-style' => array(
+				'modalSize' => array(
+					'type' => 'scale',
+					'width' => 0.6,
+					'height' => 0.4,
+					'contentRight' => 0,
+					'contentBottom' => 0,
+				),
+				'modalOptions' => array(
+					'opacity' => .6,
+					'background-color' => '#684C31',
+				),
+				'animation' => 'fadeIn',
+				'animationSpeed' => 'fast',
+				'modalTheme' => 'add_lt_group_theme',
+				'extraVar' => 'More Info',
+				'closeText' => '',
+			),
+		);
+
+		drupal_add_js($add_lt_group_style, 'setting');
+		ctools_add_js('literacy_tracker_reading_group_style', 'literacy_tracker');
+	}
+
+	/* ****************************************
+	 * 		Modal Link Builders
+	 * **************************************** */
+	function _literacy_tracker_build_add_lt_reading_groups_link($link_text = 'Literacy Tracker', $node_id) {
+		$button = '';
+		$button .= '<button type="button" class="btn btn-green">';
+		$button .= '<span class="button-text">' . $link_text . '<i class="fa fa-users" aria-hidden="true"></i></span>';
+		$button .= '</button>';
+
+		return _literacy_tracker_ctools_ajax_text_button($button, '/literacy-tracker/add-lt-group/nojs', 'Add Group', 'ctools-use-modal ctools-modal-add-lt-group-modal-style add-button add-button-for-' . $node_id, 'ctools-use-modal');
+	}
+
+	function _literacy_tracker_build_edit_lt_reading_groups_link($link_text = 'Edit', $node_id) {
+		return _literacy_tracker_ctools_ajax_text_button(
+			$link_text,
+			'/literacy-tracker/edit-lt-group/nojs/'.$node_id,
+			'Edit Group',
+			'ctools-use-modal ctools-modal-add-lt-group-modal-style add-button add-button-for-' . $node_id,
+			'ctools-use-modal'
+		);
+	}
+
+	function _literacy_tracker_build_remove_lt_reading_groups_link($link_text = 'Delete', $node_id) {
+		return _literacy_tracker_ctools_ajax_text_button(
+			$link_text,
+			'/literacy-tracker/remove-lt-group/nojs/'.$node_id,
+			'Delete Group',
+			'ctools-use-modal ctools-modal-add-lt-group-modal-style add-button add-button-for-' . $node_id,
+			'ctools-use-modal'
+		);
+	}
+
+	// The dreaded add users modal
+	function _literacy_tracker_add_users_multiple_link($link_text = 'Add Students', $reading_group_node_id) {
+		return _literacy_tracker_ctools_ajax_text_button(
+			'<i class="fa fa-user-plus" aria-hidden="true"></i>'.$link_text,
+			'/literacy-tracker/add_users_multiple/ajax/'.$reading_group_node_id,
+			'Add Users to Reading Group',
+			'btn btn-green ctools-use-modal ctools-modal-add-lt-group-modal-style add-user-modal add-button add-button-for-' . $reading_group_node_id,
+			'ctools-use-modal'
+		);
+	}
+	function _literacy_tracker_edit_user_link($link_text = 'Edit', $user_to_edit) {
+		return _literacy_tracker_ctools_ajax_text_button(
+			$link_text,
+			'/literacy-tracker/edit-user/nojs/'.$user_to_edit,
+			'Edit User in Reading Group',
+			'ctools-use-modal ctools-modal-add-lt-group-modal-style add-button edit-user-button-for-' . $user_to_edit,
+			'ctools-use-modal'
+		);
+	}
+	function _literacy_tracker_delete_user_link($link_text = 'Delete', $user_to_delete) {
+		return _literacy_tracker_ctools_ajax_text_button(
+			$link_text,
+			'/literacy-tracker/delete-user/nojs/'.$user_to_delete,
+			'Delete User from Reading Group',
+			'ctools-use-modal ctools-modal-add-lt-group-modal-style add-button delete-user-button-for-' . $user_to_delete,
+			'ctools-use-modal'
+		);
+	}
+
+	function _literacy_tracker_view_history_button($link_text = 'View History', $uid = NULL) {
+		if($uid == NULL) {
+			global $user;
+			$uid = $user->uid;
+		}
+		return _literacy_tracker_ctools_ajax_text_button(
+			$link_text,
+			'/literacy-tracker/student/view_history/ajax/'.$uid,
+			'View Students Reading Challenge History',
+			'ctools-use-modal ctools-modal-add-lt-group-modal-style view-history view-history-for-' . $uid,
+			'ctools-use-modal'
+		);
+	}
+
+	function _literacy_tracker_build_readers_interests_link($link_text = 'Edit Interests') {
+		return _literacy_tracker_ctools_ajax_text_button(
+			'<i class="fa fa-pencil" aria-hidden="true"></i> '.$link_text,
+			'/edit-lt-readers-interests/ajax',
+			'Add Readers Interests',
+			'btn btn-green interests-modal ctools-use-modal ctools-modal-add-lt-group-modal-style add-button pull-right',
+			'ctools-use-modal'
+		);
+	}
+
+	/* ****************************************
+	 * 		Modal Link Helper Functions
+	 * **************************************** */
+	function _literacy_tracker_ctools_ajax_text_button($text, $dest, $alt, $class = '', $type = 'use-ajax')
+	{
+		drupal_add_library('system', 'drupal.ajax');
+
+		return l($text, $dest, array('html' => TRUE, 'attributes' => array('class' => array($type, $class), 'title' => $alt, 'rel' => 'nofollow')));
+	}
+

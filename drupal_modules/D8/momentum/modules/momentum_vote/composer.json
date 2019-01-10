@@ -1,0 +1,14 @@
+{
+  "name": "drupal/momentum_vote",
+  "type": "drupal-module",
+  "description": "Utilizes the Momentum Vote API",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/momentum_vote",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/momentum_vote",
+    "source": "http://cgit.drupalcode.org/momentum_vote"
+  },
+  "require": { }
+}

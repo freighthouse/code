@@ -1,0 +1,98 @@
+.homepage-hero-image {
+  line-height: 0;
+  img {
+    width: 100%;
+  }
+}
+
+.homepage-hero-slider {
+  @extend %clearfix;
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-hero-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.homepage-hero-text-wrapper {
+  @include breakpoint($bp-small) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    z-index: 100;
+  }
+}
+
+.no-mediaqueries .homepage-hero-text-wrapper {
+  top: 25%;
+  left: 0;
+}
+
+.homepage-hero-content {
+  @include stagecenter();
+}
+
+.homepage-hero-text-block {
+  padding: 2em 3em 2.5em 3em;
+  width: auto;
+  background-color: $c-white;
+  @include breakpoint($bp-small) {
+    width: 50%;
+  }
+}
+
+.homepage-hero-title {
+  @include fontsize(28);
+  @extend %helvetica-semibold;
+  @extend %light;
+  margin-bottom: 0.15em;
+  color: $c-blue;
+  @include breakpoint($bp-small) {
+    @include fontsize(36);
+  }
+  @include breakpoint($bp-med) {
+    @include fontsize(42);
+  }
+}
+
+.homepage-hero-description {
+  @include fontsize(18);
+  color: $c-dark-grey;
+  .blue-button {
+    @extend %blue-button;
+    max-width: none;
+    display: inline-block;
+    padding: 0.7em 1em;
+    text-transform: uppercase;
+  }
+  .highlight {
+    background-color: $c-yellow;
+  }
+}
+
+// wider layout for announcements
+.hero-wide-layout {
+  .homepage-hero-title {
+    margin-bottom: 0;
+    @include breakpoint($bp-med) {
+      @include fontsize(38);
+    }
+  }
+  .homepage-hero-text-block {
+    @include breakpoint($bp-small) {
+      width: 79%;
+    }
+  }
+  .homepage-hero-description {
+    p:last-child {
+      margin: 1.3em 0 0.2em;
+    }
+  }
+  .homepage-hero-text-block {
+    padding: 1.5em 2em;
+  }
+}

@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * @file
+ *   Main Smartystreets module
+ */
+
+/**
+ * Implements hook_permission()
+ */
+function smarterstreets_permission() {
+  return array(
+    'admin smarterstreets' => array(
+      'title' => t('Administrate Smarterstreets'),
+      'description' => t('Set Key and ID'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function smarterstreets_menu() {
+  $items['admin/config/system/smarterstreets'] = array(
+    'title' => t('Smartystreets Config'),
+    'description' => t('Set ID and Key'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('smarterstreets_admin_settings_form'),
+    'file' => 'smarterstreets.admin.inc',
+    'access arguments' => array('admin smarterstreets'),
+  );
+  return $items;
+}
+
+/**
+ * Pass a zip.  Return City / State
+ */
+function smarterstreets_city_state_from_zip($zip) {
+  $obj = smarterstreets_obj();
+  return $obj->city_state_from_zip($zip);
+}
+
+/**
+ * Pass a zip.  Return Lat / Lon
+ */
+function smarterstreets_lat_lon_from_zip($zip) {
+  $obj = smarterstreets_obj();
+  return $obj->lat_lon_from_zip($zip);
+}
+
+/**
+ * Pass an address.  Return Lat / Lon
+ */
+function smarterstreets_lat_lon_from_address($address) {
+  $obj = smarterstreets_obj();
+  return $obj->lat_lon_from_address($address);
+}
+
+/**
+ * Pass a full address.  Get everything.
+ */
+function smarterstreets_full_address($address) {
+  $obj = smarterstreets_obj();
+  return $obj->full_address($address);
+}
+
+/**
+ * Return a Smartystreets Object
+ */
+function smarterstreets_obj() {
+  $id = variable_get('sstreets_id', 'faf3f94c-9bae-4c13-be6a-fac4c955109d');
+  $key = variable_get('sstreets_key', 'PiWw7/aex+mquBeXES8VsRqIv+rGPFVfSGCZ5bpmyVZt3IlUL7wmBS7S/44Hkwh8iK6cvZllhygDN5nVll8aCw==');
+
+  if ((empty($id)) || (empty($key))) {
+    watchdog('smarterstreets', t('Missing Smartystreets Key or ID'), array());
+    return FALSE;
+  }
+
+  return new Smartystreets($key, $id);  
+}

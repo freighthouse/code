@@ -1,0 +1,5 @@
+name = Dvinci Rest API
+description = Rest API/PHP functions, hooks and actions.
+package = Custom
+dependencies[] = services
+core = 7.x

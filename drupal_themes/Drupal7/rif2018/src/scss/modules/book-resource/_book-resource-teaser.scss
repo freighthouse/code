@@ -1,0 +1,90 @@
+// Book Resource: Teaser
+//
+// Markup: book-resource-teaser.html
+//
+// Style Guide: Nodes.Book Resource.Teaser
+.node-book-resource {
+  &.node-teaser {
+//      max-width:400px;
+//      position: relative;
+//      margin: 0 auto 25px;
+//      height: 260px;
+//      color: @white;
+//      background-color: @dark-grey;
+//      .border-radius (4px);
+//      overflow: hidden;
+    background-color: transparent;
+    border-radius: 6px;
+    margin-bottom: 0;
+    height: auto;
+    .slide & {
+      height: 260px;
+    }
+    // height: 240px;
+      .cover-image {
+        display: block;
+        height: 0;
+        padding-bottom: 70%;
+        overflow: hidden;
+        border-radius: 6px;
+        margin-bottom: $spacing-medium;
+      }
+      img {
+//          width: 100%;
+//          height: auto;
+//          .border-radiuses (4px, 0, 0, 4px);
+//          display: block;
+        border-radius: 0;
+      }
+      a {
+        text-decoration: none;
+        &:hover {
+          text-decoration: none;
+          .title {
+            text-decoration: underline;
+          }
+        }
+      }
+      .text-information {
+//          position: absolute;
+//          bottom: 0;
+//          left: 0;
+//          right: 0;
+//          padding: 15px;
+//          background-color: darken(@dark-grey, 5%);
+//          .border-radiuses (0, 4px, 4px, 0);
+          // background-color: $blue-light;
+          background-color: transparent;
+          padding: 0;
+          position: relative;
+          bottom: auto;
+          left: auto;
+          right: auto;
+
+          .title {
+//              font-family: @alt-sans-serif-font-family;
+//              font-size: @default-font-size + 2;
+//              font-weight: 900;
+//              line-height: @default-line-height + 4;
+//              text-overflow: ellipsis;
+//              white-space: nowrap;
+//              overflow: hidden;
+//              color: @white;
+            white-space: normal;
+            @include resource-title-small;
+            color: $blue-light;
+          }
+          .author {
+//              font-family: @default-font-family;
+//              font-size: @default-font-size - 2;
+//              font-weight: 700;
+//              line-height: @default-line-height + 4;
+//              text-overflow: ellipsis;
+//              white-space: nowrap;
+//              overflow: hidden;
+//              color: @white;
+              @include author;
+          }
+      }
+  }
+}

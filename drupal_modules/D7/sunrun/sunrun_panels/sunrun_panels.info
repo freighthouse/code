@@ -1,0 +1,6 @@
+name = Sunrun Panels
+description = Panels Additions
+core = 7.x
+package = Sunrun
+
+dependencies[] = panels

@@ -1,0 +1,1587 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a BIPAC Campaigns content type
+ *   along with the code needed to integrate with BIPAC
+ *   via its APIs.
+ */
+
+/**
+ * This form submits the batch
+ */
+function bipac_campaigns_load_bulk($form_state) {
+  $form['batch_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Batch size'),
+    '#default_value' => '1000',
+    '#required' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  return $form;
+}
+
+/**
+ * Submit function for postcheck_load_form
+ */
+function bipac_campaigns_load_bulk_submit($form, &$form_state) {
+
+  $batch = array(
+    'title' => t('Rolling through data...'),
+    'operations' => array(),
+    'init_message' => t('Initializing'),
+    'progress_message' => t('Processing @current of @total with a batch size of @size', array('@size' => $size)),
+    'error_message' => t('Done broke it'),
+    'finished' => '_postcheck_process_finished',
+  );
+
+  $size = $form_state['values']['batch_size'];
+
+  $results = db_select('bipac_emergency', 'b')
+  ->fields('b')
+  ->range(0, $size)
+  ->isNull('b.status')
+  ->orderBy('b.id', 'DESC')
+  ->execute();
+
+  if (!empty($results)) {
+    foreach ($results as $result) {
+      $id = $result->id;
+      if (!empty($result->data)) {
+        $data = unserialize($result->data);
+        $batch['operations'][] = array('_bipac_campaigns_process_letters', array($data, $id));
+      }
+    }
+  }
+
+  batch_set($batch);
+}
+
+
+function bipac_campaigns_refresh_counts() {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'bipac_campaign');
+  $result = $query->execute();
+
+  $nodes = reset($result);
+  $nids = array_keys($nodes);
+  if (is_array($nids)) {
+    foreach ($nids as $nid) {
+      cache_clear_all('field:node:' . $nid, 'cache_field');
+    }
+  }
+}
+
+/**
+ * Implements hook_exit().
+ *
+ * @see drupal_serve_page_from_cache()
+ */
+function bipac_campaigns_exit($destination = NULL) {
+  // If the client sent a session cookie, a cached copy will only be served
+  // to that one particular client due to Vary: Cookie. Thus, do not set
+  // max-age > 0, allowing the page to be cached by external proxies, when a
+  // session cookie is present unless the Vary header has been replaced or
+  // unset in hook_boot().
+  $vary_header = drupal_get_http_header('vary');
+  $max_age = !isset($_COOKIE[session_name()]) || isset($vary_header) ? variable_get('page_cache_maximum_age', 0) : 0;
+
+  if (drupal_page_is_cacheable() && $max_age && $destination == NULL && !headers_sent()) {
+    drupal_add_http_header('Cache-Control', 'public, max-age=' . $max_age);
+  }
+}
+
+/**
+ * Implements hook_permission()
+ */
+function bipac_campaigns_permission() {
+  return array(
+    'admin bipac campaigns' => array(
+      'title' => t('Administrate BIPAC Campaigns Module'),
+      'description' => t('Set configuration options for BIPAC Campaigns module'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function bipac_campaigns_menu() {
+  $items['admin/config/system/bipac'] = array(
+    'title' => 'BIPAC Campaigns',
+    'description' => t('Configure the API key, access URLs, etc... for the BIPAC Campaigns module.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bipac_campaigns_settings_form'),
+    'file' => 'bipac_campaigns.admin.inc',
+    'access arguments' => array('admin bipac campaigns'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/system/bipac_bulk'] = array(
+    'title' => 'BIPAC Bulk',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bipac_campaigns_load_bulk'),
+    'description' => t('Bulk send stored letters to BIPAC'),
+    'access arguments' => array('admin bipac campaigns'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_node_info()
+ */
+function bipac_campaigns_node_info() {
+  return array(
+    'bipac_campaign' => array(
+      'name' => t('BIPAC Campaign'),
+      'base' => 'bipac_campaign',
+      'description' => t('A content type that provides the necessary fields for integrating with the BIPAC APIs'),
+      'has_title' => TRUE,
+      'title_label' => t('Campaign Title'),
+      'locked' => FALSE,
+    ),
+  );
+}
+
+function bipac_campaign_form($node, $form_state) {
+  $type = node_type_get_type($node);
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => check_plain($type->title_label),
+    '#default_value' => !empty($node->title) ? $node->title : NULL,
+    '#required' => TRUE,
+  );
+  return $form;
+}
+
+/**
+ *  hook_theme
+ */
+function bipac_campaigns_theme() {
+  $items = array();
+  $items['bipac_campaigns_bipac_response'] = array(
+    'variables' => array('legislators' => NULL),
+    'template' => 'bipac_campaigns_bipac_response',
+  );
+  return $items;
+}
+
+/**
+ * hook_block_info
+ */
+function bipac_campaigns_block_info() {
+  $blocks['bipac_campaigns_bipac_block'] = array(
+    'info' => t('BIPAC Submission Form'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['bipac_campaigns_bipac_response'] = array(
+    'info' => t('BIPAC Response Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function bipac_campaigns_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'bipac_campaigns_bipac_response':
+      $content = isset($_SESSION['bipac_response']) ? $_SESSION['bipac_response'] : NULL;
+      unset($_SESSION['bipac_response']);
+      $block['subject'] = t('BIPAC Response');
+      $block['content'] = theme('bipac_campaigns_bipac_response', array('legislators' => $content));
+      break;
+    case 'bipac_campaigns_bipac_block':
+      $block['subject'] = t('Submission Form');
+      $block['content'] = _bipac_campaigns_bipac_block();
+  }
+  return $block;
+}
+
+function _bipac_campaigns_bipac_block() {
+  $bipac_info = array();
+  $nid = arg(1);
+  if (arg(0) == 'node' && is_numeric($nid)) {
+    $node = node_load($nid);
+    if (($node) && ($node->type == 'bipac_campaign')) {
+      /* $json = bipac_campaigns_smartystreets(NULL);
+      $address = NULL;
+      $zip = NULL;
+      if (!empty($json)) {
+        if (!empty($json[0]['components']['zipcode'])) {
+          $zip = $json[0]['components']['zipcode'];
+        }
+        if (!empty($json[0]['delivery_line_1'])) {
+          $address = $json[0]['delivery_line_1'];
+        }
+      }*/
+      $bipac_info = _bipac_campaigns_bipac_grab($node);
+      // return drupal_get_form('_bipac_campaigns_bipac_letter_form', $bipac_info, $nid, $address, $zip);
+      return drupal_get_form('_bipac_campaigns_bipac_letter_form', $bipac_info, $nid);
+    }
+  }
+}
+
+// function _bipac_campaigns_bipac_letter_form($form, &$form_state, $bipac_info, $nid, $address = NULL, $zip = NULL) {
+function _bipac_campaigns_bipac_letter_form($form, &$form_state, $bipac_info, $nid) {
+$debug=variable_get('momentum_api_debug',0);
+  	drupal_add_js('https://cdn.ckeditor.com/4.8.0/standard-all/ckeditor.js','external');
+	drupal_add_js(drupal_get_path('module', 'momentum_api') . '/js/momentum_api.js');
+
+  //drupal_add_css('https://sdk.ckeditor.com/theme/css/sdk-inline.css', array('group' => CSS_DEFAULT, 'every_page' => FALSE));
+  drupal_add_css(drupal_get_path('module', 'momentum_api') . '/css/momentum_api.css', array('group' => CSS_DEFAULT, 'every_page' => FALSE));
+
+  //GETS prefilled  data
+  $fname=isset($_GET['fn'])?$_GET['fn']:"";
+  $lname=isset($_GET['ln'])?$_GET['ln']:"";
+  $prefix=isset($_GET['px'])?$_GET['px']:"";
+  $address1=isset($_GET['ad'])?$_GET['ad']:"";
+  $address2=isset($_GET['ad2'])?$_GET['ad2']:"";
+  $city=isset($_GET['ct'])?$_GET['ct']:"";
+  $state=isset($_GET['st'])?$_GET['st']:"";
+  $zip=isset($_GET['zp'])?$_GET['zp']:"";
+  $phone=isset($_GET['ph'])?$_GET['ph']:"";
+  $email=isset($_GET['em'])?$_GET['em']:"";
+  //Control variables
+  $userid=isset($_GET['uid'])?$_GET['uid']:"";
+  $source=isset($_GET['src'])?$_GET['src']:"";
+  $medium=isset($_GET['mdm'])?$_GET['mdm']:"";
+  $campaign=isset($_GET['cmp'])?$_GET['cmp']:"";
+
+  //if the data is prepopulated, the user information will be saved to preview the data
+	$user_defaults=array(
+		'prefix'=>$prefix,
+		'first'=>$fname,
+		'last'=>$lname,
+		'address'=>$address1." ". $address2.", ".$city.", ".$state." ".$zip,
+		'state'=>$state,
+		'city'=>$city,
+		'phone'=>$phone,
+		'email'=>$email);
+
+ //********************  FORM control Hidden values as is in the campaign NODE ****************
+  $form['letter_id'] = array(
+    '#type' => 'hidden',
+    '#value' => $nid,
+  );
+  $form['thanks'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['thanks'],
+  );
+  $form['send_to'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['send_to'],
+  );
+  $form['recipient_states'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['recipient_states'],
+  );
+  $form['recipient_types'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['recipient_types'],
+  );
+  $form['message'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['message'],
+  );
+  $form['error'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['error'],
+  );
+  $form['topic'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['topic'],
+  );
+  $form['mode'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['mode'],
+  );
+
+
+
+// ******************CAMPAING data contol hidden fields
+$form['userid'] = array(
+    '#type' => 'hidden',
+    '#value' => $userid,
+  );
+  $form['source'] = array(
+    '#type' => 'hidden',
+    '#value' => $source,
+  );
+  $form['medium'] = array(
+    '#type' => 'hidden',
+    '#value' => $medium,
+  );
+  $form['campaign'] = array(
+    '#type' => 'hidden',
+    '#value' => $campaign,
+  );
+
+  //*********************** LETTER message fields
+  /** Letter **/
+  $form['letter'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#title' => isset($bipac_info['editable_title']) ? $bipac_info['editable_title'] : t('Preview Letter:'),
+  );
+  $form['letter']['salutation'] = array(
+    '#type' => 'hidden',
+    '#value' => isset($bipac_info['salutation']) ? $bipac_info['salutation'] : NULL,
+  );
+  $form['letter']['signature'] = array(
+    '#type' => 'hidden',
+    '#value' => isset($bipac_info['signature']) ? $bipac_info['signature'] : NULL,
+  );
+  $form['letter']['letter_issue'] = array(
+    '#type' => 'hidden',
+    '#value' => isset($bipac_info['letter_issue']) ? $bipac_info['letter_issue'] : NULL,
+  );
+
+  $form['letter']['bipac_id'] = array(
+    '#type' => 'hidden',
+    '#value' => isset($bipac_info['bipac_id']) ? $bipac_info['bipac_id'] : NULL,
+  );
+
+	//****************** LOAD letters that apply for this campaign
+	$letters="";
+	$officials_letters=array();
+	//parse each letter in the campaing to get ONE random letter per each official defined in the campaign
+	//Creates an array with the official id a key
+	foreach($bipac_info['letters'] as $key=>$letter){
+		$officials_letter_node="";
+		foreach($letter['officials'] as $official_letter){
+			$officials_letter_node.=$official_letter['value']."_";
+		}
+		$officials_letters[$officials_letter_node][]=$key;
+	}
+
+	if($debug){
+		dsm($officials_letters,"officials letters ".__FUNCTION__);
+		dsm($bipac_info,"bipac ".__FUNCTION__);
+	}
+
+	//Gets letters for each type of Official
+	foreach($officials_letters as $letters_per_officials){
+		//counts the number of letters per official
+		$lenght=count($letters_per_officials);
+		//if the official have more than 1 letter selects one randomly
+		$get_letter=rand (0,$lenght-1);
+		if($debug){
+			dsm($get_letter,"officials letters random ".__FUNCTION__);
+			dsm($letters_per_officials[$get_letter],"officials letters idletter ".__FUNCTION__);
+			dsm($bipac_info['letters'][$letters_per_officials[$get_letter]],"officials letter".__FUNCTION__);
+		}
+		//Assigns the letter to the array
+		$letter_array[]=$bipac_info['letters'][$letters_per_officials[$get_letter]];
+  	}
+	if($debug){
+		dsm($letter_array,"letter_array letters ".__FUNCTION__);
+	}
+
+	//Text to display the letter messages and previews
+	$links.="<div class='letter_tab'><label for='letter_select'>Select a letter version to view:</label><select id='letter_select'>";
+	$i=0;
+
+	foreach($letter_array as $letter){
+		//dsm($letter,"LETTER");
+		$letter_id=preg_replace('@[^a-z0-9-]+@','-', strtolower($letter['id']));
+		//shows the letter versions per each official
+		$links.="<option value='".$letter_id."'>".$letter['id']."</option>";
+
+		//Parse the original text to replace user information
+		$letter_message=parse_letter($letter['message'],$user_defaults);
+
+		//Letter type
+		$letter_type=trim($letter['type']);
+
+		//$form['message']['#value']= $letter['message'];
+
+
+		//Forms the message html
+		$letters.="<div class='letter'";
+		if($i==0){$letters.=" style='display:block' "; $i++;}
+		$letters .=" id='".$letter_id."'>";
+		//original message : not parsed
+		$letters .= "<div id='".$letter_id."_original' class='letter_original' style='display:none' >".$letter['message']."</div>";
+
+		/*
+		if ($letter_type == 'static') {
+		$form['letter']['body_display'] = array(
+		'#type' => 'item',
+		'#markup' => $letters,//$salutation . str_replace("\n", '<br />', $message) . $signature,
+		);
+		}
+		elseif($letter_type == 'editable') {
+		$form['letter']['body_display'] = array(
+		'#type' => 'text_format',
+		'#description' =>"Type anything you want to add",
+		'#format' => "simple_html",
+		'#rows'=>30,
+		'#allowed_formats' => filter_default_format($user),
+		'#value'=>$letters,
+		);
+		}
+		elseif ($letter_type == 'partial') {
+		$form['letter']['body_display'] = array(
+		'#type' => 'item',
+		'#markup' => $letters,//$salutation . str_replace("\n", '<br />', $message) . $signature,
+		);
+
+		$form['letter']['body_paragraph'] = array(
+		'#type' => 'text_format',
+		'#description' =>"Type anything you want to add",
+		'#format' => "simple_html",
+		'#suffix'=>'<a href="#" id="preview_letter">Preview your letter</a><br />',
+		'#allowed_formats' => filter_default_format($user),
+		);
+		}*/
+
+		//sets the fields needed for each type of letter and link for preview
+		if ($letter_type == 'static') {
+			$letters .="<h2>".$letter['subject']."</h2>
+			<h3>".$letter['salutation']." [Official],</h3>
+			<div class='letter_message_static'>".$letter_message." </div>
+			<div class='letter_signature'>".$letter['signature'].",</div>";
+			// <a href='#' class='preview_letter_static'>Preview Letter</a>";
+		}
+
+		//sets the fields needed for each type of letter and link for preview
+		if($letter_type == 'partial') {
+			$letters .="<h2>".$letter['subject']."</h2>
+			<h3>".$letter['salutation']." [Official],</h3>
+			<div class='letter_message_partial	'>".$letter_message." </div>
+			<textarea class='letter_message' name='".$letter_type."' id='".$letter_type."' ></textarea>
+			<div class='letter_signature'>".$letter['signature'].",</div>
+			<a href='#' class='preview_letter_partial'>Preview Letter</a>";
+		}
+
+		if($letter_type == 'editable') {
+			$letters .="<h2>".$letter['subject']."</h2>
+			<h3>".$letter['salutation']." [Official],</h3>
+			<textarea class='letter_message' name='".$letter_type."' id='".$letter_type."' rows='150' >".$letter_message."</textarea>
+			<div class='letter_signature'>".$letter['signature'].",</div>";
+		}
+		$letters .="</div>";
+	}
+  	$links.="</select></div>";
+  	//if it is only one letter do not show the selector
+	if(count($letter_array)>1){
+		$letters="<div id='letters'><div class='letter_tabs'>".$links."</div>".$letters."<div class='note'>Note: All letter versions will be sent when you submit the form.</div></div>";
+	}
+
+	//Body message display
+	$form['letter']['body_display'] = array(
+	'#type' => 'item',
+	'#markup' => $letters,
+	);
+
+
+	$form['letter']['letters'] = array(
+	'#type' => 'hidden',
+	'#value' => $bipac_info['letters'],
+	);
+    $letterfooter.="<div class='letter_footer'>NOTE: All versions of your letter will be sent. Please preview personalization before sending your letter.</div>";
+    $form['letter']['letter-footer'] = array(
+        '#type' => 'item',
+        '#markup' => $letterfooter,
+    );
+    $prefix_submit='<div class="campaign-button">';
+    $prefix_submit.='<button class="ladda-button btn sign" data-style="expand-right"><span class="ladda-label">' . t('Send Your Letter Now');
+
+    $form['letter']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => '',
+        '#attributes' => array( 'style' => array( 'display: none' )), // hide the input field
+        '#submit' => array( '_bipac_campaigns_bipac_letter_form_submit' ),
+        '#prefix' => $prefix_submit,
+        '#suffix' => '</span><span class="ladda-spinner"></span></button></div>',
+    );
+
+	/******************************************/
+
+	/*
+  if ($bipac_info['type'] == 'static') {
+    $message = str_replace('|', '', $bipac_info['message']);
+    $form['letter']['body_display'] = array(
+      '#type' => 'item',
+      '#markup' => $salutation . str_replace("\n", '<br />', $message) . $signature,
+    );
+    $form['letter']['body'] = array(
+      '#type' => 'hidden',
+      '#value' => $message,
+    );
+  }
+  elseif ($bipac_info['type'] == 'partial') {
+    $partials = explode('|', $bipac_info['message']);
+    $form['letter']['body'] = array(
+      '#prefix' => isset($partials[0]) ? $salutation . str_replace("\n", '<br />', $partials[0]) : $salutation,
+      '#suffix' => isset($partials[2]) ? str_replace("\n", '<br />', $partials[2]) . $signature : $signature,
+      '#type' => 'textarea',
+      '#rows' => 15,
+      '#default_value' => isset($partials[1]) ? $partials[1] : NULL,
+      '#title' => isset($bipac_info['editable_title']) ? $bipac_info['editable_title'] : NULL,
+    );
+    $form['letter']['body_start'] = array(
+      '#type' => 'hidden',
+      '#value' => isset($partials[0]) ? $partials[0] : $salutation,
+    );
+    $form['letter']['body_end'] = array(
+      '#type' => 'hidden',
+      '#value' => isset($partials[2]) ? $partials[2] : $salutation,
+    );
+  }
+
+  /** User Data **/
+  $form['demo'] = array(
+    '#prefix' => '<div class="personal-info">',
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#title' => t('Enter Your Info'),
+  );
+  $prefix_list=array(
+  "01"=>"Mr.",
+  "02"=>"Mrs.",
+  "03"=>"Ms.",
+  "04"=>"Miss",
+  "05"=>"Hon.",
+  "08"=>"Dr.",
+  "09"=>"Rev.",
+  "10"=>"Prof.",
+  "11"=>"Dean",
+  "12"=>"Pres.",
+  "30"=>"Rabbi",
+  "31"=>"Iman",
+	);
+
+
+  $form['demo']['writer_prefix'] = array(
+    '#type' => 'select',
+    '#title' => t('Prefix'),
+	'#options'=>$prefix_list,
+	'#default_value'=>isset($_SESSION['submitted']['writer_prefix'])?$_SESSION['submitted']['writer_prefix']:$prefix,
+    '#required' => TRUE,
+  );
+  $form['demo']['writer_first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_first_name'])?$_SESSION['submitted']['writer_first_name']:$fname,
+  );
+  $form['demo']['writer_last_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_last_name'])?$_SESSION['submitted']['writer_last_name']:$lname,
+  );
+  $form['demo']['military'] = array(
+    '#title' => t('Are you active duty military serving overseas?'),
+    '#type' => 'checkbox',
+  );
+  $form['demo']['message'] = array(
+    '#type' => 'item',
+    '#markup' => t('Please use your last state-side address, then complete your current military address below.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['demo']['writer_address_1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address 1'),
+    '#required' => TRUE,
+    '#default_value'=>isset($_SESSION['submitted']['writer_address_1'])?$_SESSION['submitted']['writer_address_1']:$address1,
+  );
+  $form['demo']['writer_address_2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address 2'),
+	'#default_value'=>isset($_SESSION['submitted']['writer_address_2'])?$_SESSION['submitted']['writer_address_2']:$address2,
+  );
+  $form['demo']['writer_city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_city'])?$_SESSION['submitted']['writer_city']:$city,
+  );
+
+  $states=momentum_api_states_campaign($nid);
+  $form['demo']['writer_state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#options' => $states,
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_state'])?$_SESSION['submitted']['writer_state']:$state,
+  );
+
+  $form['demo']['writer_zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip Code'),
+    '#required' => TRUE,
+    // '#default_value' => $zip,
+	'#default_value'=>isset($_SESSION['submitted']['writer_zip'])?$_SESSION['submitted']['writer_zip']:$zip,
+  );
+   $form['demo']['writer_phone'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone number'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_phone'])?$_SESSION['submitted']['writer_phone']:$phone,
+  );
+  $form['demo']['writer_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email Address'),
+    '#required' => TRUE,
+	'#default_value'=>isset($_SESSION['submitted']['writer_email'])?$_SESSION['submitted']['writer_email']:$email,
+  );
+  if (empty($bipac_info['silverpop'])) {
+    $form['demo']['silverpop'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('I agree to receive emails from eBay Government Relations in accordance with the ' .l(t('Privacy Policy and Cookie Notice'), 'privacy-and-cookie-notice',array('attributes' => array('target'=>'_blank'))).' and understand that I may unsubscribe at any time.'),
+      '#default_value' => TRUE,
+    );
+  }
+  else {
+    $form['demo']['silverpop'] = array(
+      '#type' => 'hidden',
+      '#value' => FALSE,
+    );
+  }
+  /** Militay address **/
+  $form['mil'] = array(
+    '#title' => t('Military Address'),
+    '#type' => 'fieldset',
+    '#description' => t('This information is optional'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['mil']['mil_address_1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address'),
+    '#required' => FALSE,
+  );
+  // $form['mil']['mil_address_2'] = array(
+  //   '#type' => 'textfield',
+  //   '#title' => t('Address'),
+  //   '#required' => FALSE,
+  // );
+  $form['mil']['mil_city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#required' => FALSE,
+  );
+  $form['mil']['mil_state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#required' => FALSE,
+    '#options' => array(
+      'AA' => 'AA',
+      'AE' => 'AE',
+      'AP' => 'AP',
+    ),
+  );
+  $form['mil']['mil_zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip'),
+    '#required' => FALSE,
+  );
+
+  /** Spam catcher field that will be hidden from view **/
+  $form['notes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Notes'),
+    '#required' => FALSE,
+    '#attributes' => array('class' => array('sc-notes-field')),
+    '#description' => t('Anything else you would like to tell us'),
+    '#prefix' => '<div class = "sc-notes-field">',
+    '#suffix' => '</div>',
+  );
+
+  // $form['submit'] = array(
+  //   '#suffix' => '</div>',
+  //   '#type' => 'submit',
+  //   '#value' => t('Send Your Letter Now'),
+  //   '#attributes' => array('class' => array('btn', 'sign', 'ladda-button')),
+  // );
+
+//  $prefix_submit='<div class="campaign-button">';
+//  $prefix_submit.='<button class="ladda-button btn sign" data-style="expand-right"><span class="ladda-label">' . t('Send Your Letter Now');
+//
+//  $form['submit'] = array(
+//    '#type' => 'submit',
+//    '#value' => '',
+//    '#attributes' => array( 'style' => array( 'display: none' )), // hide the input field
+//    '#submit' => array( '_bipac_campaigns_bipac_letter_form_submit' ),
+//    '#prefix' => $prefix_submit,
+//    '#suffix' => '</span><span class="ladda-spinner"></span></button></div>',
+//  );
+$_SESSION['submitted']=array();
+  return $form;
+}
+
+function _bipac_campaigns_bipac_letter_form_validate($form, &$form_state) {
+
+ $city=$form_state['values']['writer_city'];
+ $state=$form_state['values']['writer_state'];
+ $recipient_states=isset($form_state['values']['recipient_states'])?$form_state['values']['recipient_states']:$state;
+
+
+
+  $data = array(
+   'zipcode' => $form_state['values']['writer_zip'],
+   'street' => $form_state['values']['writer_address_1'],
+ );
+ /*$fail = FALSE;
+ //smarty streets validation
+ /*$json = bipac_campaigns_smartystreets($data, TRUE);
+ if (!empty($json)) {
+   if (!empty($json[0]['components']['city_name'])) {
+     $city = $json[0]['components']['city_name'];
+   }
+   else {
+     $fail = TRUE;
+   }
+   if (!empty($json[0]['components']['state_abbreviation'])) {
+     $state = $json[0]['components']['state_abbreviation'];
+   }
+   else {
+     $fail = TRUE;
+   }
+ }
+ else {
+   $fail = TRUE;
+ }
+
+ if($recipient_states!==$state){ $fail=TRUE;}
+
+ if ($fail === TRUE) {
+   $error = isset($form_state['values']['error']) ? $form_state['values']['error'] : variable_get('bipac_campaigns_generic_error', t('Oops.  Either your address didn\'t pass USPS validation or there are no active campaigns in your Congressional District.'));
+   form_set_error('writer_zip', $error);
+   if (isset($_SESSION['smartystreets_data'])) {
+     unset($_SESSION['smartystreets_data']);
+   }
+ }
+ else {
+   $form_state['values']['writer_state'] = $state;
+   $form_state['values']['writer_city'] = $city;
+ }*/
+}
+
+// function _bipac_campaigns_bipac_letter_form_validate($form, &$form_state) {
+//   if (!(preg_match('([\\w-]+(?:\\.[\\w-]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})', $form_state['values']['writer_email']))) {
+//     form_set_error('writer_email', 'Please enter a valid e-mail address.');
+//   }
+//
+//
+//
+//   //formerly commented out to prevent smarty streets validation - see below
+//   $data = array(
+//     'zipcode' => $form_state['values']['writer_zip'],
+//     'street' => $form_state['values']['writer_address_1'],
+//   );
+//   $fail = FALSE;
+//
+//   $json = bipac_campaigns_smartystreets($data, TRUE);
+//
+//   if (!empty($json)) {
+//     if (!empty($json[0]['components']['city_name'])) {
+//       $city = $json[0]['components']['city_name'];
+//     }
+//     else {
+//       $fail = TRUE;
+//     }
+//     if (!empty($json[0]['components']['state_abbreviation'])) {
+//       $state = $json[0]['components']['state_abbreviation'];
+//     }
+//     else {
+//       $fail = TRUE;
+//     }
+//   }
+//   else {
+//     $fail = TRUE;
+//   }
+//   if ($fail === TRUE) {
+//     $error = isset($form_state['values']['error']) ? $form_state['values']['error'] : variable_get('bipac_campaigns_generic_error', t('Oops.  Either your address didn\'t pass USPS validation or there are no active campaigns in your Congressional District.'));
+//     form_set_error('writer_zip', $error);
+//     if (isset($_SESSION['smartystreets_data'])) {
+//       unset($_SESSION['smartystreets_data']);
+//     }
+//   }
+//   else {
+//     $form_state['values']['writer_state'] = $state;
+//     $form_state['values']['writer_city'] = $city;
+//   }
+//
+//
+//
+//   /*$data = array(
+//     'zipcode' => $form_state['values']['writer_zip'],
+//     'street' => $form_state['values']['writer_address_1'],
+//   );
+//   $fail = FALSE;
+//
+//   $json = bipac_campaigns_smartystreets($data, TRUE);
+//
+//   if (!empty($json)) {
+//     if (!empty($json[0]['components']['city_name'])) {
+//       $city = $json[0]['components']['city_name'];
+//     }
+//     else {
+//       $fail = TRUE;
+//     }
+//     if (!empty($json[0]['components']['state_abbreviation'])) {
+//       $state = $json[0]['components']['state_abbreviation'];
+//     }
+//     else {
+//       $fail = TRUE;
+//     }
+//   }
+//   else {
+//     $fail = TRUE;
+//   }
+//   if ($fail === TRUE) {
+//     $error = isset($form_state['values']['error']) ? $form_state['values']['error'] : variable_get('bipac_campaigns_generic_error', t('Oops.  Either your address didn\'t pass USPS validation or there are no active campaigns in your Congressional District.'));
+//     form_set_error('writer_zip', $error);
+//     if (isset($_SESSION['smartystreets_data'])) {
+//       unset($_SESSION['smartystreets_data']);
+//     }
+//   }
+//   else {
+//     $form_state['values']['writer_state'] = $state;
+//     $form_state['values']['writer_city'] = $city;
+//   }*/
+// }
+
+
+/**
+ * This function uses the JSON API.
+ * The older API is kept, as is, below under _old
+ */
+function _bipac_campaigns_bipac_letter_form_submit($form, &$form_state) {
+
+  //dsm($form, $form_state);
+	$debug=variable_get('momentum_api_debug',0);
+	$goto_path = $form_state['values']['thanks'];
+  $id = $form_state['values']['letter_id'];
+
+	//Save address in session for use later
+	bipac_session('address', $form_state['values']['writer_address_1'] . ' ' . $form_state['values']['writer_address_2']);
+	bipac_session('city', $form_state['values']['writer_city']);
+	bipac_session('state', $form_state['values']['writer_state']);
+  bipac_session('zip', $form_state['values']['writer_zip']);
+
+  // Ensure zip code is never submitted with 9 digits
+  $form_state['values']['writer_zip'] = substr($form_state['values']['writer_zip'],0,5);
+
+	$user_input=array(
+		'prefix'=>$form_state['values']['writer_prefix'],
+		'first'=>$form_state['values']['writer_first_name'],
+		'last'=>$form_state['values']['writer_last_name'],
+		'address'=>$form_state['values']['writer_address_1']." ". $form_state['values']['writer_address_2'].", ".$form_state['values']['writer_city'].", ".$form_state['values']['writer_state']." ".$form_state['values']['writer_zip'],
+		'state'=>$form_state['values']['writer_state'],
+		'city'=>$form_state['values']['writer_city'],
+		'phone'=>$form_state['values']['writer_phone'],
+		'email'=>$form_state['values']['writer_email']);
+	// If content in the notes field, discard submission.  This field is only used to catch spambots.
+	if (user_is_anonymous()) {
+		if((!empty($form_state['values']['notes'])) || (!empty($_SESSION['bipac_submission_' . $id]))) {
+			  drupal_goto($goto_path, array('query' => array('campaign_id' => $id)));
+			  return;
+		}
+	}
+	//for immediate processing store =false
+	$store = variable_get('momentum_api_process', 0);
+
+$i=0;
+foreach($form_state['values']['letters'] as $letter){
+	$form_state['values']['letters'][$i]['message']=parse_letter($letter['message'],$user_input);
+	$i++;
+}
+
+	if($debug){
+		drupal_set_message('Momentum_campaigns '.t('Data submission is in TEST mode'),"warning");
+		if ($store==0) {
+				drupal_set_message('Momentum_campaigns '.t('Data submission sent too the local database to be processed for the cron job.'));
+		}
+	}
+
+  $result=true;
+
+  // If batching is currently set as the processing method
+	if ($store==0) {
+		watchdog("momentum_letter", "Letter stored to be submitted <pre>".print_r(serialize($form_state['values']),true)."</pre>");
+		$bid = db_insert('bipac_emergency')->fields(array('data' => serialize($form_state['values'])))->execute();
+
+		if ($bid > 0) {
+		  $_SESSION['bipac_submission_' . $id] = TRUE;
+		}
+	}
+	else {
+		if($debug){
+      dsm($form_state['values']['letter']['letters'],"Formstate");
+    }
+
+		$result=momentum_process_letters($form_state['values']);
+  }
+
+	if ($result==true){
+    // Add additional data to Iterable data
+    $user_input['mode'] = $form_state['values']['mode'];
+    $user_input['formId'] = $form_state['values']['form_id'];
+    $user_input['topic'] = $form_state['values']['topic'];
+    $user_input['nodeId'] = current_path();
+    $user_input['urlAlias'] = drupal_get_path_alias();
+
+    // Submit data to Iterable as tracked event
+    // Look for Iterable Cookie
+    if( isset($_COOKIE['iterableEndUserId']) ){
+      _iterable_form_track($user_input);
+    }
+    else{
+      // Look for a user with email field
+      $userExists = _iterable_user_lookup($user_input['email']);
+
+      // User was found, track submission
+      if($userExists){
+        _iterable_form_track($user_input);
+      }
+      // User not found
+      else{
+        // Opt-in checkbox checked
+        //  Add user to list and event track
+        if($form_state['values']['silverpop'] === 1){
+          $mapping = array(
+            'writer_email' => 'email',
+            'writer_first_name' => 'firstName',
+            'writer_last_name' => 'lastName',
+            'writer_address_1' => 'streetAddress',
+            'writer_address_2' => 'streetAddress2',
+            'writer_city' => 'city',
+            'writer_state' => 'state',
+            'writer_zip' => 'postalCode',
+            'country' => 'country',
+            'writer_phone' => 'phoneNumber',
+            'ebay_id' => 'ebayId',
+            'country' => 'country'
+          );
+
+          $form_state['values']['country'] = 'United States';
+
+          $subscribe = _iterable_list_subscribe($mapping, $form_state['values']);
+          _iterable_form_track($user_input);
+
+          watchdog('iterable', "User submitted to list and tracked => <pre>" . print_r($form_state['values'], true) . "</pre>");
+        }
+      }
+    }
+
+		drupal_goto($goto_path, array('query' => array('campaign_id' => $id)));
+		$_SESSION['submitted']='';
+	}
+	else{
+		if($debug){drupal_set_message("ERROR",'error');}
+		$_SESSION['submitted']=$form_state['values'];
+
+	}
+	return;
+}
+
+/**
+ * Where to send the letters for processing
+ * This expects $values as in $form_state['values']
+
+ DEPRECATED
+ */
+function _bipac_campaigns_process_letters($values, $uid = NULL) {
+  	$id = $values['letter_id'];
+	$test_mode = $values['mode']=='test'?"Y":"N";
+	// if($test_mode == 'Y') {dsm($values);}
+	// Set error
+  $error = isset($values['error']) ? $values['error'] : variable_get('bipac_campaigns_generic_error', t('Oops.  Either your address didn\'t pass USPS validation or there are no active campaigns in your Congressional District.'));
+
+  //if no subject sends an error to the log
+
+  // THIS IS WHERE IT IS FAILING
+	if(empty($values['subject'])) {
+		watchdog('BIPAC', 'The form needs a subject to be processed.', NULL, WATCHDOG_WARNING);
+		return;
+  }
+	//momentum API
+  $api_momentum=momentum_object(TRUE);
+
+	if ($api_momentum === FALSE) {
+		drupal_set_message('Momentum_campaigns '.t('Problem with the Momentum API object.  Are the group and key set?'),"error");
+		return;
+	}
+  	$body=$values['message'];
+	//sets letter body
+
+	//request variables
+	$message = $values['message'];
+	$chambers = !empty($values['recipient_types']) ? $values['recipient_types'] : '0,1';	// If this isn't set, we assume senators/reps
+	$states = !empty($values['recipient_states']) ? $values['recipient_states'] : "";  // Default to bundled state
+  	//Data Params
+	$officials_data=array();
+	$officials_data['first_name']=$values['writer_first_name'];
+	$officials_data['last_name']=$values['writer_last_name'];
+	$officials_data['address_1']=$values['writer_address_1'];
+	$officials_data['address_2']=$values['writer_address_2'];
+    $officials_data['city'] =$values['writer_city'];
+    $officials_data['state'] =$values['writer_state'];
+    $officials_data['zip']=$values['writer_zip'];
+	$officials_data['telephone']=$values['writer_phone'];
+	$officials_data['email']=$values['writer_email'];
+	$officials_data['prefix']=$values['writer_prefix'];
+	$officials_data['issue']=$values['letter_issue'];
+	$officials_data['subject'] = $values['subject'];
+  	$officials_data['topic'] = $values['topic'];
+	$officials_data['message'] = $values['message'];
+	$officials_data['salutation'] = "Sincerely";
+
+	// if($test_mode == 'Y') {dsm($officials_data,"REQUEST DATA");}
+   	//BIPAC ID
+  $momentum_id= preg_replace('@[^a-z0-9-]+@','-', strtolower($values['topic']));
+	//Send Momentum a letters
+	$return=momentum_letters($officials_data, $chambers, $momentum_id, 'N', $test_mode, 'Y', $states);
+	//dsm($return,"DATA RESPONSE MOMENTUM");
+	if(is_object($return)){
+
+		if ($test_mode == 'Y') {
+			watchdog('bipac_campaigns', "object  => <pre>".print_r($api_momentum,true)."</pre>");
+			watchdog('bipac_campaigns', "Response  => <pre>".print_r($return,true)."</pre>");
+		}
+
+		$store = variable_get('momentum_api_process', 0);
+		if($store==0){
+			_bipac_campaigns_update_letter($id, 1);
+		}
+		return true;
+	}
+	else{
+    watchdog('bipac_campaigns', "return 1018 bipac_campaigns.module  => <pre>".print_r($return,true)."</pre>");
+	}
+
+	return false;
+}
+
+
+/**
+ * Parse BIPAC response
+ * This handles the JSON response
+ */
+function _bipac_campaigns_bipac_parse($data) {
+  $vars = array();
+  foreach ($data as $leg) {
+    $type = !empty($leg['TITLE']) ? $leg['TITLE'] : NULL;
+    $name = array();
+    $name[] = $type;
+    $name[] = $leg['FIRST_NAME'];
+    $name[] = $leg['LAST_NAME'];
+    $dphone = !empty($leg['dist_phone']) ? _bipac_format_phone($leg['dist_phone']) : NULL;
+    $cphone = !empty($leg['cap_phone']) ? _bipac_format_phone($leg['cap_phone']) : NULL;
+    $photo = !empty($leg['photoURL']) ? $leg['photoURL'] : NULL;
+    $leg_name = implode(' ', $name);
+    $vars[] = array('name' => $leg_name, 'dphone' => $dphone, 'cphone' => $cphone, 'photo' => $photo, 'type' => $type);
+  }
+  return $vars;
+}
+
+/**
+ * Increases count in count table
+ */
+function _bipac_campaigns_count_plus($entity_id, $letter_count = 1) {
+  db_merge('field_data_field_bipac_camp_submissions')
+    ->key(array('entity_id' => $entity_id))
+    ->fields(array(
+      'field_bipac_camp_submissions_value' => 0,
+      'entity_id' => $entity_id,
+  ))
+  ->expression('field_bipac_camp_submissions_value', 'field_bipac_camp_submissions_value + :inc', array(':inc' => $letter_count))
+  ->execute();
+}
+
+/**
+ * Implements hook_cronapi()
+ */
+function bipac_campaigns_cronapi($op, $job = NULL) {
+  $items['bipac_campaigns_send_letter'] = array(
+    'description' => 'Roll through stored letters',
+    'rule' => '0 */2 * * *', // Every 2 hours
+    'callback' => '_bipac_campaigns_send_letter',
+  );
+  $items['bipac_campaigns_purge_letters'] = array(
+    'description' => 'Delete successful letters',
+    'rule' => '0 */3 * * *', // Every 2 hours
+    'callback' => '_bipac_campaigns_purge_letters',
+  );
+  $items['bipac_campaigns_refresh'] = array(
+    'description' => 'Refresh campaign counts',
+    'rule' => '0 */1 * * *', // Every 1 hours
+    'callback' => 'bipac_campaigns_refresh_counts',
+  );
+  return $items;
+}
+
+/**
+ * Delete letters with success of 1
+ */
+function _bipac_campaigns_purge_letters() {
+  $num_deleted = db_delete('bipac_emergency')
+  ->condition('status', '1')
+  ->execute();
+
+  if ($num_deleted > 0) {
+    watchdog('bipac_campaigns', t('Successfully submitted letters purged'), array());
+  }
+}
+
+/**
+ * Roll through the letters
+ * Submit to BIPAC
+ * Update as necessary
+ */
+function _bipac_campaigns_send_letter() {
+
+  $size = variable_get('momentum_api_batch_size', 50);
+  $results = db_select('bipac_emergency', 'b')
+  ->fields('b')
+  ->range(0, $size)
+  ->orderBy('b.id', 'DESC')
+  ->isNull('b.status')
+  ->execute();
+
+  if (!empty($results)) {
+    $count = 0;
+    foreach ($results as $result) {
+      $id = $result->id;
+      if (!empty($result->data)) {
+        $data = unserialize($result->data);
+        //$status = _bipac_campaigns_process_letters($data, $id);
+        $status = momentum_process_letters($data, $id);
+        $count++;
+      }
+    }
+    if ($count > 0) {
+      watchdog('bipac_campaigns', t('Processing %count letters.'), array('%count' => $count));
+    }
+  }
+}
+
+/**
+ * Update the letter result in the database
+ */
+function _bipac_campaigns_update_letter($id, $status) {
+  $updated = db_update('bipac_emergency')
+  ->fields(array(
+    'status' => $status,
+  ))
+  ->condition('id', $id, '=')
+  ->execute();
+}
+
+
+// function _reset_bipac_campaigns_elysia_cron() {
+//  $updated = db_update('elysia_cron')
+//  ->fields(array(
+//    'running' => 0,
+//  ))
+//  ->condition('name', 'bipac_campaigns_send_letter', '=')
+//  ->execute();
+// }
+
+/**
+ * Implements hook_cron_queue_info()
+ */
+function bipac_campaigns_cron_queue_info() {
+  $queues['bipac_campaigns_roll'] = array(
+    'worker callback' => 'bipac_campaigns_roll',
+    'time' => 360,
+    'skip on cron' => TRUE,
+  );
+  return $queues;
+}
+
+/**
+ * This is how we'd handle queue API stuff, if we go that route
+ */
+function bipac_campaigns_roll($data) {
+  $api = bipac_object();
+
+  if ($api === FALSE) {
+    return;
+  }
+
+  $data = unserialize($data);
+  $id = $data['campaign_id'];
+  $writer_first_name = $data['writer_first_name'];
+  $writer_last_name = $data['writer_last_name'];
+  $writer_address_1 = $data['writer_address_1'];
+  $writer_city = $data['writer_city'];
+  $writer_state = $data['writer_state'];
+  $writer_zip = $data['writer_zip'];
+  $writer_email = $data['writer_email'];
+  $message = $data['message'];
+  $subject = $data['subject'];
+  $allowed = $data['allowed'];
+  $ContentType = NULL;
+  $GroupName = NULL;
+  $writer_suffix = NULL;
+  $writer_phone = NULL;
+  $writer_middle_name = NULL;
+  $writer_address_2 = NULL;
+
+  $api->FromAddressListLegislators($writer_address_1, $writer_address_2, $writer_city, $writer_state, $writer_zip);
+
+  if (!empty($api->FromAddressListLegislators_data)) {
+    $officials = $api->FromAddressListLegislators_data;
+  }
+
+  $result = array();
+  $letter_count = 0;
+  foreach ($officials as $official) {
+    // Here we need a mechanism to determine to whom to send
+    $type = $official['Type'];
+    if (in_array($type, $allowed)) {
+      $leg_id_num = $official['leg_id_num'];
+      $salutation = $official['TITLE'] . ' ' . $official['LAST_NAME'] . ",\r\n\r\n";
+      $message = $salutation . $message;
+      $response = $api->CampaignPostLetter($GroupName, NULL, $ContentType, $leg_id_num, $writer_prefix, $writer_first_name, $writer_middle_name, $writer_suffix, $writer_last_name, $writer_email, $writer_address_1, $writer_address_2, $writer_city, $writer_state, $writer_zip, $writer_phone, $subject, $message);
+      if (($response === TRUE) && (!empty($api->CampaignPostLetter_data))) {
+        $result[] = reset($api->CampaignPostLetter_data);
+        unset($api->CampaignPostLetter_data);		// Want the data gone for the next round
+        $letter_count++;
+      }
+    }
+  }
+  $result_string = serialize($result);
+  watchdog('bipac_campaigns', t('Letters submitted: %data'), array('%data' => $result_string));
+  _bipac_campaigns_count_plus($id, $letter_count);		// +1 count in node.  Note that we should eventually wrap this in a conditional.
+}
+
+
+/**
+ * Get BIPAC info from node
+ */
+function _bipac_campaigns_bipac_grab($node) {
+  $debug=variable_get('momentum_api_debug',0);
+  $bipac_info = array();
+  $test_mode=$node->field_bipac_camp_mode['und'][0]['value']=="test";
+  if($test_mode){drupal_set_message("CAMPAIGN IN TEST MODE",'warning');}
+  //get the node object data
+  if (is_object($node)) {
+	  //Thank you page
+    $bipac_thanks = isset($node->field_bipac_camp_thank_you_page['und'][0]['value']) ? $node->field_bipac_camp_thank_you_page['und'][0]['value'] : NULL;
+	//Campaign title
+	 $bipac_title = isset($node->field_bipac_camp_form_title['und'][0]['value']) ? $node->field_bipac_camp_form_title['und'][0]['value'] : t('Get Started');
+
+	/**
+     * We need the recipient types from
+     * the node.  This will be used to make sure that
+     * letters only go to the correct people
+     */
+    $recipient_types = NULL;
+    if (!empty($node->field_bipac_recipient_types['und'])) {
+      $types = array();
+      foreach ($node->field_bipac_recipient_types['und'] as $type) {
+        $types[] = $type['value'];
+      }
+      $recipient_types = implode(',', $types);
+    }
+
+    /**
+     * And this is for states
+     * @note
+     *   watch out not to over-limit between this
+     *   and recipient types
+     */
+    $recipient_states = NULL;
+    if (!empty($node->field_bipac_recipient_states['und'])) {
+      $states = array();
+      foreach ($node->field_bipac_recipient_states['und'] as $state) {
+        $states[] = $state['value'];
+      }
+      $recipient_states = implode(',', $states);
+    }
+
+
+	//do we need this?
+	 $bipac_error = isset($node->field_bipac_camp_error_message['und'][0]['value']) ? $node->field_bipac_camp_error_message['und'][0]['value'] : NULL;
+
+
+	//settings
+	$bipac_topic = isset($node->field_bipac_camp_topic['und'][0]['value']) ? $node->field_bipac_camp_topic['und'][0]['value'] : NULL;
+    $bipac_mode = isset($node->field_bipac_camp_mode['und'][0]['value']) ? $node->field_bipac_camp_mode['und'][0]['value'] : 'test';
+	$bipac_letter_issue= isset($node->field_bipac_letter_issue['und'][0]['value']) ? $node->field_bipac_letter_issue['und'][0]['value'] : 0;
+	$silverpop = isset($node->field_bipac_silverpop['und'][0]['value']) ? $node->field_bipac_silverpop['und'][0]['value'] : NULL;
+
+
+
+
+	//gets the data from the letter
+	if(isset($node->field_bipac_letters)){
+		$number_letters=count($node->field_bipac_letters['und']);
+		$idletter=0;
+
+		/*load all the letters*/
+		foreach($node->field_bipac_letters['und'] as $letter){
+
+			$letter_collection=field_collection_item_load($letter['value']);
+
+			if($debug) {dsm($letter_collection,"letter data_ ".__FUNCTION__);}
+
+			$letters[]=array(
+				"subject"=>$letter_collection->field_letter_subject['und'][0]['value'],
+				"salutation"=>$letter_collection->field_letter_salutation['und'][0]['value'],
+				"message"=>$letter_collection->field_letter_message['und'][0]['value'],
+				"type"=>$letter_collection->field_letter_type['und'][0]['value'],
+				"signature"=>$letter_collection->field_letter_signature['und'][0]['value'],
+				"officials"=>$letter_collection->field_letter_officials['und'], //CHANGE!!!!!!
+				"id"=>$letter_collection->field_letter_id['und'][0]['value'],
+				);
+		}
+
+
+		if($debug) {dsm($letters,"letters".__FUNCTION__);}
+
+		//select valid letters for the user address and campaign officials
+
+
+		/*
+
+
+		if($number_letters==1){
+			$idletter=0;
+		}
+		else{
+			$idletter=rand(0,$number_letters-1);
+		}
+		//officials and states
+
+
+
+
+		//load all of them
+		$letters=field_collection_item_load($node->field_bipac_letters['und'][$idletter]['value']);
+
+		*/
+
+
+
+
+
+		if (isset($letters)) {
+		  $letter_officials = array();
+
+		  foreach ($letters as $type) {
+			  foreach($type['officials'] as $officials){
+				$letter_officials[] = $officials['value'];
+			  }
+		  }
+		}
+
+	if($debug) {dsm($letter_officials,"officials");}
+
+
+
+
+
+		//get targeted officials using the
+
+
+
+		//officials and states
+		$bipac_officials = isset($letters->field_letter_signature['und'][0]['value']) ? $letters->field_letter_signature['und'][0]['value'] : NULL;
+		$bipac_states = isset($letters->field_letter_signature['und'][0]['value']) ? $letters->field_letter_signature['und'][0]['value'] : NULL;
+
+
+
+
+		$bipac_subject = isset($letters->field_letter_subject['und'][0]['value']) ? $letters->field_letter_subject['und'][0]['value'] : NULL;
+    	$bipac_salutation = isset($letters->field_letter_salutation['und'][0]['value']) ? $letters->field_letter_salutation['und'][0]['value'] : NULL;
+		$bipac_message = isset($letters->field_letter_message['und'][0]['value']) ? $letters->field_letter_message['und'][0]['value'] : NULL;
+		$bipac_type = isset($letters->field_letter_type['und'][0]['value']) ? $letters->field_letter_type['und'][0]['value'] : 'static';
+		$bipac_finale = isset($letters->field_letter_signature['und'][0]['value']) ? $letters->field_letter_signature['und'][0]['value'] : 'static';
+
+
+	}
+
+
+
+
+
+    //$bipac_etitle = isset($node->field_bipac_camp_form_etitle['und'][0]['value']) ? $node->field_bipac_camp_form_etitle['und'][0]['value'] : NULL;
+    //$bipac_submissions = isset($node->field_bipac_camp_submissions['und'][0]['value']) ? $node->field_bipac_camp_submissions['und'][0]['value'] : 0;
+
+
+
+    $send_array = array();
+    if (!empty($node->field_bipac_send_to['und'])) {
+      foreach ($node->field_bipac_send_to['und'] as $send_type) {
+        $send_array[] = $send_type['value'];
+      }
+    }
+
+    $bipac_info = array('thanks' => $bipac_thanks,
+                       // 'subject' => $bipac_subject,
+                        //'message' => $bipac_message,
+                        //'salutation' => $bipac_salutation,
+                        //'signature' => $bipac_finale,
+                        'error' => $bipac_error,
+                        'mode' => $bipac_mode,
+                        'title' => $bipac_title,
+                        'topic' => $bipac_topic,
+                        //'submissions' => $bipac_submissions,
+                        //'editable_title' => $bipac_etitle,
+                        'silverpop' => $silverpop,
+                        //'send_to' => implode(',', $send_array),
+                        'recipient_states' => $recipient_states,
+                        'recipient_types' => $recipient_types,
+						'letter_issue' =>$bipac_letter_issue,
+                        'type' => $bipac_type,
+						'force_duplicates'=>$force_duplicates,
+						'letters'=>$letters);
+  }
+  return $bipac_info;
+}
+
+
+function _bipac_campaigns_states_array() {
+  $default_states = _get_state_from_campaign_id();
+
+  $states = array(
+    'AL'=>"Alabama",
+    'AK'=>"Alaska",
+    'AZ'=>"Arizona",
+    'AR'=>"Arkansas",
+    'CA'=>"California",
+    'CO'=>"Colorado",
+    'CT'=>"Connecticut",
+    'DE'=>"Delaware",
+    'DC'=>"District Of Columbia",
+    'FL'=>"Florida",
+    'GA'=>"Georgia",
+    'HI'=>"Hawaii",
+    'ID'=>"Idaho",
+    'IL'=>"Illinois",
+    'IN'=>"Indiana",
+    'IA'=>"Iowa",
+    'KS'=>"Kansas",
+    'KY'=>"Kentucky",
+    'LA'=>"Louisiana",
+    'ME'=>"Maine",
+    'MD'=>"Maryland",
+    'MA'=>"Massachusetts",
+    'MI'=>"Michigan",
+    'MN'=>"Minnesota",
+    'MS'=>"Mississippi",
+    'MO'=>"Missouri",
+    'MT'=>"Montana",
+    'NE'=>"Nebraska",
+    'NV'=>"Nevada",
+    'NH'=>"New Hampshire",
+    'NJ'=>"New Jersey",
+    'NM'=>"New Mexico",
+    'NY'=>"New York",
+    'NC'=>"North Carolina",
+    'ND'=>"North Dakota",
+    'OH'=>"Ohio",
+    'OK'=>"Oklahoma",
+    'OR'=>"Oregon",
+    'PA'=>"Pennsylvania",
+    'RI'=>"Rhode Island",
+    'SC'=>"South Carolina",
+    'SD'=>"South Dakota",
+    'TN'=>"Tennessee",
+    'TX'=>"Texas",
+    'UT'=>"Utah",
+    'VT'=>"Vermont",
+    'VA'=>"Virginia",
+    'WA'=>"Washington",
+    'WV'=>"West Virginia",
+    'WI'=>"Wisconsin",
+    'WY'=>"Wyoming",
+    'AS'=>"American Samoa",
+    'GU'=>'Guam',
+    'MP'=>"Northern Mariana Islands",
+    'PR'=>"Puerto Rico",
+    'VI'=>"Virgin Islands",
+    'FM'=>"Federated States of Micronesia",
+    'MH'=>"Marshall Islands",
+    'UM'=>"U.S. Minor Outlying Islands"
+  );
+
+  $result = array();
+  if(!empty($default_states)){
+    // If no specific state is specified return all options
+    if($default_states[0]['value'] === 'FED') return $states;
+
+    foreach($default_states as $state){
+      if(isset($states[$state['value']])){
+        $result[$state['value']] = $states[$state['value']];
+      }
+    }
+
+    return $result;
+  }
+
+  return $states;
+}
+
+
+/**
+ * Connect to Smartystreets and return a json array
+ * @todo
+ *   Move this into its own module
+ */
+function bipac_campaigns_smartystreets($data, $force = FALSE) {
+  if (($data == NULL) && (isset($_SESSION['smartystreets_data']))) {
+    return $_SESSION['smartystreets_data'];
+  }
+  $json = array();
+  // Hardcoded awesomeness
+  $key = 'PiWw7/aex+mquBeXES8VsRqIv+rGPFVfSGCZ5bpmyVZt3IlUL7wmBS7S/44Hkwh8iK6cvZllhygDN5nVll8aCw==';
+  $auth_id = 'faf3f94c-9bae-4c13-be6a-fac4c955109d';
+  $data['auth-token'] = $key;
+  $data['auth-id'] = $auth_id;
+  $url = 'https://api.smartystreets.com/street-address/';
+  $request = url($url, array('query' => $data));
+  // Let's cache Smartystreets data in a session for the user
+  if (($force == FALSE) && (!empty($_SESSION['smartystreets_data']))) {
+    $json = $_SESSION['smartystreets_data'];
+  }
+  elseif (($result = drupal_http_request($request)) && (isset($result->data)) && ($json = json_decode($result->data, TRUE))) {
+    $_SESSION['smartystreets_data'] = $json;
+  }
+  return $json;
+}
+
+
+function parse_letter($letter,$user_input){
+	$first=$user_input['first'];
+	$last=$user_input['last'];
+	$address=$user_input['address'];
+	$state=$user_input['state'];
+	$email=$user_input['email'];
+	$phone=$user_input['phone'];
+
+	if($first=="") {
+		$text=str_replace("|","--",$letter);
+		return $text;
+	}
+	$text=str_replace("|first|",$first,$letter);
+	$text=str_replace("|city|",$city,$text);
+	$text=str_replace("|last|",$last,$text);
+	$text=str_replace("|prefix|",$prefix,$text);
+	$text=str_replace("|address|",$address,$text);
+	$text=str_replace("|state|",$state,$text);
+	$text=str_replace("|email|",$email,$text);
+	$text=str_replace("|phone|",$phone,$text);
+
+	return $text;
+}

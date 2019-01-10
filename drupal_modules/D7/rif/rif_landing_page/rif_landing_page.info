@@ -1,0 +1,5 @@
+name = RIF Landing Page
+description = Handles custom functionality with the landing page content type.
+core = 7.x
+package = RIF Custom
+dependencies[] = rif_landing_page_feature

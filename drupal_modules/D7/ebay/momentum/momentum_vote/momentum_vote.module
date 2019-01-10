@@ -1,0 +1,359 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a Momentum Vote Block
+ */
+
+/**
+ *  hook_theme
+ */
+function momentum_vote_theme() {
+  $items = array();
+  /*$items['momentum_vote_response'] = array(
+    'variables' => array('voter_id' => NULL, 'polling_place' => NULL, 'early_vote_form' => NULL, 'registration_form' => NULL, 'state_office' => NULL, 'state' => NULL, 'state_full' => NULL, 'dates' => NULL, 'data' => NULL),
+    'template' => 'momentum_vote_response',
+  );*/
+  $items['momentum_vote_response'] = array(
+    'variables' => array(
+       'state_full' => NULL,
+       'state' => NULL,
+       'state_office' => NULL,
+       'registration_form' => NULL,
+       'early_vote_form' => NULL,
+       'polling_place' => NULL,
+       'voter_id' => NULL,
+       'registration_address' => NULL,
+       'registration_city' => NULL,
+       'registration_state' => NULL,
+       'registration_zip' => NULL,
+       'registration_phone' => NULL,
+       'state_registration_address' => NULL,
+       'state_registration_city_state' => NULL,
+       'registration_note' => NULL,
+       'early_vote_note' => NULL,
+       'primary_registration_deadline' => NULL,
+       'primary_absentee_application_deadline' => NULL,
+       'primary_absentee_return_deadline' => NULL,
+       'primary_early_vote_begin' => NULL,
+       'primary_early_vote_end' => NULL,
+       'primary_election_day' => NULL,
+       'general_registration_deadline' => NULL,
+       'general_absentee_application_deadline' => NULL,
+       'general_absentee_return_deadline' => NULL,
+       'general_early_vote_begin' => NULL,
+       'general_early_vote_end' => NULL,
+       'general_election_day' => NULL,
+     ),
+     'template' => 'momentum_vote_response',
+  );
+  $items['momentum_vote_banner'] = array(
+    'variables' => array('text' => NULL, 'path' => NULL),
+    'template' => 'momentum_vote_banner',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu()
+ */
+function momentum_vote_menu() {
+  $items = array();
+  $items['vote'] = array(
+    'title' => t('Voter Registration and Information'),
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',       // This is also provided as a block
+    'page arguments' => array('_momentum_vote_form'),
+    'access callback' => TRUE,
+  );
+  $items['vote/information'] = array(
+    'title' => t('Voter Registration and Information'),
+    'type' => MENU_CALLBACK,
+    'page callback' => '_momentum_vote_information',
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+/**
+ * Our vote results
+ */
+function _momentum_vote_information() {
+  $data = momentum_session('vote');
+  // $dates = momentum_session('vote_dates');
+  $dates_raw = momentum_session('vote_dates');
+  $dates = !empty($dates_raw['dates']) ? $dates_raw['dates'] : array();
+  $links = !empty($dates_raw['links']) ? reset($dates_raw['links']) : array();
+  $processed = momentum_session('vote_processed');
+
+  if (!empty($processed)) {
+    return theme('momentum_vote_response', $processed);
+  }
+
+  /*
+  if ((!empty($data)) && (!empty($dates))) {
+    return theme('momentum_vote_response', array(
+      'state_full' => !empty($links['state_full']) ? $links['state_full'] : NULL,
+      'state' => !empty($links['state']) ? $links['state'] : NULL,
+      'state_office' => !empty($links['state_office']) ? $links['state_office'] : NULL,
+      'registration_form' => !empty($links['registration_form']) ? $links['registration_form'] : NULL,
+      'early_vote_form' => !empty($links['early_vote_form']) ? $links['early_vote_form'] : NULL,
+      'polling_place' => !empty($links['polling_place']) ? $links['polling_place'] : NULL,
+      'voter_id' => !empty($links['voter_id']) ? $links['voter_id'] : NULL,
+      'dates' => $dates,
+      'data' => $data));
+  }
+  */
+
+  // Otherwise, we redirect back to the vote page
+  drupal_goto('vote');
+}
+
+/**
+ * hook_block_info
+ */
+function momentum_vote_block_info() {
+  $blocks['momentum_vote_block'] = array(
+    'info' => t('Momentum Vote Submission Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['momentum_vote_response'] = array(
+    'info' => t('Momentum Vote Response Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['momentum_vote_banner'] = array(
+    'info' => t('Momentum Vote Banner'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function momentum_vote_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'momentum_vote_response':
+      $data = momentum_session('vote');
+      $raw_dates = momentum_session('vote_dates');
+      $dates = !empty($raw_dates['dates']) ? $raw_dates['dates'] : array();
+      $links = !empty($raw_dates['links']) ? reset($raw_dates['links']) : array();
+      $block['subject'] = t('Momentum Vote Response');
+      $block['content'] = theme('momentum_vote_response', array('data' => $data, 'dates' => $dates, 'registration' => $registration));
+      if ((!empty($data)) && (!empty($dates))) {
+        $block['content'] = theme('momentum_vote_response', array(
+          'state_full' => !empty($links['state_full']) ? $links['state_full'] : NULL,
+          'state' => !empty($links['state']) ? $links['state'] : NULL,
+          'state_office' => !empty($links['state_office']) ? $links['state_office'] : NULL,
+          'registration_form' => !empty($links['registration_form']) ? $links['registration_form'] : NULL,
+          'early_vote_form' => !empty($links['early_vote_form']) ? $links['early_vote_form'] : NULL,
+          'polling_place' => !empty($links['polling_place']) ? $links['polling_place'] : NULL,
+          'voter_id' => !empty($links['voter_id']) ? $links['voter_id'] : NULL,
+          'dates' => $dates,
+          'data' => $data));
+      }
+      break;
+    case 'momentum_vote_block':
+      $block['title'] = t('Voter Registration and Information');
+      $block['content'] = _momentum_vote_block();
+      break;
+    case 'momentum_vote_banner':
+      $block['content'] = theme('momentum_vote_banner', array('text' => variable_get('momentum_vote_banner_text', 'Voting Information'), 'path' => variable_get('momentum_vote_banner_path', 'vote')));
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure
+ */
+function momentum_vote_block_configure($delta = NULL) {
+  $form = array();
+  
+  switch ($delta) {
+    case 'momentum_vote_banner':
+      $form['momentum_vote_banner_path'] = array(
+        '#type' => 'textfield',
+        '#default_value' => variable_get('momentum_vote_banner_path', NULL),
+        '#title' => t('Link Path'),
+        '#required' => TRUE,
+      );
+      $form['momentum_officials_vote_text'] = array(
+        '#type' => 'textfield',
+        '#default_value' => variable_get('momentum_vote_banner_text', NULL),
+        '#title' => t('Link Text'),
+        '#required' => TRUE,
+      );
+      break;
+  }
+  return $form;
+} 
+
+/**
+ * Implements hook_block_save
+ */
+function momentum_vote_block_save($delta = NULL, $edit = array()) {
+  switch ($delta) {
+    case 'momentum_vote_banner':
+      variable_set('momentum_vote_banner_text', $edit['momentum_vote_banner_text']);
+      variable_set('momentum_vote_banner_path', $edit['momentum_vote_banner_path']);
+      break;
+  }
+}
+function _momentum_vote_block() {
+  return drupal_get_form('_momentum_vote_form');
+}
+
+function _momentum_vote_form($form, &$form_state) {
+  $form = array();
+
+  /**
+   * Start out by ensuring a useful class
+   */
+  if (empty($form['#attributes']['class'])) {
+    $form['#attributes'] = array('class' => array('voter-registration'));
+  }
+  else {
+    $form['#attributes']['class'][] = 'voter-registration';
+  }
+
+  $form['markup'] = array(
+    '#markup' => '<p>' . t('Enter your ZIP code to receive your election details') . '</p>',
+  );
+  $form['zip'] = _momentum_forms('zip', array(), TRUE);
+  $form['notes'] = _momentum_forms('notes');
+  $form['submit'] = _momentum_forms('submit');
+  return $form;
+}
+
+function _momentum_vote_form_validate($form, &$form_state) {
+  // Insert Momentum Zip validation here
+  // validate for 5 characters (zip)
+  $zip = !empty($form_state['values']['zip']) ? $form_state['values']['zip'] : NULL;
+
+  if (drupal_strlen($zip) > 5) {
+    form_set_error('zip', t('Zip should be no longer than five digits'));
+  }
+}
+
+function _momentum_vote_form_submit($form, &$form_state) {
+  // If content in the notes field, discard submission.  This field is only used to catch spambots.
+  if(!empty($form_state['values']['notes'])) {
+    drupal_set_message('Thank you for your submission.');
+    return;
+  }
+  $zip = $form_state['values']['zip'];
+
+  momentum_session($zip, 'zip');
+
+  $object = momentum_legacy();
+
+  $json = _momentum_vote_vote($zip, $object);
+  $legacy_dates = _momentum_vote_dates($zip, $object);
+
+  unset($object);
+
+  $dates = array();
+  if (!empty($json['reg_state'])) {
+    $dates = momentum_vote($json['reg_state']);
+  }
+  /**
+   * If these API calls return false, we clear
+   * any existing session data (because this is a new submission).
+   * If true, we load the session with the new data and send the
+   * user along.
+   */
+  if ((!empty($json)) && (!empty($dates))) {
+    momentum_session('vote_dates', $dates);
+    momentum_session('vote', $json);
+    $processed = momentum_parse_vote($dates, $json, $legacy_dates);
+    momentum_session('vote_processed', $processed);
+    $form_state['redirect'] = 'vote/information';
+  }
+  else {
+    // Else, we assume we want to keep the user on the same page
+    momentum_session('vote', NULL, TRUE);          // This clears the 'vote' key
+    momentum_session('vote_dates', NULL, TRUE);
+    $error = variable_get('momentum_vote_error', t('No results for the entered zip'));
+    drupal_set_message($error, 'warning');
+  }
+}
+
+/**
+ * Get vote data
+ */
+function _momentum_vote_vote($zip, &$object) {
+  if ($success = $object->FromZIPListGOTV($zip)) {
+    $json = $object->FromZIPListGOTV_data;
+  }
+  else {
+    // Done broke
+  }
+
+  $data = array();
+  // Now we deal with API weirdness
+  if (isset($json[0])) {
+    $data = $json[0];
+    _momentum_vote_fix($data);
+    return $data;
+  }
+  return $data;
+}
+
+function _momentum_vote_dates($zip, &$object) {
+ if ($success = $object->FromZIPListElections($zip)) {
+    $data = $object->FromZIPListElections_data;
+  }
+  else {
+    // Done broke
+  }
+
+  $output = array();
+  if (!empty($data)) {
+    // Now we deal with API weirdness
+    foreach ($data as $chunk) {
+      if ((!empty($chunk['ElectionName'])) && ($chunk['ElectionName'] == 'General')) {
+        $output = $chunk;
+      }
+      // Here we need to check for the primary date chunk and add that to our output array
+      if ((!empty($chunk['ElectionName'])) && ($chunk['ElectionName'] == 'Primary') && (!empty($chunk['PrimaryDate']))) {
+        $output['PrimaryDate'] = $chunk['PrimaryDate'];         // Note, this is guesswork. Hasn't been added to API yet.
+      }
+    }
+  }
+  return $output;
+}
+
+/**
+ * Momentum sends through a lot of empty strings
+ * This removes those fields to ease theming
+ */
+function _momentum_vote_fix(&$data) {
+  foreach ($data as $a => $b) {
+    if (strlen($b) == 0) {
+      unset($data[$a]);
+    }
+    elseif (preg_match("/<[^<]+>/", $b, $m) != 0) {
+      $content = str_replace('</p>.</p>', '</p>', $b);
+      $data[$a] = $content;
+    }
+  }
+}
+
+/**
+ * Add field to system information settings
+ */
+function momentum_vote_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $form['momentum']['momentum_vote_results'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Vote Results Page'),
+      '#default_value' => variable_get('momentum_vote_results', 'vote'),
+    );
+    $form['momentum']['momentum_vote_error'] = array(
+      '#type' => 'textfield',
+      '#title' => t('No Vote Results'),
+      '#description' => t('If no results, display this error.'),
+      '#default_value' => variable_get('momentum_vote_error', t('No results for the entered zip')),
+    );
+  }
+}

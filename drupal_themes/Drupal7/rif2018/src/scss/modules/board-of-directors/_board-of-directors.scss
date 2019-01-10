@@ -1,0 +1,110 @@
+
+.node-board-of-directors-container {
+//  background-color: @rif-blue;
+//  padding: 45px 0 0;
+  background-color: $gray-white;
+  border-radius: 6px;
+  margin-bottom: $spacing-xlarge;
+  // padding-bottom: $spacing-xlarge;
+  max-width: $w-wide;
+  margin-left: auto;
+  margin-right: auto;
+  width: 98%;
+
+  .title-container {
+    padding-bottom: $spacing-xlarge;
+//    padding: 30px 0;
+//    text-align: center;
+
+    h2 {
+//      margin: 0 0 20px;
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size + 24;
+//      font-weight: 900;
+//      line-height: @default-line-height + 20;
+//      text-transform: uppercase;
+//      color: @rif-light-green;
+      color: $blue-medium;
+      font-family: $ff-display;
+      font-weight: $fw-semibold;
+      text-transform: none;
+    }
+    p {
+//      margin: 0 auto;
+//      max-width: 75%;
+//      font-family: @default-font-family;
+//      font-size: @default-font-size;
+//      font-weight: 700;
+//      line-height: @default-line-height;
+//      color: @white;
+        color: $clr-body;
+        font-family: $ff-body;
+        font-weight: $fw-regular;
+    }
+  }
+  .bod-height-adjustment {
+
+    .node-board-of-directors {
+
+      @media (min-width: 992px) {
+//        min-height: 132px;
+      }
+    }
+  }
+  .node-board-of-directors {
+//    min-height: 175px;
+//    text-align: center;
+
+    h3 {
+//      margin: 15px 0 5px;
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size + 2;
+//      font-weight: 900;
+//      line-height: @default-line-height;
+//      color: @white;
+      color: $white;
+      color: $blue-medium;
+      font-family: $ff-body;
+      font-weight: $fw-bold;
+      text-transform: none;
+    }
+    h4 {
+//      margin: 0 0 15px;
+//      font-family: @default-font-family;
+//      font-size: @default-font-size + - 2;
+//      font-weight: bold;
+//      line-height: @default-line-height - 2;
+//      color: @rif-yellow;
+      color: $blue-white;
+      color: $black;
+      font-family: $ff-body;
+      font-weight: $fw-regular;
+      text-transform: none;
+      @include fs($fs-10);
+      margin: 0 0 $spacing-small;
+    }
+    p {
+//      margin: 0;
+//      font-family: @default-font-family;
+//      font-size: @default-font-size - 4;
+//      font-weight: bold;
+//      line-height: @default-line-height - 4;
+//      color: @white;
+        color: $blue-light;
+        font-family: $ff-body;
+
+      & + p {
+//        margin-top: 5px;
+//        font-family: @alt-sans-serif-font-family;
+//        font-weight: 900;
+//        text-transform: uppercase;
+//        color: lighten(@rif-blue, 45%);
+        color: $blue-white;
+        color: $gray-dark;
+        font-family: $ff-body;
+        font-weight: $fw-regular;
+        // text-transform: none;
+      }
+    }
+  }
+}

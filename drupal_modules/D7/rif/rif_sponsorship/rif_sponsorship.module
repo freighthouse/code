@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * @file
+ * Code for the RIF Sponsorship feature.
+ */
+
+include_once 'rif_sponsorship.features.inc';

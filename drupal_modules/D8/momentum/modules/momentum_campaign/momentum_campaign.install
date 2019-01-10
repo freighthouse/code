@@ -1,0 +1,176 @@
+<?php
+
+use Drupal\Core\Database\Database;
+use Drupal\taxonomy\Entity\Term;
+//use Drupal\Core\Field\BaseFieldDefinition;
+
+/**
+ * @file
+ * Contains momentum_campaign.install.
+ */
+function momentum_campaign_update_8000() {
+  $spec = [
+    'fields' => [
+      'mid' => [
+        'type' => 'int',
+        'description' => 'Momentum issue ID.',
+        'length' => 10,
+        'not null' => TRUE,
+        'default' => '',
+      ],
+    ],
+    'indexes' => [
+      'mid_normal_index' => ['mid'],
+    ],
+  ];
+  $fields = ['mid'];
+  $schema = Database::getConnection()->schema();
+  // A normal index.
+  $schema->addIndex('taxonomy_term_field_data', 'mid_normal_index', $fields, $spec);
+
+  // A unique key.
+  $schema->addUniqueKey('taxonomy_term_field_data', 'mid_unique_key', $fields);
+
+  $schema = Database::getConnection()->schema();
+  $schema->addField('taxonomy_term_field_data', 'mid', $spec);
+}
+function momentum_campaign_update_8001() {
+  // Term names to be added.
+  $vocab = 'issues';
+  $items = [
+    1 => 'Seniors / Aging / Elderly',
+    2 => 'Agriculture / Food',
+    3 => 'Animal Rights',
+    4 => 'Appropriations',
+    5 => 'Arts / Humanities',
+    6 => 'Finance',
+    7 => 'Commerce / Business',
+    8 => 'Elections / Campaigns',
+    9 => 'Census / Redistricting',
+    10 => 'Family / Children',
+    11 => 'Human Rights / Civil Rights',
+    12 => 'Communications',
+    13 => 'Consumer Affairs',
+    14 => 'Crime / Law Enforcement',
+    15 => 'Military / Defense',
+    16 => 'Disabilities / ADA',
+    17 => 'Disaster / Emergency Management / FEMA',
+    18 => 'Education / Schools',
+    19 => 'Energy / Utilities',
+    20 => 'Entertainment / Media',
+    21 => 'Environment / Natural Resources',
+    22 => 'Foreign Policy / International Affairs',
+    23 => 'Government Operations / Government Reform',
+    24 => 'Health / Medicine',
+    25 => 'Homeland Security / Terrorism',
+    26 => 'Housing',
+    27 => 'Immigration',
+    28 => 'Intelligence / Counterintelligence',
+    29 => 'Judiciary / Law / Courts',
+    30 => 'Labor / Jobs / Pensions',
+    31 => 'Medicare / Medicaid',
+    32 => 'Public Works / Infrastructure',
+    33 => 'Minority / Ethnic',
+    34 => 'Recreation / Sports / Parks',
+    35 => 'Religion',
+    36 => 'Rules / Ethics',
+    37 => 'Rural Affairs',
+    38 => 'Science',
+    39 => 'Social Security',
+    40 => 'Aerospace / Space',
+    41 => 'Grants / Interns',
+    42 => 'Tax / Revenue',
+    43 => 'Trade / Exports / Imports',
+    44 => 'Transportation',
+    45 => 'Veterans Affairs',
+    46 => 'Land Use / Water / Oceans',
+    47 => 'Welfare / Social Issues',
+    48 => 'Womens Issues',
+    49 => 'Insurance',
+    50 => 'Regulation / Regulatory',
+    51 => 'Urban Affairs / Urban Development',
+    52 => 'Logistics / Planning',
+    53 => 'Intergovernmental Affairs / State / Local',
+    54 => 'Public Affairs / Outreach',
+    55 => 'Economic Development / Economic Policy',
+    56 => 'Abortion',
+    57 => 'Acquisitions',
+    58 => 'Banking',
+    59 => 'Budget',
+    60 => 'Congress',
+    61 => 'Gambling',
+    62 => 'Gun Issues',
+    63 => 'Lobbying / Politics',
+    64 => 'National Security',
+    65 => 'Native American Affairs',
+    66 => 'Small Business',
+    67 => 'Technology',
+    68 => 'Telecommunications',
+    69 => 'Internet / Social Media',
+    70 => 'Privacy / Personal Rights',
+  ];
+//  dpm($items);
+
+  foreach ($items as $key => $item) {
+    Term::create([
+      'parent' => [],
+      'name' => $item,
+      'vid' => $vocab,
+      'weight' => $key,
+    ])->save();
+
+  }
+}
+
+function momentum_campaign_update_8002() {
+
+  // Term names to be added.
+  $vocab = 'regions';
+  $items = [
+    'Africa',
+    'Antarctica',
+    'Asia',
+    'Australia',
+    'Europe',
+    'Global',
+    'North America',
+    'South America',
+    'United States',
+  ];
+  foreach ($items as $item) {
+    Term::create([
+      'parent' => [],
+      'name' => $item,
+      'vid' => $vocab,
+    ])->save();
+  }
+}
+
+/**
+ * Implements hook_install().
+ */
+function momentum_campaign_install() {
+  momentum_campaign_update_8000();
+  momentum_campaign_update_8001();
+  momentum_campaign_update_8002();
+}
+/**
+ * Implements hook_entity_base_field_info().
+ */
+//function momentum_campaign_entity_base_field_info(EntityTypeInterface $entity_type) {
+//  if ($entity_type->id() === 'taxonomy_term') {
+//    $fields['mid'] = BaseFieldDefinition::create('field')
+//      ->setLabel(t('Momentum issue ID.'))
+//      ->setComputed(TRUE);
+//
+//    return $fields;
+//  }
+//}
+/**
+ * Implements hook_uninstall().
+ */
+function momentum_campaign_uninstall() {
+  // Delete Momentum ID column.
+  $schema = Database::getConnection()->schema();
+  $schema->dropField('taxonomy_term_field_data', 'mid');
+}

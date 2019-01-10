@@ -1,0 +1,12 @@
+name = "RepEquity Social Tools"
+description = "A module that provides a block for users to post a pre-determined, configurable tweet or Facebook news feed message. "
+core = 7.x
+package = Main Street
+configure = admin/config/system/re_socialtools
+files[] = re_socialtools.install
+files[] = re_socialtools.module
+files[] = re_socialtools.js
+
+
+
+

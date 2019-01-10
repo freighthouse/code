@@ -1,0 +1,85 @@
+/* CSS Document */
+#tweeter_representatives
+{
+	padding: 1.5em;
+    border: 1px solid #cccccc;
+    color: #666666;
+    background-color: #ffffff;
+	display:none;
+}
+#tweeter_representatives span.official_name,
+#tweeter_representatives textarea {
+    display: block;
+    width: 100%;
+}
+#tweeter_representatives textarea {
+	
+    width: 100%;
+    line-height: 1.5;
+    resize: none;
+    overflow: auto;
+  
+    margin: 0 0 1em 0;
+    color: #333333;
+    border-color: #cccccc;
+    background-color: #ffffff;
+	height: 85px;
+	padding:5px;
+}
+#tweeter_representatives div.link{
+    font-size: 0.875rem;
+    padding: 0 0 0 30px;
+    margin: 0 0 1em 0;
+    color: #ffffff;
+    font-weight: normal;
+    line-height: 1;
+	
+}
+#tweeter_representatives .link a{
+    font-size: 20px;
+    text-transform: uppercase;
+    padding: .75em 1.5em;
+    margin-bottom: 1em;
+	color:#fff;
+	margin:0 auto;
+	display: inline;
+    border-radius: 0.3em;
+    background-color: #0064d2;
+    text-decoration: none;
+    text-align: center;
+    width: auto;
+    max-width: 300px;
+}
+#tweeter_representatives h3{
+	border-bottom: 1px dotted #ccc;
+	padding-top: 20px;
+}
+
+#tweeter_representatives span.notwitter {
+    font-size: .75em;
+    width: 100%;
+    line-height: 1em;
+    resize: none;
+    overflow: auto;
+    margin: 0 0 1em 0;
+    color: #333333;
+    
+	padding:5px;
+}
+.official_twitter{
+	background-color: #E6E6E6;
+    border: 3px solid #fff;
+    width: 400px;
+    display: inline-block;
+    min-height: 180px;
+    padding: 10px 20px;
+    vertical-align: top;
+}
+div#tweeter_representatives .preview {
+    margin: 0;
+}
+.card {
+    width: 45%;
+    display: inline-block;
+    padding: 10px;
+}

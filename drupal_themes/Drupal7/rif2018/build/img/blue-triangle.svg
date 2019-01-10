@@ -1,0 +1,20 @@
+<svg viewBox="0 0 1620 90" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="none">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>Rectangle 4</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="100%" y1="50%" x2="-2.22044605e-14%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#00A2E3" offset="0%"></stop>
+            <stop stop-color="#002C76" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Footer-2" transform="translate(0.000000, 60.000000)" fill="url(#linearGradient-1)">
+            <g id="Footer-Top" transform="translate(0.000000, -120.000000)">
+                <g id="new_chemistryGirl-MASKED">
+                    <polygon id="Rectangle-4" points="0 116 1620 60 1620 150 0 120"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

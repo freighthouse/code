@@ -1,0 +1,826 @@
+<?php
+
+	/*
+	 * Favorites Modal Flow sequence.
+	 * 1a. Ctools Links is built with specific css classes
+	 * 1b. setup__popup_style (Not always needed if you can reuse an existing style)
+	 * 2. Inject Link in node through hook_node_view
+	 * 3. Ajax Call to hook_menu item like : delete-favorites-folder/nojs/'.$folder_id
+	 * 4. Hook Menu defines what happens when that page is visited.
+	 * 5. Page Callback function does some logic and builds the form with validation and submission functions
+	 */
+
+	/* ****************************************
+	 * 			Set up permissions
+	 * **************************************** */
+	/**
+	 * Implements hook_permission()
+	 */
+	function my_favorites_permission() {
+		return array(
+			'administer my_favorites module' => array(
+				'title' => t('Administer My Favorites Module'),
+				'description' => t('Perform Administration Tasks for the My Favorites Module'),
+			)
+		);
+	}
+
+	// This was an attempt to use a different theme in various situations
+	/*function my_favorites_custom_theme() {
+		if(arg(1) == 'ajax') {
+			dsm("I made it");
+			return NULL;
+		}
+	}*/
+
+	/* ****************************************
+	 * 		Create Menu Endpoints
+	 * **************************************** */
+	/**
+	 * Implements hook_menu().
+	 */
+	function my_favorites_menu() {
+		$items = array();
+
+		//TODO: Security Option could be done something like this: https://www.drupal.org/node/1947370
+		//TODO: SECURITY: Change all access callback = TRUE to actual access check functions
+		$items['literacy-central/my-favorites/about'] = array(
+			'title' => 'About My Favorites',
+			'page callback' => 'my_favorites_about',
+			'access arguments' => array('access content')
+		);
+
+		$items['literacy-central/shared-favorites/%node'] = array(
+			'title' => 'Shared Favorites Page',
+			'page callback' => 'shared_favorites_page',
+			'page arguments' => array(2),
+			'access arguments' => array('access content'),
+			'file' => 'my_favorites.page.inc',
+		);
+
+		$items['add-to-my-favorites/%ctools_js/%'] = array(
+			'title' => 'Add to Favorites',
+			'page callback' => 'my_favorites_add_callback',
+			'file' => 'my_favorites.add_favorite_modal.inc',
+			'page arguments' => array(1, 2),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['add-to-my-favorites/%ctools_js/%/%'] = array(
+			'title' => 'Add to Favorites',
+			'page callback' => 'my_favorites_add_callback',
+			'file' => 'my_favorites.add_favorite_modal.inc',
+			'page arguments' => array(1, 2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['add-all-to-my-favorites/%ctools_js/%node/%'] = array(
+			'title' => 'Add all to Favorites',
+			'page callback' => 'my_favorites_add_all_callback',
+			'file' => 'my_favorites.add_all_favorite_modal.inc',
+			'page arguments' => array(1, 2, 3),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['add-book-to-my-favorites/%ctools_js/%'] = array(
+			'title' => 'Add to Favorites',
+			'page callback' => 'my_favorites_add_callback',
+			'file' => 'my_favorites.add_favorite_modal.inc',
+			'page arguments' => array(1, 2),
+			'access callback' => TRUE,
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['remove-from-my-favorites/%ctools_js/%node/%node'] = array(
+			'title' => 'Remove from My Favorites',
+			'page callback' => 'my_favorites_remove_callback',
+			'file' => 'my_favorites.remove_favorite_modal.inc',
+			'page arguments' => array(1, 2, 3),
+			'access callback' => 'node_access',
+			'access arguments' => array('update', 2),
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['delete-favorites-folder/%ctools_js/%node'] = array(
+			'title' => 'Delete Folder',
+			'page callback' => 'my_favorites_delete_folder_callback',
+			'file' => 'my_favorites.delete_folder_modal.inc',
+			'page arguments' => array(1, 2),
+			'access callback' => 'node_access',
+			'access arguments' => array('delete', 2),
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['rename-favorites-folder/%ctools_js/%node'] = array(
+			'title' => 'Rename Folder',
+			'page callback' => 'my_favorites_rename_folder_callback',
+			'file' => 'my_favorites.rename_folder_modal.inc',
+			'page arguments' => array(1, 2),
+			'access callback' => 'node_access',
+			'access arguments' => array('update', 2),
+			'type' => MENU_CALLBACK,
+		);
+
+		$items['share-favorites-folder/%ctools_js/%node'] = array(
+			'title' => 'Share Folder',
+			'page callback' => 'my_favorites_share_folder_callback',
+			'file' => 'my_favorites.share_folder_modal.inc',
+			'page arguments' => array(1, 2),
+			'access callback' => 'node_access',
+			'access arguments' => array('update', 2),
+			'type' => MENU_CALLBACK,
+		);
+
+		return $items;
+	}
+
+	/**
+	 * Injects new value into Support Material Node for Referring
+	 * Implements hook_node_load().
+	 */
+	function my_favorites_node_load($nodes, $types) {
+
+		$types_we_want_to_process = array('support_material');
+
+		// Decide whether any of $types are relevant to our purposes.
+		if (count(array_intersect($types_we_want_to_process, $types))) {
+			$url_parts = explode('/', current_path());
+			if (in_array('search', $url_parts)) {
+				// We don't want to do any heavy processing in search so let's bail if we are in a search view.
+				return;
+			}
+
+			foreach ($nodes as $node) {
+				$emw_node = entity_metadata_wrapper('node', $node);
+				$current_related_book_id = null;
+				$isbn_count = count($node->field_related_books['und']);
+				if ( $isbn_count == 1 ) {
+					//$current_related_book_id = $emw_node->field_related_books[0]->value()->nid;
+					$current_related_book_id = $node->field_related_books['und'][0]['target_id'];
+				} else if ( $isbn_count >= 1 ) {
+					// Perform Multiple Checks about URL and Nodes to try and guess the book that user believes is most closely related to what they are viewing
+					// First check if we are looking at a node so we can get the bundle property
+					$bundle = null;
+					if(arg(0) == 'node' && is_numeric(arg(1))){
+						$bundle = $node->type;
+					}
+					// If our current page is viewing a book then we can assume the user is expecting the resource to be pointing back to that
+					if($bundle == 'book_resource'){
+						$current_related_book_id = $node->nid;
+					} else {
+						// Since our current page isn't viewing a book let's see if the last visited page was a book and use that instead.
+						// NOTE: This will cause a performance impact to the search page which is why we bailed earlier in this function
+						$url_parts = explode('?', $_SERVER['HTTP_REFERER']);
+						$url_tags = explode('/', $url_parts[0]);
+						if(in_array('book', $url_tags)){
+							//Drop the the [http:, //, and www] from the url
+							array_shift($url_tags);
+							array_shift($url_tags);
+							array_shift($url_tags);
+
+							// Bring the URL back together to check the path alias
+							$path_url = implode('/',$url_tags);
+							$book_url = drupal_get_normal_path($path_url);
+							$book_url_array = explode('/',$book_url);
+							$current_related_book_id = 'tba';
+						} else {
+							// If the previous page wasn't a book resource then we can't really identify this value, let's use the first ISBN in our list as a fallback
+							$current_related_book_id = $node->field_related_books['und'][0]['target_id'];
+						}
+					}
+				}
+				$node->current_related_book_id = $current_related_book_id;
+			}
+		}
+	}
+
+	/**
+	 * Access callback to determine if user has access to add panel nodes.
+	 */
+	function user_owns_node() {
+		return user_access('create panel content') || user_access('administer panel-nodes');
+	}
+
+	/* ****************************************
+	 * 			Custom Access Callbacks
+	 * **************************************** */
+	function custom_shared_folders_access($node) {
+		$emw_node = entity_metadata_wrapper('node', $node, array('bundle'=>'favoritesfolder'));
+		if($emw_node->field_shared->value() == 1) {
+			return TRUE;
+		}
+		if(user_access('administer my_favorites module')) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+
+	/* ****************************************
+	 * 		Define Themeable elements
+	 * **************************************** */
+	function my_favorites_theme() {
+		return array(
+			'my_favorites_folder' => array(
+				'variables' => array('items' => NULL, 'my_favorites_folder' => NULL),
+			),
+			'my_favorites_folder_item' => array(
+				'arguments' => array('container_entity' => NULL, 'listed_entities' => array()),
+				'template' => 'my-favorites-folder-item',
+			),
+			'my_favorites_default_fieldset' => array(
+				'render element' => 'element'
+			),
+		);
+	}
+
+	/* My Favorites Folder Template */
+	function theme_my_favorites_folder($variables) {
+		$output = '';
+
+//		$form_to_pass = drupal_get_form('my_favorites_add_folder_form');
+//		$output .= render($form_to_pass);
+
+		$output .= '<div class="panel panel-default panel-favorites-list">';
+		$output .= '	<div class="panel-body">';
+		$output .= '		<div class="favorites-table">';
+		foreach ($variables['items'] as $item) {
+			$output .= theme('my_favorites_folder_item', $item);
+		}
+		$output .= '		</div>';
+		$output .= '	</div>';
+		$output .= '</div>';
+
+		return $output;
+	}
+
+	/* Setup Popup Styles */
+	function setup_add_to_favorites_popup_style() {
+		static $added = FALSE;
+		if($added == FALSE) {
+			$added = TRUE;
+			// Adding the necessary Libraries
+			ctools_include('ajax');
+			ctools_include('modal');
+			ctools_modal_add_js();
+
+			// Create our own javascript that will be used to theme a modal.
+			$add_favorite_style = array(
+				'add-favorite-modal-style' => array(
+					'modalSize' => array(
+						'type' => 'scale',
+						'width' => 0.6,
+						'height' => 0.4,
+						'contentRight' => 0,
+						'contentBottom' => 0,
+					),
+					'modalOptions' => array(
+						'opacity' => .6,
+						'background-color' => '#684C31',
+					),
+					'animation' => 'fadeIn',
+					'animationSpeed' => 'fast',
+					'modalTheme' => 'add_favorite_theme',
+					'extraVar' => 'More Info',
+					'closeText' => '',
+				),
+			);
+
+			drupal_add_js($add_favorite_style, 'setting'); // Adding the preferences
+			ctools_add_js('my_favorites_popup_style', 'my_favorites'); // Adding the theme (the first parameter is the theme file name, the second is the name of the module where this file is)
+		}
+	}
+	function setup_remove_from_favorites_popup_style() {
+		static $added = FALSE;
+		if($added == FALSE) {
+			$added = TRUE;
+			// Adding the necessary Libraries
+			ctools_include('ajax');
+			ctools_include('modal');
+			ctools_modal_add_js();
+
+			// Create our own javascript that will be used to theme a modal.
+			$remove_favorite_style = array(
+				'remove-favorite-modal-style' => array(
+					'modalSize' => array(
+						'type' => 'scale',
+						'width' => 0.6,
+						'height' => 0.4,
+						'contentRight' => 0,
+						'contentBottom' => 0,
+					),
+					'modalOptions' => array(
+						'opacity' => .6,
+						'background-color' => '#684C31',
+					),
+					'animation' => 'fadeIn',
+					'animationSpeed' => 'fast',
+					'modalTheme' => 'remove_favorite_theme',
+					'closeText' => '',
+				),
+			);
+
+			drupal_add_js($remove_favorite_style, 'setting'); // Adding the preferences
+			ctools_add_js('my_favorites_remove_favorite_style', 'my_favorites'); // Adding the theme (the first parameter is the theme file name, the second is the name of the module where this file is)
+		}
+	}
+
+	/* Preprocessor for My Favorites Folder Item Template */
+	function my_favorites_preprocess_my_favorites_folder_item(&$variables) {
+		// If the container entity is not set then we will post
+		if(!isset($variables['container_entity'])) {
+			$variables['node_url'] = '/';
+			$variables['container_id'] = null;
+			$bookCover = array(
+				'path' => file_create_url('/sites/default/files/Internal%20Layout/rif-logo-footer_0.png'),
+				'attributes' => array('class' => 'img-responsive'),
+			);
+			$variables['bookCover'] = theme('image',$bookCover);
+			$variables['support_materials'] = [];
+			$variables['title'] = "Stand Alone Materials";
+			$variables['contributors'] = 'Created by RIF';
+		} else {
+			$node_wrapper = entity_metadata_wrapper('node', $variables['container_entity']['entity']);
+			$containerVars = $variables['container_entity']['entity'];
+			$uri = entity_uri('node', $containerVars);
+			$variables['node_url'] = url($uri['path'], $uri['options']);
+
+			$variables['container_id'] = $variables['container_entity']['target_id'];
+
+			$bookCoverFileName = $node_wrapper->field_book_cover_file_name->value();
+			$bookCover = array(
+				'path' => file_create_url('public://Book_Covers/' . $bookCoverFileName),
+				'alt' => t('A book cover for ' . $bookCoverFileName),
+				'title' => t('Book Cover Image for ' . $bookCoverFileName),
+				'attributes' => array('class' => 'img-responsive'),
+			);
+			$variables['bookCover'] = theme('image', $bookCover);
+			$variables['title'] = $containerVars->title;
+			$variables['support_materials'] = [];
+
+			$rawAuthors = [];
+			$rawIllustrators = [];
+			foreach ($containerVars->field_author['und'] as $author) {
+				$rawAuthors[]['taxonomy_term'] = taxonomy_term_load($author['tid']);
+			}
+			foreach ($containerVars->field_illustrator['und'] as $illustrator) {
+				$rawIllustrators[]['taxonomy_term'] = taxonomy_term_load($illustrator['tid']);
+			}
+
+			$authors = getArrayOfTerms($rawAuthors);
+			$illustrators = getArrayOfTerms($rawIllustrators);
+			if ($authors === $illustrators) {
+				$variables['contributors'] = "Written and Illustrated by " . arrayToWordGroup($authors);
+			} else {
+				$variables['contributors'] = "Written by " . arrayToWordGroup($authors) . " and Illustrated by " . arrayToWordGroup($illustrators);
+			}
+		}
+		$variables['has_children'] = (sizeof($variables['listed_entities']) > 0);
+		if ($variables['has_children']) {
+			$variables['support_materials'] = node_view_multiple($variables['listed_entities'], 'favorites');
+		}
+
+	}
+
+	/* ****************************************
+	 * 	   Inject Variables into Node Views
+	 * **************************************** */
+	/**
+	 * Implements hook_node_view()
+	 */
+	function my_favorites_node_view($node, $view_mode, $langcode) {
+		if ($node->type == 'favoritesfolder' && $view_mode == 'full') {
+
+			/* ----------------------
+					Setup Create new form
+			   -------------------- */
+			//$node->content['create_folder_form'] = drupal_get_form('my_favorites_add_folder_form');
+
+			/* ---------------------------------------------
+					Organize Favorites Into Usable Array
+			   --------------------------------------------- */
+			if(sizeof($node->field_favorite_resources) <= 0) {
+				$emptyViewHTML = '';
+				$emptyViewHTML .= '	<div class="panel panel-default panel-favorites-list">';
+				$emptyViewHTML .= '		<div class="panel-body">';
+				$emptyViewHTML .= '			No resources have been saved yet for this folder!';
+				$emptyViewHTML .= '		</div>';
+				$emptyViewHTML .= '	</div>';
+
+				$node->content['field_favorite_resources'] = array(
+					'#type' => 'markup',
+					'#markup' => $emptyViewHTML,
+				);
+			} else {
+				$favorite_entities = $node->field_favorite_resources['und'];
+
+				$book_resource_entities = [];
+				$support_material_entities = [];
+
+				/* Sort entities between book resource and support material */
+				foreach ($favorite_entities as $pos => $favorite_entity) {
+					if ($favorite_entity['entity']->type == "book_resource") {
+						$book_resource_entities[] = $favorite_entity;
+					} else if ($favorite_entity['entity']->type == "support_material") {
+						$support_material_entities[] = $favorite_entity;
+					}
+				}
+
+				/* Add all of the book resources as the top elements of the favorite list*/
+				$favorites_list = [];
+				foreach ($book_resource_entities as $pos => $favorite_book) {
+					if (array_key_exists($favorite_book['entity']->nid, $favorites_list)) {
+						//TODO: add an error log (This should never happen though);
+					}
+					$favorites_list[$favorite_book['entity']->nid] = array(
+						'container_entity' => $favorite_book,
+						'listed_entities' => array(),
+					);
+				}
+
+				$stand_alone_sm = [];
+				/* Add all of the support materials to their associated book resources */
+				foreach ($support_material_entities as $pos => $favorite_support_material) {
+					// TODO: Go through all of the target ISBNS and add this support material to that book resource if it exists
+					$isbn_count = count($favorite_support_material['entity']->field_related_books['und']);
+					if($isbn_count == 1) {
+						$target_nid = $favorite_support_material['entity']->field_related_books['und'][0]['target_id'];
+						$favorites_list[$target_nid]['listed_entities'][$favorite_support_material['target_id']] = $favorite_support_material['entity'];
+					} else {
+						//Add the resource to the stand alone
+						$favorites_list[0]['listed_entities'][$favorite_support_material['target_id']] = $favorite_support_material['entity'];
+					}
+				}
+
+				/*
+				 * The favorites List has been completely build
+				 * Of the form
+				 * [container_nid]
+				 * 		[container_entity] - Entity of the container node
+				 * 		[listed_entities] - List of support materials ready to be passed into node_view_multiple()
+				 * */
+
+				// TODO check that the container nid exists and the internal support materials exist before sending them to the template
+
+				$node->content['field_favorite_resources'] = array(
+					'#type' => 'markup',
+					'#markup' => theme('my_favorites_folder', array('items' => $favorites_list, 'stand_alone_items' => $stand_alone_sm)),
+				);
+			}
+		}
+		if ($node->type == 'favoritesfolder' && $view_mode == 'teaser') {
+			setup_remove_from_favorites_popup_style();
+			$delete_link_html = _my_favorites_build_delete_folder_link('Delete Folder',$node->nid);
+			$node->content['delete_folder_modal_link'] = array(
+				'#type' => 'markup',
+				'#markup' =>  $delete_link_html
+			);
+			setup_add_to_favorites_popup_style();
+			$rename_folder_link_html = _my_favorites_build_rename_folder_link('Rename List',$node->nid);
+			$node->content['rename_folder_modal_link'] = array(
+				'#type' => 'markup',
+				'#markup' =>  $rename_folder_link_html
+			);
+			//setup_add_to_favorites_popup_style(); Not needed as we are resuing the add_to_favorites_popup style.
+			$share_folder_link_html = _my_favorites_build_share_folder_link('Share',$node->nid);
+			$node->content['share_folder_modal_link'] = array(
+				'#type' => 'markup',
+				'#markup' =>  $share_folder_link_html
+			);
+		}
+		if ($node->type == 'support_material' && $view_mode == 'favorites') {
+			//$form = drupal_get_form('form_remove_favorite',$node, arg(1));
+			setup_remove_from_favorites_popup_style();
+			$folder_id = arg(1);
+			if($folder_id == 'shared-favorites') { // Were on the shared-favorites page which is not aliases do use arg(2)
+				$folder_id = arg(2);
+			}
+			$node->content['remove_favorite_form'] = _my_favorites_build_remove_favorite_link("Remove", $folder_id, $node->nid);//drupal_render($form);
+		}
+		if ($node->type == 'support_material' && $view_mode == 'teaser') {
+			setup_add_to_favorites_popup_style();
+			$node->content['test_modal'] = _my_favorites_build_add_favorite_link('My Favorites', $node->nid, $node->current_related_book_id);
+		}
+		if ($node->type == 'support_material' && $view_mode == 'full') {
+			setup_add_to_favorites_popup_style();
+			$node->content['test_modal'] = _my_favorites_build_add_favorite_link_full_page('Add To My Favorites', $node->nid, $node->current_related_book_id);
+		}
+		if ($node->type == 'book_resource' && $view_mode == 'full') {
+			setup_add_to_favorites_popup_style();
+			$node->content['add_book_to_favorites_link'] = _my_favorites_build_add_favorite_link_full_page('My Favorites', $node->nid);
+		}
+	}
+
+	function my_favorites_views_pre_render(&$view) {
+		if($view->name == 'support_materials') {
+			setup_add_to_favorites_popup_style();
+			$view->raw_results = array();
+			foreach($view->result as $index => $item) {
+				$view->raw_results[] = $item->nid;
+			}
+			$view->node_list = implode("_", $view->raw_results);
+			$view->add_all_button = _my_favorites_build_add_all_favorite_link('Add All', arg(1), $view->node_list); // arg(1) should always be the node id
+		}
+	}
+
+	function my_favorites_views_post_execute(&$view) {
+		//dsm($view);
+	}
+
+	/* ****************************************
+	 * 			New Favorite Folder
+	 * **************************************** */
+
+	function my_favorites_add_folder_form($form, $form_state) {
+
+//		$favorite_folders = views_get_view_result('my_favorite_folders','my_favorite_folders');
+
+//		$favorite_folder_ids = [];
+
+//		foreach($favorite_folders as $pos => $folder) {
+//			$favorite_folder_ids[$folder->nid] = $folder->node_title;
+//		}
+
+
+		$form = array();
+
+		$form['#tree'] = TRUE;
+
+		$form['input-grouping'] = array(
+			'#type' => 'fieldset',
+			'#prefix' => '<div class="input-group grady-was-here">',
+			'#suffix' => '</div>',
+			'#theme_wrappers' => array(),
+		);
+
+		$form['input-grouping']['new-list-text'] = array(
+			'#type' => 'textfield',
+			'#attributes' => array(
+				'class' => array('form-control'),
+				'placeholder' => t('Name of list...'),
+			),
+			'#size' => 60,
+			'#maxlength' => 128,
+			'#required' => TRUE,
+			'#theme_wrappers' => array(),
+		);
+
+		$form['input-grouping']['new-list-button'] = array (
+			'#type' => 'submit',
+			'#value' => t('Create'),
+			'#attributes' => array('class' => array('btn btn-default btn-blue')),
+			'#prefix' => '<span class="input-group-btn">',
+			'#suffix' => '</span>',
+			'#weight' => 19,
+		);
+
+		return $form;
+	}
+
+	//TODO: Validate options for new folder
+
+	function my_favorites_add_folder_form_submit(&$form, &$form_state) {
+		// TODO: Check if user has less than 5 folders assigned to them (Put in validate section)
+
+		// Create a new favorites folder node with the title set to $form_state['values']['input-grouping']['new-list-text']
+		_my_favorites_create_new_folder_node($form_state['values']['input-grouping']['new-list-text']);
+	}
+
+	/* ****************************************
+	 * 			Page Definitions
+	 * **************************************** */
+	function my_favorites_about() {
+		$content = array();
+		$content['raw_markup'] = array(
+			'#type' => 'markup',
+			'#markup' => '<p>The favorites page is magical</p>'
+		);
+
+		return $content;
+	}
+
+	/* ****************************************
+	 * 			Block Creation
+	 * **************************************** */
+	/**
+	 * Implements hook_block_info().
+	 */
+	function my_favorites_block_info() {
+		$blocks['my_favorites_header'] = array(
+			'info' => t('My Favorites Header'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+		$blocks['quick_folder_list'] = array(
+			'info' => t('Quick Folder List'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_PER_USER,
+		);
+
+		return $blocks;
+	}
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function my_favorites_block_view($delta = '') {
+		// The $delta parameter tells us which block is being requested.
+		switch ($delta) {
+			case 'my_favorites_header':
+				// The subject is displayed at the top of the block. Note that it
+				// should be passed through t() for translation. The title configured
+				// for the block using Drupal UI supercedes this one.
+				$block['subject'] = t('My Favorites');
+				// The content of the block is typically generated by calling a custom
+				// function.
+				$block['content'] = block_example_contents($delta, array('title' => $block['subject']));
+				break;
+			case 'quick_folder_list' :
+				$block['subject'] = t('Quick Folder List');
+				$block['content'] = block_example_contents($delta, array('title' => $block['subject']));
+		}
+		return $block;
+	}
+
+	/**
+	 * A module-defined block content function.
+	 */
+	function block_example_contents($which_block, $data) {
+		switch ($which_block) {
+			case 'my_favorites_header':
+				// Modules would typically perform some database queries to fetch the
+				// content for their blocks. Here, we'll just use the variable set in the
+				// block configuration or, if none has set, a default value.
+				// Block content can be returned in two formats: renderable arrays
+				// (as here) are preferred though a simple string will work as well.
+				// Block content created through the UI defaults to a string.
+
+				$BuiltNewForm = drupal_get_form('my_favorites_add_folder_form');
+
+				$BuiltNewForm = drupal_get_form('my_favorites_add_folder_form');
+
+				$html = '';
+				$html .= '<div class="container">';
+				$html .= '	<div class="row">';
+				$html .= '		<div class="col-md-3">';
+				$html .= '			<h1>'.$data['title'].'</h1>';
+				$html .= '		</div>';
+				$html .= '		<div class="col-md-4 col-md-offset-5">';
+				//$html .= 			render($BuiltNewForm);
+				$html .= '		</div>';
+				$html .= '	</div>';
+				$html .= '</div>';
+
+				$result = array(
+					'#markup' => $html,
+				);
+				return $result;
+				break;
+
+			case 'quick_folder_list':
+				$BuiltNewForm = drupal_get_form('my_favorites_add_folder_form');
+
+				$my_view = views_embed_view('my_favorite_folders','other_favorites_list',arg(1));
+				$folder_html = '';
+				if(!empty($my_view)) {
+					$folder_html .= '<div class="panel-footer">';
+					$folder_html .= 	$my_view;
+					$folder_html .= '</div>';
+				}
+
+				$html = '';
+				$html .= '<div class="panel panel-quick-folder-list">';
+				$html .= '	<div class="panel-body">';
+				$html .= '		<div class="create-new-list-container">';
+				$html .= '			<h5 class="new-list-title"><i class="fa fa-plus-circle pull-left"></i><span><strong>Create new Folder</strong></span></h5>';
+				$html .= 			render($BuiltNewForm);
+				$html .= '		</div>';
+				$html .= '	</div>';
+				$html .= 	$folder_html;
+				$html .= '</div>';
+				$result = array(
+					'#markup' => $html,
+				);
+				return $result;
+
+		}
+	}
+
+	/* ****************************************
+	 * 			Helper Functions
+	 * **************************************** */
+	function _my_favorites_build_remove_favorite_link($link_text = 'Remove',$folder_id, $node_id) {
+		$emw_folder_node = entity_metadata_wrapper('node', $folder_id);
+		$folder_author_uid = $emw_folder_node->author->getIdentifier();
+
+		global $user;
+		$current_user_uid = $user->uid;
+		$button = '';
+		if($folder_author_uid == $current_user_uid) {
+			$button .= '<button type="button" class="btn btn-blue">';
+			$button .= '<span class="button-text"><i class="fa fa-times"></i>' . $link_text . '</span>';
+			$button .= '</button>';
+		}
+
+		return _my_favorites_ctools_ajax_text_button($button, 'remove-from-my-favorites/nojs/'.$folder_id.'/'.$node_id, 'link to open modal', 'ctools-use-modal ctools-modal-remove-favorite-modal-style add-button-for-'.$node_id, 'ctools-use-modal');
+	}
+
+	function _my_favorites_build_delete_folder_link($link_html,$folder_id) {
+		return _my_favorites_ctools_ajax_text_button($link_html, 'delete-favorites-folder/nojs/'.$folder_id, 'Delete Favorite Folder', 'ctools-use-modal ctools-modal-remove-favorite-modal-style delete-folder-'.$folder_id, 'ctools-use-modal');
+		//return '<a href="/delete-favorites-folder/nojs/'.$folder_id.'" class="ctools-use-modal ctools-use-modal ctools-modal-remove-favorite-modal-style delete-folder-'.$folder_id.' ctools-use-modal-processed" title="link to open modal">Delete Folder</a>';
+	}
+
+	function _my_favorites_build_rename_folder_link($link_html,$folder_id) {
+		return _my_favorites_ctools_ajax_text_button($link_html, 'rename-favorites-folder/nojs/'.$folder_id, 'Rename Favorite Folder', 'ctools-use-modal ctools-modal-remove-favorite-modal-style rename-folder-'.$folder_id, 'ctools-use-modal');
+	}
+
+	function _my_favorites_build_share_folder_link($link_html,$folder_id) {
+		return _my_favorites_ctools_ajax_text_button($link_html, 'share-favorites-folder/nojs/'.$folder_id, 'Share Options for Favorite Folder', 'ctools-use-modal ctools-modal-remove-favorite-modal-style share-folder-'.$folder_id, 'ctools-use-modal');
+	}
+
+	function _my_favorites_build_add_favorite_link($link_text = 'My Favorites',$node_id, $book_id = null) {
+		$button  = '';
+		$button .= '<button type="button" class="btn btn-blue">';
+		$button .= '<span class="button-text"><i class="fa fa-heart-o"></i>'.$link_text.'</span>';
+		$button .= '</button>';
+		$book_id_string = ($book_id) ? '/'.$book_id : '';
+
+		return _my_favorites_ctools_ajax_text_button($button, 'add-to-my-favorites/nojs/'.$node_id.$book_id_string, 'Add Resource to Favorite Folder', 'ctools-use-modal ctools-modal-add-favorite-modal-style add-button add-button-for-'.$node_id, 'ctools-use-modal');
+	}
+
+	function _my_favorites_build_add_all_favorite_link($link_text = 'Add All',$book_id,$node_ids) {
+		$button  = '';
+		$button .= '<span class="button-text"><i class="fa fa-heart-o pull-right"></i>'.$link_text.'</span>';
+
+		return _my_favorites_ctools_ajax_text_button($button, 'add-all-to-my-favorites/nojs/'.$book_id.'/'.$node_ids, 'Add all Resources to Favorite Folder', 'btn btn-blue pull-right ctools-use-modal ctools-modal-add-favorite-modal-style add-all-button', 'ctools-use-modal');
+	}
+
+	function _my_favorites_build_add_book_resource($link_text = 'My Favorites', $node_id) {
+		$button  = '';
+		$button .= '<button type="button" class="btn btn-blue">';
+		$button .= '<span class="button-text"><i class="fa fa-heart-o"></i>'.$link_text.'</span>';
+		$button .= '</button>';
+
+		return _my_favorites_ctools_ajax_text_button($button, 'add-to-my-favorites/nojs/'.$node_id, 'Add Book Resource to Favorite Folder', 'ctools-use-modal ctools-modal-add-favorite-modal-style add-button-for-'.$node_id, 'ctools-use-modal');
+	}
+
+	function _my_favorites_build_add_favorite_link_full_page($link_text = 'My Favorites',$node_id, $book_id = null) {
+		$button  = '';
+		$button .= '<button type="button" class="btn btn-blue book-resource-favorite-button">';
+		$button .= '<span class="button-text"><i class="fa fa-heart-o pull-right"></i>'.$link_text.'</span>';
+		$button .= '</button>';
+		$book_id_string = ($book_id) ? '/'.$book_id : '';
+
+		return _my_favorites_ctools_ajax_text_button($button, 'add-to-my-favorites/nojs/'.$node_id.$book_id_string, 'Add Resource to Favorite Folder', 'ctools-use-modal ctools-modal-add-favorite-modal-style add-button-for-'.$node_id, 'ctools-use-modal');
+	}
+
+	function _my_favorites_create_new_folder_node($tile_of_node) {
+		global $user;
+
+		// entity_create replaces the procedural steps in the first example of
+		// creating a new object $node and setting its 'type' and uid property
+		$values = array(
+			'type' => 'favoritesfolder',
+			'uid' => $user->uid,
+			'status' => 1,
+			'comment' => 0,
+			'promote' => 0,
+		);
+		$entity = entity_create('node', $values);
+
+		// The entity is now created, but we have not yet simplified use of it.
+		// Now create an entity_metadata_wrapper around the new node entity
+		// to make getting and setting values easier
+		$emw_node = entity_metadata_wrapper('node', $entity);
+
+		// Using the wrapper, we do not have to worry about telling Drupal
+		// what language we are using. The Entity API handles that for us.
+		$emw_node->title->set($tile_of_node);
+
+		$emw_node->save(); // Now just save the wrapper and the entity
+	}
+
+	/**
+	 * Override of the ctools ajax_text button because ctools does not currently let me provide additional
+	 *   attributes such as rel="nofollow". This functions main purpose is to add the rel="nofollow"
+	 *
+	 * @param $text
+	 *   The text that will be displayed as the link.
+	 * @param $dest
+	 *   The destination of the link.
+	 * @param $alt
+	 *   The alt text of the link.
+	 * @param $class
+	 *   Any class to apply to the link. @todo this should be a options array.
+	 * @param $type
+	 *   A type to use, in case a different behavior should be attached. Defaults
+	 *   to ctools-use-ajax.
+	 *
+	 * @return mixed
+	 */
+	function _my_favorites_ctools_ajax_text_button($text, $dest, $alt, $class = '', $type = 'use-ajax') {
+		drupal_add_library('system', 'drupal.ajax');
+		return l($text, $dest, array('html' => TRUE, 'attributes' => array('class' => array($type, $class), 'title' => $alt, 'rel' => 'nofollow')));
+	}

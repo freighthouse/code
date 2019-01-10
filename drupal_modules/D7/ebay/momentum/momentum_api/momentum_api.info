@@ -1,0 +1,9 @@
+name = Momentum API
+description = Provides a general API for integrating with Momentum
+core = 7.x
+package = Momentum
+dependencies[] = momentum_tools
+
+configure = admin/config/system/momentum
+
+stylesheets[all][] = /momentum_api/css/momentum_api.css

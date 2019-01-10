@@ -1,0 +1,157 @@
+/**
+ * @file
+ * Print styling
+ *
+ * We provide some sane print styling for Drupal using Zen's layout method.
+ */
+
+@media print {
+
+  a:link,
+  a:visited { /* underline all links */
+    text-decoration: underline !important;
+  }
+
+  #site-name a:link,
+  #site-name a:visited { /* Don't underline header */
+    text-decoration: none !important;
+  }
+
+  #content a[href]:after { /* Add visible URL after links. */
+    content: " (" attr(href) ")";
+    font-weight: normal;
+    font-size: 16px;
+  }
+
+  #content a[href^="javascript:"]:after,
+  #content a[href^="#"]:after { /* Only display useful links. */
+    content: "";
+  }
+
+  #content abbr[title]:after { /* Add visible title after abbreviations. */
+    content: " (" attr(title) ")";
+  }
+
+  #content { /* Un-float the content */
+    float: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body,
+  #page,
+  #main,
+  #content,
+  .all-content { /* Turn off any background colors or images */
+    color: #000;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, h4 {
+    border: none !important;
+    color: #000 !important;
+  }
+
+  #header {
+    margin-top: 0;
+    margin-bottom: 30px;
+  }
+
+  .grid-1,
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .grid-5,
+  .grid-6,
+  #block-views-latest-help-documents-block, 
+  #block-views-popular-block,
+  #block-training .right,
+  #block-training .left,
+  #block-training .table-training {
+    width: 100%;
+    float: none;
+  }
+
+  .prepend-1,
+  .prepend-2,
+  .prepend-3,
+  .prepend-4,
+  .prepend-5 {
+    padding: 0;
+  }
+
+  #skip-link,
+  #toolbar,
+  #navigation,
+  .region-sidebar-first,
+  .region-sidebar-second,
+  .region-footer-links,
+  #footer,
+  .breadcrumb,
+  .tabs,
+  .action-links,
+  .links,
+  .book-navigation,
+  .forum-topic-navigation,
+  .pager,
+  .feed-icons,
+  #block-system-main-menu,
+  #button-training-videos,
+  #block-views-quotes-block { /* Hide sidebars and nav elements */
+    visibility: hidden;
+    display: none;
+  }
+
+  /* for the help page */
+  .page-node-187001 .region-bottom .block.first,
+  #block-training {
+    background: transparent !important;
+    box-shadow: none;
+    color: #000;
+  }
+
+  /* tour page */
+  #product-menu,
+  #video-and-clients {
+    display: none;
+    visibility: hidden;
+  }
+
+  /* product pages */
+  .field-name-field-video,
+  #block-views-product-slider-block .views_slideshow_slide .views-field-field-slider-image,
+  .views-slideshow-cycle-main-frame-row img {
+    display: none;
+    visibility: hidden;
+  }
+
+  .views-slideshow-cycle-main-frame-row {
+    display: block !important;
+    position: static !important;
+    opacity: 1 !important;
+  }
+
+  #block-views-product-slider-block {
+    background: transparent !important;
+    box-shadow: none;
+    margin: 0 !important;
+  }
+
+  #block-views-product-slider-block .views-field-body {
+    marghin-bottom: 20px;
+    padding: 0;
+    width: 100%;
+    color: #000;
+  }
+
+  .product-slider-body .inline-image {
+    float: none;
+  }
+
+} /* End @media print */

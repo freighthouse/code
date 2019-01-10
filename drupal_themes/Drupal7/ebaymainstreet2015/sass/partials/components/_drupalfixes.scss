@@ -1,0 +1,35 @@
+//admin menu links font weight reset and z-indexing
+#admin-menu {
+  z-index: 9999;
+
+  a {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}
+
+.tabs {
+  @extend %clearfix;
+  border-bottom: solid 2px $c-blue;
+  margin-bottom: 1em;
+  padding-left: 0;
+
+  li {
+    float: left;
+    margin-right: 0.3em;
+    list-style-type: none;
+
+    a {
+      display: block;
+      padding: 0.5em 1em;
+      background-color: $c-blue;
+      color: #fff;
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        @include transition();
+        background-color: $c-light-blue;
+      }
+    } //a
+  } //li
+} //tabs

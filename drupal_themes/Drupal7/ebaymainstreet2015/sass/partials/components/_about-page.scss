@@ -1,0 +1,35 @@
+#about-page {
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5em;
+    margin-top: 1.5em;
+    color: $c-off-black;
+    text-align: center;
+    @extend %sans-serif;
+  }
+  .bean-homepage-hero-2017 .content {
+    background: $g1-2;
+    color: $g1-5;
+    @include breakpoint($bp-small) {
+      width: 40%;
+    }
+  }
+  .full-page-block {
+    .content {
+      background: $g1-1;
+      padding: 1.5em;
+      h3 {
+        margin-top: 0;
+        a {
+          color: $g1-5;
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+      p {
+        color: $g1-5;
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains momentum_reports.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function momentum_reports_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the momentum_reports module.
+    case 'help.page.momentum_reports':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides the ability to generate reports based on Momentum API data.') . '</p>';
+      return $output;
+
+    default:
+  }
+}

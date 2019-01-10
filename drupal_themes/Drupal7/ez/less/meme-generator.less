@@ -1,0 +1,176 @@
+#meme-generator {
+  margin: 60px 0;
+  button {
+    border: none;
+    padding: 8px;
+  }
+  .btn,
+  .toggle-button {
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .btn {
+    border: 1px solid #ccc;
+  }
+  .btn-sm {
+    padding: 5px 10px;
+  }
+  .fa-stack {
+    height: 1.4em;
+    width: 1.4em;
+    line-height: 1.5em;
+  }
+  .fa-stack {
+    .fa-stack-2x {
+      font-size: 1.5em;
+    }
+  }
+  .open-sans {
+    font-family: 'Open Sans', sans-serif;
+  }
+  .oswald {
+    font-family: 'Oswald', sans-serif;
+  }
+  .montserrat {
+    font-family: 'Montserrat', sans-serif;
+  }
+  .raleway {
+    font-family: 'Raleway', sans-serif;
+  }
+  .lora {
+    font-family: 'Lora', serif;
+  }
+  .merriweather {
+    font-family: 'Merriweather', serif;
+  }
+  .playfair {
+    font-family: 'Playfair Display', serif;
+  }
+  .muli {
+    font-family: 'Muli', sans-serif;
+  }
+  .indie-flower {
+    font-family: 'Indie Flower', cursive;
+  }
+  .inconsolata {
+    font-family: 'Inconsolata', monospace;
+  }
+  .lobster {
+    font-family: 'Lobster', cursive;
+  }
+  .quicksand {
+    font-family: 'Quicksand', sans-serif;
+  }
+  .amatic {
+    font-family: 'Amatic SC', cursive;
+  }
+
+  .toggle-button {
+    display: inline-block;
+    input {
+      font-size: 0;
+      height: 0;
+      width: 0;
+      visibility: hidden;
+      + label {
+        box-sizing: border-box;
+        background-color: #fff;
+        font-weight: normal;
+        display: inline-block;
+        padding: 5px 10px;
+        margin-bottom: 0;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 18px;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        -ms-touch-action: manipulation;
+        touch-action: manipulation;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        background-image: none;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+      }
+      &:checked + label {
+        background-color: #ccc;
+      }
+      &:checked + label:hover {
+        cursor: default;
+      }
+    }
+  }
+
+  .upload {
+    position: relative;
+    display: block;
+    height: 30px;
+    input {
+      position: absolute;
+      height: 34px;
+      width: 30px;
+      visibility: hidden;
+    }
+  }
+
+  .editor {
+    background-color: #eee;
+    padding: 10px;
+    border-radius: 3px 3px 0 0;
+    border: 1px solid #ddd;
+  }
+
+  .form-inline {
+    margin-bottom: 10px;
+  }
+
+  #text-size {
+    height: 32px;
+  }
+
+  .input-hider {
+    position: relative;
+    display: inline-block;
+    input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      visibility: hidden;
+    }
+  }
+
+  .btn-text-color {
+    color: #f00;
+  }
+
+  .btn-bg-color {
+    color: #000;
+    .fa-font {
+      color: #fff;
+    }
+  }
+
+  #text {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .dropdown-menu li .radio {
+    display: block;
+    input {
+      visibility: hidden;
+      width: 0;
+    }
+    label {
+      display: block !important;
+      width: 100%;
+      padding: 3px 20px;
+      &:hover {
+        background-color: #f5f5f5;
+      }
+    }
+  }
+}

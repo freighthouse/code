@@ -1,0 +1,87 @@
+<?php
+
+/**
+ * Implementation of hook_form_alter().
+ * @see http://api.drupal.org/api/function/hook_form_alter
+ * We add a few custom fields to the default Drupal contact form
+ */
+function mod_mainstreet_form_contact_site_form_alter(&$form, $form_state) {
+
+	$form['company'] = array(
+		'#title' => t('Your company'),
+		'#type' => 'textfield',
+		'#required' => true,
+	);
+	$form['phone'] = array(
+		'#title' => t('Your phone'),
+		'#type' => 'textfield',
+	);
+
+	// reorder the elements in the form to include the elements being inserted
+	//$order = array('contact_information', 'name', 'company', 'phone', 'mail', 'subject', 'message', 'copy', 'submit');
+	$order = array(
+		'name',
+		'mail',
+		'phone',
+		'cid',
+		'message',
+		'submit',
+		'company',
+		'subject',
+		'copy'
+		);
+	$i = 0;
+	foreach($order as $key => $field) {
+		$form[$field]['#weight'] = $i;
+		$i++;
+	}
+
+
+	$remove = array(
+		'company',
+		'subject',
+		'copy',
+		);
+	foreach($remove as $key => $field) {
+		unset($form[$field]);
+	}
+
+
+}
+
+/**
+ * Implementation of hook_init().
+ */
+//function mod_mainstreet_init() {
+//}
+
+/**
+ * Implementation of hook_theme().
+ */
+//function mod_mainstreet_theme() {
+//}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function mod_mainstreet_form_alter(&$form, $form_state, $form_id) {
+	if($form_id == 'video_submission_node_form'){
+		//kpr($form);
+		$form['field_submission_terms']['#weight'] = 13;
+		$form['locations']['#weight'] = 12;
+		$form['locations']['#collapsible'] = FALSE;
+		$form['locations']['#collapsed'] = FALSE;
+		$form['locations']['#group'] = '';
+		//$form['locations']['#tree'] = FALSE;
+		//$form['locations']['#type'] = '';
+		$form['actions']['submit']['#value'] = 'Submit';
+	}
+}
+
+/**
+ * Collaspes all the admin/build/module fieldsets, taken from util module
+ * @param array $form fapi array
+ * @return string
+ */
+//function theme_system_modules_theme($form) {
+//}

@@ -1,0 +1,339 @@
+<?php
+
+/**
+ * @file
+ *   Basic configuration and tools for iterable
+ */
+
+require 'autoload.php';
+
+use IterableApi\IterableApi;
+
+define('API_KEY', variable_get('iterable_api_key'));
+define('LIST_ID', variable_get('iterable_list_id'));
+define('INTERNATIONAL_LIST_ID', variable_get('international_list_id'));
+
+/**
+ * Implements hook_permission()
+ */
+function iterable_permission() {
+  return array(
+    'admin iterable access' => array(
+      'title' => t('Iiterable Configuration'),
+      'description' => t('Set configuration options for Iterable'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function iterable_menu() {
+  $items = array();
+
+  $items['admin/config/iterable'] = array(
+    'title' => 'Iterable Configuration',
+    'description' => 'Configuration for the Iterable module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('iterable_form'),
+    'access arguments' => array('access administration pages'),
+  );
+
+  $items['admin/config/iterable/forms'] = array(
+    'title' => 'Webforms',
+    'description' => 'Page to select forms and map their fields to Iterable Fields.',
+    'file' => 'iterable.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'access arguments' => array('admin iterable access'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+
+  return $items;
+}
+
+/**
+ * Form for module configuration page
+ */
+function iterable_form($form, &$form_state) {
+
+  $form['iterable_api_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Project API Key'),
+    '#description' => t('The API Key associated with the Iterable project'),
+    '#default_value' => variable_get('iterable_api_key'),
+    '#required' => TRUE
+  );
+
+  $form['iterable_list_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('List Id'),
+    '#description' => t('The List ID within the project that users will be entered into'),
+    '#default_value' => variable_get('iterable_list_id'),
+    '#required' => TRUE
+  );
+
+  $form['international_list_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('International List Id'),
+    '#description' => t('International List ID'),
+    '#default_value' => variable_get('international_list_id'),
+    '#required' => FALSE
+  );
+
+  return system_settings_form($form);
+}
+
+function iterable_form_alter(&$form, &$form_state, $form_id) {
+  if($form_id === '_ebay_custom_get_us_form'){
+    // Establish connection with iterable
+    $form['#submit'][] = '_iterable_submit_data';
+  }
+}
+
+function iterable_block_info(){
+  $blocks['manage_subscription'] = array(
+    'info' => t('Iterable: Manage Subscription'),
+  );
+  return $blocks;
+}
+
+function iterable_block_view($delta = ''){
+  $block = array();
+  switch ($delta) {
+    case 'manage_subscription':
+      if (isset($_COOKIE['iterableEndUserId']) && !empty($_COOKIE['iterableEndUserId'])){
+        $block['subject'] = t('Manage Subscription');
+        $block['content'] = drupal_get_form('iterable_manage_subscription');
+      }
+      break;
+  }
+  return $block;
+}
+
+function iterable_manage_subscription($form, &$form_state){
+
+  // get current user and all channels
+
+  $iterable = new IterableApi(API_KEY);
+
+  $email = $_COOKIE['iterableEndUserId'];
+  $user = $iterable->getUserData($email);
+  $channels = $iterable->getChannels();
+
+  watchdog('iterable', 'loading user channel preferences for ' . $email);
+
+  if ($user and $channels){
+
+    // get user settings and channels
+
+    $prefs = array();
+    $phone = false;
+
+    if (isset($user->phoneNumber)){
+      $phone = $user->phoneNumber;
+    }
+
+    if (isset($user->unsubscribedChannelIds)){
+      $prefs = $user->unsubscribedChannelIds;
+    }
+
+    // user info prefix
+
+    $html = '<p>';
+    $html .= '<strong>Email:</strong> ' . $email;
+    if ($phone){
+      $html .= '<br>';
+      $html .= '<strong>Phone:</strong> ' . $phone;
+    }
+    $html .= '</p>';
+    $html .= '<hr>';
+
+    $form['info'] = array(
+      '#type' => 'markup',
+      '#markup' => $html,
+      '#weight' => 1
+    );
+
+    $form['user'] = array(
+      '#type' => 'hidden',
+      '#value' => $email
+    );
+
+    // channel checkboxes
+
+    $form['channels'] = array(
+      '#tree' => TRUE,
+      '#weight' => 2
+    );
+
+    foreach ($channels as $ch){
+      $field = array(
+        '#type' => 'checkbox',
+        '#title' => t($ch->name),
+        '#options' => array(1),
+        '#value' => 0
+      );
+      if (!in_array($ch->id, $prefs)){
+        $field['#value'] = 1;
+      }
+      $form['channels'][$ch->id] = $field;
+    }
+
+    // submit button
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Update'),
+      '#weight' => 3
+    );
+
+    $form['#attributes'] = array(
+      'class' => array('iterable-manage-subscription')
+    );
+
+    return $form;
+
+  }
+
+}
+
+function iterable_manage_subscription_validate($form, &$form_state){
+
+  // Validation logic.
+
+}
+
+function iterable_manage_subscription_submit($form, &$form_state){
+
+  $iterable = new IterableApi(API_KEY);
+
+  $input = $form_state['input'];
+  $field = $form_state['values'];
+
+  $email = $field['user'];
+  $channels = $field['channels'];
+
+  if (isset($input['channels'])) {
+    foreach($input['channels'] as $id => $value){
+      if ($value == 1) {
+        unset($channels[$id]);
+      }
+    }
+  }
+
+  $prefs = array_keys($channels);
+  $iterable->updateUserChannels($email, $prefs);
+
+  drupal_set_message(t('Your channel preferences have been updated.'), 'status');
+
+  watchdog('iterable', 'updating user channel preferences for ' . $email);
+
+}
+
+/**
+ * Function to process form data before sending to Iterable.
+ *
+ * Function that submits to this function is in ebay_custom.module
+ *  Line: 380 - _ebay_custom_get_us_form_submit()
+ */
+function _iterable_submit_data($mapping, $values){
+
+  $processed_values = array();
+  foreach ($values as $k => $v) {
+    $match = array_key_exists($k, $mapping);
+    if ($match && (!empty($v))) {
+      if ($k == 'country') {
+        $country = _ebay_custom_get_country_name($v);
+        $processed_values[$mapping[$k]] = $country;
+      }
+      else {
+        $processed_values[$mapping[$k]] = filter_xss(trim($v));
+      }
+    }
+  }
+
+  // CONDITIONAL LIST ID FOR EBAY ONLY
+  //  Other list ID is for international submissions
+  $listId = ($processed_values['country'] != 'United States') ? INTERNATIONAL_LIST_ID : LIST_ID;
+
+  $iterable = new IterableApi(API_KEY, $listId);
+
+  $result = $iterable->listSubscribe($processed_values);
+
+  // Need to check that the result code was 200 indicating the request was successful
+  if ($result->successCount >= 1) {
+    drupal_goto('thanks');
+  }
+  else {
+    drupal_set_message(t('We were unable to process the form. Please try again.'), 'error');
+  }
+}
+
+/**
+ * Function to update/insert user data
+ *
+ * Function that submits to this function is in bipac_campaigns.module
+ *  Line: 930
+ */
+function _iterable_user_update($mapping, $data){
+  $processed_values = array();
+  foreach ($data as $k => $v) {
+    $match = array_key_exists($k, $mapping);
+    if ($match && (!empty($v))) {
+      $processed_values[$mapping[$k]] = filter_xss(trim($v));
+    }
+  }
+
+  // Organic list ID
+  $iterable = new IterableApi(API_KEY, '87818');
+
+  $userUpdate = $iterable->updateUser($processed_values);
+
+  watchdog('iterable', "User Update Response  => <pre>" . print_r($userUpdate, true) . "</pre>");
+}
+
+/**
+ * Function to unsubscribe user from channels in iterable
+ *
+ * Currently unused
+ */
+function _iterable_user_unsubscribe($email){
+  $iterable = new IterableApi(API_KEY);
+
+  $userUnsubscribe = $iterable->unsubscribeUserFromChannels($email);
+
+  watchdog('iterable', "User Update Response  => <pre>" . print_r($userUnsubscribe, true) . "</pre>");
+}
+
+/**
+ * Function to track user submission of the campaign form.
+ *
+ * @param array   $data
+ *
+ * Function that submits to this function is in bipac_campaigns.module
+ *  Line: 931
+ */
+function _iterable_form_track($data){
+  $iterable = new IterableApi(API_KEY);
+
+  $trackUser = $iterable->trackUser($data, 'formSubmission');
+
+  watchdog('iterable', "Tracked User Response  => <pre>" . print_r($trackUser, true) . "</pre>");
+}
+
+/**
+ * Function to look-up details about a user to see if they already exist
+ *
+ * @param string      $email
+ *
+ * @return boolean    $userExists
+ */
+function _iterable_user_lookup($email){
+  $iterable = new IterableApi(API_KEY);
+
+  $userLookup = $iterable->userLookup($email);
+
+  $userExists = ( isset($userLookup->user) ) ? true : false;
+  return $userExists;
+}

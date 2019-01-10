@@ -1,0 +1,4 @@
+name = Sunrun Savings Calculator
+description = Integration with the savings calculator web services
+core = 7.x
+package = Sunrun

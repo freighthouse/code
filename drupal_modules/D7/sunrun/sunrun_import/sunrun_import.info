@@ -1,0 +1,12 @@
+name = Sunrun Import
+description = Import content from legacy site
+core = 7.x
+package = Sunrun
+version = 7.x-1.0
+dependencies[] = migrate
+dependencies[] = sunrun_ftr_city
+
+files[] = sunrun_import.migrate.inc
+files[] = sunrun_import_cities.inc
+files[] = sunrun_import_press_releases.inc
+files[] = sunrun_import.drush.inc

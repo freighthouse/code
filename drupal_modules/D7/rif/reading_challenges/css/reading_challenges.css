@@ -1,0 +1,36 @@
+.timer-container {
+    color: blue;
+}
+
+.word {
+    padding: 0 2px;
+    border: 1px solid rgba(0, 0, 0,0);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.word:hover {
+    background-color: rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.word.highlighted {
+    background-color: rgba(255, 255, 100, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.word.highlighted:hover {
+    background-color: rgba(255, 150, 150, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.form-item-words-clicked {
+    display:none;
+}
+
+.time-box {
+    background-color: rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    padding: 0 10px;
+    border-radius: 5px;
+}

@@ -1,0 +1,231 @@
+<?php
+
+// define('SILVERPOP_UN', 'ebay-team@repequity.com');
+// define('SILVERPOP_PW', 'r3pEquity!');
+
+/**
+ * This function requires an associative array
+ * with the field name => value
+ * @args
+ *   $values = array containing: Email, First Name, Last Name, Source
+ */
+function _silverpop_api($values, $list_id = '1468702') {
+
+  if (!empty($values['Email'])) {
+    require_once('SilverpopAPI.php');
+    $pop = new SilverpopAPI();
+    try {
+      $pop->login(SILVERPOP_UN, SILVERPOP_PW);
+    }
+    catch (Exception $e) {
+      watchdog('Silverpop', t('Login Silverpop exception %error'), array('%error' => $e));
+      return FALSE;
+    }
+    try {
+      $pop->add_recipient($list_id, $values, NULL, true, true, false, false);
+    }
+    catch (Exception $e) {
+      watchdog('Silverpop', t('Caught Silverpop exception %error'), array('%error' => $e));
+      return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+/**
+ * Implements hook_form_alter().
+ * webform_client_form_### = webform to integrate with SP
+ */
+function silverpop_api_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form_id) {
+    // For dev
+    case 'webform_client_form_129971':
+      $form['#submit'][] = '_silverpop_api_webform';
+      break;
+    // For prod
+    case 'webform_client_form_130210':
+      $form['#submit'][] = '_silverpop_api_webform';
+      break;
+
+    case 'webform_client_form_130414':
+      $form['#submit'][] = '_silverpop_api_webform';
+      break;
+  }
+}
+
+/**
+ * Parse out needed data and submit to SP
+ */
+function _silverpop_api_webform(&$form, &$form_state) {
+  $silverpop = !empty($_SESSION['silverpop']) ? $_SESSION['silverpop'] : array();
+  // Collect data and put it into sessions
+  if (!empty($form['submitted']['email']['#value'])) {
+    $silverpop['Email'] = $form['submitted']['email']['#value'];
+  }
+  if (!empty($form['submitted']['name']['first_name']['#value'])) {
+    $silverpop['First Name'] = $form['submitted']['name']['first_name']['#value'];
+  }
+  if (!empty($form['submitted']['name']['last_name']['#value'])) {
+    $silverpop['Last Name'] = $form['submitted']['name']['last_name']['#value'];
+  }
+  if (!empty($form['submitted']['mobile']['#value'])) {
+    $silverpop['Mobile'] = $form['submitted']['mobile']['#value'];
+  }
+  if (!empty($form['submitted']['mobile_text_alerts']['#value'])) {
+    $silverpop['Mobile Phone'] = reset($form['submitted']['mobile_text_alerts']['#value']);
+  }
+  if (!empty($form['submitted']['ebay_id']['#value'])) {
+    $silverpop['eBay ID'] = $form['submitted']['ebay_id']['#value'];
+  }
+  if (!empty($form['submitted']['contact_preferences']['#value'])) {
+    $prefs = array_values($form['submitted']['contact_preferences']['#value']);
+    $silverpop['Contact Preferences'] = implode($prefs, '|');;
+  }
+  if (!empty($form['submitted']['speak_with_legislator']['#value'])) {
+    $silverpop['Would you be willing to speak with a legislator'] = $form['submitted']['speak_with_legislator']['#value'];
+  }
+  if (!empty($form['submitted']['would_you_be_willing_to_speak_with_the_media']['#value'])) {
+    $silverpop['Would you be willing to speak with the media'] = $form['submitted']['would_you_be_willing_to_speak_with_the_media']['#value'];
+  }
+  if (!empty($form['submitted']['address']['#value'])) {
+    $address = !empty($form['submitted']['address']['#value']) ? $form['submitted']['address']['#value'] : NULL;
+    $address_fields = smarterstreets_full_address($address);
+    $address_fields = reset($address_fields);
+    $silverpop['Home Address'] = !empty($address_fields['delivery_line_1']) ? $address_fields['delivery_line_1'] : NULL;
+    $silverpop['Zip Code'] = !empty($address_fields['components']['zipcode']) ? $address_fields['components']['zipcode'] : NULL;
+    $silverpop['State'] = !empty($address_fields['components']['state_abbreviation']) ? $address_fields['components']['state_abbreviation'] : NULL;
+    $silverpop['City'] = !empty($address_fields['components']['city_name']) ? $address_fields['components']['city_name'] : NULL;
+  }
+  $_SESSION['silverpop'] = $silverpop;
+
+  $page = !empty($form['details']['page_num']['#value']) ? $form['details']['page_num']['#value'] : NULL;
+  if ($page != 3) {
+    return;
+  }
+
+  // And here, we take the $silverpop array and call the _silverpop_api($silverpop, '12345') function;
+  if(_silverpop_api($silverpop)) {
+    watchdog('Silverpop', t('User Added'), array());
+  }
+  unset($_SESSION['silverpop']);
+}
+
+/**
+ * Implements hook_block_info
+ */
+function silverpop_api_block_info() {
+  $blocks['silverpop_collector'] = array(
+    'info' => t('Silverpop Collection'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['silverpop_collector_alt'] = array(
+    'info' => t('Silverpop Collection for Signup Page'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view
+ */
+function silverpop_api_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'silverpop_collector':
+      $block['subject'] = t('Our Newsletter');
+      $block['content'] = drupal_get_form('silverpop_api_form');
+      break;
+    case 'silverpop_collector_alt':
+      $block['subject'] = t('Newsletter Signup');
+      $block['content'] = drupal_get_form('silverpop_api_form');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * A simple email collection form
+ */
+function silverpop_api_form($form, &$form_state) {
+
+  /**
+   * Check our session for previous submission
+   */
+  $previously = !empty($_SESSION['silverpop_submission']) ? TRUE : FALSE;
+
+  $form = array();
+
+  if ($previously === TRUE) {
+	  //unset($_SESSION['silverpop_submission']);
+	  $form['markup'] = array(
+      '#markup' => t('Thank you for subscribing!'),
+    );
+    return $form;
+  }
+
+
+
+  $form['description'] = array(
+    '#type' => 'item',
+    '#prefix' => '<div id="description">',
+    '#suffix' => '</div>',
+    '#description' => t('Enter your email address and click the Subscribe button to sign up for our newsletter.'),
+  );
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#size' => 25,
+    '#attributes' => array('placeholder' => t('Enter your email address')),
+
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Subscribe >'),
+    '#ajax' => array(
+      'callback' => 'silverpop_api_form_submit',
+      'wrapper' => 'description',
+    ),
+  );
+
+  return $form;
+}
+
+function silverpop_api_form_validate($form, &$form_state) {
+}
+
+function silverpop_api_form_submit($form, &$form_state) {
+
+  $email = $form_state['values']['email'];
+  if($email==""){
+	  $message ='<div id="edit-description" class="form-item form-type-item"><div class="description">';
+	  $message .= t('Enter your email address and click the Subscribe button to sign up for our newsletter.');
+	  $message .='<br /><div style="color:red; font-size:10px">';
+	  $message .= t("Please enter a valid email address.");
+	  $message .= '</div></div></div>';
+	   return $message;
+  }
+
+  $list_id = '3107397';
+  $data = array('Email' => $email, 'source' => 'www');
+  $result = _silverpop_api($data, $list_id);
+
+  if ($result) {
+    // Good.
+    $_SESSION['silverpop_submission'] = TRUE;
+    //$element = $form['description'];
+	//dpm(t('@email subscribed.  Thank you!', array('@email' => $email)));
+    //$element['#markup'] = t('@email subscribed.  Thank you!', array('@email' => $email));
+	$element  = t('@email subscribed.  Thank you!', array('@email' => $email))."<br />";
+    return $element;
+  }
+  else {
+	  $message ='<div id="edit-description" class="form-item form-type-item"><div class="description">';
+	  $message .= t('Enter your email address and click the Subscribe button to sign up for our newsletter.');
+	  $message .='<br /><div style="color:red; font-size:10px">';
+	  $message .= t("Unable to add your email to our list, please try again.");
+	  $message .= '</div></div></div>';
+
+    watchdog('Silverpop', 'Unable to subscribe %email to Silverpop list id %list_id', array('%email' => $email, '%list_id' => $list_id), WATCHDOG_NOTICE);
+	return $message;
+  }
+}

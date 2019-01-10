@@ -1,0 +1,8 @@
+name = Momentum Officials
+description = Utilizes the Momentum Officials API
+core = 7.x
+package = Momentum
+dependencies[] = momentum_api
+dependencies[] = imagecache_external
+
+configure = admin/config/system/site-information

@@ -1,0 +1,7 @@
+name = Momentum Vote
+description = Utilizes the Momentum Vote API
+core = 7.x
+package = Momentum
+dependencies[] = momentum_api
+
+configure = admin/config/system/site-information

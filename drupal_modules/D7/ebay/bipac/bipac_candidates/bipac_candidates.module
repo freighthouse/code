@@ -1,0 +1,165 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a BIPAC Vote Block
+ */
+
+/**
+ *  hook_theme
+ */
+function bipac_candidates_theme() {
+  $items = array();
+  $items['bipac_candidates_response'] = array(
+    'variables' => array('data' => NULL, 'dates' => NULL),
+    'template' => 'bipac_candidates_response',
+  );
+  return $items;
+}
+
+/**
+ * hook_block_info
+ */
+function bipac_candidates_block_info() {
+  $blocks['bipac_candidates_block'] = array(
+    'info' => t('BIPAC Candidates Search Submission Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['bipac_candidates_state'] = array(
+    'info' => t('BIPAC Candidates by State Search Submission Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['bipac_candidates_response'] = array(
+    'info' => t('BIPAC Candidates Search Response Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function bipac_candidates_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'bipac_candidates_response':
+      $data = bipac_session('candidates');
+      $block['subject'] = t('BIPAC Vote Response');
+      $block['content'] = theme('bipac_candidates_response', array('data' => $data));
+      break;
+    case 'bipac_candidates_block':
+      $block['title'] = t('BIPAC Candidates Search Submission Form');
+      $block['content'] = _bipac_candidates_block();
+      break;
+    case 'bipac_candidates_state':
+      $block['title'] = t('BIPAC Candidates Search Response Data');
+      $block['content'] = _bipac_candidates_state();
+  }
+  return $block;
+}
+
+function _bipac_candidates_block() {
+  $zip = bipac_session('zip');
+  $address = bipac_session('address');
+  $state = bipac_session('state');
+  $city = bipac_session('city');
+  return drupal_get_form('_bipac_candidates_form', $zip, $address, $state, $city);
+}
+
+function _bipac_candidates_form($form, &$form_state, $zip, $address, $state, $city) {
+  $form['address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address'),
+    '#default_value' => $address,
+  );
+  $form['city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#default_value' => $city,
+  );
+  $form['state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#empty_option' => t('Select'),
+    '#default_value' => $state,
+    '#options' => bipac_states(),
+    '#required' => TRUE,
+  );
+  $form['zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter your zip code to find local voting information'),
+    '#default_value' => $zip,
+  );
+  /** Spam catcher field that will be hidden from view using CSS **/
+  $form['notes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Notes'),
+    '#required' => FALSE,
+    '#attributes' => array('class' => array('sc-notes-field')),
+    '#description' => t('Anything else you would like to tell us'),
+    '#prefix' => '<div class = "sc-notes-field">',
+    '#suffix' => '</div>',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search'),
+    '#attributes' => array('class' => array('btn', 'sign')),
+  );
+  return $form;
+}
+
+function _bipac_candidates_form_validate($form, &$form_state) {
+  $zip = trim(str_replace('-', '', $form_state['values']['zip']));
+  if ((is_numeric($zip)) && (strlen($zip) > 4)) {
+    // All is good
+  }
+  else {
+    form_set_error('zip', t('There might be a problem with your zip code.  Please check and retry.'));
+  }
+}
+
+function _bipac_candidates_form_submit($form, &$form_state) {
+  // If content in the notes field, discard submission.  This field is only used to catch spambots.
+  if(!empty($form_state['values']['notes'])) {
+    drupal_set_message('Thank you for your submission.');
+    return;
+  }
+
+  $zip = $form_state['values']['zip'];
+
+  bipac_session('zip', $zip);	// This loads the 'zip' key with $zip.  For posterity.
+
+  $object = bipac_object();
+
+  $json = _bipac_candidates($zip, $object);
+  $dates = _bipac_dates($zip, $object);
+  /**
+   * If these API calls return false, we clear
+   * any existing session data (because this is a new submission).
+   * If true, we load the session with the new data and send the
+   * user along.
+   */
+  if ((!empty($json)) && (!empty($dates))) {
+    bipac_session('vote', $json);
+    bipac_session('vote_dates', $dates);
+    if ($page = variable_get('bipac_candidates_results', NULL)) {
+      drupal_goto($page);
+    }
+    // Else, we assume we want to keep the user on the same page
+  }
+  else {
+    bipac_session('vote', NULL, TRUE);		// This clears the 'vote' key
+    bipac_session('vote_dates', NULL, TRUE);
+    $error = variable_get('bipac_candidates_error', t('No results for the entered zip'));
+    drupal_set_message($error, 'warning');
+  }
+
+}
+
+/**
+ * Add field to system information settings
+ */
+function bipac_candidates_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    // Additional fields can be added here
+  }
+}

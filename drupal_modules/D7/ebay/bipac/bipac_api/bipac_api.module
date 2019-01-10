@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a BIPAC Campaigns content type
+ *   along with the code needed to integrate with BIPAC
+ *   via its APIs.
+ */
+
+/**
+ * Get BIPAC API Object
+ */
+function bipac_object($test = FALSE) {
+  if(($key = variable_get('bipac_api_api_key', NULL)) && ($g = variable_get('bipac_api_parent', NULL))) {
+    module_load_include('php', 'bipac_api', 'bipac.class');
+    $api = new Bipac($key, $g, $test);
+    return $api;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Add fields to system information settings
+ */
+function bipac_api_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $form['bipac'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('BIPAC Configuration'),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['bipac']['bipac_api_api_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('API Key'),
+      '#default_value' => variable_get('bipac_api_api_key', NULL),
+      '#description' => t('You must request this from BIPAC'),
+    );
+    $form['bipac']['bipac_api_parent'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Group Name'),
+      '#default_value' => variable_get('bipac_api_parent', NULL),
+      '#description' => t('Parent organization related to your BIPAC API key.'),
+    );
+    $form['bipac']['bipac_api_email_address'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Email Address'),
+      '#description' => t('This is the email address associated with your BIPAC API key.'),
+      '#default_value' => variable_get('bipac_api_email_address', NULL),
+    );
+  }
+}

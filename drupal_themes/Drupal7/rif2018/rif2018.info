@@ -1,0 +1,45 @@
+name = RIF 2018
+description = A custom theme for RIF.org.
+core = 7.x
+base theme = rif
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;     Stylesheets        ::
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+stylesheets[all][] = build/css/screen.css
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;      Javascripts       ::
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+scripts[] = build/js/main.js
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;        Regions         ::
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+regions[page_top] = Page top
+regions[page_bottom] = Page bottom
+
+regions[navigation] = Navigation
+regions[header] = Header
+
+regions[featured] = Featured
+regions[sidebar_first] = Sidebar first
+regions[highlighted] = Highlighted
+regions[sidebar_second] = Sidebar second
+
+regions[help] = Help
+
+regions[content] = Content
+
+regions[triptych_first] = Triptych first
+regions[triptych_middle] = Triptych middle
+regions[triptych_last] = Triptych last
+
+regions[sponsorship] = Sponsorship Featured
+
+regions[footer_firstcolumn] = Footer first column
+regions[footer_secondcolumn] = Footer second column
+regions[footer_thirdcolumn] = Footer third column
+regions[footer_fourthcolumn] = Footer fourth column
+regions[footer] = Footer
+regions[sub_footer] = Sub Footer

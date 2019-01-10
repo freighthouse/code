@@ -1,0 +1,16 @@
+momentum.config:
+  path: '/admin/config/services/momentum'
+  defaults:
+    _form: '\Drupal\momentum\Form\MomentumConfig'
+    _title: 'Momentum Configuration'
+  requirements:
+    _permission: 'administer momentum'
+  options:
+    _admin_route: 'TRUE'
+
+momentum.dashboard:
+  path: '/momentum'
+  defaults:
+    _controller: '\Drupal\momentum\Controller\MomentumController::dashboard'
+  requirements:
+    _permission: 'administer momentum'

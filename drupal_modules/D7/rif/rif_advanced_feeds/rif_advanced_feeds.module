@@ -1,0 +1,115 @@
+<?php
+
+	/**
+	 * Implements hook_permission()
+	 */
+	function rif_advanced_feeds_permission() {
+		return array(
+			'advanced feed configurations' => array(
+				'title' => t('Administer Advanced Feed Configurations'),
+				'description' => t('Perform Updates to the advanced Feed Configurations'),
+			)
+		);
+	}
+
+	/**
+	 * Implements hook_menu().
+	 */
+	function rif_advanced_feeds_menu() {
+		$items = array();
+
+		$items['admin/config/content/feed_configurations'] = array (
+			'title' => 'Advanced Feed Configurations',
+			'description' => t('Configure advanced feed configurations.'),
+			'page callback' => 'drupal_get_form',
+			'page arguments' => array('rif_advanced_feeds_form'),
+			'access arguments' => array('advanced feed configurations'),
+			'file' => 'rif_advanced_feeds.config.inc',
+		);
+
+		return $items;
+	}
+
+	/**
+	 * Implements hook_form_BASE_ID_alter().
+	 */
+	function rif_advanced_feeds_form_feeds_import_form_alter(&$form, &$form_state, $form_id) {
+		$form['#validate'][] = 'rif_advanced_feeds_header_check';
+	}
+
+	function rif_advanced_feeds_header_check(&$form, &$form_state) {
+		//dsm("header Check");
+		$csv_source = FeedsPreviewSource::instance($form['#importer_id'], 1);
+		if (!empty($form_state['values']['feeds']) && is_array($form_state['values']['feeds'])) {
+			$csv_source->addConfig($form_state['values']['feeds']);
+		}
+//		dsm($form);
+//		dsm($source);
+//		form_set_error('id100', '<strong>Test Debug Break</strong>');
+
+		// Get The current column Headers
+		$fetch = $csv_source->importer->fetcher->fetch($csv_source);
+		$result = $csv_source->importer->parser->parse($csv_source, $fetch);
+
+		if(empty($result->items)) {
+			form_set_error('feeds','No Rows were found in your csv file');
+		} else {
+			// Get an example column
+			$provided_headers = array_keys($result->items[0]);
+
+			// Get the list of Mappings
+			$mappings = $csv_source->importer->parser->getMappingSourceList();
+
+			// Check the provided headers against the mappings and make sure they are exact
+			$extra_headers = array_diff($provided_headers, $mappings);
+
+			$missing_headers = array_diff($mappings, $provided_headers);
+
+			if(sizeof($missing_headers) > 0 || sizeof($extra_headers) > 0){
+				$general_message = variable_get('rif_advanced_feeds_general_error');
+				if(empty($general_message)) { $general_message = 'ERRORS FOUND!'; }
+
+				$missing_headers_message = variable_get('rif_advanced_feeds_missing_columns_error');
+				if(empty($missing_headers_message)) { $missing_headers_message = 'You are missing required headers in your csv:'; }
+
+				$extra_headers_message = variable_get('rif_advanced_feeds_extra_columns_error');
+				if(empty($extra_headers_message)) { $extra_headers_message = 'You have extra headers in your csv:'; }
+
+				form_set_error('id0', '<strong>'.$general_message.'</strong>');
+				if(sizeof($missing_headers) > 0){
+					form_set_error('id1', '<strong>'.$missing_headers_message.'</strong>' . _array2ul($missing_headers));
+				}
+
+				if(sizeof($extra_headers) > 0){
+					form_set_error('id2', '<strong>'.$extra_headers_message.'</strong>' . _array2ul($extra_headers));
+				}
+			}
+		}
+		unset($csv_source);
+	}
+
+	/**
+	 * Converts a multi-level array to UL list.
+	 */
+	function _array2ul($array) {
+		$output = '<ul>';
+		foreach ($array as $key => $value) {
+			$function = is_array($value) ? __FUNCTION__ : 'htmlspecialchars';
+			$output .= '<li>[<i>' . $function($value) . '</i>]</li>';
+		}
+		return $output . '</ul>';
+	}
+
+	// Unused now but I can see the client asking for this
+	function toAlpha($number,$alphabet){
+		$number++;
+		$count = count($alphabet);
+		if($number <= $count)
+			return $alphabet[$number-1];
+		while($number > 0){
+			$modulo     = ($number - 1) % $count;
+			$alpha      = $alphabet[$modulo].$alpha;
+			$number     = floor((($number - $modulo) / $count));
+		}
+		return $alpha;
+	}

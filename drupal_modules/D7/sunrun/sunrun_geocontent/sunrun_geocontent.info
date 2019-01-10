@@ -1,0 +1,6 @@
+name = Sunrun GeoContent
+description = Module getting content based on IP Addresses
+core = 7.x
+package = Sunrun
+
+dependencies[] = smart_ip

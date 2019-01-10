@@ -1,0 +1,758 @@
+/*------------------------------------------------------------------
+[Pricing Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Last change:  11/13/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. PRICING LAYOUT A
+II. PRICING LAYOUT B
+III. INTERNATIONAL PRICING BLOCK
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @PRICING LAYOUT A
+/*------------------------------------------------------------------*/
+
+.page-node-192001 .all-content {
+  padding-bottom: 30px;
+}
+
+.section-pricing #developer-api h2 {
+  font-weight: bold;
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+#pricing-table {
+  clear: both;
+  margin: 0 -20px;
+  padding: 30px 20px;
+  background: #eee;
+  border-top: 1px solid #d4d4d4;
+  -moz-box-shadow: inset 0px 1px 0px #fff;
+  -webkit-box-shadow: inset 0px 1px 0px #fff;
+  box-shadow: inset 0px 1px 0px #fff;
+}
+
+
+.pricing-overlay,
+#numbers-overlay,
+#voice-broadcast-overlay,
+#ccc-overlay,
+#ivr-overlay,
+#text-overlay {
+  display: none;
+}
+
+  .pricing-overlay #numbers-overlay,
+  .pricing-overlay #voice-broadcast-overlay,
+  .pricing-overlay #ccc-overlay,
+  .pricing-overlay #ivr-overlay,
+  .pricing-overlay #text-overlay  {
+    display: block;
+  }
+
+.pricing-overlay {
+  background: #000;
+  clear: left;
+  border-radius: 6px;
+  padding: 5px;
+  width: 650px;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  position: absolute;
+  top: 465px;
+  z-index: 1000;
+}
+
+  .large-arrow {
+    content: " ";
+    display: block;
+    top: -20px;
+    margin-left: 70px;
+    width: 0; 
+    height: 0; 
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 20px solid #000;
+    position: absolute;
+  }
+
+  .numbers.pricing-overlay {
+    margin-left: 130px;
+  }
+
+  .numbers.pricing-overlay .large-arrow {
+    margin-left: 315px;
+  }
+
+  .lt-ie8 .numbers.pricing-overlay .large-arrow {
+    margin-left: 155px;
+  }
+
+  .text.pricing-overlay {
+    margin-left: 0px;
+  }
+
+  .text.pricing-overlay .large-arrow {
+    margin-left: 260px;
+  }
+
+  .ivr.pricing-overlay {
+    margin-left: 300px;
+  }
+
+  .ivr.pricing-overlay .large-arrow {
+    margin-left: 335px;
+  }
+
+  .ccc.pricing-overlay {
+    margin-left: 300px;
+  }
+
+  .ccc.pricing-overlay .large-arrow {
+    margin-left: 520px;
+  }
+  .rates-overlay-inner,
+  .pricing-overlay-inner {
+    border-radius: 5px;
+    background: #fff;
+    padding-top: 8px;
+    width: 100%;
+  }
+  .rates-close,
+  .overlay-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    color: #000;
+    font-size: 12px;
+  }
+
+  .pricing-overlay table {
+    width: 100%;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .pricing-overlay td,
+  .pricing-overlay th {
+    padding: 2px 20px;
+    line-height: 28px;
+  }
+
+    .pricing-overlay td.check {
+      text-align: center;
+    }
+
+  .pricing-overlay th {
+    font-weight: bold;
+    font-size: 13px;
+  }
+
+    th.ccc-lite,
+    th.ccc-standard,
+    th.ccc-pro {
+      text-align: center;
+    }
+
+    th.ccc-lite {
+      color: #666;
+    }
+
+    th.ccc-standard {
+      color: #ff9024;
+    }
+
+    th.ccc-pro {
+      color: #176093;
+    }
+
+    .pricing-overlay th span {
+      color: #999;
+    }
+
+  .pricing-overlay tr.even {
+    border: none; 
+    background: #e4eff7;
+  }
+
+  .pricing-overlay p {
+    margin: 0 20px 10px;
+  }
+
+    .pricing-overlay p.note {
+      color: #999;
+      font-size: 12px;
+    }
+
+  .pricing-overlay .sign-up {
+    background-color: #10a254;
+    padding: 20px 20px 15px;
+    border-radius: 0 0 5px 5px;
+    text-align: center;
+    clear: both;
+  }
+
+  .pricing-overlay .sign-up span {
+    font-size: 24px;
+    line-height: 1em;
+    color: #fff;
+    display: inline-block
+  }
+
+  .pricing-overlay .sign-up .button {
+    float: none;
+    display: inline-block;
+    margin: 0 0 0 15px;
+
+  }
+
+  .pricing-overlay .full-features,
+  .pricing-overlay .text-notes {
+    border-top: 1px solid #d1d1d1;
+    box-shadow: 1px 0 0 #fff inset;
+    background-color: #eee;
+    padding: 20px;
+    font-size: 12px;
+  }
+
+  .pricing-overlay .full-features {
+    float: left;
+    padding: 10px 20px 20px;
+  }
+
+  .lt-ie8 .pricing-overlay .full-features {
+    float: none;
+  }
+
+    .full-features h3 {
+      line-height: 24px;
+    }
+
+    .pricing-overlay .full-features ul {
+      margin-left: 0;
+    }
+
+    .full-features li {
+      float: left;
+      list-style: none;
+      width: 200px;
+      line-height: 20px;
+      color: #666;
+    }
+
+  .pricing-overlay .button-group {
+    width: 330px;
+    margin: 10px auto;
+  }
+
+  .lt-ie9 .pricing-overlay .button-group {
+    width: 335px;
+  }
+
+  #short-code {
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff), color-stop(95%,#fff), color-stop(100%,#eee)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);   
+  background: -moz-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: -ms-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);
+  background: -o-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: linear-gradient(to bottom, #eee 0%, #fff 5%, #fff 95%, #eee 100%);  /* current standard, but unimplemented */  
+  background-position: left center;
+  background-repeat: no-repeat;
+  border-top: 1px solid #dadada;
+  border-bottom: 1px solid #dadada;
+  padding: 30px 20px;
+}
+
+#short-code tr.even {
+  background: #E4EFF7;
+  border: none;
+}
+
+#short-code table th,
+#short-code table td {
+  padding: 5px 10px;
+}
+
+.section-pricing #developer-api,
+.section-pricing #international-rates,
+.section-pricing #short-code {
+  margin: 0 -20px;
+  background-color: #fff;
+}
+
+
+.lt-ie9 .section-pricing #developer-api {
+  width: 1000px;
+}
+
+.lt-ie9 .section-pricing #pricing-table,
+.lt-ie9 .section-pricing #international-rates {
+  width: 960px;
+}
+
+.section-pricing #developer-api {
+  background-color: #0D4582;
+  background-image: url("../images/bg-product-slider.jpg");
+  box-shadow: 0 0 250px rgba(0, 0, 0, 1) inset;
+  color: #fff;
+  margin-bottom: -40px;
+
+}
+
+  #developer-api .inner {
+    background: url('../images/pricing/api.png') 0 0 no-repeat;
+    padding: 30px 20px;
+  }
+
+  .section-pricing #developer-api p {
+    padding-right: 60px;
+  }
+
+/*------------------------------------------------------------------*/
+/* END PRICING LAYOUT A
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @PRICING LAYOUT B
+/*------------------------------------------------------------------*/
+
+#pricing-overview {
+  clear: both;
+  margin: 0 -20px;
+  padding: 30px 20px;
+  background: #eee;
+  border-top: 1px solid #d4d4d4;
+  border-bottom: 1px solid #d4d4d4;
+  -moz-box-shadow: inset 0px 1px 0px #fff;
+  -webkit-box-shadow: inset 0px 1px 0px #fff;
+  box-shadow: inset 0px 1px 0px #fff;
+}
+
+.pricing-by-product {
+  margin: 20px 10px 0;
+}
+
+#pricing-overview .intro,
+#pricing-overview .intro + ul {
+  color: #333;
+}
+
+#pricing-overview .intro {
+  margin-bottom: 15px;
+}
+
+#pricing-overview .large-button {
+  font-size: 25px;
+  display: block;
+  margin: 0 auto;
+  width: 200px;
+  bottom: -30px;
+  position: relative;
+}
+
+.pricing-product-overview {
+  border-radius: 3px;
+  border: 1px solid #d4d4d4;
+  background: #fff;
+}
+
+.pricing-product-overview .product-overview {
+  padding: 20px 10px;
+  border-top: 1px solid #d4d4d4;
+}
+
+.pricing-product-overview .product-overview:first-child {
+  border-top: 0px;
+}
+
+#content .pricing-product-overview .product-name {
+  margin: 0;
+  line-height: 1;
+}
+
+#pricing-overview .extras {
+  font-size: 14px;
+  color: #666;
+  margin: 5px 0 -20px 10px;
+}
+
+.lt-ie8 #pricing-overview .extras {
+  margin-bottom: 0;
+}
+
+.product-details {
+  padding-left: 70px;
+  background: url("../images/sprites/callfire-features-pricing.png") no-repeat;
+  float: left;
+}
+
+#voice-broadcast-overview .product-details {
+  background-position: 0 0;
+}
+
+
+#text-messaging-overview .product-details {
+  background-position: 0 -84px;
+}
+
+
+#numbers-overview .product-details {
+  background-position: 0 -180px;
+}
+
+.product-price {
+  float: right;
+  line-height: 1;
+  color: #999;
+  width: 160px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.product-price .price {
+  display: block;
+  color: #032a46;
+  font-size: 36px;
+}
+
+.product-price .divider {
+  font-size: 24px;
+}
+
+.product-price .unit {
+  font-size: 14px;
+}
+
+#pricing-overview .expanded {
+  color: #666;
+  text-decoration: underline;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.product-expanded-pricing {
+  padding: 30px 20px;
+}
+
+.block #voice-broadcast-expanded-pricing.product-expanded-pricing {
+  margin-top: -40px;
+}
+
+.product-expanded-pricing .price-display {
+  font-size: 18px;
+  height: auto;
+  text-align: center;
+  padding: 30px;
+  border: none;
+}
+
+.price-display .button {
+  margin: 30px 0 0;
+  font-size: 16px;
+}
+
+.product-expanded-pricing .price-display .price {
+  font-size: 96px;
+  line-height: 1;
+}
+
+.product-expanded-pricing .price-display .money-symbol {
+  font-size: 60px;
+  line-height: 80px;
+}
+
+.product-expanded-pricing .product-name {
+  padding-left: 40px;
+  background: url("../images/sprites/callfire-features-pricing.png") 0 -428px no-repeat;
+  font-size: 18px;
+  font-weight: normal;
+}
+
+#text-messaging-expanded-pricing .product-name {
+  background-position: 0 -478px;
+}
+
+#numbers-expanded-pricing .product-name {
+  background-position: 0 -538px;
+}
+
+#ivr-expanded-pricing .product-name {
+  background-position: 0 -598px;
+}
+
+#cloud-call-center-expanded-pricing .product-name {
+  background-position: 0 -658px;
+}
+
+.product-expanded-pricing .description {
+  font-size: 16px;
+  color: #666;
+  line-height: 3;
+}
+
+.table-name {
+  font-size: 14px;
+  margin-left: 10px;
+  font-weight: normal;
+}
+
+
+.product-expanded-pricing tr.even {
+  background: #E4EFF7;
+  border: none;
+}
+
+.product-expanded-pricing td,
+.product-expanded-pricing th {
+  padding: 0px 10px;
+  line-height: 28px;
+  font-size: 14px;
+  text-align: left;
+}
+
+.product-expanded-pricing td.check {
+  text-align: center;
+}
+
+.product-expanded-pricing th {
+  font-size: 13px;
+}
+
+.additional-info .table-name {
+  margin: 0 0 20px;
+  font-size: 16px;
+}
+
+.additional-info h5 {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.product-expanded-pricing .button-group {
+  margin: 5px 0;
+}
+
+.product-expanded-pricing .full-features {
+  font-size: 12px;
+  background-color: #eee;
+  float: left;
+  padding: 10px 20px 20px 10px;
+  border-top: 1px solid #D1D1D1;
+}
+
+.product-expanded-pricing .full-features ul {
+  margin-left: 0;
+}
+
+#text-messaging-expanded-pricing,
+#ivr-expanded-pricing {
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff), color-stop(95%,#fff), color-stop(100%,#eee)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);   
+  background: -moz-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: -ms-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);
+  background: -o-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: linear-gradient(to bottom, #eee 0%, #fff 5%, #fff 95%, #eee 100%);  /* current standard, but unimplemented */  
+  background-position: left center;
+  background-repeat: no-repeat;
+  border-top: 1px solid #dadada;
+  border-bottom: 1px solid #dadada;
+}
+
+#cloud-call-center-expanded-pricing th {
+  text-align: center;
+}
+
+/*------------------------------------------------------------------*/
+/* @PRICING LAYOUT B
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @INTERNATIONAL PRICING BLOCK
+/*------------------------------------------------------------------*/
+
+.section-pricing #international-rates {
+  color: #111;
+  background: url(../images/pricing/international.jpg) 0 0 no-repeat;
+  margin-bottom: -40px;
+  padding: 30px 20px 40px;
+}
+
+  .section-pricing #international-rates h2 {
+    color: #111;
+  }
+
+  .section-pricing #international-rates p {
+    margin-bottom: 10px;
+  }
+
+  .pricing-group {
+    width: 168px;
+    text-align: center;
+    margin: 0 10px;
+    float: left;
+  }
+
+    .pricing-group h3 {
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .pricing-group p {
+      text-align: left;
+      font-size: 14px;
+      line-height: 18px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .pricing-group a.button {
+      float: none;
+      display: block;
+    }
+
+  .price-display {
+    background-color: #fff;
+    border: 1px solid #d4d4d4;
+    padding: 15px 0 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 12px;
+    color: #999;
+    height: 135px;
+    margin-bottom: 10px;
+  }
+
+    .price-display .price {
+      font-size: 80px;
+      line-height: 80px;
+      color: #032a46;
+      display: block;
+      letter-spacing: -3px;
+    }
+
+    .price-display a {
+      font-size: 13px;
+      margin-top: 15px;
+      display: block;
+    }
+
+    .price-display .money-symbol {
+      font-size: 50px;
+      vertical-align: top;
+      line-height: 60px;
+    }
+
+.section-pricing .region-bottom .block {
+  margin-bottom: 0;
+}
+
+#international-pricing {
+  background: url('../images/pricing/international-rates.jpg') right 0 no-repeat;
+  padding: 20px;
+  position: relative;
+  border-top: 1px solid #ccc;
+}
+
+#international-pricing .block-title {
+  margin: 20px 10px;
+}
+
+#international-pricing .select2 {
+  width: 300px;
+}
+#international-pricing-container { 
+  background-color: #e4f7f9;
+}
+
+#international-pricing #searchForm {
+  margin-bottom: 20px;
+}
+
+  #result {
+    min-height: 220px;
+  }
+
+  #result .pricing-group {
+    text-align: left;
+    margin: 0 0 0 20px;
+    width: 193px;
+  }
+
+  #result .pricing-group:first-child,
+  #result .landline.pricing-group {
+    margin: 0;
+  }
+
+  #result h3.country {
+    font-size: 24px;
+  }
+
+  #result .category,
+  #result .country {
+    font-size: 22px;
+  }
+
+  #result .price-display {
+    padding: 10px 5px;
+    height: auto;
+    line-height: 14px;
+    text-align: center;
+  }
+  .rates-notice {
+    font-size: 13px;
+    display: inline-block;
+    margin-left: 12px;
+  }
+  .span-3 .landline .price-display {
+    padding-bottom: 24px !important;
+  }
+  #rates-overview {
+    display: none;
+    clear: left;
+    background: #000;
+    border-radius: 6px;
+    padding: 5px;
+    max-width: 760px;
+    min-width: 375px;
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    position: absolute;
+    z-index: 1000;
+    left: 205px;
+    margin-top: 20px;
+  }
+  .rates-overlay-inner {
+    padding-bottom: 8px;
+  }
+  #rates-overview .large-arrow {
+    margin-left: 175px;
+  }
+
+  #result .loading {
+    background-position: 0 60px;
+    padding-top: 70px;
+    padding-right: 60px;
+  }
+
+  #rates-overview td,
+  #rates-overview th {
+    padding: 5px 15px;
+  }
+
+  #rates-overview table tbody tr:nth-child(2n+1) td {
+    background: rgb(197, 246, 255);
+    background: rgba(195, 236, 244, .5);
+  }
+
+/*------------------------------------------------------------------*/
+/* @INTERNATIONAL PRICING BLOCK
+/*------------------------------------------------------------------*/

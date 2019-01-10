@@ -1,0 +1,4 @@
+name = PAC Donations
+description = For the thermometers.
+core = 7.x
+configure = admin/config/system/pac_donations

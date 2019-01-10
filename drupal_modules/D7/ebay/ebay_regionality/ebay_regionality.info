@@ -1,0 +1,8 @@
+name = "eBay Region Selector"
+description = "A module written by RepEquity that contains the region-selection functionality for eBay Mainstreet"
+core = 7.x
+package = eBay
+files[] = ebay_regionality.module
+scripts[] = region_filter.js
+scripts[] = jquery.cookie.js
+

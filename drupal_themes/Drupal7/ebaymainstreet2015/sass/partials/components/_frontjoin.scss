@@ -1,0 +1,101 @@
+.front {
+  .content-top, .content-feature {
+    margin-bottom: 1.5em;
+  }
+}
+.front-page-join{
+  .content{
+    padding: 0;
+    border: none;
+
+    @include breakpoint($bp-small){
+      display: flex;
+      margin-bottom: 1.5em;
+    }
+  }
+  .block-bean-front-page-issue-feature-blocks {
+    margin-bottom: 1.5em;
+  }
+
+  .ebay-custom-join-text-wrapper{
+    float: none;
+    width: auto;
+    padding: 40px;
+    background: $new-dark-blue;
+    color: $new-light-green;
+    margin: 0;
+
+    @include breakpoint($bp-small){
+      width: 65%;
+    }
+  }
+
+  .ebay-custom-join-form-wrapper{
+    width: auto;
+    float: none;
+    padding: 40px;
+    background: $new-light-green;
+    color: $new-dark-blue;
+
+    @include breakpoint($bp-small){
+      width: 35%;
+    }
+
+    form{
+      padding: 0;
+    }
+
+    .form-type-select{
+      color: $new-dark-blue;
+
+      label{
+        color: $new-dark-blue;
+        display: block;
+        @include fontsize(13);
+
+        span{
+          @include fontsize(19);
+          display: block;
+        }
+      }
+    }
+
+    .form-select{
+      width: 80%;
+      color: $new-dark-blue;
+      border: 1px solid $new-dark-blue;
+      background-color: transparent;
+      height: 32px;
+      margin: 0;
+    }
+
+    .form-submit{
+      margin: 0;
+      float: right;
+      background: $new-dark-blue;
+      color: $new-light-green;
+      border-radius: 0;
+      border: none;
+      text-transform: none;
+      @include fontsize(12);
+      padding: 3px 0;
+      border: 1px solid $new-dark-blue;
+      width: 20%;
+    }
+  }
+
+  .ebay-custom-join-title{
+    color: $new-light-green;
+  }
+
+  .ebay-custom-join-description p{
+    color: $new-light-green;
+    @include fontsize(14);
+  }
+
+  .ebay-custom-join-form-title{
+    color: $new-dark-blue;
+    @include fontsize(36);
+    text-transform: none;
+  }
+}

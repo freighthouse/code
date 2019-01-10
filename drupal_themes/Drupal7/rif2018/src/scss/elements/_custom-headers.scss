@@ -1,0 +1,45 @@
+
+.custom-header-1,
+.custom-header-2,
+.example-header {
+//  margin: 0 0 15px;
+//  padding: 0;
+
+  &.blue {
+//    color: @rif-blue;
+    color: $blue-dark;
+  }
+  &.purple {
+//    color: @rif-purple;
+    color: $blue-light;
+  }
+  &.green {
+//    color: @rif-light-green;
+    color: $green-light;
+  }
+  &.allcaps {
+//    text-transform: uppercase;
+  }
+}
+.custom-header-1 {
+//  font-family: @alt-sans-serif-font-family;
+//  font-weight: 900;
+//  line-height: 1em;
+  font-family: $ff-display;
+  font-weight: $fw-semibold;
+  margin-top: $spacing-large;
+  &:first-child {
+    margin-top: 0;
+  }
+}
+.custom-header-2 {
+//  font-family: @alt-serif-font-family;
+//  font-weight: 900;
+//  line-height: 1em;
+  font-family: $ff-display;
+  font-weight: $fw-semibold;
+  margin-top: $spacing-large;
+  &:first-child {
+    margin-top: 0;
+  }
+}

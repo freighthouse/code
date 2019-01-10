@@ -1,0 +1,36 @@
+
+.addthis_inline_share_toolbox,
+.addthis_inline_share_toolbox_m0wb {
+
+  .node-book-resource &,
+  .node-support-material & {
+//    margin: 10px 0;
+//    text-align: left;
+    margin: $spacing-medium 0;
+
+    @media (max-width: 991px) {
+//      text-align: center;
+    }
+  }
+  #mapcontainer & {
+//    margin-top: 15px;
+  }
+  .modal-dialog & {
+//    display: block;
+//    text-align: center;
+//    margin: 30px 0 15px;
+  }
+  .node-blog-container &,
+  .node-press-release-container & {
+
+    @media (min-width: 992px) {
+//      margin-left: 30px;
+//      margin-bottom: 30px;
+//      text-align: right;
+    }
+    @media (max-width: 991px) {
+//      margin: 0 0 30px;
+//      text-align: center;
+    }
+  }
+}

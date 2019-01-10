@@ -1,0 +1,5 @@
+name = RIF Advanced Feeds
+description = Gives advanced functionality specific to RIF for feeds
+package = Feeds
+dependencies[] = feeds
+core = 7.x

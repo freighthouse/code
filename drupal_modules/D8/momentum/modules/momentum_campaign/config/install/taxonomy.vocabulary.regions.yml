@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  enforced:
+    module:
+      - momentum_campaign
+name: Regions
+vid: regions
+description: 'Global regions.'
+hierarchy: 0
+weight: 1

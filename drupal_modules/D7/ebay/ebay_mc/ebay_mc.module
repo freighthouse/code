@@ -1,0 +1,71 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function ebay_mc_menu() {
+  $items = array();
+
+  $items['admin/config/system/ebay_mc'] = array(
+    'title' => 'eBay Mobile Commons Validation',
+    'description' => "eBay Mobile Commons Validation",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ebay_mc_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function ebay_mc_admin_settings_form() {
+  $form = array();
+  
+  $form['ebay_mc_pages'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Page aliases for Mobile Commons code'),
+    '#description' => t('Enter the Drupal path aliases of all pages where the Mobile Commons client-side validation code should appear. Do not include the leading slash. Separate aliases with a line break.'),
+    '#default_value' => variable_get('ebay_mc_pages', ''),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+function ebay_mc_page_alter(&$page) {
+  $pages = variable_get('ebay_mc_pages', FALSE);
+  if ($pages) {
+    $paths = drupal_strtolower($pages);
+    $current_page = drupal_strtolower(drupal_get_path_alias($_GET['q']));
+    $page_match = drupal_match_path($current_page, $paths);
+    if ($current_page != $_GET['q']) {
+      $page_match = $page_match || drupal_match_path($_GET['q'], $paths);
+    }
+  }
+  if (!($pages) || $page_match) {
+    drupal_add_js('//ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js', array('type' => 'external'));
+    drupal_add_js('//ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/additional-methods.min.js', array('type' => 'external'));
+    $script = 'jQuery(document).ready(function($) {
+        //form validation rules
+        $(".mobilecommons").validate({
+          rules: {
+            "person[phone]":       {required:true, phoneUS:true},
+            "person[postal_code]": {required:true, zipcodeUS:true},
+            "person[email]":       {required:true, email:true}
+          },
+          messages: {
+            "person[phone]":       "Please enter a US phone number",
+            "person[postal_code]": "Please enter a US zip code",
+            "person[email]":       "Please enter a valid email address"
+          },
+          submitHandler: function(form) {
+            form.submit();
+          }
+        });
+      });';
+    drupal_add_js($script, 'inline');
+  }
+  
+}

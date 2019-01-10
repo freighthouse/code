@@ -1,0 +1,4 @@
+core = "7.x"
+name = "Sunrun ZipTool"
+description = "An aquisition tool to capture leads."
+package = Sunrun

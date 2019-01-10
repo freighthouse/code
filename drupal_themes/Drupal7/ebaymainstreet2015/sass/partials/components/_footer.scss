@@ -1,0 +1,125 @@
+.footer {
+  @extend %clearfix;
+  display: block;
+  clear: both;
+  color: $c-dark-grey;
+  background-color: $c-off-white;
+  a {
+    color: $c-dark-grey;
+    &:hover,
+    &:focus {
+      color: $c-blue;
+      text-decoration: none;
+    }
+  }
+}
+
+.footer-content {
+  @include stagecenter();
+}
+
+.site-logo-footer {
+  position: relative;
+  z-index: 1;
+  a {
+    @include svg-bg('ebay-new-logo');
+    display: block;
+    width: 194px;
+    height: 37px;
+    background-size: 194px 38px;
+    margin: 0 auto;
+    @include breakpoint($bp-small) {
+      margin-left: -12px;
+    }
+  }
+}
+
+.footer-logo-title {
+  margin: 2em 0;
+  @include breakpoint($bp-small) {
+    float: left;
+    margin: 4.5em 0 1.5em 0;
+  }
+}
+
+.footer-main-menu {
+  @include fontsize(16);
+  @extend %helvetica;
+  @extend %bold;
+
+  @include breakpoint($bp-small) {
+    float: right;
+    margin: 4.5em 0 1.5em 0;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  li {
+    display: block;
+    line-height: 2;
+    list-style-type: none;
+
+    @include breakpoint($bp-small) {
+      display: inline;
+      margin-right: 4.75em;
+    }
+
+    &.first {
+      display: none;
+    }
+
+    &.last {
+      margin-right: 0;
+    }
+
+  }
+}
+
+.footer-copyright {
+  @include fontsize(12);
+  @extend %helvetica;
+  clear: both;
+  border-top: 1px solid $c-light-grey;
+  margin-top: 2em;
+  text-align: center;
+
+  @include breakpoint($bp-small) {
+    float: left;
+    margin: 0;
+    width: 50%;
+    text-align: left;
+  }
+}
+
+.footer-secondary-menu {
+  @include fontsize(12);
+  @extend %helvetica;
+  padding-top: 1em;
+  border-top: 1px solid $c-light-grey;
+  margin-bottom: 3.5em;
+  text-align: center;
+
+  @include breakpoint($bp-small) {
+    float: right;
+    width: 50%;
+    text-align: right;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    display: inline;
+    margin-right: 2.5em;
+    list-style-type: none;
+    &.last {
+      margin-right: 0;
+    }
+  }
+}

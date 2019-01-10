@@ -1,0 +1,5 @@
+name = Reading Challenges
+description = Adds Reading Challenges Tools to Literacy Tracker.
+core = 7.x
+
+dependencies[] = literacy_tracker

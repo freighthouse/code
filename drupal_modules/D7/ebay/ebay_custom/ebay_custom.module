@@ -1,0 +1,1841 @@
+<?php
+
+define('SILVERPOP_UN', 'ebay-team@repequity.com');
+define('SILVERPOP_PW', 'r3pEquity!');
+define('JOIN_INTRO', variable_get('ebay_custom_join_intro', ''));
+define('JOIN_FOOTER', variable_get('ebay_custom_join_footer', ''));
+
+/**
+ * Implements hook_init()
+ */
+function ebay_custom_init() {
+  // drupal_add_js(drupal_get_path('module', 'ebay_custom') . '/js/bipac.js');
+}
+
+/*
+ *  hook_theme
+ */
+function ebay_custom_theme() {
+   $items = array();
+  $items['ebay_custom_display_twitter_pull'] = array(
+    'variables' => array('tweets' => NULL),
+    'template' => 'ebay_custom_twitter_pull_display_oauth',
+  );
+  $items['ebay_custom_bipac_response'] = array(
+    'variables' => array('legislators' => NULL),
+    'template' => 'ebay_custom_bipac_response',
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_permission().
+ */
+function ebay_custom_permission() {
+  return array(
+    'administer ebay custom settings' => array(
+      'title' => t('Administer eBay Custom settings'),
+    ),
+  );
+}
+
+/*
+ * hook_menu
+ */
+function ebay_custom_menu() {
+  $items['join'] = array(
+    'title' => t('Sign Up for eBay Main Street & Make Your Voice Heard!'),
+    'page callback' => 'ebay_custom_join_page',
+    'access arguments' => array('access content'),
+	  'type' => MENU_NORMAL_ITEM,
+  );
+  $items['join/%'] = array(
+    'title' => t('Sign Up for eBay Main Street & Make Your Voice Heard!'),
+    'page callback' => 'ebay_custom_form_switcher',
+	  'page arguments' => array(1, 2),
+	  'access arguments' => array('access content'),
+	  'type' => MENU_CALLBACK,
+  );
+  $items['edit/letter/%'] = array(
+    'title' => t('Review and Edit'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_ebay_custom_edit_bipac_letter', 2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/config/user-interface/ebay_custom'] = array(
+    'page callback' => 'drupal_get_form',
+	  'page arguments' => array('ebay_custom_admin_settings_form'),
+	  'access arguments' => array('administer ebay custom settings'),
+	  'title' => t('eBay Custom Settings'),
+	  'description' => t('Add or edit the text that appears on the Join page'),
+	  'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+function ebay_custom_admin_settings_form($form, &$form_state) {
+
+  $form['ebay_custom_join_intro'] = array(
+    '#type' => 'textarea',
+	  '#title' => t('Intro text for Join page(s)'),
+	  '#default_value' => variable_get('ebay_custom_join_intro', ''),
+  );
+
+  $form['ebay_custom_join_footer'] = array(
+    '#type' => 'textarea',
+	  '#title' => t('Footer text for Join page(s)'),
+	  '#description' => t('This text will appear below the join form(s)'),
+	  '#default_value' => variable_get('ebay_custom_join_footer', ''),
+  );
+
+  $form['ebay_custom_join_block_title'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Block title for the front page join form.'),
+    '#description' => t('This text will appear as the block title for the front page join form.'),
+    '#default_value' => variable_get('ebay_custom_join_block_title', 'Sign Up for eBay Main Street'),
+  );
+
+  $form['ebay_custom_join_title'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Title text for the front page join form.'),
+    '#description' => t('This text will appear as the title for the front page join form.'),
+    '#default_value' => variable_get('ebay_custom_join_title', 'Make your voice heard!'),
+  );
+
+  $form['ebay_custom_join_description'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Description text for the front page join form.'),
+    '#description' => t('This text will appear as the description for the front page join form.'),
+    '#default_value' => variable_get('ebay_custom_join_description', '<p>When it comes to online commerce, legislators have immense power. If you sell online, you’re probably already aware that legislators can affect your bottom line – and even threaten your company’s very existence – by creating unfair commerce policies.</p><p>The best way to protect yourself and online commerce is to make your voice heard in the halls of power. Signing up for Main Street can help you do just that.</p>'),
+  );
+
+  $form['ebay_custom_join_form_title'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Form title text for the front page join form.'),
+    '#description' => t('This text will appear as the form title for the front page join form.'),
+    '#default_value' => variable_get('ebay_custom_join_form_title', 'Sign Up Now'),
+  );
+
+  return system_settings_form($form);
+}
+
+/*
+ * hook_page_alter
+ */
+function ebay_custom_page_alter(&$page) {
+  if (arg(0) == 'join') {
+    drupal_add_js(drupal_get_path('module', 'ebay_custom') . '/ebay_custom.js');
+  }
+}
+
+/*
+ * hook_block_info
+ */
+function ebay_custom_block_info() {
+  $blocks['ebay_custom_twitter_pull'] = array(
+    'info' => t('Twitter feed - eBay Custom'),
+  );
+  $blocks['ebay_custom_join'] = array(
+    'info' => t('Join form - step 1 (country)'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['ebay_custom_join_clone'] = array(
+    'info' => t('Join form - step 1 (country) - CLONE'),
+  );
+  $blocks['ebay_custom_facebook_join'] = array(
+    'info' => t('Join form page for Facebook app'),
+  );
+  $blocks['ebay_custom_facebook_campaign'] = array(
+    'info' => t('Campaign for Facebook app'),
+  );
+  $blocks['ebay_custom_bipac_block'] = array(
+    'info' => t('BIPAC campaign form'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['ebay_custom_bipac_response'] = array(
+    'info' => t('BIPAC response block'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function ebay_custom_block_view($delta = '') {
+  switch ($delta) {
+    case 'ebay_custom_twitter_pull':
+      if (function_exists('twitter_pull_oauth_fetch_key')) {
+        $contents = twitter_pull_oauth_fetch_key('ebay_custom_display_twitter_pull');
+      }
+      $block['title'] = t('Follow Us');
+      $block['content'] = $contents;
+    break;
+
+    case 'ebay_custom_join':
+      $block['title'] = t(variable_get('ebay_custom_join_block_title', 'Sign Up for eBay Main Street'));
+      $block['content'] = _ebay_custom_join_block();
+      break;
+
+    case 'ebay_custom_join_clone':
+      $block['title'] = t('Join Main Street');
+      $block['content'] = _ebay_custom_join_block();
+      break;
+
+    case 'ebay_custom_facebook_join':
+      //$block['title'] = t('Join Us');
+      $block['content'] = array(
+	'#markup' => _ebay_custom_facebook_join(),
+	'#attached' => array(
+	  'js' => array(drupal_get_path('module', 'ebay_custom') . '/ebay_custom.js'),
+	),
+      );
+      break;
+
+    case 'ebay_custom_facebook_campaign':
+      $block['title'] = t('Take Action');
+      $block['content'] = _ebay_custom_facebook_campaign();
+      break;
+
+    case 'ebay_custom_bipac_response':
+      $content = isset($_SESSION['bipac_response']) ? $_SESSION['bipac_response'] : NULL;
+      unset($_SESSION['bipac_response']);
+      $block['subject'] = t('BIPAC Response');
+      $block['content'] = theme('ebay_custom_bipac_response', array('legislators' => $content));
+      break;
+
+    case 'ebay_custom_bipac_block':
+      $block['title'] = t('Get Started');
+      $block['content'] = _ebay_custom_bipac_block();
+
+  }
+  return $block;
+}
+
+function ebay_custom_join_page() {
+  $html = check_markup(JOIN_INTRO, 'full_html');
+  $html.= render(drupal_get_form('ebay_custom_join_form'));
+  $html.= '<div id="new-form-div"></div>';
+  $html.= check_markup(JOIN_FOOTER, 'full_html');
+  return $html;
+}
+
+function ebay_custom_join_form($form, &$form_state) {
+  $countries = _ebay_custom_get_countries_array();
+
+  $form['country'] = array(
+    '#title' => t('<span class="prefix">Step 1:</span> Please select your country'),
+    '#type' => 'select',
+    '#options' => $countries,
+    '#default_value' => _ebay_custom_get_country_id('United States'),
+  );
+
+  $form['submit'] = array(
+   '#type' => 'submit',
+	 '#value' => t('Go'),
+   );
+
+  return $form;
+}
+
+function ebay_custom_join_form_submit($form, &$form_state) {
+  if (is_numeric($form_state['values']['country']) && (_ebay_custom_get_country_name($form_state['values']['country']))) {
+    drupal_goto('join/' . $form_state['values']['country']);
+  }
+}
+
+function ebay_custom_form_switcher($country_id, $ajax = NULL) {
+  if ($country = _ebay_custom_get_country_name($country_id)) {
+    if ($country == 'United States') {
+      $form = drupal_get_form('_ebay_custom_get_us_form', $country_id);
+    }
+    else {
+      $form = drupal_get_form('_ebay_custom_get_international_form', $country_id);
+    }
+    if (isset($form)) {
+      if ($ajax) {
+        print render($form);
+        drupal_exit();
+      }
+      else {
+        drupal_set_title('Sign Up for eBay Main Street & Make Your Voice Heard!');
+        return check_markup(JOIN_INTRO, 'full_html') . render($form) . check_markup(JOIN_FOOTER, 'full_html');
+      }
+    }
+  }
+  else {
+    _ebay_custom_error_redirect();
+  }
+}
+
+function _ebay_custom_error_redirect() {
+  drupal_set_message(t('Please select your country'), 'error');
+  drupal_goto('join');
+}
+
+
+function _ebay_custom_get_us_form($form, &$form_state, $country_id) {
+  $form['#action'] = url('join/' . $country_id);
+
+  $form['email'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('E-Mail'),
+	   '#required' => TRUE,
+   );
+   $form['fname'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('First Name'),
+     '#required' => TRUE,
+   );
+   $form['lname'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('Last Name'),
+     '#required' => TRUE,
+   );
+   $form['address'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('Street Address'),
+     '#required' => TRUE,
+   );
+   $form['address2'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('Suite or Apt.'),
+     '#description' => t('Why do we want your address? Only so we can notify you of relevant issues in your state or Congressional district.'),
+   );
+   $form['city'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('City'),
+     '#required' => TRUE,
+   );
+   $form['state'] = array(
+     '#type' => 'select',
+	   '#title' => 'State or protectorate',
+	   '#options' => _ebay_custom_get_states_array(),
+     '#required' => TRUE,
+   );
+   $form['postalcode'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('Zip code'),
+	   '#description' => t('Include your Zip+4 if you know it, as some Congressional districts span zip codes.'),
+     '#required' => TRUE,
+   );
+   $form['country'] = array(
+     '#type' => 'select',
+	   '#options' => _ebay_custom_get_countries_array(),
+	   '#default_value' => $country_id,
+	   '#disabled' => TRUE,
+	   '#description' => l('Not your country?', 'join'),
+   );
+   $form['phone'] = array(
+     '#type' => 'telfield',
+	   '#title' => 'Phone',
+   );
+   $form['phone_2'] = array(
+    '#type' => 'numberfield',
+    '#title' => t('Ext.'),
+    '#maxlength' => 10,
+    );
+   $form['ebay_id'] = array(
+    '#type' => 'textfield',
+	  '#title' => 'eBay ID',
+   );
+
+   $form['submit'] = array(
+     '#type' => 'submit',
+	   '#value' => t('Join'),
+   );
+
+   return $form;
+}
+
+function _ebay_custom_get_us_form_validate($form, &$form_state) {
+  if (!(preg_match('([\\w-]+(?:\\.[\\w-]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})', $form_state['values']['email']))) {
+    form_set_error('email', 'Please enter a valid e-mail address.');
+  }
+}
+
+function _ebay_custom_get_us_form_submit($form, &$form_state) {
+  $values = array();
+  $mapping = array(
+    'email' => 'email',
+    'fname' => 'firstName',
+    'lname' => 'lastName',
+    'address' => 'streetAddress',
+    'address2' => 'streetAddress2',
+    'city' => 'city',
+    'state' => 'state',
+    'postalcode' => 'postalCode',
+    'country' => 'country',
+    'phone' => 'phoneNumber',
+    'ebay_id' => 'ebayId'
+  );
+
+  $values = $form_state['values'];
+
+  if (!empty($values['contact_preference'])) {
+    $arr = array();
+    foreach ($values['contact_preference'] as $k => $v) {
+	  if ($v) {
+	    $arr[$k] = $v;
+	  }
+	}
+    $values['contact_preference'] = implode(',', $arr);
+  }
+
+  if (isset($_SERVER['REMOTE_ADDR'])) {
+    $remote_ip = trim($_SERVER['REMOTE_ADDR']); // 10.2.134.177
+  }
+  else {
+    $remote_ip = NULL;
+  }
+  if (!empty($values['address']) && !empty($values['city']) && !empty($values['state']) && ($remote_ip != '10.2.134.177')) {
+    // Look up the +4 using the LiveAddressAPI
+	// $key = urlencode('KXL496f4gf+YqYcNUKL21fxUb2MSPi1MjqS38gzdJ77UvDDeS7P3vKcjJkYPPvpaV0gieO5ur6SzVIKY4HqMww==');
+	$key = urlencode('PiWw7/aex+mquBeXES8VsRqIv+rGPFVfSGCZ5bpmyVZt3IlUL7wmBS7S/44Hkwh8iK6cvZllhygDN5nVll8aCw==');
+	$address = urlencode(filter_xss(trim($values['address'])));
+	$city = urlencode(filter_xss(trim($values['city'])));
+  $state = urlencode(filter_xss(trim($values['state'])));
+
+  // $request = "https://api.smartystreets.com/street-address/?street=" . $address . "&city=" . $city . "&state=" . $state . "&auth-token=" . $key;
+
+	$request = "https://api.smartystreets.com/street-address/?street=" . $address . "&city=" . $city . "&state=" . $state . "&auth-token=" . $key . "&auth-id=faf3f94c-9bae-4c13-be6a-fac4c955109d";
+	if ($result = json_decode(file_get_contents($request))) {
+	    $values['postalcode'] = $result[0]->components->zipcode . '-' . $result[0]->components->plus4_code ;
+  }
+
+  }
+  if(!empty($values['phone'])) {
+    $clean_number = preg_replace('/\D/', '', filter_xss(trim($values['phone'])));
+    $clean_number = substr($clean_number, 0, 11);
+    switch (strlen($clean_number)) {
+      case 7:
+        // Format: xxx-xxxx
+        $clean_number =  preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1-$2", $clean_number);
+      case 10:
+        // Format: (xxx) xxx-xxxx
+        $clean_number = preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "($1) $2-$3", $clean_number);
+      case 11:
+        // Format: x(xxx) xxx-xxxx
+        $clean_number = preg_replace("/([0-9a-zA-Z]{1})([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1($2) $3-$4", $clean_number);
+      default:
+        // Return original phone if not 7, 10 or 11 digits long
+        $clean_number = $clean_number;
+    }
+    $values['phone'] = $clean_number;
+    if (!(empty($values['phone_2']))) {
+      $clean_ext = preg_replace('/\D/', '', filter_xss(trim($values['phone_2'])));
+      $ext = 'X' . $clean_ext ;
+      $values['phone'].= ' ' . $ext;
+    }
+  }
+  //$processed_values = _ebay_custom_prepare_form_for_silverpop($mapping, $values);
+
+  // SEND FORM VALUES TO ITERABLE MODULE FOR PROCESSING
+  _iterable_submit_data($mapping, $values);
+
+  // if ($processed_values) {
+  //   drupal_goto('thanks');
+  // }
+  // else {
+  //   drupal_set_message(t('We were unable to process the form. Please try again.'), 'error');
+  // }
+}
+
+function _ebay_custom_get_international_form($form, &$form_state, $country_id) {
+   $form['#action'] = url('join/' . $country_id);
+   $form['email'] = array(
+     '#type' => 'textfield',
+	 '#title' => t('E-Mail'),
+	 '#required' => TRUE,
+   );
+   $form['fname'] = array(
+     '#type' => 'textfield',
+	 '#title' => t('First Name'),
+     '#required' => TRUE,
+   );
+   $form['lname'] = array(
+     '#type' => 'textfield',
+	 '#title' => t('Last Name'),
+     '#required' => TRUE,
+   );
+   $form['address'] = array(
+     '#type' => 'textfield',
+	 '#title' => t('Address'),
+   );
+   $form['address2'] = array(
+     '#type' => 'textfield',
+	 '#title' => t('Address 2'),
+   );
+   $form['city'] = array(
+     '#type' => 'textfield',
+	 '#title' => t('City'),
+   );
+   $form['postalcode'] = array(
+     '#type' => 'textfield',
+	   '#title' => t('Postal Code'),
+     '#required' => TRUE,
+   );
+   $form['country'] = array(
+     '#type' => 'select',
+	 '#options' => _ebay_custom_get_countries_array(),
+	 '#default_value' => $country_id,
+	 '#disabled' => TRUE,
+	 '#description' => l('Not your country?', 'join'),
+   );
+   $form['phone'] = array(
+     '#type' => 'telfield',
+     '#title' => 'Phone',
+   );
+   $form['phone_2'] = array(
+    '#type' => 'numberfield',
+    '#title' => t('Ext.'),
+    '#maxlength' => 10,
+    );
+   $form['ebay_id'] = array(
+    '#type' => 'textfield',
+    '#title' => 'eBay ID',
+   );
+
+   $form['submit'] = array(
+     '#type' => 'submit',
+	 '#value' => t('Join'),
+   );
+  return $form;
+}
+
+function _ebay_custom_get_international_form_validate($form, &$form_state) {
+  if (!(preg_match('([\\w-]+(?:\\.[\\w-]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})', $form_state['values']['email']))) {
+    form_set_error('email', 'Please enter a valid e-mail address.');
+  }
+}
+
+function _ebay_custom_get_international_form_submit($form, &$form_state) {
+  $values = array();
+  $mapping = array(
+    'email' => 'email',
+    'fname' => 'firstName',
+    'lname' => 'lastName',
+    'address' => 'streetAddress',
+    'address2' => 'streetAddress2',
+    'city' => 'city',
+    'state' => 'state',
+    'postalcode' => 'postalCode',
+    'country' => 'country',
+    'phone' => 'phoneNumber',
+    'ebay_id' => 'ebayId'
+  );
+
+  $values = $form_state['values'];
+
+  if(!empty($values['phone'])) {
+    $clean_number = preg_replace('/\D/', '', filter_xss(trim($values['phone'])));
+    $clean_number = substr($clean_number, 0, 11);
+    switch (strlen($clean_number)) {
+      case 7:
+        // Format: xxx-xxxx
+        $clean_number =  preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1-$2", $clean_number);
+      case 10:
+        // Format: (xxx) xxx-xxxx
+        $clean_number = preg_replace("/([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "($1) $2-$3", $clean_number);
+      case 11:
+        // Format: x(xxx) xxx-xxxx
+        $clean_number = preg_replace("/([0-9a-zA-Z]{1})([0-9a-zA-Z]{3})([0-9a-zA-Z]{3})([0-9a-zA-Z]{4})/", "$1($2) $3-$4", $clean_number);
+      default:
+        // Return original phone if not 7, 10 or 11 digits long
+        $clean_number = $clean_number;
+    }
+    $values['phone'] = $clean_number;
+    if (!(empty($values['phone_2']))) {
+      $clean_ext = preg_replace('/\D/', '', filter_xss(trim($values['phone_2'])));
+      $ext = 'X' . $clean_ext ;
+      $values['phone'].= ' ' . $ext;
+    }
+  }
+
+  _iterable_submit_data($mapping, $values);
+
+}
+
+function _ebay_custom_prepare_form_for_silverpop($mapping, $values, $dbid = '1468702') {
+  if ($values) {
+    foreach ($values as $k => $v) {
+      $match = array_key_exists($k, $mapping);
+	  if ($match && (!empty($v))) {
+	    if ($k == 'country') {
+              $country = _ebay_custom_get_country_name($v);
+              // $processed_values[$mapping[$k]] = _ebay_custom_get_country_name($v);
+              $processed_values[$mapping[$k]] = $country;
+            }
+            else {
+	      $processed_values[$mapping[$k]] = filter_xss(trim($v));
+            }
+	  }
+    }
+    if ($processed_values['Email']) {
+      require_once('SilverpopAPI.php');
+      $pop = new SilverpopAPI();
+      $pop->login(SILVERPOP_UN, SILVERPOP_PW);
+      if ($dbid == '1468702') {
+        if ($country != 'United States') {
+          $dbid = '2747870';
+        }
+      }
+      try {
+        $pop->add_recipient($dbid, $processed_values, NULL, true, true, false, false);
+      }
+      catch (Exception $e) {
+        watchdog('Silverpop', t('Caught Silverpop exception %error'), array('%error' => $e));
+      }
+    }
+	return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function _ebay_custom_join_block() {
+  $html_temp_title = '<div class="ebay-custom-join-title">' . variable_get('ebay_custom_join_title', 'Make your voice heard!') . '</div>';
+  $html_temp_description = '<div class="ebay-custom-join-description">' . variable_get('ebay_custom_join_description', '<p>When it comes to online commerce, legislators have immense power. If you sell online, you’re probably already aware that legislators can affect your bottom line – and even threaten your company’s very existence – by creating unfair commerce policies.</p><p>The best way to protect yourself and online commerce is to make your voice heard in the halls of power. Signing up for Main Street can help you do just that.</p>') . '</div>';
+  $html_temp_form_title = '<div class="ebay-custom-join-form-title">' . variable_get('ebay_custom_join_form_title', 'Sign Up Now') . '</div>';
+
+  $html = '<div class="ebay-custom-join-text-wrapper">' . $html_temp_title . $html_temp_description . '</div>';
+  $form = drupal_get_form('ebay_custom_join_form');
+  $html .= '<div class="ebay-custom-join-form-wrapper">' . $html_temp_form_title . render($form) . '</div>';
+  return t($html);
+}
+
+function _ebay_custom_get_country_name($country_id) {
+  $countries = _ebay_custom_get_countries_array();
+  if (is_array($countries) && $country_id) {
+    if (array_key_exists($country_id, $countries)) {
+      return $countries[$country_id];
+    }
+    else {
+      return FALSE;
+    }
+  }
+}
+
+function _ebay_custom_get_country_id($country_name) {
+  $countries = _ebay_custom_get_countries_array();
+  if (is_array($countries) && $country_name) {
+    if ($key = array_search($country_name, $countries)) {
+      return $key;
+    }
+    else {
+      return 0;
+    }
+  }
+}
+
+function _ebay_custom_get_countries_array() {
+  return array(
+        "Select...",
+		"Afghanistan",
+		"Albania",
+		"Algeria",
+		"Andorra",
+		"Angola",
+		"Antigua and Barbuda",
+		"Argentina",
+		"Armenia",
+		"Australia",
+		"Austria",
+		"Azerbaijan",
+		"Bahamas",
+		"Bahrain",
+		"Bangladesh",
+		"Barbados",
+		"Belarus",
+		"Belgium",
+		"Belize",
+		"Benin",
+		"Bhutan",
+		"Bolivia",
+		"Bosnia and Herzegovina",
+		"Botswana",
+		"Brazil",
+		"Brunei",
+		"Bulgaria",
+		"Burkina Faso",
+		"Burundi",
+		"Cambodia",
+		"Cameroon",
+		"Canada",
+		"Cape Verde",
+		"Central African Republic",
+		"Chad",
+		"Chile",
+		"China",
+		"Colombi",
+		"Comoros",
+		"Congo (Brazzaville)",
+		"Congo",
+		"Costa Rica",
+		"Cote d'Ivoire",
+		"Croatia",
+		"Cuba",
+		"Cyprus",
+		"Czech Republic",
+		"Denmark",
+		"Djibouti",
+		"Dominica",
+		"Dominican Republic",
+		"East Timor (Timor Timur)",
+		"Ecuador",
+		"Egypt",
+		"El Salvador",
+		"Equatorial Guinea",
+		"Eritrea",
+		"Estonia",
+		"Ethiopia",
+		"Fiji",
+		"Finland",
+		"France",
+		"Gabon",
+		"Gambia, The",
+		"Georgia",
+		"Germany",
+		"Ghana",
+		"Greece",
+		"Grenada",
+		"Guatemala",
+		"Guinea",
+		"Guinea-Bissau",
+		"Guyana",
+		"Haiti",
+		"Honduras",
+		"Hungary",
+		"Iceland",
+		"India",
+		"Indonesia",
+		"Iran",
+		"Iraq",
+		"Ireland",
+		"Israel",
+		"Italy",
+		"Jamaica",
+		"Japan",
+		"Jordan",
+		"Kazakhstan",
+		"Kenya",
+		"Kiribati",
+		"Korea, North",
+		"Korea, South",
+		"Kuwait",
+		"Kyrgyzstan",
+		"Laos",
+		"Latvia",
+		"Lebanon",
+		"Lesotho",
+		"Liberia",
+		"Libya",
+		"Liechtenstein",
+		"Lithuania",
+		"Luxembourg",
+		"Macedonia",
+		"Madagascar",
+		"Malawi",
+		"Malaysia",
+		"Maldives",
+		"Mali",
+		"Malta",
+		"Marshall Islands",
+		"Mauritania",
+		"Mauritius",
+		"Mexico",
+		"Micronesia",
+		"Moldova",
+		"Monaco",
+		"Mongolia",
+		"Morocco",
+		"Mozambique",
+		"Myanmar",
+		"Namibia",
+		"Nauru",
+		"Nepa",
+		"Netherlands",
+		"New Zealand",
+		"Nicaragua",
+		"Niger",
+		"Nigeria",
+		"Norway",
+		"Oman",
+		"Pakistan",
+		"Palau",
+		"Panama",
+		"Papua New Guinea",
+		"Paraguay",
+		"Peru",
+		"Philippines",
+		"Poland",
+		"Portugal",
+		"Qatar",
+		"Romania",
+		"Russia",
+		"Rwanda",
+		"Saint Kitts and Nevis",
+		"Saint Lucia",
+		"Saint Vincent",
+		"Samoa",
+		"San Marino",
+		"Sao Tome and Principe",
+		"Saudi Arabia",
+		"Senegal",
+		"Serbia and Montenegro",
+		"Seychelles",
+		"Sierra Leone",
+		"Singapore",
+		"Slovakia",
+		"Slovenia",
+		"Solomon Islands",
+		"Somalia",
+		"South Africa",
+		"Spain",
+		"Sri Lanka",
+		"Sudan",
+		"Suriname",
+		"Swaziland",
+		"Sweden",
+		"Switzerland",
+		"Syria",
+		"Taiwan",
+		"Tajikistan",
+		"Tanzania",
+		"Thailand",
+		"Togo",
+		"Tonga",
+		"Trinidad and Tobago",
+		"Tunisia",
+		"Turkey",
+		"Turkmenistan",
+		"Tuvalu",
+		"Uganda",
+		"Ukraine",
+		"United Arab Emirates",
+		"United Kingdom",
+		"United States",
+		"Uruguay",
+		"Uzbekistan",
+		"Vanuatu",
+		"Vatican City",
+		"Venezuela",
+		"Vietnam",
+		"Yemen",
+		"Zambia",
+		"Zimbabwe"
+	);
+}
+
+function _ebay_custom_get_states_array() {
+  return array(
+      '0' => "Select...",
+            'AL'=>"Alabama",
+			'AK'=>"Alaska",
+			'AZ'=>"Arizona",
+			'AR'=>"Arkansas",
+			'CA'=>"California",
+			'CO'=>"Colorado",
+			'CT'=>"Connecticut",
+			'DE'=>"Delaware",
+			'DC'=>"District Of Columbia",
+			'FL'=>"Florida",
+			'GA'=>"Georgia",
+			'HI'=>"Hawaii",
+			'ID'=>"Idaho",
+			'IL'=>"Illinois",
+			'IN'=>"Indiana",
+			'IA'=>"Iowa",
+			'KS'=>"Kansas",
+			'KY'=>"Kentucky",
+			'LA'=>"Louisiana",
+			'ME'=>"Maine",
+			'MD'=>"Maryland",
+			'MA'=>"Massachusetts",
+			'MI'=>"Michigan",
+			'MN'=>"Minnesota",
+			'MS'=>"Mississippi",
+			'MO'=>"Missouri",
+			'MT'=>"Montana",
+			'NE'=>"Nebraska",
+			'NV'=>"Nevada",
+			'NH'=>"New Hampshire",
+			'NJ'=>"New Jersey",
+			'NM'=>"New Mexico",
+			'NY'=>"New York",
+			'NC'=>"North Carolina",
+			'ND'=>"North Dakota",
+			'OH'=>"Ohio",
+			'OK'=>"Oklahoma",
+			'OR'=>"Oregon",
+			'PA'=>"Pennsylvania",
+			'RI'=>"Rhode Island",
+			'SC'=>"South Carolina",
+			'SD'=>"South Dakota",
+			'TN'=>"Tennessee",
+			'TX'=>"Texas",
+			'UT'=>"Utah",
+			'VT'=>"Vermont",
+			'VA'=>"Virginia",
+			'WA'=>"Washington",
+			'WV'=>"West Virginia",
+			'WI'=>"Wisconsin",
+			'WY'=>"Wyoming",
+			'AS'=>"American Samoa",
+			'GU'=>'Guam',
+			'MP'=>"Northern Mariana Islands",
+			'PR'=>"Puerto Rico",
+			'VI'=>"Virgin Islands",
+			'FM'=>"Federated States of Micronesia",
+			'MH'=>"Marshall Islands",
+			'UM'=>"U.S. Minor Outlying Islands"
+		);
+}
+
+/**
+ * Implements hook_node_presave
+ */
+function ebay_custom_node_presave($node) {
+  if(($node->type == 'video_submission') && ($_SESSION['contest_sent'] != 1)) {
+    $email = ebay_custom_content_field($node, 'field_submission_email');
+    $name = ebay_custom_content_field($node, 'field_submission_name');
+    $to = $email;
+$message = "
+Dear $name,\r\n
+
+Thank you for your submission to the eBay \"My Business, My Voice\" Video Contest. We look forward to reviewing your video!\r\n
+Please note that judging will begin on March 19th and finalists will be notified by March 27th.\r\n
+
+Thank you,\r\n
+
+The eBay Government Relations Team\r\n
+
+Please click here: http://www.ebaymainstreet.com to return to eBay Main Street.";
+    $subject = "Video Contest";
+$from = "government_relations@ebay.com";
+$headers = "From:" . $from;
+mail($to,$subject,$message,$headers);
+    $_SESSION['contest_sent'] = 1;
+  }
+}
+
+/**
+ * Return single value from given node array
+ */
+function ebay_custom_content_field($node, $field, $comp = 'value', $type = 'node') {
+    $items = field_get_items($type, $node, $field);
+    if($items) {
+      $items_first = reset($items);
+      return implode('', $items_first);
+    }
+}
+/**
+ * Altering the log in form for /pac
+ */
+function ebay_custom_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['#id'] == 'user-login-form') {
+    if (!empty($_GET['article_id'])) {
+      drupal_set_message(t('Please login using your Corporate Email Address and Personnel Number to view this article'));
+      $redirect = $_GET['article_id'];
+      $form['article_id'] = array(
+        '#type' => 'hidden',
+        '#value' => $redirect,
+      );
+      $form['#action'] = '/pac?destination=' . $redirect;
+    }
+    $form['name']['#title'] = t('Corporate Email Address');
+    $form['name']['#suffix'] = t('<span class="description">Please use your FULL corporate email address (e.g. xsmith@ebay.com).</span>');
+    $form['pass']['#title'] = t('Personnel Number');
+    $form['pass']['#suffix'] = t('<span class="description">Please use your 8-digit Personnel Number as found in your profile on <a href="https://thehub.corp.ebay.com/" target="_blank">The Hub</a>.</span>');
+    //$form['suffix'] = t('Please use your 8-digit Personnel Number as found in your profile on The Hub.');
+    $form['#submit'][] = '_ebay_custom_pac_redirect';
+  }
+  if ($form_id == 'video_submission_node_form') {
+    $form['actions']['submit']['#value'] = t('Submit');
+  }
+  /** Note that these IDs are for production.  Don't change them unless you have a good reason **/
+  if (($form_id == 'webform_client_form_129029') || ($form_id == 'webform_client_form_129027')) {
+    $submits = $form['#submit'];
+    array_unshift($submits, 'ebay_custom_not_charitable');
+    $form['#submit'] = $submits;
+  }
+}
+
+function _ebay_custom_pac_redirect(&$form, &$form_state) {
+/*dsm($_GET['destination']);
+    login_destination_perform_redirect($_GET['destination']);
+dsm($form);
+dsm($form_state);
+  if (!empty($_GET['destination'])) {
+    $redirect = $_GET['destination'];
+drupal_goto($redirect);
+    watchdog('pac_test', $redirect, array());
+    if (drupal_valid_path($redirect)) {
+      drupal_set_message(t('Redirecting to your requested content'));
+    }
+  }*/
+}
+
+function ebay_custom_not_charitable($form, $form_state) {
+  $submitted = $form_state['input']['submitted'];
+  if ((isset($submitted['no_thanks']['no'])) && ($submitted['no_thanks']['no'] == 'no')) {
+    if (isset($form['#node']->webform['emails'])) {
+      foreach ($form['#node']->webform['emails'] as $email) {
+        if ((isset($email['email'])) && ($email['email'] == 'ebayPAC@ebay.com')) {
+          $eid = $email['eid'];
+          unset($form['#node']->webform['emails'][$eid]);
+        }
+      }
+    }
+  }
+}
+
+function _ebay_custom_facebook_join() {
+  return ebay_custom_join_page();
+}
+
+function _ebay_custom_facebook_campaign() {
+  return views_embed_view('action_center', 'page');
+}
+
+function _ebay_custom_bipac_block() {
+  $bipac_info = array();
+  $nid = arg(1);
+  if (arg(0) == 'node' && is_numeric($nid)) {
+    $node = node_load($nid);
+    if (($node) && ($node->type == 'campaign')) {
+      $bipac_info = _ebay_custom_get_bipac_info($node);
+    }
+  }
+  else {
+    $action_view = views_get_view_result('action_center');
+    $node = node_load($action_view[0]->nid);
+    $bipac_info = _ebay_custom_get_bipac_info($node);
+  }
+  return drupal_get_form('_ebay_custom_bipac_join_form', $bipac_info);
+}
+
+function _ebay_custom_bipac_join_form($form, &$form_state, $bipac_info) {
+  $form = array(
+    '#prefix' => '<div class="petition">',
+    '#suffix'=> '</div>',
+  );
+  $form['action'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['type'],
+  );
+  $form['bipac_url'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['url'],
+  );
+  $form['issue'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['id'],
+  );
+  $form['parent'] = array(
+    '#type' => 'hidden',
+    '#value' => 'EBAY',
+  );
+  $form['thanks'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['thanks'],
+  );
+  $form['bipac_subject'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['subject'],
+  );
+  $form['bipac_content'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['content'],
+  );
+  $form['bipac_error'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['error'],
+  );
+  $form['bipac_topic'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['topic'],
+  );
+  $form['bipac_mode'] = array(
+    '#type' => 'hidden',
+    '#value' => $bipac_info['mode'],
+  );
+  $form['writer_first_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('First Name'),
+    '#required' => TRUE,
+  );
+  $form['writer_last_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Last Name'),
+    '#required' => TRUE,
+  );
+  $form['military'] = array(
+    '#title' => t('Check if you are active duty military serving overseas.'),
+    '#type' => 'checkbox',
+  );
+  $form['mil'] = array(
+    '#title' => t('Military Address (Optional)'),
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#attributes' => array('class' => array('military-fields')),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['mil']['mil_address_1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Unit/PSC Number or Ship'),
+    '#required' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+    '#prefix' => t('Please enter your military address below.  <strong>Then, enter either your most recent state-based address or the address to which you intend to return.</strong>  We will use this address to send your letter to the appropriate legislator(s).'),
+  );
+  $form['mil']['mil_address_2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Box/Hull Number'),
+    '#required' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['mil']['mil_address_3'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Company Name or Military Formation'),
+    '#required' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['mil']['mil_city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City Code'),
+    '#required' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['mil']['mil_state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#required' => FALSE,
+    '#options' => array(
+      '0' => '- Select -',
+      'AA' => 'AA',
+      'AE' => 'AE',
+      'AP' => 'AP',
+    ),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['mil']['mil_zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip'),
+    '#required' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="military"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['writer_address_1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Home Address'),
+    '#required' => TRUE,
+  );
+  $form['writer_address_2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Home Address Line 2'),
+  );
+  $form['writer_city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#required' => TRUE,
+  );
+  $form['writer_state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#options' => _ebay_custom_get_states_array(),
+    '#default_value' => NULL,
+    '#required' => TRUE,
+  );
+  $form['writer_zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Zip'),
+    '#required' => TRUE,
+  );
+  $form['writer_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email Address'),
+    '#required' => TRUE,
+  );
+  if($bipac_info['disable_check'] === FALSE) {
+    $form['writer_agree'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('I agree to receive emails from eBay Government Relations in accordance with the <a href="/terms-of-use-privacy-policy" target="_blank">Privacy Policy</a> and understand that I may <a href="/unsubscribe" title="unsubscribe">unsubscribe</a> at any time.'),
+      '#attributes' => array('checked' => 'checked'),
+    );
+  }else{
+    $form['writer_agree'] = array(
+      '#type' => 'hidden',
+      '#value' => FALSE,
+    );
+  }
+  if($bipac_info['editable_letter']) {
+    $form['edit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Next'),
+      '#attributes' => array('class' => array('btn', 'sign')),
+      '#submit' => array('_ebay_custom_edit_bipac_process'),
+    );
+    $form['key'] = array(
+      '#type' => 'hidden',
+      '#value' => $bipac_info['editable_key'],
+    );
+    _ebay_custom_bipac_session_clear($bipac_info['editable_key']);
+  }
+  else {
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Sign Your Name'),
+      '#attributes' => array('class' => array('btn', 'sign')),
+    );
+  }
+  return $form;
+}
+
+function _ebay_custom_edit_bipac_process($form, &$form_state) {
+  if (!(preg_match('([\\w-]+(?:\\.[\\w-]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})', $form_state['values']['writer_email']))) {
+    form_set_error('writer_email', 'Please enter a valid e-mail address.');
+  }
+  if(empty($form_state['values']['bipac_content'])) {
+    return;
+  }
+  $key = trim($form_state['values']['key']);
+  $_SESSION['bipac_' . $key . '_values'] = $form_state['values'];
+
+  // We generate a hash to ensure that the user has, in fact, gone through the first form
+  $salt = 'w3ofijaobehsi';
+  $hash = md5($salt . $key);
+  $_SESSION['bipac_' . $key . '_hash'] = $hash;
+  drupal_goto('edit/letter/' . filter_xss($key));
+}
+
+function _ebay_custom_edit_bipac_letter($form, &$form_state, $key) {
+  $salt = 'w3ofijaobehsi';
+  $hash = md5($salt . $key);
+  $f = 'bipac_' . $key . '_fail';
+  $k = 'bipac_' . $key . '_values';
+  $values = $_SESSION[$k];
+  //if ((strpos($values['bipac_content'], '|')) && (substr_count($values['bipac_content'], '|') == 2)) {
+  if (substr_count($values['bipac_content'], '|') == 2) {
+    $content_array = explode('|', $values['bipac_content']);
+    $original = str_replace('|', '', $values['bipac_content']);
+  }
+  else {
+    $content_array = NULL;
+    $original = str_replace('|', '', $values['bipac_content']);
+  }
+  // Check hash
+  if((isset($key)) && (isset($_SESSION['bipac_' . $key . '_hash'])) && ($_SESSION['bipac_' . $key . '_hash'] == $hash) && (isset($_SESSION['bipac_' . $key . '_values']['bipac_content']))) {
+    if(isset($_SESSION[$f]) && $_SESSION[$f] == 1) {
+      unset($_SESSION[$f]);
+      $form['writer_address_1'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Home Address'),
+        '#required' => TRUE,
+        '#default_value' => $values['writer_address_1'],
+      );
+      $form['writer_address_2'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Home Address Line 2'),
+        '#default_value' => $values['writer_address_2'],
+      );
+      $form['writer_city'] = array(
+        '#type' => 'textfield',
+        '#title' => t('City'),
+        '#required' => TRUE,
+        '#default_value' => $values['writer_city'],
+      );
+      $form['writer_state'] = array(
+        '#type' => 'select',
+        '#title' => t('State'),
+        '#options' => _ebay_custom_get_states_array(),
+        '#required' => TRUE,
+        '#default_value' => $values['writer_state'],
+      );
+      $form['writer_zip'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Zip'),
+        '#required' => TRUE,
+        '#default_value' => $values['writer_zip'],
+      );
+    }
+    else {
+      $form['writer_address_1'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $values['writer_address_1'],
+      );
+      $form['writer_address_2'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $values['writer_address_2'],
+      );
+      $form['writer_city'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $values['writer_city'],
+      );
+      $form['writer_state'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $values['writer_state'],
+      );
+      $form['writer_zip'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $values['writer_zip'],
+      );
+    }
+    if (is_array($content_array)) {
+      $form['letter0'] = array(
+        '#type' => 'hidden',
+
+        '#value' => $content_array[0],
+
+      );
+      $form['letter'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Editable Letter'),
+        '#prefix' => '<p>' . str_replace("\n", '<br />', $content_array[0]) . '</p>',
+        '#default_value' => $content_array[1],
+        '#suffix' => '<p>' . str_replace("\n", '<br />', $content_array[2]) . '</p>',
+      );
+      $form['letter2'] = array(
+        '#type' => 'hidden',
+        '#value' => $content_array[2],
+      );
+    }
+    else {
+      $form['letter'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Letter'),
+        '#default_value' => $original,
+      );
+    }
+    $form['original'] = array(
+      '#type' => 'hidden',
+      '#value' => $original,
+    );
+    $form['key'] = array(
+      '#type' => 'hidden',
+      '#value' => $key,
+    );
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Sign Your Name'),
+      '#attributes' => array('class' => array('btn', 'sign')),
+    );
+    return $form;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+function _ebay_custom_edit_bipac_letter_submit($form, &$form_state) {
+  $key = $form_state['values']['key'];
+  $k = 'bipac_' . $key . '_values';
+  $f = 'bipac_' . $key . '_fail';
+  $h = 'bipac_' . $key . '_hash';
+  $values = $_SESSION[$k];
+  $error = isset($values['bipac_error']) ? $values['bipac_error'] : NULL;
+  $mode = $values['bipac_mode'];
+  if($mode == 'production') {
+    $bipac_url = 'https://www.bipac.net/modules/directpost/letterpostfromwriterinfo.asp';
+  }
+  else {
+    $bipac_url = 'https://www.bipac.net/modules/directpost/letterpostfromwriterinfo2.asp';
+  }
+
+  $military = NULL;
+  if(!empty($values['military'])) {
+    $military = "\r\nPlease respond to my service address at:\r\n";
+    $unit = !empty($values['mil_address_1']) ? $values['mil_address_1'] : NULL;
+    $box= !empty($values['mil_address_2']) ? $values['mil_address_2'] : NULL;
+    if($unit && $box) {
+      $military .= $unit . ' ' . $box . "\r\n";
+    }
+    elseif($unit) {
+      $military .= $unit . "\r\n";
+    }
+    elseif($box) {
+      $military .= $box . "\r\n";
+    }
+    $formation = !empty($values['mil_address_3']) ? $values['mil_address_3'] : NULL;
+    $military .= $formation . "\r\n";
+    $mil_city = !empty($values['mil_city']) ? $values['mil_city'] : NULL;
+    $mil_state = !empty($values['mil_state']) ? $values['mil_state'] : NULL;
+    if($mil_city && $mil_state) {
+      $military .= $mil_city . ', ' . $mil_state . "\r\n";
+    }
+    elseif($mil_city) {
+      $military .= $mil_city . "\r\n";
+    }
+    elseif($mil_state) {
+      $military .= $mil_state . "\r\n";
+    }
+    $mil_zip = !empty($values['mil_zip']) ? $values['mil_zip'] : NULL;
+    $military .= $mil_zip;
+  }
+
+  // Silverpop handling
+  // Note: Silverpop API stuff moved to bottom and in BIPAC result to get country
+  $mapping = array(
+        'writer_first_name' => 'First Name',
+        'writer_last_name' => 'Last Name',
+        'writer_email' => 'Email',
+        'writer_address_1' => 'Home Address',
+        'writer_address_2' => 'Home Address 2',
+        'writer_city' => 'City',
+        'writer_zip' => 'Zip',
+        'bipac_topic' => 'Campaign ID',
+        'writer_state' => 'State',
+        'country' => 'Country',
+        'mil_address_1' => 'Military Unit',
+        'mil_address_2' => 'Military Box',
+        'mil_address_3' => 'Military Company',
+        'mil_city' => 'Military City',
+        'mil_state' => 'Military State',
+        'mil_zip' => 'Military Zip',
+  );
+
+  // BIPAC handling
+  if(!empty($form_state['values']['letter']) && (!empty($form_state['values']['letter0']) || !empty($form_state['values']['letter2']))) {
+    $messagetxt = $form_state['values']['letter0'] . $form_state['values']['letter'] . $form_state['values']['letter2'] . "\r\n" . $values['writer_first_name'] . ' ' . $values['writer_last_name'] . $military;
+    $values['bipac_content'] = $form_state['values']['letter0'] . '|' . $form_state['values']['letter'] . '|' . $form_state['values']['letter2'];
+  }
+  else {
+    $messagetxt = $form_state['values']['letter'] . "\r\n" . $values['writer_first_name'] . ' ' . $values['writer_last_name'] . $military;
+  }
+  // We replace values with those in the form if the user had to update due to address validation failure
+  if(!empty($form_state['values']['writer_address_1'])) {
+    $values['writer_address_1'] = $form_state['values']['writer_address_1'];
+  }
+  if(!empty($form_state['values']['writer_address_2'])) {
+    $values['writer_address_2'] = $form_state['values']['writer_address_2'];
+  }
+  if(!empty($form_state['values']['writer_city'])) {
+    $values['writer_city'] = $form_state['values']['writer_city'];
+  }
+  if(!empty($form_state['values']['writer_state'])) {
+    $values['writer_state'] = $form_state['values']['writer_state'];
+  }
+  if(!empty($form_state['values']['writer_zip'])) {
+    $values['writer_zip'] = $form_state['values']['writer_zip'];
+  }
+  // Update session with new values
+  unset($_SESSION[$k]);
+  $_SESSION[$k] = $values;
+  $post_data = 'writer_first_name=' . urlencode($values['writer_first_name']) .
+               '&writer_last_name=' . urlencode($values['writer_last_name']) .
+               '&writer_email=' . $values['writer_email'] .
+               '&writer_address_1=' . urlencode($values['writer_address_1']) .
+               '&writer_address_2=' . urlencode($values['writer_address_2']) .
+               '&writer_city=' . urlencode($values['writer_city']) .
+               '&writer_state=' . urlencode($values['writer_state']) .
+               '&writer_zip=' . urlencode($values['writer_zip']) .
+               '&writer_country=' . urlencode('United States') .
+               '&military_unit=' . urlencode($values['mil_address_1']) .
+               '&military_box=' . urlencode($values['mil_address_2']) .
+               '&military_company=' . urlencode($values['mil_address_3']) .
+               '&military_city=' . urlencode($values['mil_city']) .
+               '&military_state=' . urlencode($values['mil_state']) .
+               '&military_zip=' . urlencode($values['mil_zip']) .
+               '&action='  . urlencode($values['action']) .
+               '&issue=' . urlencode($values['issue']) .
+               '&apikey=' . '755d2aba10d6d2e967fb5634f8606488' .
+               '&subject=' . urlencode($values['bipac_subject']) .
+               '&message=' . urlencode($messagetxt) .
+	       '&topic=' . urlencode(strtolower(trim($values['bipac_topic']))) .
+               '&g=' . urlencode(strtolower(trim($values['parent'])));
+
+  $options = array(
+    'method' => 'POST',
+    'data' => $post_data,
+    'timeout' => 30,
+    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+  );
+
+  $result = drupal_http_request($bipac_url, $options);
+  if(($result->code == 200) && ($mode == 'production')) {
+    if(strpos($result->data, 'Leg_1')) {
+      if(!empty($values['writer_agree'])) {
+        $values['country'] = 'United States';
+        $values = _ebay_custom_prepare_form_for_silverpop($mapping, $values, '1788739');
+      }
+      $_SESSION['bipac_response'] = _ebay_custom_get_bipac_legs($result->data);
+      if(isset($values['thanks'])) {
+        $path = $values['thanks'];
+        _ebay_custom_bipac_session_clear($key);
+        drupal_goto($path);
+      }
+      else {
+        _ebay_custom_bipac_session_clear($key);
+        drupal_set_message('Submission received!  Thank you for your support.');
+      }
+    }
+    else {
+      drupal_set_message($error, 'error');
+      $_SESSION[$f] = 1;
+    }
+  }
+  elseif ($mode == 'production') {
+    drupal_set_message('There was a problem receiving your submission.  Please wait a few minutes and try again.');
+    watchdog('ebay_custom', 'BIPAC submission failed: ' . $result->data . ' code: ' . $result->code, NULL, WATCHDOG_WARNING);
+    $_SESSION[$f] = 1;
+  }
+
+  if($mode == 'debug') {
+    drupal_set_message('Debug Mode.  Nothing submitted to Silverpop.  BIPAC returns test data.');
+    drupal_set_message('BIPAC Return Code: ' . $result->code);
+    drupal_set_message($result->data);
+    $_SESSION['bipac_response'] = _ebay_custom_get_bipac_legs($result->data);
+    if (!strpos($result->data, 'Leg_1')) {
+      $_SESSION[$f] = 1;
+    }
+    dsm($_SESSION['bipac_response']);
+  }
+
+  if(($result->code == 200) && ($mode == 'test')) {
+    drupal_set_message('Test Mode.  Nothing submitted to Silverpop.  BIPAC returns test data.');
+    if(strpos($result->data, 'Leg_1')) {
+      $_SESSION['bipac_response'] = _ebay_custom_get_bipac_legs($result->data);
+      if(isset($values['thanks'])) {
+        $path = $values['thanks'];
+        _ebay_custom_bipac_session_clear($key);
+        drupal_goto($path);
+      }
+      else {
+        _ebay_custom_bipac_session_clear($key);
+        drupal_set_message('Submission received!  Thank you for your support.');
+      }
+    }
+    else {
+      drupal_set_message($error, 'error');
+      $_SESSION[$f] = 1;
+    }
+  }
+  elseif ($mode == 'test') {
+    drupal_set_message('There was a problem receiving your submission.  Please wait a few minutes and try again.');
+    drupal_set_message('BIPAC test submission failed: ' . $result->data);
+    $_SESSION[$f] = 1;
+  }
+
+  if((!empty($values['writer_agree'])) && ($mode == 'production')) {
+    $values['country'] = NULL;
+    $values = _ebay_custom_prepare_form_for_silverpop($mapping, $values, '1788739');
+  }
+}
+
+function _ebay_custom_bipac_session_clear($key) {
+  $k = 'bipac_' . $key . '_values';
+  $f = 'bipac_' . $key . '_fail';
+  $h = 'bipac_' . $key . '_hash';
+  unset($_SESSION[$k]);
+  unset($_SESSION[$h]);
+  unset($_SESSION[$f]);
+}
+
+function _ebay_custom_bipac_join_form_validate($form, &$form_state) {
+  if (!(preg_match('([\\w-]+(?:\\.[\\w-]+)*@(?:[\\w-]+\\.)+[a-zA-Z]{2,7})', $form_state['values']['writer_email']))) {
+    form_set_error('writer_email', 'Please enter a valid e-mail address.');
+  }
+}
+
+function _ebay_custom_bipac_join_form_submit($form, &$form_state) {
+
+  $error = isset($form_state['values']['bipac_error']) ? $form_state['values']['bipac_error'] : NULL;
+  $mode = $form_state['values']['bipac_mode'];
+
+  if($mode == 'production') {
+    $bipac_url = 'https://www.bipac.net/modules/directpost/letterpostfromwriterinfo.asp';
+  }else{
+    $bipac_url = 'https://www.bipac.net/modules/directpost/letterpostfromwriterinfo2.asp';
+  }
+
+  $military = NULL;
+  if(!empty($form_state['values']['military'])) {
+    $military = "\r\nPlease respond to my service address at:\r\n";
+    $unit = !empty($form_state['values']['mil_address_1']) ? $form_state['values']['mil_address_1'] : NULL;
+    $box= !empty($form_state['values']['mil_address_2']) ? $form_state['values']['mil_address_2'] : NULL;
+    if($unit && $box) {
+      $military .= $unit . ' ' . $box . "\r\n";
+    }elseif($unit) {
+      $military .= $unit . "\r\n";
+    }elseif($box) {
+      $military .= $box . "\r\n";
+    }
+    $formation = !empty($form_state['values']['mil_address_3']) ? $form_state['values']['mil_address_3'] : NULL;
+    $military .= $formation . "\r\n";
+    $mil_city = !empty($form_state['values']['mil_city']) ? $form_state['values']['mil_city'] : NULL;
+    $mil_state = !empty($form_state['values']['mil_state']) ? $form_state['values']['mil_state'] : NULL;
+    if($mil_city && $mil_state) {
+      $military .= $mil_city . ', ' . $mil_state . "\r\n";
+    }elseif($mil_city) {
+      $military .= $mil_city . "\r\n";
+    }elseif($mil_state) {
+      $military .= $mil_state . "\r\n";
+    }
+    $mil_zip = !empty($form_state['values']['mil_zip']) ? $form_state['values']['mil_zip'] : NULL;
+    $military .= $mil_zip;
+  }
+
+  // Silverpop handling
+  // Note: Silverpop API stuff moved to bottom and in BIPAC result to get country
+  $mapping = array(
+        'writer_first_name' => 'First Name',
+        'writer_last_name' => 'Last Name',
+        'writer_email' => 'Email',
+        'writer_address_1' => 'Home Address',
+        'writer_address_2' => 'Home Address 2',
+        'writer_city' => 'City',
+        'writer_zip' => 'Zip',
+        'bipac_topic' => 'Campaign ID',
+        'writer_state' => 'State',
+        'country' => 'Country',
+        'mil_address_1' => 'Military Unit',
+        'mil_address_2' => 'Military Box',
+        'mil_address_3' => 'Military Company',
+        'mil_city' => 'Military City',
+        'mil_state' => 'Military State',
+        'mil_zip' => 'Military Zip',
+  );
+
+  // BIPAC handling
+  $message_content = str_replace('|', '', $form_state['values']['bipac_content']);
+  $messagetxt = $message_content . "\r\n" . $form_state['values']['writer_first_name'] . ' ' . $form_state['values']['writer_last_name'] . $military;
+  $post_data = 'writer_first_name=' . urlencode($form_state['values']['writer_first_name']) .
+               '&writer_last_name=' . urlencode($form_state['values']['writer_last_name']) .
+               '&writer_email=' . $form_state['values']['writer_email'] .
+               '&writer_address_1=' . urlencode($form_state['values']['writer_address_1']) .
+               '&writer_address_2=' . urlencode($form_state['values']['writer_address_2']) .
+               '&writer_city=' . urlencode($form_state['values']['writer_city']) .
+               '&writer_state=' . urlencode($form_state['values']['writer_state']) .
+               '&writer_zip=' . urlencode($form_state['values']['writer_zip']) .
+               '&writer_country=' . urlencode('United States') .
+               '&military_unit=' . urlencode($form_state['values']['mil_address_1']) .
+               '&military_box=' . urlencode($form_state['values']['mil_address_2']) .
+               '&military_company=' . urlencode($form_state['values']['mil_address_3']) .
+               '&military_city=' . urlencode($form_state['values']['mil_city']) .
+               '&military_state=' . urlencode($form_state['values']['mil_state']) .
+               '&military_zip=' . urlencode($form_state['values']['mil_zip']) .
+               '&action='  . urlencode($form_state['values']['action']) .
+               '&issue=' . urlencode($form_state['values']['issue']) .
+               '&apikey=' . '755d2aba10d6d2e967fb5634f8606488' .
+               '&subject=' . urlencode($form_state['values']['bipac_subject']) .
+               '&message=' . urlencode($messagetxt) .
+	       '&topic=' . urlencode(strtolower(trim($form_state['values']['bipac_topic']))) .
+               '&g=' . urlencode(strtolower(trim($form_state['values']['parent'])));
+
+  $options = array(
+    'method' => 'POST',
+    'data' => $post_data,
+    'timeout' => 30,
+    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+  );
+
+  $result = drupal_http_request($bipac_url, $options);
+
+  if(($result->code == 200) && ($mode == 'production')) {
+    if(strpos($result->data, 'Leg_1')) {
+      if(!empty($form_state['values']['writer_agree'])) {
+        $form_state['values']['country'] = 'United States';
+        $values = _ebay_custom_prepare_form_for_silverpop($mapping, $form_state['values'], '1788739');
+      }
+      // watchdog('ebay_custom', 'BIPAC submission: ' . $result->data . ' code: ' . $result->code, NULL, WATCHDOG_WARNING);
+      $_SESSION['bipac_response'] = _ebay_custom_get_bipac_legs($result->data);
+      if(isset($form_state['values']['thanks'])) {
+        $path = $form_state['values']['thanks'];
+        drupal_goto($path);
+      } else {
+        drupal_set_message('Submission received!  Thank you for your support.');
+      }
+    } else {
+      drupal_set_message($error, 'error');
+    }
+  } elseif ($mode == 'production') {
+    drupal_set_message('There was a problem receiving your submission.  Please wait a few minutes and try again.');
+    watchdog('ebay_custom', 'BIPAC submission failed: ' . $result->data . ' code: ' . $result->code, NULL, WATCHDOG_WARNING);
+  }
+
+  if($mode == 'debug') {
+    drupal_set_message('Debug Mode.  Nothing submitted to Silverpop.  BIPAC returns test data.');
+    drupal_set_message('BIPAC Return Code: ' . $result->code);
+    drupal_set_message($result->data);
+    $_SESSION['bipac_response'] = _ebay_custom_get_bipac_legs($result->data);
+    dsm($_SESSION['bipac_response']);
+  }
+
+  if(($result->code == 200) && ($mode == 'test')) {
+    drupal_set_message('Test Mode.  Nothing submitted to Silverpop.  BIPAC returns test data.');
+    if(strpos($result->data, 'Leg_1')) {
+      $_SESSION['bipac_response'] = _ebay_custom_get_bipac_legs($result->data);
+      if(isset($form_state['values']['thanks'])) {
+        $path = $form_state['values']['thanks'];
+        drupal_goto($path);
+      } else {
+        drupal_set_message('Submission received!  Thank you for your support.');
+      }
+    } else {
+      drupal_set_message($error, 'error');
+    }
+  } elseif ($mode == 'test') {
+    drupal_set_message('There was a problem receiving your submission.  Please wait a few minutes and try again.');
+    drupal_set_message('BIPAC test submission failed: ' . $result->data);
+  }
+
+  if((!empty($form_state['values']['writer_agree'])) && ($mode == 'production')) {
+    $form_state['values']['country'] = NULL;
+    $values = _ebay_custom_prepare_form_for_silverpop($mapping, $form_state['values'], '1788739');
+  }
+}
+
+function _ebay_custom_get_bipac_legs($data) {
+  $dom = new domDocument();
+  @$dom->loadHTML($data);
+  $dom->preserveWhiteSpace = FALSE;
+  $legs = $dom->getElementsByTagName('p');
+  $vars = array();
+
+  if($legs) {
+    foreach($legs as $leg) {
+      $item = $leg->nodeValue;
+      switch($item) {
+        case strpos($item, 'Leg_1_Name'):
+          $leg_1_name = str_replace('Leg_1_Name: ', '', $item);
+          $tmp = explode(" ", $leg_1_name);
+          $leg_1_type = isset($tmp[0]) ? strtolower($tmp[0]) : NULL;
+          break;
+        case strpos($item, 'Leg_1_Dist_Phone'):
+          $leg_1_dist_phone = str_replace('Leg_1_Dist_Phone: ', '', $item);
+          break;
+        case strpos($item, 'Leg_1_Cap_Phone'):
+          $leg_1_cap_phone = str_replace('Leg_1_Cap_Phone: ', '', $item);
+          break;
+        case strpos($item, 'Leg_1_Photo'):
+          $leg_1_photo = str_replace('Leg_1_Photo: ', '', $item);
+          break;
+        case strpos($item, 'Leg_2_Name'):
+          $leg_2_name = str_replace('Leg_2_Name: ', '', $item);
+          $tmp = explode(" ", $leg_2_name);
+          $leg_2_type = isset($tmp[0]) ? strtolower($tmp[0]) : NULL;
+          break;
+        case strpos($item, 'Leg_2_Dist_Phone'):
+          $leg_2_dist_phone = str_replace('Leg_2_Dist_Phone: ', '', $item);
+          break;
+        case strpos($item, 'Leg_2_Cap_Phone'):
+          $leg_2_cap_phone = str_replace('Leg_2_Cap_Phone: ', '', $item);
+          break;
+        case strpos($item, 'Leg_2_Photo'):
+          $leg_2_photo = str_replace('Leg_2_Photo: ', '', $item);
+          break;
+        case strpos($item, 'Leg_3_Name'):
+          $leg_3_name = str_replace('Leg_3_Name: ', '', $item);
+          $tmp = explode(" ", $leg_3_name);
+          $leg_3_type = isset($tmp[0]) ? strtolower($tmp[0]) : NULL;
+          break;
+        case strpos($item, 'Leg_3_Dist_Phone'):
+          $leg_3_dist_phone = str_replace('Leg_3_Dist_Phone: ', '', $item);
+          break;
+        case strpos($item, 'Leg_3_Cap_Phone'):
+          $leg_3_cap_phone = str_replace('Leg_3_Cap_Phone: ', '', $item);
+          break;
+        case strpos($item, 'Leg_3_Photo'):
+          $leg_3_photo = str_replace('Leg_3_Photo: ', '', $item);
+          break;
+      }
+    }
+    if(isset($leg_1_name)) {
+      $vars[] = array('name' => $leg_1_name, 'dphone' => _ebay_custom_format_phone($leg_1_dist_phone), 'cphone' => _ebay_custom_format_phone($leg_1_cap_phone), 'photo' => $leg_1_photo, 'type' => $leg_1_type);
+    }
+    if(isset($leg_2_name)) {
+      $vars[] = array('name' => $leg_2_name, 'dphone' => _ebay_custom_format_phone($leg_2_dist_phone), 'cphone' => _ebay_custom_format_phone($leg_2_cap_phone), 'photo' => $leg_2_photo, 'type' => $leg_2_type);
+    }
+    if(isset($leg_3_name)) {
+      $vars[] = array('name' => $leg_3_name, 'dphone' => _ebay_custom_format_phone($leg_3_dist_phone), 'cphone' => _ebay_custom_format_phone($leg_3_cap_phone), 'photo' => $leg_3_photo, 'type' => $leg_3_type);
+    }
+  }
+  return $vars;
+}
+
+function _ebay_custom_format_phone($num) {
+  return preg_replace('~.*(\d{3})[^\d]*(\d{3})[^\d]*(\d{4}).*~', '($1) $2-$3', $num);
+}
+
+function _ebay_custom_get_bipac_info($node) {
+  $bipac_info = array();
+  if (is_object($node)) {
+    $bipac_id = isset($node->field_campaign_bipac_campaignid['und'][0]['value']) ? $node->field_campaign_bipac_campaignid['und'][0]['value'] : NULL;
+    $bipac_type = $node->field_campaign_bipac_type['und'][0]['value'];
+    $silverpop_disable_check = !empty($node->field_campaign_disable_silverpop['und'][0]['value']) ? TRUE : FALSE;
+    $bipac_thanks = isset($node->field_campaign_thank_you_page['und'][0]['value']) ? $node->field_campaign_thank_you_page['und'][0]['value'] : NULL;
+    $bipac_subject = isset($node->field_campaign_subject['und'][0]['value']) ? $node->field_campaign_subject['und'][0]['value'] : NULL;
+    $bipac_content = isset($node->field_campaign_letter_content['und'][0]['value']) ? $node->field_campaign_letter_content['und'][0]['value'] : NULL;
+    $bipac_error = isset($node->field_campaign_error_message['und'][0]['value']) ? $node->field_campaign_error_message['und'][0]['value'] : NULL;
+    $bipac_mode = isset($node->field_campaign_test_mode['und'][0]['value']) ? $node->field_campaign_test_mode['und'][0]['value'] : 'test';
+    $bipac_topic = isset($node->field_campaign_topic['und'][0]['value']) ? $node->field_campaign_topic['und'][0]['value'] : NULL;
+    $bipac_editable = !empty($node->field_campaign_editable_letter['und'][0]['value']) ? TRUE : FALSE;
+    $bipac_key = isset($node->field_campaign_editable_key['und'][0]['value']) ? $node->field_campaign_editable_key['und'][0]['value'] : NULL;
+
+    $bipacurl   = "https://www.bipac.net/petition_2.asp?g=EBAY";
+    if ($bipac_type == 'Letter') {
+      $bipacurl   = "https://www.bipac.net/alert_2.asp?g=EBAY";
+    }
+    else {
+      $bipacurl   = "https://www.bipac.net/petition_2.asp?g=EBAY";
+    }
+    $bipac_info = array('id' => $bipac_id, 'type' => $bipac_type, 'url' => $bipacurl, 'thanks' => $bipac_thanks, 'subject' => $bipac_subject, 'content' => $bipac_content, 'error' => $bipac_error, 'mode' => $bipac_mode, 'topic' => $bipac_topic, 'disable_check' => $silverpop_disable_check, 'editable_letter' => $bipac_editable, 'editable_key' => $bipac_key);
+  }
+  return $bipac_info;
+}
+
+/**
+ * Exclude certain content types from the core search
+ */
+function ebay_custom_query_alter(&$query) {
+  $is_search = FALSE;
+  foreach ($query->getTables() as $table) {
+    if ($table['table'] == 'search_index') {
+      $is_search = TRUE;
+    }
+  }
+
+  if ($is_search) {
+     $query->condition('n.type', 'facebook_page', '<>');
+     $query->condition('n.type', 'feed', '<>');
+		 $query->condition('n.type', 'feed_item', '<>');
+		 $query->condition('n.type', 'feed_item_ebay_inc_news', '<>');
+		 $query->condition('n.type', 'flickr_image', '<>');
+		 $query->condition('n.type', 'media_article', '<>');
+		 $query->condition('n.type', 'office', '<>');
+		 $query->condition('n.type', 'policy_paper', '<>');
+		 $query->condition('n.type', 'profile', '<>');
+		 $query->condition('n.type', 'spotlight', '<>');
+		 $query->condition('n.type', 'video_submission', '<>');
+
+  }
+}

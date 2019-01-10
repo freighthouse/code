@@ -1,0 +1,14 @@
+{
+  "name": "drupal/momentum_campaign",
+  "type": "drupal-module",
+  "description": "Provides a campaign content type and integration to the Momentum API.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/momentum_campaign",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/momentum_campaign",
+    "source": "http://cgit.drupalcode.org/momentum_campaign"
+  },
+  "require": { }
+}

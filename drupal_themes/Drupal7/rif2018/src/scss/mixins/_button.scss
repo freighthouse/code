@@ -1,0 +1,176 @@
+//
+// @file
+// Button mixins.
+// ---------------------------------------------------------------------------
+@mixin button {
+  @include fs($fs-10);
+  border: 0;
+  border-width: 0;
+  border-radius: 2em;
+  color: $white;
+  display: inline-block;
+  font-family: $ff-sans;
+  font-weight: $fw-bold;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-shadow: none;
+  line-height: 30px;
+  padding: 15px 60px;
+
+  @media (max-width: 767px) {
+    letter-spacing: .05em;
+  }
+}
+
+@mixin button-small {
+  @include button;
+  @include fs($fs-00);
+  line-height: 18px;
+  padding: 12px 24px;
+
+  &:active {
+    padding-bottom: 11px;
+    padding-top: 13px;
+  }
+}
+
+@mixin button-xsmall {
+  @include button;
+  @include fs($fs-00);
+  line-height: 18px;
+  padding: 6px 12px;
+
+  &:active {
+    padding-bottom: 5px;
+    padding-top: 7px;
+  }
+}
+
+@mixin button-large {
+  @include fs($fs-10);
+  line-height: 30px;
+  padding: 15px 60px;
+
+  &:active {
+    padding-bottom: 14px;
+    padding-top: 16px;
+  }
+
+  @media (max-width: 767px) {
+    line-height: 30px;
+    padding: 10px 30px;
+
+    &:active {
+      padding-bottom: 9px;
+      padding-top: 11px;
+    }
+  }
+}
+
+@mixin button-blue {
+  background-color: $blue-light;
+  box-shadow: 0 -1px 0 inset rgba($blue-medium, .5);
+
+  &:hover,
+  &:focus,
+  &.active,
+  &.active-trail {
+    background-color: $blue-medium;
+    background-image: linear-gradient(to top right, $blue-medium, $blue-light);
+    color: $white;
+  }
+
+  &:active {
+    background-color: $blue-medium;
+    background-image: none;
+    box-shadow: 0 1px 0 inset rgba($blue-dark, .5);
+    color: $white;
+  }
+}
+
+@mixin button-green {
+  background-color: $green-light;
+  box-shadow: 0 -1px 0 inset rgba($green-medium, .5);
+
+  &:hover,
+  &:focus,
+  &.active,
+  &.active-trail {
+    background-color: $green-medium;
+    background-image: linear-gradient(to top right, $green-medium, $green-light);
+  }
+
+  &:active {
+    background-color: $green-medium;
+    background-image: none;
+    box-shadow: 0 1px 0 inset rgba($green-dark, .5);
+  }
+}
+
+@mixin button-red {
+  background-color: $red-medium;
+  box-shadow: 0 -1px 0 inset rgba($red-medium, .5);
+
+  &:hover,
+  &:focus,
+  &.active,
+  &.active-trail {
+    background-color: $red-medium;
+    background-image: linear-gradient(to top right, $red-medium, $red-light);
+    background-image: linear-gradient(to top right, $red-dark, $red-medium);
+  }
+
+  &:active {
+    background-color: $red-medium;
+    background-image: none;
+    box-shadow: 0 1px 0 inset rgba($red-dark, .5);
+  }
+}
+
+@mixin button-white {
+  background-color: $white;
+  box-shadow: 0 0 5px inset $white;
+  color: $blue-light;
+
+  &:hover,
+  &:focus,
+  &.active,
+  &.active-trail {
+    background-color: $white;
+    background-image: linear-gradient(to top right, mix($blue-light, $white, 15%), $white);
+  }
+
+  &:active {
+    background-color: mix($white, $blue-white);
+    background-image: none;
+    box-shadow: 0 1px 5px inset rgba($blue-light, .5);
+  }
+}
+
+@mixin button-gray {
+  background-color: $gray-light;
+  box-shadow: 0 -1px 0 inset rgba($gray-medium, .5);
+  color: $gray-dark;
+
+  &:hover,
+  &:focus,
+  &.active,
+  &.active-trail {
+    background-color: $gray-medium;
+    background-image: linear-gradient(to top right, $gray-light, $gray-white);
+    color: $gray-dark;
+  }
+
+  &:active {
+    background-color: $gray-light;
+    background-image: none;
+    box-shadow: 0 1px 0 inset rgba($gray-medium, .5);
+    color: $gray-dark;
+  }
+}
+
+@mixin button-disabled {
+  box-shadow: none;
+  opacity: .5;
+}

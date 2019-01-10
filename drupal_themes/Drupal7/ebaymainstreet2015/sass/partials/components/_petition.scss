@@ -1,0 +1,64 @@
+.node-type-petition{
+
+  .region-content .block-system > .content{
+    border: none;
+    background: none;
+  }
+
+  .petition-content{
+    background: #fff;
+    border: 1px solid #ccc;
+    margin: 0 0 1.5em;
+
+    .petition-padding{
+      padding: 1.5em;
+    }
+
+    .field-name-field-petition-text{
+      .field-label{
+        @include fontsize(22);
+        margin-bottom: 10px;
+        color: $c-blue;
+        @extend %helvetica;
+        font-weight: normal;
+      }
+
+      .field-items{
+        background: #eee;
+        padding: 1.5em;
+      }
+    }
+  }// .petition-content
+
+  .petition-form{
+    background: #fff;
+    border: 1px solid #ccc;
+
+    .petition-padding{
+      padding: 1.5em;
+    }// .petition-padding
+
+    h2{
+      margin-top: 0;
+      @extend %titletext;
+    }
+  }// .petition-form
+
+  @include breakpoint($bp-small) {
+    .petition-content{
+      float: left;
+      width: 66%;
+      margin-right: 2%;
+      margin: 0 2% 0 0;
+    }
+
+    .petition-form{
+      float: right;
+      width: 30%;
+    }
+  }
+
+  .field-name-field-disclaimer-text p{
+    @include fontsize(12);
+  }
+}// .node-type-petition

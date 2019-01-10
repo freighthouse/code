@@ -1,0 +1,332 @@
+.node-timeline {
+  .vco-storyjs ol,
+  .vco-storyjs ul {
+    list-style: initial;
+    margin-bottom: 1em;
+    li {
+      margin-left: 2em;
+    }
+  }
+}
+
+.timeline .item {
+  @extend %clearfix;
+  background: none;
+  color: $c-off-black;
+  text-align: left;
+  background-color: $c-white;
+  border: 1px solid $c-light-grey;
+
+  div {
+    padding: 0 2em;
+  }
+
+  h2 {
+    @extend %titletext;
+    @include fontsize(16);
+    @extend %bold;
+    color: $c-off-black;
+  }
+
+  .read_more {
+    @include fontsize(14);
+    @extend %helvetica;
+    display: block;
+    padding: 0.75em 0.5em;
+    margin: 0 0.5em;
+    border-top: 1px solid $c-light-grey;
+    color: $c-blue;
+    text-align: right;
+    &:after {
+      @include fontsize(18);
+      @extend %chevron-right;
+      display: inline-block;
+      margin-left: 0.5em;
+      line-height: 1.8;
+      vertical-align: middle;
+    }
+  }
+}
+
+.timeline .item_open {
+  background: none;
+  color: $c-off-black;
+  text-align: left;
+  background-color: $c-off-white;
+  border-radius: 3px;
+  overflow-y: scroll !important;
+  h2 {
+    @extend %titletext;
+    @include fontsize(16);
+    @extend %bold;
+    width: 80%;
+    color: $c-blue;
+    text-align: left;
+  }
+  .item_open_cwrapper {
+    max-width: 440px;
+  }
+  .item_open_content {
+    padding: 1em;
+  }
+  .t_close {
+    @include fontsize(14);
+    @extend %univers;
+    @extend %bold;
+    border-radius: 3px;
+    margin-right: 0;
+    color: $c-white;
+    background-color: $c-blue;
+    text-transform: uppercase;
+    &:hover,
+    &:focus {
+      background-color: $c-light-blue;
+    }
+    @include breakpoint($bp-small) {
+      margin-right: -2em;
+    }
+  }
+}
+
+.timelineLoader {
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 208px 13px;
+  background-image: url('../images/timeline/loadingAnimation.gif');
+}
+
+.timeline .t_line_holder {
+  height: 90px;
+  background: none;
+}
+
+.t_line_wrapper {
+  padding-top: 13px;
+  padding-bottom: 13px;
+  border-bottom: 3px solid $c-light-grey;
+}
+
+.timeline .t_line_m {
+  border-left: 1px solid $c-light-grey;
+  border-right: 1px solid $c-light-grey;
+}
+
+.timeline a.t_line_node {
+  @include fontsize(15);
+  @extend %helvetica;
+  top: -20px;
+  padding: 0;
+  height: 2em;
+  color: $c-dark-grey;
+  background: none;
+  text-decoration: none;
+  &.active {
+    background: none;
+    &:after {
+      background-color: $c-blue;
+    }
+  }
+
+  &:after {
+    content: '';
+    display: block;
+    border-radius: 4px;
+    margin: 0 auto;
+    width: 8px;
+    height: 8px;
+    background-color: $c-light-grey;
+    &:hover,
+    &:focus {
+      background: none;
+      background-color: $c-light-blue;
+    }
+  }
+
+  &:hover,
+  &:focus {
+    color: $c-blue;
+    background: none;
+  }
+}
+
+.timeline {
+  @extend %clearfix;
+  .t_node_desc {
+    transform: translate(-50%, -50%);
+    top: 40px;
+    margin: 50%;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #fff;
+    background: none;
+    background-color: $c-blue;
+  }
+}
+
+.timeline #t_line_right,
+.timeline #t_line_left {
+  top: 43px;
+}
+
+.timeline #t_line_left {
+  background: none;
+  &:before {
+    @extend %chevron-left;
+  }
+  &:hover,
+  &:focus {
+    background: none;
+    color: $c-blue;
+  }
+}
+
+.timeline #t_line_right {
+  background: none;
+  &:before {
+    @extend %chevron-right;
+  }
+  &:hover,
+  &:focus {
+    background: none;
+    color: $c-blue;
+  }
+}
+
+.timeline .t_left {
+  @include fontsize(24);
+  background: none;
+  &:before {
+    @extend %chevron-left;
+  }
+  &:hover,
+  &:focus,
+  &:hover:active {
+    background: none;
+    color: $c-blue;
+  }
+}
+
+.timeline .t_right {
+  @include fontsize(24);
+  background: none;
+  &:before {
+    @extend %chevron-right;
+  }
+  &:hover,
+  &:focus,
+  &:hover:active {
+    background: none;
+    color: $c-blue;
+  }
+}
+
+.timeline h4.t_line_month {
+  @include fontsize(16);
+  margin-top: -50px;
+}
+
+.t_line_month_year {
+  display: inline;
+}
+
+
+// Timeline Responsive
+$giant-width: 700px; // 1100
+$large-width: 550px; // 1024
+$med-width: 550px; // 925
+$small-width: 425px; // 769
+$tiny-width: 425px; // 550
+$default-width: 260px; // 320
+
+.timeline .timeline_line,
+.timeline .t_line_view {
+  width: $default-width;
+  @include breakpoint($bp-tiny) {
+    width: $tiny-width;
+  }
+  @include breakpoint($bp-small) {
+    width: $small-width;
+  }
+  @include breakpoint($bp-med) {
+    width: $med-width;
+  }
+  @include breakpoint($bp-large) {
+    width: $large-width;
+  }
+  @include breakpoint($bp-giant) {
+    width: $giant-width;
+  }
+}
+
+.timeline .t_line_m {
+  width: $default-width/2;
+  @include breakpoint($bp-tiny) {
+    width: $tiny-width/2;
+  }
+  @include breakpoint($bp-small) {
+    width: $small-width/2;
+  }
+  @include breakpoint($bp-med) {
+    width: $med-width/2;
+  }
+  @include breakpoint($bp-large) {
+    width: $large-width/2;
+  }
+  @include breakpoint($bp-giant) {
+    width: $giant-width/2;
+  }
+}
+
+.timeline .t_line_m.right {
+  left: $default-width/2;
+  width: $default-width/2;
+  @include breakpoint($bp-tiny) {
+    left: $tiny-width/2;
+    width: $tiny-width/2;
+  }
+  @include breakpoint($bp-small) {
+    left: $small-width/2;
+    width: $small-width/2;
+  }
+  @include breakpoint($bp-med) {
+    left: $med-width/2;
+    width: $med-width/2;
+  }
+  @include breakpoint($bp-large) {
+    left: $large-width/2;
+    width: $large-width/2;
+  }
+  @include breakpoint($bp-giant) {
+    left: $giant-width/2;
+    width: $giant-width/2;
+  }
+}
+
+/////
+// timeline.js stuff
+////
+
+.storyjs-embed {
+  .vco-storyjs .vco-feature h1,
+  .vco-storyjs .vco-feature h2,
+  .vco-storyjs .vco-feature h3,
+  .vco-storyjs .vco-feature h4,
+  .vco-storyjs .vco-feature h5,
+  .vco-storyjs .vco-feature h6 {
+    @extend %univers;
+  }
+
+  .vco-storyjs p,
+  .vco-storyjs blockquote,
+  .vco-storyjs blockquote p,
+  .vco-storyjs .twitter blockquote p {
+    @extend %helvetica;
+  }
+}
+
+
+.slider-item .text .container h2.date,
+.nav-container .title {
+  display: none;
+}

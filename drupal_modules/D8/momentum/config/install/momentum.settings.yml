@@ -1,0 +1,8 @@
+momentum_key: null
+momentum_parent: null
+momentum_email: null
+momentum_url: 'https://bapi-stage.reqdigital.com/'
+momentum_process: 0
+momentum_debug: 0
+momentum_batch_size: 50
+momentum_error_description: null

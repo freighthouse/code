@@ -1,0 +1,369 @@
+<?php
+
+/**
+ * @file
+ *   Install and remove schema for BIPAC Campaigns module
+ *   This file also sets up the content type fields
+ *   For the BIPAC Campaign content type (which is defined in .module).
+ */
+
+/**
+ * Implements hook_schema()
+ */
+function bipac_campaigns_schema() {
+  $schema['bipac_campaigns'] = array(
+    'description' => 'maintains count information for petition and letter submissions',
+    'fields' => array(
+      'topic' => array(
+        'description' => 'BIPAC topic',
+        'not null' => TRUE,
+        'type' => 'varchar',
+        'length' => 155,
+      ),
+      'count' => array(
+        'description' => 'current count',
+        'type' => 'int',
+        'unsigned' => TRUE,
+	'default' => 0,
+      ),
+    ),
+    'unique_keys' => array(
+      'filename' => array('topic'),
+    ),
+    'primary key' => array('topic'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_install()
+ */
+function bipac_campaigns_install() {
+  // Empty
+}
+
+/**
+ * Implements hook_enable()
+ */
+function bipac_campaigns_enable() {
+  node_types_rebuild();
+  $types = node_type_get_types();
+  node_add_body_field($types['bipac_campaign']);
+
+  foreach(_bipac_campaigns_installed_fields() as $field) {
+    field_create_field($field);
+  }
+
+  foreach(_bipac_campaigns_installed_instances() as $instance) {
+    $instance['entity_type'] = 'node';
+    $instance['bundle'] = 'bipac_campaign';
+    field_create_instance($instance);
+  }
+  drupal_set_message(t('BIPAC Campaigns module enabled.  You will need to add your API key and Parent.  You may also want to adjust your new content type settings.'));
+}
+
+/**
+ * Fields array for content type
+ */
+function _bipac_campaigns_installed_fields() {
+  return array(
+    'field_bipac_camp_thank_you_page' => array(
+      'field_name' => 'field_bipac_camp_thank_you_page',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_form_title' => array(
+      'field_name' => 'field_bipac_camp_form_title',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_error_message' => array(
+      'field_name' => 'field_bipac_camp_error_message',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_subject' => array(
+      'field_name' => 'field_bipac_camp_subject',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_letter_salut' => array(
+      'field_name' => 'field_bipac_camp_letter_salut',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_letter_message' => array(
+      'field_name' => 'field_bipac_camp_letter_message',
+      'type' => 'text_with_summary',
+    ),
+    'field_bipac_camp_letter_finale' => array(
+      'field_name' => 'field_bipac_camp_letter_finale',
+      'type' => 'text_with_summary',
+    ),
+    'field_bipac_camp_topic' => array(
+      'field_name' => 'field_bipac_camp_topic',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_type' => array(
+      'field_name' => 'field_bipac_camp_type',
+      'type' => 'list_text',
+      'settings' => array(
+        'allowed_values' => array(
+          'editable' => t('Fully Editable Campaign'),
+          'partial' => t('Partially Editable Campaign'),
+          'static' => t('Static Campaign'),
+        ),
+      ),
+    ),
+    'field_bipac_camp_form_etitle' => array(
+      'field_name' => 'field_bipac_camp_form_etitle',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_mode' => array(
+      'field_name' => 'field_bipac_camp_mode',
+      'type' => 'list_text',
+      'settings' => array(
+        'allowed_values' => array(
+          'test' => t('Test'),
+          'production' => t('Production'),
+        ),
+      ),
+    ),
+    'field_bipac_camp_submissions' => array(
+      'field_name' => 'field_bipac_camp_submissions',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_submission_date' => array(
+      'field_name' => 'field_bipac_camp_submission_date',
+      'type' => 'text',
+    ),
+    'field_bipac_camp_tweet' => array(
+      'field_name' => 'field_bipac_camp_tweet',
+      'type' => 'text',
+    ),
+  );
+}
+
+/**
+ * Field instances for content type
+ */
+function _bipac_campaigns_installed_instances() {
+  return array(
+    'field_bipac_camp_thank_you_page' => array(
+      'field_name' => 'field_bipac_camp_thank_you_page',
+      'label' => t('Thank You Page'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_form_title' => array(
+      'field_name' => 'field_bipac_camp_form_title',
+      'label' => t('Form Title'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_error_message' => array(
+      'field_name' => 'field_bipac_camp_error_message',
+      'label' => t('Error Message'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_subject' => array(
+      'field_name' => 'field_bipac_camp_subject',
+      'label' => t('Subject'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_topic' => array(
+      'field_name' => 'field_bipac_camp_topic',
+      'label' => t('Topic'),
+      'required' => TRUE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_letter_salut' => array(
+      'field_name' => 'field_bipac_camp_letter_salut',
+      'label' => t('Letter Salutation'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_letter_message' => array(
+      'field_name' => 'field_bipac_camp_letter_message',
+      'label' => t('Letter Message'),
+      'required' => TRUE,
+      'widget' => array(
+        'type' => 'text_textarea_with_summary',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+      'settings' => array(
+        'text_processing' => '0',
+      ),
+    ),
+    'field_bipac_camp_letter_finale' => array(
+      'field_name' => 'field_bipac_camp_letter_finale',
+      'label' => t('Letter Signature'),
+      'required' => TRUE,
+      'widget' => array(
+        'type' => 'text_textarea_with_summary',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+      'settings' => array(
+        'text_processing' => '0',
+      ),
+    ),
+    'field_bipac_camp_type' => array(
+      'field_name' => 'field_bipac_camp_type',
+      'label' => t('Type'),
+      'required' => TRUE,
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_form_etitle' => array(
+      'field_name' => 'field_bipac_camp_form_etitle',
+      'label' => t('Editable Field Title'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_mode' => array(
+      'field_name' => 'field_bipac_camp_mode',
+      'label' => t('Mode'),
+      'required' => TRUE,
+      'widget' => array(
+        'type' => 'options_select',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_submissions' => array(
+      'field_name' => 'field_bipac_camp_submissions',
+      'label' => t('Form Submissions (count)'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_submission_date' => array(
+      'field_name' => 'field_bipac_camp_submission_date',
+      'label' => t('Last Submission Date'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'field_bipac_camp_tweet' => array(
+      'field_name' => 'field_bipac_camp_tweet',
+      'label' => t('Canned Tweet'),
+      'required' => FALSE,
+      'widget' => array(
+        'type' => 'text_textfield',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function bipac_campaigns_uninstall() {
+  // Drops table.  Use with caution.
+  drupal_uninstall_schema('bipac_campaigns');
+
+  foreach (array_keys(_bipac_campaigns_installed_fields()) as $field) {
+    field_delete_field($field);
+  }
+ 
+  $instances = field_info_instances('node', 'bipac_campaign');
+  foreach ($instances as $instance_name => $instance) {
+    field_delete_instance($instance);
+  }
+
+  node_type_delete('bipac_campaign');
+}

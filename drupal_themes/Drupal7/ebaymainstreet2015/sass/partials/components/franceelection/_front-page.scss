@@ -1,0 +1,405 @@
+//Logo
+.header-main-menu-1 {
+  .not-front & {
+    top: 4em;
+    @include breakpoint($bp-small) {
+      top: 0;
+    }
+  }
+}
+.site-logo-france {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  @include breakpoint($bp-small) {
+    padding: 2em 0em;
+  }
+  a {
+    @include svg-bg('Ebay-sengage');
+    display: block;
+    width: 244px;
+    height: 43px;
+    background-size: 100%;
+    margin: 0px auto;
+    background-repeat: no-repeat;
+    @include breakpoint($bp-small) {
+      margin: 0;
+    }
+  }
+}
+.site-logo-france-2 {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  @include breakpoint($bp-small) {
+    padding: 1em 0em 2em 0;
+  }
+  a {
+    @include svg-bg('Ebay-sengage');
+    display: block;
+    width: 247px;
+    height: 31px;
+    background-repeat: no-repeat;
+    background-size: 247px 33px;
+    margin: 0px auto;
+    @include breakpoint($bp-small) {
+      margin: 0;
+    }
+  }
+}
+//Graph on the Homepage
+#block-bean-france-election-homepage-graph-, #block-bean-france-election-homepage-graph-3{
+  h2 {
+    text-align: center;
+    text-transform: uppercase;
+    margin-top: 40px;
+  }
+  .bean-france-election-homepage-graph {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 2em;
+    .field-name-field-graph-image {
+      float: none;
+      @include breakpoint($bp-small) {
+        width: 47%;
+        float: left;
+      }
+    }
+    .field-name-field-right-text {
+      @include fontsize(24);
+      float: none;
+        @include breakpoint($bp-small) {
+            @include fontsize(36);
+            color: #333333;
+            border-left: 5px solid #0064d2;
+            font-style: italic;
+            padding-left: 33px;
+            float: right;
+            width: 47%;
+          }
+    }
+      .field-name-field-source {
+        float:none;
+        @include breakpoint($bp-small) {
+        width: 100%;
+        float: left;
+        @include fontsize(11);
+        padding-left: 65px;
+      }
+    }
+  }
+}
+#block-bean-france-election-homepage-graph-2 {
+  margin-top: 60px;
+  .bean-france-election-homepage-graph {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 2em;
+  .field-name-field-right-text {
+    @include fontsize(24);
+      float: none;
+        @include breakpoint($bp-small) {
+            @include fontsize(36);
+            color: #333333;
+            border-left: 5px solid #0064d2;
+            font-style: italic;
+            padding-left: 33px;
+            float: left;
+            width: 47%;
+          }
+
+  }
+  .field-name-field-graph-image {
+      float: none;
+      @include breakpoint($bp-small) {
+        width: 47%;
+        float: right;
+      }
+    }
+    .field-name-field-source {
+        float:none;
+        @include breakpoint($bp-small) {
+        width: 88%;
+        float: left;
+        text-align: right;
+        @include fontsize(11);
+      }
+    }
+  }
+}
+#block-bean-france-election-homepage-graph-3 {
+    margin-top: 60px;
+}
+//Engage Block on the bottom
+#block-bean-pourquoi-ebay-sengage {
+  h2 {
+    text-align: center;
+  }
+  .bean-france-election-quote-block {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    padding: 2em;
+    .field-name-field-member-image {
+      float: none;
+      @include breakpoint($bp-small) {
+        width: 25%;
+        float: left;
+      }
+      img {
+        border-radius: 50%;
+        margin: 1em 0 1.5em 0;
+      }
+    }
+    .field-name-field-member-title {
+      @include fontsize(16);
+      margin-top: 20px;
+      @include breakpoint($bp-small) {
+        @include fontsize(24);
+        color: #333333;
+        margin-top: 15px;
+      }
+    }
+    .field-name-field-quote-long {
+      @include fontsize(20);
+      @include breakpoint($bp-small) {
+        @include fontsize(25);
+        color: #333333;
+        font-style: italic;
+      }
+    }
+    .field-name-field-article-link {
+        margin-top : 30px;
+        border-top: 1px solid #cccccc;
+        margin-bottom: 30px;
+        a{
+            float: right;
+            @extend %learn-more-link;
+            border: none;
+            &:hover,
+            &:focus {
+                color: $c-medium-grey;
+            }
+      }
+    }
+  }
+}
+//Nos View on the homepage
+#block-views-nos-propositions-block {
+	h2 {
+		text-align: center;
+	}
+	.view-nos-propositions {
+			background-color: #ffffff;
+    		border: 1px solid #cccccc;
+    		padding: 2em;
+    		h2 {
+    			text-align:left;
+    		}
+		.view-header p{
+			@include breakpoint($bp-small) {
+    			@include fontsize(24);
+          margin-left: 10px;
+    			color: #333333;
+  			}
+		}
+		.view-footer {
+			@extend %clearfix;
+			clear: both;
+			p{
+				@include breakpoint($bp-small) {
+    			@include fontsize(24);
+          text-align: center;
+          margin-top: 60px;
+    			color: #333333;
+  			}
+  			a {
+          padding: 1em;
+          @include fontsize(16);
+            padding: 1.2em 1.25em 1.2em 1.25em;
+            color: #ffffff;
+            background: none;
+            text-shadow: none;
+            border-radius: 0;
+            background-color: #0064d2;
+            border-radius: 4px;
+            font-weight: normal;
+            line-height: 2;
+  				@include breakpoint($bp-small) {
+  					@include fontsize(18);
+    				padding: 1.5em 6.25em 1.5em 6.25em;
+    				color: #ffffff;
+    				background: none;
+    				text-shadow: none;
+    				border-radius: 0;
+    				background-color: #0064d2;
+    				border-radius: 4px;
+    				font-weight: normal;
+    				line-height: 2;
+  				}
+  			}
+  		}
+		}
+		.views-row-1 {
+			float: none;
+			@include breakpoint($bp-small) {
+    			width: 30%;
+          margin-left: 10px;
+    			padding-right: 20px;
+    			border-right: 2px solid #ccc;
+    			float: left;
+  			}
+  		}
+
+  		.views-row-2 {
+			float: none;
+			@include breakpoint($bp-small) {
+    			width: 30%;
+    			padding-left: 20px;
+    			padding-right: 20px;
+    			border-right: 2px solid #ccc;
+    			float: left;
+  			}
+  		}
+  		.views-row-3 {
+			float: none;
+			@include breakpoint($bp-small) {
+    			width: 30%;
+    			padding-left: 20px;
+    			float: left;
+  			}
+		}
+	}
+}
+//hidding the content and tabs from the page
+.page-node-130351, .page-node-130423 {
+  .main-content {
+    .block-system {
+      .content {
+        display: none;
+      }
+    }
+  }
+}
+.footer-logo-title-1 {
+  margin: 2em 0;
+  @include breakpoint($bp-small) {
+    float: left;
+    margin: 4.5em 0 0 0;
+  }
+}
+.footer-copyright-1 {
+  @include fontsize(12);
+  @extend %helvetica;
+  clear: both;
+  border-top: 1px solid $c-light-grey;
+  margin-top: 2em;
+  padding-bottom: 20px;
+  text-align: center;
+
+  @include breakpoint($bp-small) {
+    float: left;
+    margin: 0;
+    width: 100%;
+    text-align: left;
+  }
+}
+.footer-main-menu-1 {
+  @include fontsize(16);
+  @extend %helvetica;
+  @extend %bold;
+  float: none;
+
+  @include breakpoint($bp-small) {
+    margin: 4.5em 0 1.5em 0;
+    float: right;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
+
+  li {
+    display: block;
+    line-height: 2;
+    list-style-type: none;
+
+    @include breakpoint($bp-small) {
+      display: inline;
+      margin-right: 2em;
+    }
+    &.menu-twitter a{
+      font-size: 0px;
+      &:before {
+        @extend %twitter;
+        @include fontsize(20);
+      }
+    }
+    &.menu-linkedin a{
+      font-size: 0px;
+      &:before {
+        @extend %linkedin;
+        @include fontsize(20);
+      }
+    }
+    &.first {
+    }
+
+    &.last {
+      margin-right: 0;
+    }
+
+  }
+}
+//Homepage Updates
+#block-views-le-constat-block {
+  h2 {
+    text-align: center;
+  }
+  .view-le-constat {
+    padding: 2em;
+    background: white;
+    border: 1px solid #ccc;
+    .views-row-1, .views-row-2 {
+        width: 100%;
+        display: block;
+        text-align: center;
+      @include breakpoint($bp-small) {
+        width: 29%;
+        display: inline-block;
+        margin-right: 35px;
+        vertical-align: top;
+      }
+      .views-field-title {
+        border-left: 2px solid #0064d2;
+        padding-left: 20px;
+        min-height: 74px;
+        margin-bottom:25px;
+      }
+      .field-name-field-le-source {
+        text-align: center;
+      }
+    }
+    .views-row-3 {
+      width: 100%;
+      display: block;
+      text-align: center;
+      @include breakpoint($bp-small) {
+        width: 30%;
+        display: inline-block;
+        margin-right: 35px;
+        vertical-align: top;
+      }
+      .views-field-title {
+        border-left: 2px solid #0064d2;
+        padding-left: 20px;
+        min-height: 74px;
+        margin-bottom:25px;
+      }
+      .field-name-field-le-source {
+        text-align: center;
+      }
+    }
+  }
+}

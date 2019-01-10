@@ -1,0 +1,197 @@
+
+.node-type-career-opportunity {
+//  margin-top: 30px;
+
+  .panel {
+//    border: 1px solid darken(@off-white, 5%);
+
+    .panel-body {
+//      padding: 0;
+padding: 0;
+
+      .node-career-opportunity-container {
+//        padding: 15px 30px;
+//        text-align: center;
+          margin-bottom: $spacing-xxlarge;
+          margin-top: $spacing-xxlarge;
+          margin-left: auto;
+          margin-right: auto;
+          max-width: 900px;
+          @media (max-width: 767px) {
+            margin-bottom: $spacing-xlarge;
+            margin-top: $spacing-xlarge;
+          }
+
+        h3 {
+//          margin: 0;
+//          font-family: @alt-sans-serif-font-family;
+//          font-size: @default-font-size + 4;
+//          font-weight: 900;
+//          line-height: @default-line-height + 12;
+//          text-transform: uppercase;
+
+          a {
+//            color: @rif-blue;
+
+            &:hover,
+            &:focus {
+//              color: darken(@rif-blue, 10%);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+.node-career-opportunity-description {
+  margin-top: 0;
+//  margin-top: 55px;
+
+  .panel {
+//    border: 1px solid darken(@off-white, 5%);
+
+    .panel-body {
+//      padding: 30px;
+
+      p {
+//        margin: 0;
+
+        strong {
+//          display: block;
+//          margin: 30px 0 15px;
+//          font-size: @default-font-size + 4;
+//          line-height: @default-line-height + 4;
+//          color: @rif-purple;
+            color: $blue-light;
+            margin: $spacing-xlarge 0 $spacing-small;
+        }
+        & + p {
+//          margin: 15px 0 0;
+            margin-top: 1.5em;
+        }
+      }
+      ol {
+//        margin: 0;
+//        counter-reset: li;
+//        padding-left: 0;
+//        list-style: none;
+
+        li {
+//          position: relative;
+//          margin: 0 0 0 30px;
+//          font-family: @default-font-family;
+//          font-size: @default-font-size - 2;
+//          font-weight: 900;
+//          line-height: @default-line-height + 2;
+//          padding: 0 15px;
+//          list-style: none;
+//          color: @rif-grey;
+            font-family: $ff-sans;
+
+          & + li {
+//            margin-top: 7.5px;
+          }
+          &:before {
+//            content: counter(li);
+//            counter-increment: li;
+//            position: absolute;
+//            left: -24px;
+//            width: 20px;
+//            height: 20px;
+//            font-family: @alt-sans-serif-font-family;
+//            font-size: @default-font-size - 6;
+//            font-weight: 900;
+//            text-align: center;
+//            line-height: @default-line-height - 1;
+//            color: @white;
+//            background: @rif-blue;
+//            .border-radius (20px);
+          }
+        }
+      }
+      ul:not(.dropdown-menu) {
+//        margin: 0 0 0 30px;
+//        list-style: none;
+//        padding: 0;
+            margin-top: $spacing-small;
+
+        li {
+//          padding: 0 15px;
+//          font-family: @default-font-family;
+//          font-size: @default-font-size;
+//          font-weight: normal;
+//          line-height: @default-line-height;
+//          color: @rif-grey;
+            font-family: $ff-sans;
+
+          & + li {
+//            margin-top: 15px;
+          }
+          &:last-child {
+
+            p {
+
+              &:last-child {
+//                margin: 0;
+              }
+            }
+          }
+          ul {
+//            margin: 20px;
+
+            li {
+
+              &:before {
+//                content: "\f10c";
+//                font-family: FontAwesome;
+//                font-size: @default-font-size - 6;
+//                display: inline-block;
+//                margin-left: -2.5em;
+//                color: @rif-purple;
+//                width: 30px;
+                  font-size: 10px;
+              }
+            }
+          }
+          &:before {
+//            content: "\f111";
+//            font-family: FontAwesome;
+//            font-size: @default-font-size - 6;
+//            display: inline-block;
+//            margin-left: -2.5em;
+//            color: @rif-blue;
+//            width: 30px;
+              font-size: 6px;
+              line-height: 24px;
+              vertical-align: top;
+              margin-left: -30px;
+          }
+          h3 {
+//            margin: -24px 0 7.5px;
+//            padding: 0;
+//            font-family: @alt-sans-serif-font-family;
+//            font-weight: 900;
+//            font-size: @default-font-size + 2;
+//            line-height: @default-line-height + 2;
+//            color: @rif-purple;
+//            text-align: left;
+          }
+          h4 {
+//            margin: -24px 0 7.5px;
+//            font-family: @alt-sans-serif-font-family;
+//            font-weight: 900;
+//            font-size: @default-font-size + 2;
+//            line-height: @default-line-height + 2;
+//            color: @rif-purple;
+//            text-transform: uppercase;
+          }
+          p {
+//            padding: 0 !important;
+//            margin: 0 0 15px;
+//            font-size: @default-font-size - 2;
+          }
+        }
+      }
+    }
+  }
+}

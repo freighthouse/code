@@ -1,0 +1,37 @@
+
+
+body {
+  background-color: $white;
+  color: $black;
+  font-family: $ff-sans;
+  padding-right: 0 !important;
+}
+
+h1, h2 {
+  color: $blue-light;
+  font-family: $ff-display;
+  font-weight: $fw-semibold;
+  > b,
+  > strong {
+    font-weight: $fw-semibold;
+  }
+}
+
+p {
+  margin-bottom: $spacing-medium;
+  @include fs($fs-body);
+  line-height: 1.5em;
+
+  &:last-child {
+    margin-bottom: 0;;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+cite {
+  color: $gray-dark;
+  @include fs($fs-body-small);
+}

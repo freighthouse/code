@@ -1,0 +1,14 @@
+{
+  "name": "drupal/momentum_officials",
+  "type": "drupal-module",
+  "description": "Provides the ability to find elected officials based on location using the Momentum API.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/momentum_officials",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/momentum_officials",
+    "source": "http://cgit.drupalcode.org/momentum_officials"
+  },
+  "require": { }
+}

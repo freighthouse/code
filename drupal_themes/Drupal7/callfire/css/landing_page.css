@@ -1,0 +1,254 @@
+/*------------------------------------------------------------------
+[Landing Page Node Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Description: Generic styles for Landing Page page type
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+.node-type-landing-page #sales-number {
+  border-width: 1px;
+  margin-top: 10px;
+  right: 30px;
+  font-size: 20px;
+  border-radius: 4px;
+  padding: 10px;
+  width: 258px;
+  text-align: center;
+}
+
+.node-type-landing-page h1 {
+  font-size: 30px;
+}
+
+.node-type-landing-page h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.node-type-landing-page .social-links h3 {
+  font-size: 11px;
+}
+
+.node-type-landing-page .sidebars .region-sidebar-second .block {
+  padding-top: 0;
+}
+
+.node-type-landing-page #quotes {
+  font-size: 14px;
+}
+
+.node-type-landing-page #quotes .quote {
+  font-family: Georgia;
+  padding: 15px;
+  color: #333;
+  background-color: #dcecf8;
+  margin-bottom: 0;
+  position: relative;
+}
+
+  .node-type-landing-page .quote:before {
+    display: block;
+    content: " ";
+    width: 0; 
+    height: 0; 
+    border-top: 0 solid transparent;
+    border-bottom: 25px solid transparent; 
+    border-right: 25px solid #dcecf8; 
+    bottom: 0;
+    margin-bottom: -25px;
+    margin-left: -5px;
+    position: absolute;
+  }
+
+    .node-type-landing-page .quote.right-aligned:before {
+      border-right: none;
+      border-left: 25px solid #dcecf8; 
+      right: 12px;
+    }
+
+  .quote-attribution {
+    padding: 5px 8px 20px 45px;
+  }
+
+    .quote-attribution.right-aligned {
+      text-align: right;
+      padding: 5px 45px 20px 8px;
+    }
+
+    .quote-attribution span {
+      font-weight: bold;
+      display: inline-block;
+      margin-right: 5px;
+      color: #222;
+    }
+
+.callfire-benefits {
+  padding-bottom: 70px;
+  background: url('../images/landing-page/woman-with-headset.jpg') right bottom no-repeat;
+}
+
+  .woman-in-yellow {
+    background-image: url('../images/landing-page/woman-in-yellow.jpg');
+  }
+
+  .woman-asian {
+    background-image: url('../images/landing-page/woman-asian.jpg');
+    padding-bottom: 75px;
+  }
+
+  .callfire-benefits ul {
+    margin: 0;
+    list-style: none;
+  }
+
+    .callfire-benefits li {
+      padding-left: 30px;
+      line-height: 36px;
+      font-size: 18px;
+      background: url('../images/landing-page/signup-check.jpg') left center no-repeat;
+    }
+
+.product-features {
+  border-top: 1px solid #ccc;
+  box-shadow: 1px 1px 0px #fff inset;
+  padding-top: 30px;
+  background: url('../images/landing-page/bg-product-features.jpg') top center no-repeat;
+  margin-bottom: 25px;
+}
+
+  .product-features ul {
+    list-style: none;
+    margin-left: 0;
+    margin-bottom: 50px;
+    clear: both;
+    font-size: 13px;
+  }
+
+  .product-features ul li {
+    padding-left: 15px;
+    line-height: 24px;
+    width: 280px;
+    float: left;
+    color: #555;
+    background: url('../images/landing-page/bullet.jpg') left center no-repeat;
+  }
+
+#landing-page-sign-up {
+  padding: 0;
+  border: 1px solid #ff9024;
+  font-size: 14px;
+  color: #333;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+  
+  #landing-page-sign-up h2 {
+    background-color: #ff9024;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    padding: 10px 15px;
+  }
+
+  #landing-page-sign-up form {
+    margin: 15px;
+  }
+
+  #landing-page-sign-up input {
+    margin-bottom: 10px;
+    font-size: 15px;
+    border-radius: 3px;
+    width: 258px;
+    padding: 4px;
+    border: 1px solid #dcdcdc;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+    transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    -moz-transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+    -webkit-transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+  }
+
+    #landing-page-sign-up input:focus {
+      border-color: rgba(82, 168, 236, 0.8);
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+      outline: 0 none;
+    }
+
+    #landing-page-sign-up .placeholder {
+      color: #999;
+    }
+
+  #landing-page-sign-up .callfire-benefits {
+    background: none;
+  }
+
+  #landing-page-sign-up .callfire-benefits li {
+    font-size: 16px;
+    line-height: 30px;
+  }
+
+  #landing-page-sign-up .button {
+    color: #fff;
+    display: block;
+    margin: 10px 0 5px;
+    padding: 8px 0;
+    width: 100%;
+    background-color: #ff9024;
+    background-image: -moz-linear-gradient(top, #ffa753, #ff9024);
+    background-image: -webkit-linear-gradient(top, #ffa753, #ff9024);
+    background-image: linear-gradient(top, #ffa753, #ff9024);
+    border-color: #f89406 #f89406 #c86607;
+    font-size: 18px;
+  }
+
+  #landing-page-sign-up .button:hover {
+    color: #fff;
+  }
+
+  #landing-page-sign-up a {
+    color: #333;
+    font-size: 12px;
+    float: right;
+  }
+
+    #landing-page-sign-up a:hover {
+      color: #000;
+    }
+
+
+
+#signup-today {
+  padding: 10px 15px;
+  text-align: center;
+  background-color: #ffc68f;
+  border-radius: 0 0 6px 6px;
+}
+
+  #signup-today h2 {
+    font-size: 18px;
+    color: #111;
+  }
+
+  #signup-today .button {
+    display: block;
+    float: none;
+    font-weight: normal;
+    font-size: 16px;
+    font-weight: 16px;
+    margin: 0 15px 5px;
+    color: #fff;
+  }
+
+    #signup-today .button:hover {
+      color: #fff;
+    }
+
+  #signup-today a {
+    color: #333;
+  }
+
+    #signup-today a:hover {
+    color: #000;
+  }

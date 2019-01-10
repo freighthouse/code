@@ -1,0 +1,52 @@
+
+.breadcrumb {
+//  position: relative;
+//  z-index: 1;
+//  margin: 0;
+//  padding: 0;
+//  background-color: @rif-blue;
+//  text-align: center;
+//  .border-radius (0);
+  background: $blue-light;
+  // position: absolute;
+  // margin-top: $spacing-medium;
+  padding: $spacing-small 0 0;
+  width: 100%;
+
+  li {
+
+    &.active {
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size - 6;
+//      font-weight: 900;
+//      line-height: @default-line-height;
+//      text-transform: uppercase;
+//      color: @rif-yellow;
+      font-family: $ff-body;
+    }
+    a {
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size - 6;
+//      font-weight: 900;
+//      line-height: @default-line-height;
+//      text-transform: uppercase;
+//      color: @white;
+      font-family: $ff-body;
+      letter-spacing: .05em;
+
+      &:hover,
+      &:focus {
+//        color: @rif-yellow;
+//        text-decoration: none;
+        color: $white;
+        text-decoration: underline;
+      }
+    }
+  }
+  > li + li {
+    &:before {
+      color: $white;
+      opacity: .25;
+    }
+  }
+}

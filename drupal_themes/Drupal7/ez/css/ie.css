@@ -1,0 +1,13 @@
+@media only screen and (max-width: 768px) {
+  .lt-ie10 .navbar-trunk.slide {
+    display: none;
+  }
+  .lt-ie10 .navbar-trunk.slide.menu-open {
+    display: block;
+  }
+  .lt-ie10 #main.menu-open,
+  .lt-ie10 .navbar-header.menu-open {
+    margin-left: 240px;
+  }
+}
+/*# sourceMappingURL=ie.css.map */

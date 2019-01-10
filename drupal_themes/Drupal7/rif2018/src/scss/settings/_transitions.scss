@@ -1,0 +1,13 @@
+//
+// Default transition values
+//
+
+$trans-settings: (
+  property: all,
+  duration: .25s,
+  easing: ease-in-out,
+  delay: 0s
+);
+
+$default-transition-duration: map-get($trans-settings, duration);
+$default-transition-easing: map-get($trans-settings, easing);

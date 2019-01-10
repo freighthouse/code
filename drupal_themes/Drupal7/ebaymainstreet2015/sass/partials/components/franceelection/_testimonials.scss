@@ -1,0 +1,197 @@
+#block-views-microsite-testimonials-block {
+	margin-top: 60px;
+	.view-microsite-testimonials {
+        padding: 1.5em;
+        @include breakpoint($bp-small) {
+        }
+		.views-row {
+			width: 100%;
+            margin-bottom: 60px;
+            background: white;
+            padding-bottom: 25px;
+			@include breakpoint($bp-small) {
+				width: 29%;
+    			background: white;
+   				margin-right: 30px;
+   				margin-bottom: 60px;
+    			display: inline-block;
+                padding-bottom: 25px;
+    		}
+    		.views-field-title {
+    			padding-left: 20px;
+    			padding-top: 10px;
+    		}
+    		h2 {
+    			margin: 0;
+    		}
+    		.field-name-field-business-name {
+                padding-left: 20px;
+                 padding-top: 10px;
+                 font-size: 1.5em;
+                @include breakpoint($bp-small) {  
+    			 padding-left: 20px;
+                 padding-top: 10px;
+                }
+    		}
+            .field-name-field-testimonial-market {
+                padding-left: 20px;
+                 padding-top: 10px;
+                @include breakpoint($bp-small) {  
+                 padding-left: 20px;
+                 padding-top: 10px;
+                }
+            }
+            .field-name-body {
+                padding-left: 20px;
+            }
+    	}
+        .has-video {
+            .field-name-field-testi-photo a{
+                position: relative;
+                z-index: 3;
+                &:before{
+                    content: '';
+                    position: absolute;
+                    top: -115px;
+                    right: 0;
+                    bottom: 0;
+                    left: 38%;
+                    background: url("/sites/all/themes/ebaymainstreet2015/images/play.png") no-repeat;
+                    z-index: 15;
+                    display: block;
+                }
+            }
+        }
+	}
+}
+#block-views-microsite-testimonials-block-1 {
+    margin-top: 60px;
+    h2 {
+        text-align: center;
+    }
+    .view-microsite-testimonials {
+        padding: 1.5em;
+        @include breakpoint($bp-small) {
+            background-color: white;
+            border: 1px solid #cccccc;
+            padding-left: 3em;
+            padding-right: 2em;
+            padding-top: 3em;
+        }
+        .views-row {
+            width: 100%;
+            margin-bottom: 60px;
+            background: white;
+            padding-bottom: 25px;
+            @include breakpoint($bp-small) {
+                width: 29%;
+                background: white;
+                margin-left: 28px;
+                margin-right: 10px;
+                margin-bottom: 60px;
+                display: inline-block;
+                padding-bottom: 0px;
+            }
+            .views-field-title {
+                padding-left: 20px;
+                padding-top: 10px;
+            }
+            h2 {
+                margin: 0;
+                text-align: left;
+            }
+            .field-name-field-business-name, .field-name-field-testimonial-market {
+                padding-left: 20px;
+                 padding-top: 10px;
+                @include breakpoint($bp-small) {  
+                 padding-left: 20px;
+                 padding-top: 10px;
+                }
+            }
+            .field-name-body {
+                padding-left: 20px;
+            }
+        }
+        .has-video {
+            .field-name-field-testi-photo a{
+                position: relative;
+                z-index: 3;
+                &:before{
+                    content: '';
+                    position: absolute;
+                    top: -115px;
+                    right: 0;
+                    bottom: 0;
+                    left: 38%;
+                    background: url("/sites/all/themes/ebaymainstreet2015/images/play.png") no-repeat;
+                    z-index: 15;
+                    display: block;
+                }
+            }
+        }
+    }
+}
+.page-node-130365, .page-node-130440 {
+	#block-system-main {
+		.content {
+			display: none;
+		}
+	}
+}
+#node-130361, #node-130445 {
+    #edit-previous {
+        display: none;
+    }
+}
+#block-block-131 {
+        width: 385px;
+        margin-top: 20px;
+    @include breakpoint($bp-small) {
+        width: 100%;
+    }
+    .content {
+        @include breakpoint($bp-small) { 
+            margin-top: 120px;
+            margin-left: 60px;
+        }
+    }
+}
+#block-block-134 {
+    padding: 2em;
+    background: #ffffff;
+    border: 1px solid #cccccc;
+    margin-top: 40px;
+}
+#block-views-microsite-testimonials-block-1 {
+    .view-microsite-testimonials {
+        padding: 0px;
+    }
+    .view-header p{
+        padding-top: 25px;
+            @include breakpoint($bp-small) {
+                @include fontsize(24);
+                color: #333333;
+                margin-left: 20px;
+            }
+        }
+    .view-footer {
+        margin-top : 80px;
+        margin-right:30px;
+        margin-left: 30px;
+        border-top: 1px solid #cccccc;
+        margin-bottom: 30px;
+        @include breakpoint($bp-small) {
+            margin-top : 30px;
+            border-top: 1px solid #cccccc;
+            margin-bottom: 30px;
+        }
+        a{
+            @extend %learn-more-link;
+            border: none;
+            &:hover,
+            &:focus {
+                color: $c-medium-grey;
+            }
+        }
+    }
+}

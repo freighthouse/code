@@ -1,0 +1,6 @@
+name = "Silverpop API"
+description = "A simple module that submits to Silverpop"
+core = 7.x
+package = Silverpop
+dependencies[] = 'ebay_custom'
+dependencies[] = 'smarterstreets'

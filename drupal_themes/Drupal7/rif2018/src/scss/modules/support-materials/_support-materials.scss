@@ -1,0 +1,397 @@
+// Teaser
+//
+// The support Material when shown as a teaser
+//
+// Markup: support-material-teaser.html
+//
+//Styleguide Modules.Support Materials.Teaser
+.node-support-material {
+  &.node-teaser {
+//      border-top: 1px solid lighten(@blue, 45%);
+      .content {
+//          padding: 20px 0 15px;
+        padding: $spacing-large 0;
+      }
+      .description {
+//        font-size: 16px;
+      }
+      .icon {
+          img {
+//              margin: auto;
+//              max-width: 80%;
+          }
+//          padding: 0 5px 0 15px;
+//          text-align: right;
+          padding: 0 0 0 15px;
+        //   @media (min-width: 1440px) {
+        //       padding: 0 30px;
+        //   }
+          .fa {
+//              font-size: 30px;
+//              color: @darker-blue;
+          }
+      }
+      .text {
+          padding-left: 15px;
+      }
+      a {
+
+        .description {
+//          color: @grey !important;
+        }
+        h4 {
+            color: $blue-light;
+        }
+
+        &:hover {
+            h4 {
+                color: $blue-medium;
+            }
+        }
+      }
+      h4 {
+//          margin: 0 0 5px;
+//          font-family: @default-font-family;
+//          font-size: @default-font-size;
+//          font-weight: 900;
+//          line-height: @default-line-height - 4;
+//          color: @darker-blue;
+        @include resource-title-small;
+      }
+      .field-name-field-description,
+      .description {
+//          font-weight: 500;
+//          font-size: @default-font-size - 2;
+//          line-height: @default-line-height - 2;
+//          color: @grey;
+        @include description;
+      }
+      .button {
+//          text-align: right;
+//          padding-right: 15px;
+            @media (max-width: 991px) {
+                clear: both;
+                width: 100%;
+                text-align: left;
+            }
+          .btn {
+//              width:100%;
+//              line-height: 34px;
+//              padding-top: 0;
+//              padding-bottom: 0;
+                width: auto;
+                font-size: 12px;
+                line-height: 12px;
+                padding: 9px 12px;
+
+                &:active {
+                padding-bottom: 8px;
+                padding-top: 10px;
+                }
+
+              .fa {
+//                  margin-right: 8px;
+                line-height: 12px;
+                margin-left: 0;              
+                margin-right: 6px;
+              }
+          }
+          @media (max-width: 768px) {
+//              margin-top:20px;
+          }
+      }
+  }
+  &.search-results {
+      .container {
+//          width: 100%;
+//          height: auto;
+        margin-bottom: $spacing-large;
+        padding-top: 0;;
+          .support-cover {
+//              max-width:400px;
+//              position: relative;
+//              margin: 0 auto;
+//              color: @white;
+//              background-color: lighten(@dark-blue, 65%);
+//              .border-radius (4px);
+                border: none;
+                background: none;
+              
+              > a {
+                background-color: rgba($blue-white, .5);
+                border-radius: 6px;
+                display: block;
+                height: 0;
+                margin-bottom: $spacing-medium;
+                // padding-bottom: 180/263*100%;
+                padding-bottom: 60%;
+                position: relative;
+                transition: all .15s linear;
+                &:hover {
+                  background-color: rgba($blue-white, .75);
+                }
+              }
+              img {
+//                  width: 30%;
+//                  .border-radiuses (4px, 0, 0, 4px);
+//                  display: block;
+                margin: 0;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+              }
+          }
+          .title {
+//              font-family: @default-font-family;
+//              font-size: @default-font-size - 4;
+//              font-weight: 900;
+//              line-height: @default-line-height;
+//              text-overflow: ellipsis;
+//              color: @dark-blue;
+//              text-transform: uppercase;
+                @include resource-title-small;
+          }
+          a {
+              .title {
+                  color: $blue-light;
+              }
+
+              &:hover {
+                  .title {
+                    color: $blue-medium;
+                  }
+              }
+          }
+          .text {
+//              font-family: @default-font-family;
+//              font-size: @default-font-size - 4;
+//              line-height: @default-line-height - 4;
+                @include description;
+          }
+      }
+  }
+  &.search-results {
+//      max-width: none;
+//      max-height: 550px;
+  }
+}
+
+// Teaser List
+//
+// The support Material when shown as a list of teasers in a panel. panel-default and panel-support-materials
+//
+// Markup: support-material-teaser-list.html
+//
+//Styleguide Modules.Support Materials.Teaser-List
+.panel-support-materials {
+    margin-bottom: $spacing-xxlarge;
+    margin-top: $spacing-large;
+    @media (max-width: 991px) {
+        margin-bottom: $spacing-xlarge;
+        margin-top: $spacing-medium;
+    }
+}
+.node-support-material {
+    &.node-teaser {
+        border-bottom: 1px solid $gray-light;
+        border-top: none;
+        &:first-child {
+            border-top: 1px solid $gray-light;
+    //          border-top: 0;
+        }
+        &:nth-of-type(odd) {
+            background-color: $gray-white;
+    //          background-color: @white;
+        }
+        &:nth-of-type(even) {
+            background-color: $white;
+    //          background-color: lighten(@blue, 55%);
+        }
+    }
+}
+
+.button-container .btn.book-resource-favorite-button {
+  .button-text {
+//      display: block;
+//      margin: 0;
+//      padding: 0;
+      .fa-heart {
+//          float: right;
+      }
+  }
+}
+.button-text {
+//font-size: 12px;
+//padding: 0 5px;
+    font-size: inherit;
+    padding: 0;
+}
+
+.support-materials {
+  .view-display-id-related_support_materials {
+//      min-height: 600px;
+  }
+  .view-empty {
+      .support-empty-view {
+//          display: table-cell;
+//          vertical-align: middle;
+//          text-align: center;
+//          padding: 30px;
+//          min-height: 150px;
+      }
+  }
+
+  h3 {
+//      margin: 0 0 15px;
+//      font-family: @default-font-family;
+//      font-size: @default-font-size + 2;
+//      font-weight: 900;
+//      line-height: @default-line-height + 12;
+//      color: @grey;
+    font-family: $ff-sans;
+    @include fs($fs-body-large);
+    font-weight: $fw-bold;
+    line-height: 30px;
+    color: $blue-dark;
+    margin: $spacing-xsmall 0;
+  }
+  & > .dropdown {
+//      margin: 0;
+
+      &.open {
+
+          .dropdown-toggle {
+//              background-color: @darker-blue;
+//              .border-radiuses (15px, 0, 0, 15px);
+          }
+          .dropdown-menu {
+//              margin-top: 0;
+//              background-color: @darker-blue;
+//              border: none;
+//              .border-radiuses (0, 4px, 4px, 4px);
+//              padding: 8px;
+
+              li {
+
+                  &:first-child {
+
+                      a {
+//                          .border-radiuses (4px, 0, 0, 4px);
+                      }
+                  }
+                  &:last-child {
+
+                      a {
+//                          .border-radiuses (0, 4px, 4px, 0);
+                      }
+                  }
+                  & + li {
+
+                      a {
+//                          border-top: 1px solid darken(@off-white, 10%);
+                      }
+                  }
+                  a {
+//                      font-family: @alt-sans-serif-font-family;
+//                      font-size: @default-font-size;
+//                      line-height: @default-line-height;
+//                      color: @grey;
+//                      font-weight: 700;
+//                      margin: 0;
+//                      padding: 6px 10px;
+//                      border: none;
+//                      background-color: @white;
+//                      .border-radius (0);
+
+                      &:hover,
+                      &:focus {
+//                          background-color: lighten(@lighter-blue, 35%) !important;
+                      }
+                      &:active {
+//                          background-color: lighten(@lighter-blue, 30%) !important;
+                      }
+                  }
+              }
+          }
+      }
+      button {
+//          padding: 0 15px;
+//          font-family: @alt-serif-font-family;
+//          font-size: @default-font-size;
+//          line-height: @default-line-height + 18;
+//          font-weight: 700;
+//          text-transform: none;
+//          color: @white;
+//          background-color: @dark-blue;
+
+          .caret {
+//              margin-left: 8px;
+          }
+      }
+  }
+  .btn {
+//      padding: 0 15px;
+//      line-height: 33px;
+    line-height: 18px;
+
+      .fa {
+//          //margin-left: 8px;
+//          line-height: 33px;
+margin-left: 12px;
+line-height: 18px;
+      }
+  }
+}
+
+.node-support-material .search-results {
+  .resource-cover .support-cover {
+      img {
+//          height: 65px;
+      }
+  }
+}
+
+.related-book-path {
+    a {
+        background-color: $gray-white;
+        border: 1px solid rgba($gray-light, 0);
+        border-radius: 6px;
+        color: $gray-dark;
+        display: block;
+        @include fs($fs-body-small);
+        line-height: 1.5em;
+        padding: $spacing-large;
+        padding-left: $spacing-xxlarge;
+        position: relative;
+        transition: all .15s linear;
+        text-decoration: none;
+
+        strong {
+            color: $blue-light;
+        }
+        
+        &:before {
+            content: "\f060";
+            content: "\f15b";
+            color: $blue-light;
+            font-family: "FontAwesome";
+            @include fs($fs-40);
+            font-weight: 100;
+            position: absolute;
+            left: $spacing-large;
+            top: 50%;
+            transform: translateY(-50%);
+            width: $spacing-large;
+            text-align: center;
+            transition: all .15s linear;
+        }
+
+        &:hover {
+            border-color: $gray-light;
+            &:before {
+                color: $blue-medium;
+            }
+        }
+    }
+}

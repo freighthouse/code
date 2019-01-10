@@ -1,0 +1,14 @@
+{
+  "name": "drupal/momentum_social",
+  "type": "drupal-module",
+  "description": "Enables 'Tweet your officials' and social sharing for Momentum campaigns.",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://www.drupal.org/project/momentum_social",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://www.drupal.org/project/issues/momentum_social",
+    "source": "http://cgit.drupalcode.org/momentum_social"
+  },
+  "require": { }
+}

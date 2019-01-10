@@ -1,0 +1,1193 @@
+<?php
+
+/**
+ * Check to make sure the user has a PURL session before allowing them to access the PURL page.
+ */
+if (drupal_get_path_alias($_GET['q']) == 'rating-lookup' && !isset($_SESSION['PURL'])) {
+    drupal_goto('<front>');
+}
+
+function sunrun_leadforms_init() {
+
+  if (drupal_get_path_alias($_GET['q']) == 'contact-us') {
+    $action = variable_get('ctc_form_action');
+    $oid = variable_get('ctc_form_oid');
+    $return_url = variable_get('ctc_form_return_url');
+    $button_text = variable_get('ctc_form_button_text');
+    $tcpa_disclosure = variable_get('tcpa_disclosure');
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_click_to_call.js');
+
+    drupal_add_js(array(
+      'sunrun_click_to_call' => array(
+        'action' => $action,
+        'oid' => $oid,
+        'return_url' => $return_url,
+        'button_text' => $button_text,
+        'tcpa_disclosure' => $tcpa_disclosure,
+      )
+    ), 'setting');
+  }
+}
+
+/**
+ * Implement hook_menu().
+ */
+function sunrun_leadforms_menu() {
+    $items = array();
+
+    $items['admin/sunrun/leadforms'] = array(
+        'title' => 'Leadform configuration',
+        'description' => 'Configure Sunrun Marketo Leadforms',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('sunrun_leadforms_settings_admin'),
+        'access arguments' => array('administer site configuration'),
+        'type' => MENU_NORMAL_ITEM,
+        'file' => 'sunrun_leadforms.admin.inc',
+    );
+
+    $items['admin/sunrun/click-to-call'] = array(
+        'title' => 'Click-to-call configuration',
+        'description' => 'Configure click-to-call forms',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('sunrun_leadforms_click_to_call_settings_admin'),
+        'access arguments' => array('administer site configuration'),
+        'type' => MENU_NORMAL_ITEM,
+        'file' => 'sunrun_leadforms.click_to_call.admin.inc',
+    );
+
+    $items['ajax-purls-request/change/%/details'] = array(
+        'page callback' => 'ajax_purls_request_actions_callback',
+        'page arguments' => array(2),
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+        'delivery callback' => 'ajax_deliver',
+        'theme callback' => 'ajax_base_page_theme',
+    );
+    return $items;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function sunrun_leadforms_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * Implement hook_block_info().
+ */
+function sunrun_leadforms_block_info() {
+    $blocks = array(
+        'comcast-web-to-lead-form' => array(
+            'info' => t('Sunrun Leadforms: Comcast Web to Lead Form')
+        ),
+        'puerto-rico-web-to-lead-form' => array(
+            'info' => t('Sunrun Leadforms: Puerto Rico Web to Lead Form')
+        ),
+        'puerto-rico-web-to-lead-form-es' => array(
+            'info' => t('Sunrun Leadforms: Puerto Rico Web to Lead Form (spanish)')
+        ),
+        'purls' => array(
+            'info' => t('Sunrun Leadforms: PURLS Form')
+        ),
+        'soft-signup' => array(
+            'info' => t('Sunrun Leadforms: Soft Signup Form')
+        ),
+        'standard-leadform-homepage' => array(
+            'info' => t('Sunrun Leadforms: Standard Lead Form (Homepage)')
+        ),
+        'standard-leadform' => array(
+            'info' => t('Sunrun Leadforms: Standard Lead Form (Form Only)')
+        ),
+        'standard-leadform-multi-step' => array(
+            'info' => t('Sunrun Leadforms: Multi-step standard lead form')
+        ),
+        'standard-leadform-multi-step-var' => array(
+            'info' => t('Sunrun Leadforms: Multi-step standard lead form variation')
+        ),
+        'standard-leadform-multi-step-h' => array(
+            'info' => t('Sunrun Leadforms: Multi-step standard lead form - horizontal')
+        ),
+        'click-to-call' => array(
+            'info' => t('Sunrun Leadforms: Click to Call Form')
+        ),
+        'roof-finder' => array(
+            'info' => t('Sunrun Leadforms: Roof Finder')
+        ),
+        'roof-header' => array(
+            'info' => t('Sunrun Leadforms: Roof Header')
+        ),
+        'average-monthly-bill' => array(
+            'info' => t('Sunrun Leadforms: Solar average monthly bill')
+        ),
+        'solar-rating-slider' => array(
+            'info' => t('Sunrun Leadforms: Solar rating star slider')
+        ),
+        'referral-form' => array(
+            'info' => t('Sunrun Leadforms: Referral form')
+        ),
+        'purls-code-form' => array(
+            'info' => t('Sunrun Leadforms: Purls code form')
+        ),
+        'purls-previous-page-footnotes' => array(
+            'info' => t('Sunrun Leadforms: Previous Page Footnotes (content)')
+        ),
+        'purls-previous-page-title' => array(
+            'info' => t('Sunrun Leadforms: Previous Page Footnotes (heading)')
+        ),
+        'service-transfer-form' => array(
+            'info' => t('Sunrun: Service transfer')
+        ),
+        'standard-bestbuy-leadform' => array(
+            'info' => t('Sunrun Leadforms: Bestbuy')
+        ),
+        'standard-costco-leadform' => array(
+            'info' => t('Sunrun Leadforms: Costco')
+        ),
+        'home-depot-leadform' => array(
+            'info' => t('Sunrun Leadforms: Home Depot')
+        ),
+        'thank-you-out-of-territory' => array(
+            'info' => t('Sunrun: Thank you out of territory')
+        ),
+    );
+    return $blocks;
+}
+
+/**
+ * Implement hook_block_view().
+ */
+function sunrun_leadforms_block_view($delta = '') {
+    $block = array();
+
+    $environment = variable_get('marketo_environment', '//app-ab02.marketo.com');
+    $munchkin_id = variable_get('munchkin_id');
+
+    switch ($delta) {
+        case 'comcast-web-to-lead-form':
+            // Test
+            if ( $_SERVER['HTTP_HOST'] !== 'www.sunrun.com'){
+                $form_action = 'https://test.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8';
+                $oid = "00D1h0000008gOV";
+                $campaign_code_id = "00NQ000000248MR";
+                $campaign_code_value = "186502654524953";
+            }
+            // Production
+            else {
+                $form_action = 'https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8';
+                $oid = "00D600000006rTW";
+                $campaign_code_id = "00N0d000002c5GD";
+                $campaign_code_value = "186502654524953";
+            }
+
+            $block['content'] = theme('comcast-web-to-lead-form', array(
+                'form_action' => $form_action,
+                'base_url' => $GLOBALS['base_url'],
+                'oid' => $oid,
+                'email_placeholder' => 'name@comcast.com',
+                'channel' => 'Co Marketing',
+                'lead_source' => 'Comcast EPP',
+                'lead_type' => 'Web Capture',
+                'campaign_code_id' => $campaign_code_id,
+                'campaign_code_value' => $campaign_code_value
+            ));
+            drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+
+            drupal_add_js(array(
+                'webform' => array(
+                    'datalayer' => array('category' => 'comcast quote form'),
+                    'validator' => array('methods' => array(
+                        'email' => 'comcast_email')
+                    )
+                ),
+            ), 'setting');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_jquery.validate_config.js');
+            drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+                'type' => 'external',
+                'scope' => 'footer',
+                'group' => JS_THEME,
+                'defer' => TRUE,
+            ));
+            break;
+
+        case 'puerto-rico-web-to-lead-form':
+        case 'puerto-rico-web-to-lead-form-es':
+            // Test, Dev & Local
+            if ($_SERVER['HTTP_HOST'] !== 'www.sunrun.com') {
+                $form_action = 'https://test.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8';
+                $oid = "00D1h0000008gOV";
+                $campaign_code_id = "00N0d000002c5GD";
+                $campaign_code_value = "SR2001";
+                $primary_campaign_id = "00N1h000000GIzj";
+                $primary_campaign_value = "7010d000000aYr3";
+            } // Production
+            else {
+                $form_action = 'https://webto.salesforce.com/servlet/servlet.WebToLead?encoding=UTF-8';
+                $oid = "00D600000006rTW";
+                $campaign_code_id = "00N0d000002c5GD";
+                $campaign_code_value = 'SR2001';
+                $primary_campaign_id = "00N0d000002c89r";
+                $primary_campaign_value = "7010d000000aYr3";
+            }
+
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_jquery.validate_config.js');
+
+            // include localization
+            if ($delta == 'puerto-rico-web-to-lead-form-es') {
+                drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/localization/messages_es.js');
+                $theme_hook = 'puerto-rico-web-to-lead-form-es';
+
+            } else {
+                $theme_hook = 'puerto-rico-web-to-lead-form';
+            }
+
+            drupal_add_js(array(
+                'webform' => array(
+                    'datalayer' => array('category' => 'puerto rico quote form'),
+                    'validator' => array('methods' => array(
+                        'email' => 'email')
+                    )
+                ),
+            ), 'setting');
+
+            drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+                'type' => 'external',
+                'scope' => 'footer',
+                'group' => JS_THEME,
+                'defer' => TRUE,
+            ));
+
+            $block['content'] = theme($theme_hook, array(
+                'form_action' => $form_action,
+                'base_url' => $GLOBALS['base_url'],
+                'oid' => $oid,
+                'email_placeholder' => 'Email',
+                'channel' => 'Digital Organic',
+                'lead_source' => 'Sunrun.com Aggregate',
+                'lead_type' => 'Partner',
+                'primary_campaign_id' => $primary_campaign_id,
+                'primary_campaign_value' => $primary_campaign_value,
+                'campaign_code_id' => $campaign_code_id,
+                'campaign_code_value' => $campaign_code_value
+            ));
+
+            break;
+
+        case 'solar-rating-slider':
+            $block['content'] = theme('solar-rating-slider');
+            break;
+
+        case 'average-monthly-bill':
+            $block['subject'] = t('Your Average Monthly Electric Bill');
+            $solar_rating_form = drupal_get_form('solar_rating_form');
+            $block['content'] = render($solar_rating_form);
+            break;
+
+        case 'standard-bestbuy-leadform':
+            drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_zeus_forms.js');
+                $block['content'] = theme('standard-bestbuy-leadform', array(
+                'headline' => '',
+                'blurb' => '',
+                ));
+            drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+                'type' => 'external',
+                'scope' => 'footer',
+                'group' => JS_THEME,
+                'defer' => TRUE,
+            ));
+        break;
+
+        case 'standard-costco-leadform':
+            drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_zeus_forms.js');
+            $block['content'] = theme('standard-costco-leadform', array(
+                'headline' => '',
+                'blurb' => '',
+            ));
+            drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+                'type' => 'external',
+                'scope' => 'footer',
+                'group' => JS_THEME,
+                'defer' => TRUE,
+            ));
+            break;
+
+        case 'home-depot-leadform':
+            drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_zeus_forms.js');
+            $block['content'] = theme('home-depot-leadform', array(
+                'headline' => '',
+                'blurb' => '',
+            ));
+            drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+                'type' => 'external',
+                'scope' => 'footer',
+                'group' => JS_THEME,
+                'defer' => TRUE,
+            ));
+            break;
+
+        case 'standard-leadform-multi-step':
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+          drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.easing.js');
+          drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_multi_step.js');
+          drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+          drupal_add_js(array(
+            'sunrun_leadforms' => array(
+              'form' => 'standard-leadform-multi-step',
+            )
+          ), 'setting');
+          $block['content'] = theme('standard-leadform-multi-step', array(
+            'headline' => variable_get('homepage_leadform_headline'),
+            'blurb'    => variable_get('homepage_leadform_blurb'),
+              'oot_msg' =>  variable_get('oot_msg'),
+          ));
+          drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+            'type' => 'external',
+            'scope' => 'footer',
+            'group' => JS_THEME,
+            'defer' => TRUE,
+          ));
+          break;
+
+        case 'standard-leadform-multi-step-var':
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.easing.js');
+          drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_multi_step.js');
+          drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+          drupal_add_js(array(
+            'sunrun_leadforms' => array(
+              'form' => 'standard-leadform-multi-step-var',
+            )
+          ), 'setting');
+          $block['content'] = theme('standard-leadform-multi-step', array(
+            'headline' => variable_get('homepage_leadform_headline'),
+            'blurb'    => variable_get('homepage_leadform_blurb'),
+              'oot_msg' =>  variable_get('oot_msg'),
+          ));
+          drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+            'type' => 'external',
+            'scope' => 'footer',
+            'group' => JS_THEME,
+            'defer' => TRUE,
+          ));
+          break;
+
+        case 'standard-leadform-multi-step-h':
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.easing.js');
+          drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_multi_step.js');
+          drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+          drupal_add_js(array(
+            'sunrun_leadforms' => array(
+              'form' => 'standard-leadform-multi-step-h',
+            )
+          ), 'setting');
+          $block['content'] = theme('standard-leadform-multi-step-h', array(
+            'headline' => variable_get('homepage_leadform_headline'),
+            'blurb'    => variable_get('homepage_leadform_blurb'),
+              'oot_msg' =>  variable_get('oot_msg'),
+          ));
+
+          drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', array(
+            'type' => 'external',
+            'scope' => 'footer',
+            'group' => JS_THEME,
+            'defer' => TRUE,
+          ));
+          break;
+
+        case 'purls':
+            $user = _sunrun_leadforms_get_user_purl();
+            $form_id = variable_get('purls_form_id');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_purls.js');
+            drupal_add_js(array(
+                'sunrun_purls' => array(
+                    'form_id' => $form_id,
+                    'environment' => $environment,
+                    'munchkin_id' => $munchkin_id,
+                    'first_name' => $user->first,
+                    'last_name' => $user->last,
+                    'address' => $user->address,
+                    'city' => $user->city,
+                    'state' => $user->state,
+                    'zip' => $user->zip,
+                    'bill' => $user->bill,
+                )
+            ), 'setting');
+
+            $block['content'] = theme('purls-user-info', array(
+                'user' => $user,
+                'form_id' => $form_id,
+                'environment' => $environment
+            ));
+            break;
+
+        case 'soft-signup':
+
+            $form_id = variable_get('softsignup_form_id');
+
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_leadforms.js');
+            drupal_add_js(array(
+                'sunrun_leadforms' => array(
+                    'form' => 'soft-signup',
+                    'form_id' => $form_id,
+                    'environment' => $environment,
+                    'munchkin_id' => $munchkin_id,
+                )
+            ), 'setting');
+
+            $block['content'] = theme('soft-signup-form', array(
+                'form_id' => $form_id,
+                'environment' => $environment
+            ));
+            break;
+
+        case 'click-to-call':
+            $date = new DateTime("now", new DateTimeZone('America/Los_Angeles') );
+            $block['content'] = theme('click-to-call-form', array(
+                //eventual form values will go here.
+            ));
+            break;
+
+        case 'roof-finder':
+            $block['content'] = theme('roof-finder');
+            break;
+
+        case 'roof-header':
+            $block['content'] = theme('roof-header');
+            break;
+
+        case 'referral-form':
+            $form_id = variable_get('referral_form_id', '1187');
+
+            drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_leadforms.js');
+            drupal_add_js(array(
+                'sunrun_leadforms' => array(
+                    'form' => 'referral-form',
+                    'form_id' => $form_id,
+                    'environment' => $environment,
+                    'munchkin_id' => $munchkin_id,
+                )
+            ), 'setting');
+
+            $block['content'] = theme('referral-form', array(
+                'form_id' => $form_id,
+                'environment' => $environment,
+                'munchkin_id' => $munchkin_id,
+            ));
+            break;
+
+            case 'thank-you-out-of-territory':
+                drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.oot.js');
+                drupal_add_js(
+                    array(
+                        'type' => 'inline',
+                        'scope' => 'footer',
+                        'group' => JS_THEME,
+                        'weight' => 5,
+                    ), 'setting'
+                );
+                $block['content'] = theme('thank-you-out-of-territory');
+            break;
+
+        case 'purls-code-form':
+            $form = drupal_get_form('sunrun_leadforms_purls_code_form');
+            $block['content'] = render($form);
+            break;
+
+        case 'purls-previous-page-footnotes':
+            if(isset($_SESSION['previous_nid'])){
+                $block['content'] = theme('purls_previous_page_footnotes');
+            }
+            break;
+
+        case 'purls-previous-page-title':
+            if(isset($_SESSION['previous_nid'])){
+                $block['content'] = theme('purls_previous_page_title');
+            }
+            break;
+    }
+
+
+    return $block;
+}
+
+/**
+ * Implement hook_theme()
+ */
+function sunrun_leadforms_theme() {
+    $tcpa = variable_get('tcpa_disclosure');
+    $tcpa_disclosure_spanish = variable_get('tcpa_disclosure_spanish');
+    $oot_msg = variable_get('oot_msg');
+    $theme = array(
+        'comcast-web-to-lead-form' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/web-to-lead-form'
+        ),
+        'puerto-rico-web-to-lead-form' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/web-to-lead-form'
+        ),
+        'puerto-rico-web-to-lead-form-es' => array(
+            'variables' => array(
+                'tcpa' => $tcpa,
+                'tcpa_spanish' => $tcpa_disclosure_spanish
+            ),
+            'template' => 'templates/web-to-lead-form-es'
+        ),
+        'purls-user-info' => array(
+            'variables' => array('user' => NULL),
+            'template' => 'templates/purls-user-info'
+        ),
+        'standard-bestbuy-leadform' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-bestbuy-leadform'
+        ),
+        'standard-costco-leadform' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-costco-leadform'
+        ),
+        'home-depot-leadform' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/home-depot-leadform'
+        ),
+        'get-quote-form' => array(
+            'variables' => array(),
+            'template' => 'templates/get-quote-form'
+        ),
+        'get-quote-simple-form' => array(
+            'variables' => array(),
+            'template' => 'templates/get-quote-simple-form'
+        ),
+        'standard-leadform' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-leadform'
+        ),
+        'standard-leadform-horizontal' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-leadform-horizontal'
+        ),
+        'standard-leadform-homepage' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-leadform-homepage'
+        ),
+        'standard-leadform-multi-step' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-leadform-multi-step'
+        ),
+        'standard-leadform-multi-step-var' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-leadform-multi-step-var'
+        ),
+        'standard-leadform-multi-step-h' => array(
+            'variables' => array('tcpa' => $tcpa),
+            'template' => 'templates/standard-leadform-multi-step-h'
+        ),
+        'soft-signup-form' => array(
+            'variables' => array(),
+            'template' => 'templates/soft-signup-form'
+        ),
+        'click-to-call-form' => array(
+            'variables' => array(),
+            'template' => 'templates/click-to-call-form'
+        ),
+        'roof-finder' => array(
+            'variables' => array(),
+            'template' => 'templates/roof-finder'
+        ),
+        'roof-header' => array(
+            'variables' => array(),
+            'template' => 'templates/roof-header'
+        ),
+        'solar-rating-slider' => array(
+            'variables' => array(),
+            'template' => 'templates/purls-star-rating'
+        ),
+        'referral-form' => array(
+            'template' => 'templates/referral-form'
+        ),
+        'purls-code-form' => array(
+            'template' => 'templates/purls-code-form',
+            'render element' => 'form',
+        ),
+        'purls_previous_page_footnotes' => array(
+            'template' => 'templates/purls-previous-page-footnotes',
+        ),
+        'purls_previous_page_title' => array(
+            'template' => 'templates/purls-previous-page-title',
+        ),
+        'service-transfer-form' => array(
+            'template' => 'templates/service-transfer-form',
+            'variables' => array('tcpa' => $tcpa),
+        ),
+        'thank-you-out-of-territory' => array(
+            'template' => 'templates/thank-you-out-of-territory',
+            'variables' => array('oot_msg' => $oot_msg)
+        ),
+    );
+
+    return $theme;
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function sunrun_leadforms_preprocess_purls_previous_page_footnotes(&$variables) {
+    $node = node_load($_SESSION['previous_nid']);
+    if($node){
+        $node = node_view($node);
+        $footnote = preg_replace('/(<h2>.*<\/h2>)/i', '', render($node['field_footnotes']));
+        $variables['footnotes'] = $footnote;
+    }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function sunrun_leadforms_preprocess_purls_previous_page_title(&$variables) {
+    $node = node_load($_SESSION['previous_nid']);
+    if($node){
+        $node = node_view($node);
+        preg_match('/(<h2>.*<\/h2>)/i', render($node['field_footnotes']), $title);
+        $variables['title'] = isset($title[0]) ? preg_replace(array('/<h2>/', '/<\/h2>/'), '', $title[0]) : '';
+    }
+}
+
+/**
+ * Implements hook_webform_validation_validators().
+ */
+function sunrun_purls_webform_validation_validators() {
+    return array(
+        'valid_code' => array(
+            'name' => "Valid PURL Code",
+            'component_types' => array(
+                'textfield',
+            ),
+            'description' => t('Verifies that an entered PURL code is valid.')
+        ),
+    );
+}
+
+/**
+ * Implements hook_webform_validation_validate().
+ */
+function sunrun_leadforms_webform_validation_validate($validator_name, $items, $components, $rule) {
+    $errors = array();
+
+    if ($items) {
+        switch ($validator_name) {
+            /**
+             * Check to see if the entered code exists in the purl_codes table. If it does add that data to the session for display on the next page.
+             */
+            case 'valid_code':
+                // Switch to the Purls database.
+                db_set_active('srcustom');
+                $purl_code = $items['item_1'];
+                // Fetch first result
+                $result  = db_select('purl_codes', 'p')->fields('p')
+                            ->condition('code', $purl_code)
+                            ->execute()->fetch();
+                // Switch back afterwards.
+                db_set_active();
+                if($result){
+                    $_SESSION['PURL'] = $result;
+                } else {
+                    $errors['item_1'] = t('Oops! The keycode you have entered is not valid. Please try again.');
+                }
+                break;
+        }
+    }
+
+    return $errors;
+}
+
+
+/**
+ * Ajax callback function.
+ * function ajax_purls_request_actions_callback($detailParam)
+ * @param $detailParam
+ * @return ajax-request
+ */
+function ajax_purls_request_actions_callback($detailParam) {
+
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_zipcodes.js');
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_purls.js');
+    $environment = variable_get('marketo_environment', '//app-ab02.marketo.com');
+    $munchkin_id = variable_get('munchkin_id');
+    $user = _sunrun_leadforms_get_user_purl();
+    $form_id = variable_get('purls_form_id');
+    drupal_add_js(array(
+        'sunrun_purls' => array(
+            'form_id' => $form_id,
+            'environment' => $environment,
+            'munchkin_id' => $munchkin_id,
+            'first_name' => $user->first,
+            'last_name' => $user->last,
+            'address' => $user->address,
+            'city' => $user->city,
+            'state' => $user->state,
+            'zip' => $user->zip,
+            'bill' => $user->bill,
+        )
+    ), 'setting');
+    // module_load_include('inc', 'ms_product_management', 'includes/ms_product_management_import_products');
+    $id = 'srPurlsUser' . ucfirst($detailParam) . 'Details';
+    $output = array(
+        '#prefix' => '<div  id="' . $id . '">',
+        '#suffix' => '</div>',
+        '#markup' => render(drupal_get_form('purls_user_change_' . $detailParam . '_details_form', $id))
+    );
+    $commands[] = ajax_command_replace('#' . $id, render($output));
+    $page = array('#type' => 'ajax', '#commands' => $commands);
+    return $page;
+}
+
+/******* PURLS CHANGE DETAILS FORMS *****/
+/**
+ * Purls user change details form
+ * @param $form
+ * @param $form_state
+ * @return $form;
+ */
+function purls_user_change_name_details_form($form, &$form_state, $id) {
+    $form_state['storage']['idReplace'] = $id;
+    $ajax = array(
+        'wrapper' => $id,
+        'callback' => 'purls_user_change_details_form_ajax_callback',
+    );
+    $user = _sunrun_leadforms_get_user_purl();
+    $form = array();
+    $form['#attributes'] = array('class' => array('purls-change-name-form'));
+    $form['firtsNameTexfield'] = array(
+        '#type' => 'textfield',
+        '#default_value' => $user->first,
+        '#size' => 60,
+        '#maxlength' => 128,
+        '#required' => TRUE,
+        '#weight' => 1,
+    );
+    $form['lastNameTexfield'] = array(
+        '#type' => 'textfield',
+        '#default_value' => $user->last,
+        '#size' => 60,
+        '#maxlength' => 128,
+        '#required' => TRUE,
+        '#weight' => 2,
+    );
+    $form['save'] = array(
+        '#type' => 'submit',
+        '#prefix' => '<div class="submit-wrapper hide">',
+        '#suffix' => '</div>',
+        '#ajax' => $ajax,
+        '#name' => t('saveNameDetails'),
+        '#value' => 'save',
+        '#weight' => 3,
+    );
+    $form['submit'] = array(
+        '#type' => 'button',
+        '#value' => 'save',
+        '#weight' => 4,
+    );
+    return $form;
+}
+
+/**
+ * Purls user change details form
+ * @param $form
+ * @param $form_state
+ * @return $form;
+ */
+function purls_user_change_address_details_form($form, &$form_state) {
+    $form = array();
+    $user = _sunrun_leadforms_get_user_purl();
+    $form_state['storage']['idReplace'] = $id;
+    $ajax = array(
+        'wrapper' => $id,
+        'callback' => 'purls_user_change_details_form_ajax_callback',
+    );
+    $form['#attributes'] = array('class' => array('purls-change-address-form'));
+    $form['addressTextfield'] = array(
+        '#type' => 'textfield',
+        '#default_value' => $user->address,
+        '#size' => 60,
+        '#maxlength' => 128,
+        '#required' => TRUE,
+        '#weight' => 1,
+    );
+    $form['cityTextfield'] = array(
+        '#type' => 'textfield',
+        '#default_value' => $user->city,
+        '#size' => 60,
+        '#maxlength' => 128,
+        '#required' => TRUE,
+        '#weight' => 2,
+    );
+    $form['stateSelect'] = array(
+        '#type' => 'select',
+        '#default_value' => $user->state,
+        '#options' => array(
+            "AL" => 'Alabama',
+            "AK" => 'Alaska',
+            "AZ" => 'Arizona',
+            "AR" => 'Arkansas',
+            "CA" => 'California',
+            "CO" => 'Colorado',
+            "CT" => 'Connecticut',
+            "DE" => 'Delaware',
+            "FL" => 'Florida',
+            "GA" => 'Georgia',
+            "HI" => 'Hawaii',
+            "ID" => 'Idaho',
+            "IL" => 'Illinois',
+            "IN" => 'Indiana',
+            "IA" => 'Iowa',
+            "KS" => 'Kansas',
+            "KY" => 'Kentucky',
+            "LA" => 'Louisiana',
+            "ME" => 'Maine',
+            "MD" => 'Maryland',
+            "MA" => 'Massachusetts',
+            "MI" => 'Michigan',
+            "MN" => 'Minnesota',
+            "MS" => 'Mississippi',
+            "MO" => 'Missouri',
+            "MT" => 'Montana',
+            "NE" => 'Nebraska',
+            "NV" => 'Nevada',
+            "NH" => 'New Hampshire',
+            "NJ" => 'New Jersey',
+            "NM" => 'New Mexico',
+            "NY" => 'New York',
+            "NC" => 'North Carolina',
+            "ND" => 'North Dakota',
+            "OH" => 'Ohio',
+            "OK" => 'Oklahoma',
+            "OR" => 'Oregon',
+            "PA" => 'Pennsylvania',
+            "RI" => 'Rhode Island',
+            "SC" => 'South Carolina',
+            "SD" => 'South Dakota',
+            "TN" => 'Tennessee',
+            "TX" => 'Texas',
+            "UT" => 'Utah',
+            "VT" => 'Vermont',
+            "VA" => 'Virginia',
+            "WA" => 'Washington',
+            "DC" => 'Washington, DC',
+            "WV" => 'West Virginia',
+            "WI" => 'Wisconsin',
+            "WY" => 'Wyoming',
+        ),
+        '#required' => TRUE,
+        '#weight' => 3,
+    );
+    $form['zipTextfield'] = array(
+        '#type' => 'textfield',
+        '#default_value' => $user->zip,
+        '#size' => 60,
+        '#maxlength' => 128,
+        '#required' => TRUE,
+        '#weight' => 4,
+    );
+    $form['save'] = array(
+        '#type' => 'submit',
+        '#prefix' => '<div class="submit-wrapper hide">',
+        '#suffix' => '</div>',
+        '#ajax' => $ajax,
+        '#name' => t('saveAddressDetails'),
+        '#value' => 'save',
+        '#weight' => 6,
+        '#ajax' => $ajax,
+    );
+    $form['submit'] = array(
+        '#type' => 'button',
+        '#value' => 'save',
+        '#weight' => 7,
+    );
+    return $form;
+}
+
+/**
+ * function ms_products_form_ajax_callback($form, &$form_state)
+ * @param $form
+ * @param $form_state
+ */
+function purls_user_change_details_form_ajax_callback($form, &$form_state) {
+
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js');
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_zipcodes.js');
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_purls.js');
+    $environment = variable_get('marketo_environment', '//app-ab02.marketo.com');
+    $munchkin_id = variable_get('munchkin_id');
+    if (isset($form_state['clicked_button']['#name']) && $form_state['clicked_button']['#name'] == 'saveNameDetails') {
+        $_SESSION['PURL']->first = $form_state['values']['firtsNameTexfield'];
+        $_SESSION['PURL']->last = $form_state['values']['lastNameTexfield'];
+    }
+    elseif (isset($form_state['clicked_button']['#name']) && $form_state['clicked_button']['#name'] == 'saveAddressDetails') {
+        $_SESSION['PURL']->address = $form_state['values']['addressTextfield'];
+        $_SESSION['PURL']->city = $form_state['values']['cityTextfield'];
+        $_SESSION['PURL']->state = $form_state['values']['stateSelect'];
+        $_SESSION['PURL']->zip = $form_state['values']['zipTextfield'];
+    }
+    $user = $_SESSION['PURL'];
+    $form_id = variable_get('purls_form_id');
+    drupal_add_js(array(
+        'sunrun_purls' => array(
+            'form_id' => $form_id,
+            'environment' => $environment,
+            'munchkin_id' => $munchkin_id,
+            'first_name' => $user->first,
+            'last_name' => $user->last,
+            'address' => $user->address,
+            'city' => $user->city,
+            'state' => $user->state,
+            'zip' => $user->zip,
+            'bill' => $user->bill,
+        )
+    ), 'setting');
+
+    $output = theme('purls-user-info', array(
+        'user' => $user,
+        'form_id' => $form_id,
+        'environment' => $environment
+    ));
+    $commands[] = ajax_command_remove('.get-quote-form.get-quote-form-one-time-processed');
+    $commands[] = ajax_command_replace('#srPurlsUserNameDetailsWrapper', $output);
+    $page = array('#type' => 'ajax', '#commands' => $commands);
+    return $page;
+}
+
+function solar_rating_form($form, &$form_state) {
+    $form = array();
+    $user = $_SESSION['PURL'];
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_ranges.js');
+    drupal_add_js(array(
+        'sunrunRanges' => array(
+            'threeStarsHeadline' => variable_get('3_stars_or_less_headline_txt'),
+            'threeStarsBody' => variable_get('3_stars_or_less_body_text'),
+            'fourStarsHeadline' => variable_get('equal_4_stars_headline_txt'),
+            'fourStarsBody' => variable_get('equal_4_stars_body_text'),
+        )
+    ), 'setting');
+    drupal_add_js(drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.range.js');
+    drupal_add_css(drupal_get_path('module', 'sunrun_leadforms') . '/assets/css/jquery.range.css');
+    $form['singleSlider'] = array(
+        '#type' => 'hidden',
+        '#value' => $user->bill,
+        '#attributes' => array(
+            'class' => array('single-slider'),
+            'id' => array('srPurlsAverageElectricBill'),
+        ),
+        '#weight' => 2,
+    );
+    $form['afterBillAverageText'] = array(
+        '#prefix' => '<div id="afterBillAverageText" class="after-bill-average-body-text"><p>',
+        '#suffix' => '</p></div>',
+        '#weight' => 3,
+    );
+    return $form;
+}
+
+/**
+ * Implements hook_preprocess_panels_add_content_modal to exclude some items
+ */
+function sunrun_leadforms_preprocess_panels_add_content_modal(&$vars){
+    $exclude = array(
+        'sunrun_leadforms-standard-leadform',
+        'sunrun_leadforms-standard-leadform-horizontal',
+        'sunrun_leadforms-standard-leadform-homepage',
+        'sunrun_leadforms-referral-form',
+        'sunrun_leadforms-purls',
+        'sunrun_leadforms-soft-signup',
+        'sunrun_leadforms-click-to-call',
+    );
+    foreach ($vars['categories']['miscellaneous']['content'] as $key => $pane) {
+        if(in_array($pane['subtype_name'], $exclude)){
+            unset($vars['categories']['miscellaneous']['content'][$key]);
+        }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function sunrun_leadforms_form_alter(&$form, &$form_state, $form_id) {
+    if(strpos($form_id, 'webform_client_form_') === 0){
+        switch($form['#node']->webform['machine_name']){
+            case 'purls_address':
+                $form['#attached']['js'] += array(
+                    drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/jquery.validate.min.js' => array('type' => 'file'),
+                    drupal_get_path('module', 'sunrun_leadforms') . '/assets/js/sunrun_purls.js' => array('type' => 'file'),
+                );
+                $form['#attributes']['class'][] = 'purls-address-webform';
+                $form['#submit'] = array('sunrun_leadforms_purls_address_form_callback');
+                // Get current page nid
+                $node = menu_get_object();
+                $_SESSION['previous_nid'] = $node->nid;
+                break;
+            case 'purls_code':
+                $form['#attributes']['id'][] = 'purls-code-webform';
+                $form['actions']['submit']['#ajax'] = array(
+                    'callback' => 'sunrun_leadforms_purls_code_form_callback',
+                    'wrapper' => 'purls-code-webform',
+                );
+                $form['actions']['submit']['#attributes'] = array('class' => array('webform-submit', 'btn-cta'));
+                $form['#submit'] = array();
+                // Get current page nid
+                $node = menu_get_object();
+                $_SESSION['previous_nid'] = $node->nid;
+                break;
+        }
+    }
+}
+
+/**
+ * Submit function for sunrun_leadforms_purls_address_form
+ */
+function sunrun_leadforms_purls_address_form_callback($form, &$form_state) {
+    // Fetch first result
+    // Switch to the Purls database.
+    db_set_active('srcustom');
+    $result  = db_select('purl_codes', 'p')->fields('p')
+                ->condition('zip', $form_state['values']['submitted']['zip'])
+                ->condition('state', $form_state['values']['submitted']['state'])
+                ->condition('address', '%' . db_like($form_state['values']['submitted']['address']) . '%', 'LIKE')
+                ->execute()->fetch();
+    db_set_active();
+    // Switch back afterwards.
+    if(!empty($result)){
+        $_SESSION['PURL'] = $result;
+        // redirect to rating lookup
+        drupal_goto('rating-lookup');
+    } else {
+        // redirect to some thank you page
+        drupal_goto('purls/free-solar-quote');
+    }
+}
+
+/**
+ * Callback function for sunrun_leadforms_purls_code_form
+ */
+function sunrun_leadforms_purls_code_form_callback($form, &$form_state) {
+    // Check for errors
+    if ($errors = form_get_errors()) {
+      ctools_include('ajax');
+      // Tracking event
+      $commands[] = array(
+        'command'  => 'sunrun_ga',
+        'category' => 'acquisition tool',
+        'action' => 'get rating',
+        'label'  => 'submit failure',
+        'value'  => false,
+        'nonInteraction' => true,
+      );
+      // Remove previous erros
+      $commands[] = ajax_command_invoke('#purls-code-webform .alert-danger', 'remove');
+      // Return error
+      $commands[] = ajax_command_prepend('#purls-code-webform', theme('status_messages'));
+      // Return commands
+      return array('#type' => 'ajax', '#commands' => $commands);
+    }
+    // If we are here we have the PURL variable setted
+    if (isset($_SESSION['PURL'])) {
+      ctools_include('ajax');
+      // Tracking event
+      $commands[] = array(
+        'command'  => 'sunrun_ga',
+        'category' => 'acquisition tool',
+        'action' => 'get rating',
+        'label'  => 'purls form submit',
+        'value'  => false,
+        'nonInteraction' => true,
+      );
+      // redirect to rating lookup
+      $commands[] = ctools_ajax_command_redirect('rating-lookup');
+      // Return commands
+      return array('#type' => 'ajax', '#commands' => $commands);
+    }
+}
+
+function sunrun_leadforms_preprocess_click_to_call(&$vars) {
+  dpm($vars);
+}
+
+/**
+ * Retrieves a user object from the SESSION or creates a new standard
+ * class object to be used with empty (but set) properties.
+ *
+ * @return \stdClass user object with PII properties
+ */
+function _sunrun_leadforms_get_user_purl() {
+  if(isset($_SESSION['PURL'])) {
+    $user = $_SESSION['PURL'];
+  } else {
+    $user = new stdClass();
+    $user->first = "";
+    $user->last = "";
+    $user->address = "";
+    $user->city = "";
+    $user->state = "";
+    $user->zip = "";
+    $user->bill = "";
+  }
+  return $user;
+}
+
+function _sunrun_leadforms_check_business_hours() {
+  // check the kill switch first
+  if(variable_get('ctc_kill_switch', 0)) return false;
+
+  // get the current time (PST) and day for displaying the click to call block/button
+  $date = new DateTime("now", new DateTimeZone('America/Los_Angeles') );
+  $current_hour = $date->format('Gi');
+  $current_day = $date->format('N');
+
+  // set the open and closing hours based on the current day
+  switch($current_day) {
+    case 1:
+      $open = variable_get('ctc_monday_open', '900');
+      $close = variable_get('ctc_monday_close', '2100');
+      break;
+    case 2:
+      $open = variable_get('ctc_tuesday_open', '900');
+      $close = variable_get('ctc_tuesday_close', '2100');
+      break;
+    case 3:
+      $open = variable_get('ctc_wednesday_open', '900');
+      $close = variable_get('ctc_wednesday_close', '2100');
+      break;
+    case 4:
+      $open = variable_get('ctc_thursday_open', '900');
+      $close = variable_get('ctc_thursday_close', '2100');
+      break;
+    case 5:
+      $open = variable_get('ctc_friday_open', '900');
+      $close = variable_get('ctc_friday_close', '2100');
+      break;
+    case 6:
+      $open = variable_get('ctc_saturday_open', '900');
+      $close = variable_get('ctc_saturday_close', '2100');
+      break;
+    case 7:
+      $open = variable_get('ctc_sunday_open', '900');
+      $close = variable_get('ctc_sunday_close', '2100');
+      break;
+  }
+
+  // if not within the range for the day return closed
+  if($current_hour < $open || $current_hour >= $close) return false;
+
+  // open for business
+  return true;
+}

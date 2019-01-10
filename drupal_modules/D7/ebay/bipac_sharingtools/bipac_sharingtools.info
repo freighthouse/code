@@ -1,0 +1,11 @@
+name = "BIPAC Sharing Tools"
+description = "Sharing tools for BIPAC campaigns"
+core = 7.x
+package = Main Street
+configure = admin/config/system/bipac_sharingtools
+files[] = re_socialtools.install
+files[] = re_socialtools.module
+
+
+
+

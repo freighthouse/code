@@ -1,0 +1,137 @@
+.component {
+  // padding-top: 30px;
+  // padding-bottom: 30px;
+  margin-bottom: $spacing-xxlarge;
+
+  @media (max-width: 767px) {
+    margin-bottom: $spacing-xlarge;
+  }
+
+  .component {
+    margin-bottom: 0;
+  }
+
+  @media (min-width: 992px) {
+    .col-md-12 {
+      float: none;
+    }
+  }
+
+  .component-header {
+    text-align: center;
+    padding-bottom: $spacing-medium;
+    padding-left: 30px;
+    padding-right: 30px;
+
+    @media (min-width: 992px) {
+      padding-bottom: $spacing-large;
+    }
+    @media (min-width: 1440px) {
+      padding-bottom: $spacing-xlarge;
+    }
+
+    .field-name-field-layout-title {
+      display: inline-block;
+      font-family: $ff-display;
+      @include fs($fs-70);
+      line-height: 1em;
+      // line-height: 48px;
+      margin: 0;
+      position: relative;
+
+      // Book wing
+      &:before {
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: contain;
+        content: '';
+        display: inline-block;
+        margin-left: -36px;
+        margin-right: -12px;
+        top: -.5em;
+        height: 42px;
+        width: 48px;
+        position: relative;
+        // @media (min-width: 768px) {
+        //   display: block;
+        //   position: absolute;
+        //   top: -42px;
+
+        // }
+      }
+
+      + .field-name-field-layout-description {
+        margin-top: $spacing-small;
+        @media (min-width: 992px) {
+          margin-top: $spacing-medium;
+        }
+      }
+    }
+  }
+
+  &--color-blue {
+    .component-header {
+      .field-name-field-layout-title {
+        color: $blue-dark;
+
+        &:before {
+          background-image: url('../img/blue-wing.png');
+        }
+      }
+    }
+  }
+
+  &--color-green {
+    .component-header {
+      .field-name-field-layout-title {
+        color: $green-dark;
+
+        &:before {
+          background-image: url('../img/green-wing.png');
+        }
+      }
+    }
+  }
+
+  &--color-red {
+    .component-header {
+      .field-name-field-layout-title {
+        color: $red-dark;
+
+        &:before {
+          background-image: url('../img/red-wing.png');
+        }
+      }
+    }
+  }
+}
+
+.separator {
+  // padding-bottom: 20px;
+  // padding-top: 20px;
+  margin-bottom: $spacing-large;
+  margin-bottom: 0;
+  // margin-top: $spacing-large;
+
+  @media (min-width: 1200px) {
+    // padding-bottom: 60px;
+    // padding-top: 60px;
+    // margin-bottom: $spacing-xlarge;
+    // margin-top: -$spacing-xlarge;
+    // margin-top: $spacing-xxxlarge;
+  }
+}
+
+.separator--straight-line {
+  position: relative;
+
+  &:before {
+    background-color: #CDD4DB;
+    content: '';
+    display: block;
+    height: 1px;
+    position: absolute;
+    top: 50%;
+    width: 100%;
+  }
+}

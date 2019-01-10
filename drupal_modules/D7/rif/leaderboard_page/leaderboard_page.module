@@ -1,0 +1,59 @@
+<?php
+
+	/**
+	 * Implements hook_block_info().
+	 *
+	 * This hook defines blocks to be recognized by the system
+	 */
+	function leaderboard_page_block_info() {
+		// Define the Puzzle Maker Callout
+		$blocks['leaderboard_page_counter_block'] = array(
+			'info' => t('Leaderboard Block'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+		return $blocks;
+	}
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function leaderboard_page_block_view($delta = '') {
+		switch($delta) {
+			case 'leaderboard_page_counter_block' :
+				$block['subject'] = t('Leaderboard Block');
+				$block['content'] = array(
+					'#markup' => _get_leaderboard_block(),
+					'#attached' => array(
+						'css' => array(
+							drupal_get_path('module', 'leaderboard_page') . '/css/leaderboard_page.css',
+						),
+						'js' => array(
+							drupal_get_path('module', 'leaderboard_page') . '/js/leaderboard_page.js',
+						)
+					),
+				);
+				break;
+		}
+
+		return $block;
+	}
+
+	function _get_leaderboard_block() {
+		$output = '
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					<a href="https://docs.google.com/forms/d/e/1FAIpQLSdMB5Bh_02FSdBY3G74F_2YR7CfEqu3l-MMqNkfH6sACxh1oA/viewform" target="_blank" class="counter-container">
+						<div class="results-container"><span class="results"></span></div>
+						<img class="img-responsive leaderboard-image" src="/'.drupal_get_path('module', 'leaderboard_page') . '/assets/counts.png'.'">
+					</a>
+				</div>
+			</div>
+		</div>
+		';
+		//<div class="counter"><p>Code Called <span class="counter-num">0</span> times</p></div>
+		//<div class="link-container"><a href="#">Enter Your # of Books</a></div>
+		return $output;
+	}

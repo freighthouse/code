@@ -1,0 +1,44 @@
+.front-twitter {
+  .content {
+    padding: 0 1em;
+    border: 1px solid $c-light-grey;
+    background-color: $c-white;
+
+    @include breakpoint($bp-small) {
+      padding: 0;
+    }
+  }
+  iframe {
+    width: 100% !important;
+  }
+}
+
+.view-tweets {
+  height: 100%;
+  max-height: 800px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 44.4em;
+
+  @include breakpoint($bp-small) {
+    max-width: 33.4em;
+  }
+  .views-row {
+    border-bottom: 1px solid $c-light-grey;
+  }
+
+  .views-field-formatted-tweet {
+    margin-right: 1em;
+  }
+
+  .views-field-image {
+    background-color: $c-white;
+    text-align: center;
+    padding: 1em;
+    margin-top: -2px;
+    .tweet-image {
+      border: 1px solid $c-light-grey;
+    }
+  }
+}

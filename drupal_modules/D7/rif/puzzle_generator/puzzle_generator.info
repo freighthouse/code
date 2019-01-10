@@ -1,0 +1,5 @@
+name = Puzzle Generator
+description = Adds the Puzzle Generator Pages and Tools
+dependencies[] = content_bundles
+dependencies[] = rif_registration
+core = 7.x

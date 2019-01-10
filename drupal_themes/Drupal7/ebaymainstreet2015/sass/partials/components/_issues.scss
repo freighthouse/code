@@ -1,0 +1,320 @@
+.node-type-issue .region-content .block-system > .content {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.issues-page {
+  hr {
+    color: $c-light-grey;
+  }
+  .hero-content {
+    h1 {
+      margin: 0.67em 0 0;
+    }
+  }
+  #block-views-news-issue-related-news {
+    //@include breakpoint($bp-small) {
+    //  padding-bottom: 1.5em;
+    //}
+    .view-display-id-issue_related_news {
+      .view-content {
+        .front-page-news-wrapper {
+          padding: 0;
+          .front-page-news-photo {
+            display: block;
+            margin-right: 0;
+            width: auto;
+            max-height: 250px;
+            @include breakpoint($bp-small) {
+              display: inline-block;
+            }
+            img {
+              height: 250px;
+              width: auto;
+            }
+          }
+          .front-page-news-text {
+            display: block;
+            @include breakpoint($bp-small) {
+              display: inline-block;
+              width: 65%;
+            }
+            .front-page-news-link {
+              margin: 2em;
+              &:after {
+                @extend %chevron-right;
+                float: right;
+                margin-top: 1em;
+              }
+              .front-page-news-date {
+                margin-bottom: 1em;
+                color: $c-dark-grey;
+              }
+              .front-page-news-title {
+                color: $g1-4;
+                font-size: 1.5em;
+                margin-bottom: 1em;
+              }
+              .front-page-news-description {
+
+              }
+            }
+          }
+          .front-page-news-regions {
+
+          }
+          .front-page-news-read-article {
+            .front-page-news-read-article-link {
+
+            }
+          }
+        }
+      }
+      .view-footer {
+        text-align: center;
+        margin: 1em;
+        @include breakpoint($bp-small) {
+          float: right;
+          margin-right: 3em;
+        }
+        a {
+          @extend %newbluebutton;
+        }
+      }
+    }
+  }
+}
+
+.full-page-block {
+  h2 {
+    //padding-bottom: 1.5em;
+    margin-bottom: 1.5em;
+    margin-top: 1.5em;
+  }
+  .view-mediaarticles {
+    .view-content {
+      background: $g1-1;
+      .media-item {
+        padding: 1.5em 0;
+      }
+    }
+  }
+}
+
+.issue-page-top {
+  @extend %clearfix;
+  h2 {
+    @extend %sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1.5em;
+    color: #333333;
+    text-align: center;
+  }
+  .field-issue-summary {
+    background: $g1-5;
+    color: $g1-2;
+    padding: 1em;
+    font-size: 1.5em;
+    @include breakpoint($bp-small) {
+      padding: 3em;
+    }
+  }
+  //padding-bottom: 1.5em;
+}
+
+.issue-page-wrapper {
+  .issue-page-content-wrapper {
+    @extend %clearfix;
+    word-break: break-word;
+    padding: 1.5em 1em 1.5em 1em;
+    border: 1px solid $c-light-grey;
+    color: $c-dark-grey;
+    background-color: $c-white;
+    @include breakpoint($bp-small) {
+      padding: 1.5em 7em 1.5em 0;
+    }
+  }
+  .issue-page-header {
+    margin: 2em auto;
+  }
+  .issue-page-at-a-glance {
+    @extend %full-page-feature;
+    .content {
+      @include fontsize(22);
+      @extend %helvetica;
+      @extend %light;
+      padding: 2em 0;
+      border: none;
+      border: 1px solid $c-light-grey;
+      background: $c-white;
+    }
+  }
+}
+
+//.issue-page-related-news {
+//  margin-top: 1em;
+//  @include breakpoint($bp-small) {
+//    //margin-top: 2em;
+//    h2 {
+//      margin-bottom: 1.5em;
+//    }
+//  }
+//}
+
+.issue-page-take-action {
+  @extend %clearfix;
+  h2 {
+    @extend %titletext;
+  }
+}
+
+.issue-page-social-sidebar {
+  @include breakpoint($bp-small) {
+    width: 20%;
+    float: left;
+  }
+}
+
+.issue-page-content {
+  @include breakpoint($bp-small) {
+    width: 80%;
+    float: left;
+  }
+}
+
+.issue-listing-featured {
+  &.full-page-block .take-action-group-wrapper .content {
+    border: none;
+  }
+}
+
+.issue-page-social-sidebar {
+  margin-top: 1em;
+  h2 {
+    @include fontsize(14);
+    @extend %helvetica;
+    color: $c-dark-grey;
+    margin: 0 3em 0.5em 0;
+    text-align: center;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+  .issue-share.menu {
+    padding: 0;
+    margin: 0 1.5em 0 0;
+    text-align: center;
+    line-height: 1.5;
+    .leaf {
+      @include fontsize(24);
+      display: inline;
+      list-style-type: none;
+      @include breakpoint($bp-small) {
+        display: block;
+      }
+    }
+  }
+}
+
+.policy-papers-block {
+
+  .views-exposed-form {
+    //margin-bottom: 2em;
+  }
+
+  .views-exposed-form .views-exposed-widget {
+    float: none;
+    @include breakpoint($bp-small) {
+      float: left;
+    }
+  }
+
+  select {
+    width: 100%;
+    @include breakpoint($bp-small) {
+      width: auto;
+    }
+  }
+}
+
+.find-your-representatives-block {
+  .form-item-findreps-city input[type="text"],
+  .form-item-findreps-address input[type="text"],
+  .form-submit {
+    width: 100%;
+  }
+}
+
+
+#block-views-mediaarticles-block{
+  padding-top: 1.5em;
+  .content{
+    background: $new-light-blue;
+  }
+}
+
+.view-mediaarticles {
+  .media-items {
+    margin: 0;
+    padding: 0;
+  }
+  .media-item {
+    list-style-type: none;
+    border-bottom: 1px solid $c-medium-grey;
+    padding: 1em 0;
+    //&:last-child {
+    //  border-bottom: 0;
+    //}
+    .media-headline {
+      margin: 0 1em;
+
+      a{
+        color: $new-dark-blue;
+      }
+    }
+    .media-publisher-date {
+      margin: 0;
+    }
+  }
+
+  .more-link{
+    text-align: right;
+    padding: 0 2em;
+
+    a{
+      @extend %newbluebutton;
+    }
+  }
+}
+
+.no-related-news .advocacy-toolkit-block.issue-page {
+  margin: 0;
+  width: 100%;
+  .advocacy-toolkit-read-article {
+    display: table-cell;
+    vertical-align: middle;
+  }
+}
+
+.field-name-field-at-a-glance {
+  margin: 0 1em;
+  @include breakpoint($bp-small) {
+    margin: 0 3em;
+  }
+  li {
+    margin-bottom: 0.5em;
+  }
+}
+
+.secondary-issues-block .issues-listing-region,
+.secondary-issues .secondary-issues-region {
+  position: absolute;
+  bottom: 1em;
+}
+
+//centers message-your-lawmaker iframe on 'share-your-story-video' page//
+
+#message-your-lawmaker-iframe {
+  display: block ;
+  margin: 0 auto ;
+}

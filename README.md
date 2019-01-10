@@ -2,4 +2,4 @@
 
 Code samples for Jeremy Michael Cerda
 
-#### Author - Jeremy Michael Cerda @jmcerda
+#### Author - Jeremy Michael Cerda @jmcerda jcerda@freighthouse.io

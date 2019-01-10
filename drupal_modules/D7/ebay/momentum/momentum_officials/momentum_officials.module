@@ -1,0 +1,576 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a Momentum Officials search and response 
+ */
+
+/**
+ * hook_theme
+ */
+function momentum_officials_theme() {
+  $items = array();
+  $items['momentum_officials_response'] = array(
+    'variables' => array('officials' => NULL),
+    'template' => 'momentum_officials_response',
+  );
+  $items['momentum_officials_banner'] = array(
+    'variables' => array('path' => NULL, 'text' => NULL),
+    'template' => 'momentum_officials_banner',
+  );
+  $items['momentum_officials_address'] = array(
+    'variables' => array('office_type' => NULL, 'address_1' => NULL, 'address_2' => NULL, 'address_3' => NULL, 'phone' => NULL, 'fax' => NULL),
+    'template' => 'momentum_officials_address',
+  );
+  $items['momentum_officials_committees'] = array(
+    'variables' => array('committee_chamber' => NULL, 'committee_type' => NULL, 'name' => NULL, 'title' => NULL),
+    'template' => 'momentum_officials_committees',
+  );
+  $items['momentum_officials_social'] = array(
+    'variables' => array('website' => NULL, 'webform' => NULL, 'Facebook' => NULL, 'Twitter' => NULL, 'YouTube' => NULL, 'handle' => NULL),
+    'template' => 'momentum_officials_social',
+  );
+  $items['momentum_officials_staffers'] = array(
+    'variables' => array('full_name' => NULL, 'title' => NULL),
+    'template' => 'momentum_officials_staffers',
+  );
+  $items['momentum_officials_list'] = array(
+    'variables' => array('officials' => NULL),
+    'template' => 'momentum_officials_list',
+  );
+  $items['momentum_officials_official'] = array(
+    'variables' => array('photo' => NULL, 'full_name' => NULL, 'title' => NULL, 'party' => NULL, 'party_abbreviation' => NULL, 'social' => NULL, 'office' => NULL, 'state_offices' => NULL, 'district_code' => NULL, 'position_type' => NULL, 'organization' => NULL, 'state' => NULL, 'state_abbreviation' => NULL, 'district' => NULL, 'staffers' => NULL, 'committees' => NULL, 'reelection_status' => NULL, 'next_election' => NULL, 'seniority' => NULL, 'terms_served' => NULL),
+    'template' => 'momentum_officials_official',
+  );
+  $items['momentum_officials_vote_record_list'] = array(
+    'variables' => array('vote_record' => NULL),
+    'template' => 'momentum_officials_vote_record_list',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_menu()
+ */
+function momentum_officials_menu() {
+  $items = array();
+  $officials_title = variable_get('momentum_officials_title', t('Find Your Elected Officials'));
+  $items['officials'] = array(
+    'title' => $officials_title,
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',	// This is also provided as a block
+    'page arguments' => array('_momentum_officials_form'),
+    'access callback' => TRUE,
+  );
+  $items['officials/list'] = array(
+    'title' => t('Your Elected Officials'),
+    'type' => MENU_CALLBACK,
+    'page callback' => '_momentum_officials_list',
+    'access callback' => TRUE,
+  );
+  $items['official/%'] = array(
+    'title' => t('Your Elected Officials'),
+    'type' => MENU_CALLBACK,
+    'page callback' => '_momentum_officials_official',
+    'access callback' => TRUE,
+    'page arguments' => array(1),
+  );
+  return $items;
+}
+
+/**
+ * Return a list of officials from Momentum data
+ */
+function _momentum_officials_list() {
+
+  $officials = momentum_session('officials');
+  if (empty($officials)) {
+    // This means that the user never went through the form
+    drupal_goto('officials');
+  }
+
+  if ($data = momentum_parse_officials($officials)) {
+    return theme('momentum_officials_list', array('officials' => $data));
+  }  
+}
+
+/**
+ * Display an individual official
+ */
+function _momentum_officials_official($id) {
+  $path = drupal_get_path('module', 'mm_voterecord');
+  drupal_add_css($path . '/css/font-awesome-4.4.0/css/font-awesome.min.css');
+
+  $id = trim($id);
+  $id = (int)$id;
+  // All IDs should be numeric.  If not, just 404
+  if (!is_numeric($id)) {
+    return FALSE;
+  }
+
+
+  //cache request and use it if it exists
+  $key = 'official-' . $id;
+  if (cache_get($key)) {
+    $officials = momentum_cache($key);
+    //dsm('...now reading from cache');
+  } else {
+    $officials = momentum_ids($id);
+    //dsm('...now reading from api');
+    if (!empty($officials)) {
+      momentum_cache($key, $officials);
+    } else {
+        drupal_set_message('Unable to find an official with that ID');
+        drupal_goto('officials');
+    }
+  }
+
+  /**
+   * Now we check the session data for the provided ID
+   */
+  $official = array();
+  foreach ($officials as $sector) {
+    // 'sector' being us_government, state_government, local_government
+    if (!empty($sector[$id])) {
+      // it's a hit!
+      $official = $sector[$id];
+      break 1;
+    }
+  }
+
+  if (empty($official)) {
+    return FALSE;
+  }
+  // Render this into easier data
+  $data = momentum_parse_official($official);
+  if (empty($data['full_name'])) {
+    // One final check to make sure we have good data
+    return FALSE;
+  }
+
+
+  //Search retrieve and and match official id against stored votes for official vote record
+  $matched_vote_record = _mm_retrieve_vote_record($id);
+
+  // And we return our template with data
+  return theme('momentum_officials_official', array(
+    'photo' => !empty($data['photo']) ? $data['photo'] : NULL,
+    'full_name' => !empty($data['full_name']) ? $data['full_name'] : NULL,
+    'title' => !empty($data['title']) ? $data['title'] : NULL,
+    'party' => !empty($data['party']) ? $data['party'] : NULL,
+    'party_abbreviation' => !empty($data['party_abbreviation']) ? $data['party_abbreviation'] : NULL,
+    'district_code' => !empty($data['district_code']) ? $data['district_code'] : NULL,
+    'district' => !empty($data['district']) ? $data['district'] : NULL,
+    'state' => !empty($data['state']) ? $data['state'] : NULL,
+    'state_abbreviation' => !empty($data['state_abbreviation']) ? $data['state_abbreviation'] : NULL,
+    'position_type' => !empty($data['position_type']) ? $data['position_type'] : NULL,
+    'organization' => !empty($data['organization']) ? $data['organization'] : NULL,
+    'social' => !empty($data['social']) ? $data['social'] : NULL,
+    'office' => !empty($data['office']) ? $data['office'] : NULL,
+    'state_offices' => !empty($data['state_offices']) ? $data['state_offices'] : NULL,
+    'staffers' => !empty($data['staffers']) ? $data['staffers'] : NULL,
+    'committees' => !empty($data['committees']) ? $data['committees'] : NULL,
+    'next_election' => !empty($data['next_election']) ? $data['next_election'] : NULL,
+    'terms_served' => !empty($data['terms_served']) ? $data['terms_served'] : NULL,
+    'election_details' => !empty($data['election_details']) ? $data['election_details'] : NULL,
+    'seniority' => !empty($data['seniority']) ? $data['seniority'] : NULL,
+    'vote_record' => !empty($matched_vote_record) ? $matched_vote_record : NULL,
+  ));
+}
+
+/**
+ * hook_block_info
+ */
+function momentum_officials_block_info() {
+  $blocks['momentum_officials_block'] = array(
+    'info' => t('Momentum Officials Search Form'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  $blocks['momentum_officials_banner'] = array(
+    'info' => t('Momentum Officials Banner'),
+    'cache' => DRUPAL_CACHE_PER_ROLE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function momentum_officials_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'momentum_officials_block':
+      $block['subject'] = t('Find Your Elected Officials');
+      $block['content'] = _momentum_officials_block();
+      break;
+    case 'momentum_officials_banner':
+      // I don't think this needs a title.  Leaving it off.
+      $block['content'] = theme('momentum_officials_banner', array('path' => variable_get('momentum_officials_banner_path', 'officials'), 'text' => variable_get('momentum_officials_banner_text', 'Find Your Officials')));
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_block_configure
+ */
+function momentum_officials_block_configure($delta = NULL) {
+  $form = array();
+  
+  switch ($delta) {
+    case 'momentum_officials_banner':
+      $form['momentum_officials_banner_path'] = array(
+        '#type' => 'textfield',
+        '#default_value' => variable_get('momentum_officials_banner_path', NULL),
+        '#title' => t('Link Path'),
+        '#required' => TRUE,
+      );
+      $form['momentum_officials_banner_text'] = array(
+        '#type' => 'textfield',
+        '#default_value' => variable_get('momentum_officials_banner_text', NULL),
+        '#title' => t('Link Text'),
+        '#required' => TRUE,
+      );
+      break;
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_save
+ */
+function momentum_officials_block_save($delta = NULL, $edit = array()) {
+  switch ($delta) {
+    case 'momentum_officials_banner':
+      variable_set('momentum_officials_banner_text', $edit['momentum_officials_banner_text']);
+      variable_set('momentum_officials_banner_path', $edit['momentum_officials_banner_path']);
+      break;
+  }
+}
+
+/**
+ * Render data into something the template can use
+ */
+function _momentum_officials_prepare($officials) {
+  $content = array();
+
+  foreach ($officials as $type => $delta) {
+    foreach ($delta as $official) {
+      if ($storage = _momentum_officials_parser($official)) {
+        $id = !empty($storage['official_id']) ? $storage['official_id'] : NULL;
+        if (!empty($id)) {
+          $content[$id] = $storage;
+        }
+      }
+    }
+  }
+  return $content;
+}
+
+function _momentum_officials_parser($official) {
+  $storage = array();
+  if (!empty($official['personal'])) {
+    $personal = $official['personal'];
+    $storage['official_id'] = !empty($personal['official_id']) ? $personal['official_id'] : NULL;
+    $storage['full_name'] = !empty($personal['full_name']) ? $personal['full_name'] : NULL;
+    $storage['party'] = !empty($personal['party']) ? $personal['party'] : NULL;
+    $storage['party_abbreviation'] = !empty($personal['party_abbreviation']) ? $personal['party_abbreviation'] : NULL;
+    $storage['photo'] = !empty($personal['photo']) ? $personal['photo'] : NULL;
+  }
+  if (!empty($official['position'])) {
+    $position = $official['position'];
+    $storage['position_type'] = !empty($position['position_type']) ? $position['position_type'] : NULL;
+    $storage['title'] = !empty($position['title']) ? $position['title'] : NULL;
+    $storage['organization'] = !empty($position['organization']) ? $position['organization'] : NULL;
+    $storage['state'] = !empty($position['state']) ? $position['state'] : NULL;
+    $storage['state_abbreviation'] = !empty($position['state_abbreviation']) ? $position['state_abbreviation'] : NULL;
+    $storage['district'] = !empty($position['district']) ? $position['district'] : NULL;
+    $storage['district_code'] = !empty($position['district_code']) ? $position['district_code'] : NULL;
+  }
+  if (!empty($official['office'])) {
+    $storage['office'] = $official['office'];
+  }
+  if (!empty($official['social'])) {
+    $storage['social'] = $official['social'];
+    if (!empty($official['social']['Twitter'])) {
+      $replace = array('https://twitter.com/', 'http://twitter.com/', 'https://www.twitter.com/', 'http://www.twitter.com');
+      $handle = str_replace($replace, '', $official['social']['Twitter']);
+      $storage['social']['handle'] = $handle;
+    }
+  }
+  if (!empty($official['committees'])) {
+    $storage['committees'] = $official['committees']; 
+  }
+  if (!empty($official['biography'])) {
+    $storage['biography'] = $official['biography'];
+  }
+  if (!empty($official['staffers'])) {
+    $storage['staffers'] = $official['staffers'];
+  }
+  if (!empty($official['state_offices'])) {
+    $storage['state_offices'] = $official['state_offices'];
+  }
+  return $storage;
+}
+
+/**
+ * 
+ */
+function _momentum_officials_block() {
+  /**
+   * @note
+   *   These values could be passed through on
+   *   smaller sites and the form pre-filled.
+   *   However, this will require caching tweaks
+   *   and will not work well on big sites.
+   *
+   * $values['zip'] = momentum_session('zip');
+   * $values['address'] = momentum_session('address');
+   * $values['state'] = momentum_session('state');
+   * $values['city'] = momentum_session('city');
+   */
+  return drupal_get_form('_momentum_officials_form');
+}
+
+/**
+ * Candidates form.  Uses the standard library of Momentum form elements
+ */
+function _momentum_officials_form($form, &$form_state) {
+  $officials_title = variable_get('momentum_officials_title', t('Find Your Elected Officials'));
+  drupal_set_title($officials_title);
+  $form = array();
+
+  /**
+   * Start out by ensuring a useful class
+   */
+  if (empty($form['#attributes']['class'])) {
+    $form['#attributes'] = array('class' => array('officials'));
+  }
+  else {
+    $form['#attributes']['class'][] = 'officials';
+  }
+
+  /**
+   * Then add our fields using _momentum_forms
+   *
+   * @note
+   *   Please reuse _momentum_forms elements whenever possible
+   *   This helps maintain consistency
+   */
+  $values = array();
+  $form['momentum_officials_intro'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . variable_get('momentum_officials_intro', NULL) . '</p>',
+  );
+  $form['address_1'] = _momentum_forms('address', $values, TRUE);
+  $form['address_2'] = _momentum_forms('address_2', $values, FALSE);
+  $form['city'] = _momentum_forms('city', $values, TRUE);
+  $form['state'] = _momentum_forms('state', $values, TRUE);
+  $form['zip'] = _momentum_forms('zip', $values, TRUE);
+  $form['zip']['#description'] = t('5-Digit Code');
+  $form['notes'] = _momentum_forms('notes');
+  $form['search'] = _momentum_forms('search');
+  $form['search']['#value'] = t('Search');
+  $form['momentum_officials_outro'] = array(
+    '#type' => 'item',
+    '#markup' => '<p>' . variable_get('momentum_officials_outro', NULL) . '</p>',
+  );
+
+  return $form;
+}
+
+/**
+ * Validation function for momentum_officials_form
+ */
+function _momentum_officials_form_validate($form, &$form_state) {
+  $zip = $form_state['values']['zip'];
+  if (!momentum_check_zip($zip)) {
+    form_set_error('zip', t('There is a problem with your zip code.  Please check and retry.'));
+  }
+}
+
+/**
+ * Submit function for momentum_officials_form
+ */
+function _momentum_officials_form_submit($form, &$form_state) {
+  // If content in the notes field, discard submission.  This field is only used to catch spambots.
+  if(!empty($form_state['values']['notes'])) {
+    drupal_set_message('Thank you for your submission.');
+    return;
+  }
+
+  $zip = $form_state['values']['zip'];
+  $address = $form_state['values']['address_1'];
+  $city = $form_state['values']['city'];
+  $state = $form_state['values']['state'];
+
+  $hash = md5($address . $city . $state . $zip);
+
+  /**
+   * First, let's see if the user has already submitted this
+   * address.  If so, return cached officials
+   */
+
+  if (($officials = momentum_session('officials')) && ($stored_hash = momentum_session('address_hash')) && ($hash == $stored_hash)) {
+    /**
+     * Nothing happens here!
+     * Somebody is submitting the same address.
+     */
+    drupal_goto('officials/list');
+    return;
+  }
+
+  /**
+   * Complete possible list for chambers:
+   *   us_senate
+   *   us_house
+   *   state_governor
+   *   state_house
+   *   state_senate
+   *   county_executive
+   *   county_legislature
+   *   municipal_executive
+   *   municipal_legislature
+   */
+  $chambers_default = array('us_senate','us_house','state_governor','state_senate','state_house');
+
+  $chambers = variable_get('momentum_officials_chambers', $chambers_default);
+
+  // @note - $data is being overriden on the API level
+  $data = array('social', 'personal', 'position', 'office', 'staffers', 'committees', 'state_offices', 'biography');
+
+  $values = array('address_1' => $address, 'city' => $city, 'state' => $state, 'zip' => $zip);
+
+  /**
+   * Otherwise, we run the query and load it into the session
+   */
+  $result = momentum_officials($values, $chambers, $data);
+  if (!empty($result)) {
+    momentum_session('address_hash', $hash);
+    momentum_session('officials', $result);
+    momentum_session('zip', $zip);
+    momentum_session('address', $address);
+    momentum_session('city', $city);
+    momentum_session('state', $state);
+    $form_state['redirect'] = 'officials/list';
+  }
+  else {
+    // We need to nuke our session items
+    momentum_session('address_hash', NULL, TRUE);
+    momentum_session('officials', NULL, TRUE);
+    momentum_session('zip', NULL, TRUE);
+    momentum_session('address', NULL, TRUE);
+    momentum_session('city', NULL, TRUE);
+    momentum_session('state', NULL, TRUE);
+    drupal_set_message(t('Either your address failed USPS validation or returned no results.  Please check your address and try again.'), 'warning');
+  }
+}
+
+/**
+ * Add field to system information settings
+ */
+function momentum_officials_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    // Additional fields can be added here
+    $form['momentum']['officials'] = array(
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+      '#title' => t('Momentum Officials'),
+    );
+    $form['momentum']['officials']['momentum_officials_title'] = array(
+      '#title' => t('Page Title'),
+      '#type' => 'textfield',
+      '#default_value' => variable_get('momentum_officials_title', t('Find Officials')),
+      '#required' => TRUE,
+    );
+    $form['momentum']['officials']['momentum_officials_intro'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Introduction text'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('momentum_officials_intro', NULL),
+    );
+    $form['momentum']['officials']['momentum_officials_outro'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Outro text'),
+      '#required' => FALSE,
+      '#default_value' => variable_get('momentum_officials_outro', NULL),
+    );
+    $form['momentum']['officials']['momentum_officials_chambers'] = array(
+      '#type' => 'select',
+      '#options' => array(
+        'us_president' => t('President / VP'),
+        'us_senate' => t('US Senate'),
+        'us_house' => t('US House'),
+        'state_governor' => t('Governor'),
+        'state_senate' => t('State Senate'),
+        'state_house' => t('State House'),
+        'county_executive' => t('County Executive'),
+        'county_legislature' => t('County Legislature'),
+        'municipal_executive' => t('Municipal Executive'),
+        'municipal_legislature' => t('Municipal Legislature'),
+      ),
+      '#default_value' => variable_get('momentum_officials_chambers', array('us_senate', 'us_house')),
+      '#title' => st('Retrieve Which Chambers?'),
+      '#multiple' => TRUE,
+    );
+  }
+}
+
+function _mm_retrieve_vote_record($id){
+  $saved_records = db_query("SELECT * FROM  `variable` WHERE name LIKE  'saved_data_%'")->fetchAll();
+  $items = array();
+  if (!empty($saved_records)) {
+    foreach ($saved_records as $key) {
+      $items[] = variable_get($key->name);
+    }
+  }
+  else {
+    return array();
+  }
+
+  $member_votes = array();
+  $all_legislator_votes = array();
+
+  $counter = -1;
+  if (!empty($items)) {
+    foreach($items as $bill){
+      $votes = $bill['vote_data'];
+      foreach($votes as $vote){
+        $legislator_votes = $vote['LegislatorVotes'];
+        foreach($legislator_votes as $legislator){
+          if($legislator['KnowWhoPersonID'] == $id){
+            $counter++;
+            $matched_vote_record['votes'][$counter]['legislator'] = $legislator;
+            $matched_vote_record['votes'][$counter]['Motion'] = $vote['Motion'];
+            $matched_vote_record['votes'][$counter]['VoteId'] = $vote['VoteID'];
+            $matched_vote_record['votes'][$counter]['mbr_position'] = $vote['mbr_position'];
+            $matched_vote_record['votes'][$counter]['VoteDate'] = $vote['VoteDate'];
+            array_push($member_votes, strtolower($vote['mbr_position']));
+            array_push($all_legislator_votes, strtolower($legislator['Vote']));
+          
+            $matched_vote_record['votes'][$counter]['bill_data'] = $bill['bill_data'];
+          }
+        }
+      }
+    }
+  }
+  $matched_vote_record['vote_percentage'] = _get_vote_percentage($member_votes, $all_legislator_votes);
+  return !empty($matched_vote_record) ? $matched_vote_record : NULL;
+}
+
+
+function _get_vote_percentage($member_votes, $legislator_votes){
+  $matches = 0;
+  for ($i=0; $i < count($member_votes); $i++) { 
+    if ($legislator_votes[$i] == $member_votes[$i]) {
+      $matches++;
+    } else {
+    }
+  }
+  if (count($member_votes) != 0 || count($member_votes) != NULL) {
+    $percentage = ($matches / (float) count($member_votes));
+    return round($percentage * 100, 1).'%';
+  } else {
+    return NULL;
+  }
+}

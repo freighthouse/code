@@ -1,0 +1,143 @@
+<?php
+
+/**
+ * Add new database table schema for escalators and rating
+ */
+function sunrun_calculator_update_7001() {
+  $schema['sunrun_calculator_pricing'] = array(
+    'description' => 'Sunrun calculator escalator and pricing rates.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary key identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'state' => array(
+        'description' => 'State abbreviated code.',
+        'type' => 'varchar',
+        'length' => 2,
+        'not null' => true,
+        'default' => '',
+      ),
+      'utility_name' => array(
+        'description' => 'Utility name.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => false,
+        'default' => '',
+      ),
+      'genability_utility_lsecode' => array(
+        'description' => 'Genability utility lseCode.',
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => false,
+        'default' => '',
+      ),
+      'genability_utility_lseid' => array(
+        'description' => 'Genability utility lseId.',
+        'type' => 'int',
+        'not null' => false,
+      ),
+      'escalator' => array(
+        'description' => 'Escalator value.',
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 3,
+        'not null' => false,
+      ),
+      'rate' => array(
+        'description' => 'Rating value.',
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 3,
+        'not null' => false,
+      ),
+      'prepay_cost' => array(
+        'description' => 'Cost per watt when user pre-pays.',
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 2,
+        'not null' => false,
+      ),
+      'loan_cost' => array(
+        'description' => 'Cost per watt when user takes out a loan.',
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 2,
+        'not null' => false,
+      ),
+      'cash_cost' => array(
+        'description' => 'Cost per watt when user pays cash.',
+        'type' => 'numeric',
+        'precision' => 10,
+        'scale' => 2,
+        'not null' => false,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'state_lseid' => array('state', 'genability_utility_lseid')
+    ),
+  );
+
+  db_create_table('sunrun_calculator_pricing',
+    $schema['sunrun_calculator_pricing']);
+}
+
+/**
+ * Add new database table schema for logging
+ */
+function sunrun_calculator_update_7002() {
+  variable_set('sunrun_calculator_enable_logging', true);
+  variable_set('sunrun_calculator_enable_caching', true);
+  
+  $schema['sunrun_calculator_logging'] = array(
+    'description' => 'Sunrun Calculator api logging.',
+    'fields' => array(
+      'lid' => array(
+        'type' => 'serial',
+        'not null' => true,
+        'description' => 'Primary Key: Unique logging event ID.',
+      ),
+      'service_type' => array(
+        'description' => 'API Service Type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => true,
+        'default' => '',
+      ),
+      'service_request' => array(
+        'type' => 'blob',
+        'not null' => true,
+        'size' => 'big',
+        'description' => 'Serialized array of the service request parameters.',
+      ),
+      'service_response' => array(
+        'type' => 'blob',
+        'not null' => true,
+        'size' => 'big',
+        'description' => 'Serialized array of the service response.',
+      ),
+      'timestamp' => array(
+        'type' => 'int',
+        'not null' => true,
+        'default' => 0,
+        'description' => 'Unix timestamp of when request occurred.',
+      ),
+    ),
+    'primary key' => array('lid'),
+  );
+  
+  db_create_table('sunrun_calculator_logging',
+    $schema['sunrun_calculator_logging']);
+}
+
+/**
+ * Remove old configuration values
+ */
+function sunrun_calculator_update_7003() {
+  variable_delete('sunrun_calculator_not_available_url');
+  variable_delete('sunrun_calculator_low_lifetime_url');
+}

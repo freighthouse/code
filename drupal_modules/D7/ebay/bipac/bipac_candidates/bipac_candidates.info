@@ -1,0 +1,7 @@
+name = BIPAC Candidates
+description = Utilizes the BIPAC Find Your Candidates API
+core = 7.x
+package = BIPAC
+dependencies[] = bipac_api
+
+configure = admin/config/system/site-information

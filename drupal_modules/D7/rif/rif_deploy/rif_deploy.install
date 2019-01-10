@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Installation and update hooks.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function rif_deploy_install() {
+  _rif_deploy_create_donate();
+}
+
+/**
+ * Create the footer donate block and store it's ID to settings.
+ */
+function _rif_deploy_create_donate() {
+  // Create a new landing page feature entity.
+  $entity_type = 'landing_page_component';
+  $entity = entity_create($entity_type, array(
+    'type' => 'feature',
+  ));
+
+  // Create an entity wrapper to update our entity with.
+  $wrapper = entity_metadata_wrapper($entity_type, $entity);
+  $wrapper->title = 'Donate';
+  $wrapper->field_feature_description = array(
+    'value' => 'Your contribution will help us provide free books and literacy programs to children across the nation.',
+  );
+  $wrapper->field_feature_url = array(
+    'title' => 'Donate',
+    'url' => 'https://www.google.com/',
+  );
+  $wrapper->save();
+
+  // Save the ID of this to load later.
+  variable_set('rif_donate_footer_feature', $wrapper->getIdentifier());
+}

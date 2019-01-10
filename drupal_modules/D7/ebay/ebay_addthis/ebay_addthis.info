@@ -1,0 +1,9 @@
+name = "eBay Mainstreet AddThis"
+description = "Provides custom AddThis implementation for news nodes"
+core = 7.x
+package = eBay
+files[] = ebay_addthis.module
+files[] = ebay_addthis_handler_field_ebay_addthis.inc
+
+
+

@@ -1,0 +1,108 @@
+.page-ebaysengage-nos-propositions {
+    #block-system-main {
+        .content {
+            display: none;
+        }
+    }
+}
+#block-views-nos-propositions-block-1 {
+    width: 100%;
+    float: none;
+    margin-top: 40px;
+    @include breakpoint($bp-small) {
+	   width: 70%;
+       float: left;
+    }
+	.view-nos-propositions {
+    	.views-row-1, .views-row-2, .views-row-3{
+    		background-color: #ffffff;
+    		padding: 2em;
+    		padding-top: 0em;
+    		border: 1px solid #cccccc;
+    	}
+        .field-name-field-hero-image-small {
+            margin-top: 40px;
+        }
+        .views-field-title {
+            h2 {
+                text-transform: uppercase;
+                @include fontsize(24);
+                margin-top: -51px;
+                margin-bottom: 50px;
+                padding-left: 44px;
+                font-weight: bold;
+                color: #ffffff;
+                text-shadow: 0 2px 2px rgba(0, 0, 0, 0.5);
+            }
+        }
+    }
+}
+//Webform on the right 
+#block-webform-client-block-130361, #block-webform-client-block-130445 {
+    margin-top: 40px;
+    h2 {
+        @include breakpoint($bp-small) {
+            @include fontsize(32);
+            font-weight: 300;
+            color: #0064d2;
+        }
+    }
+    width: 100%;
+    @include breakpoint($bp-small) {
+        width: 21%;
+        border: 1px solid #cccccc;
+        float: right;
+        background-color: #fff;
+        padding: 1em;
+        padding-top: 0em;
+    }
+}
+.page-node-130366, .page-node-130442, .page-node-130446 {
+    .contextual-links-region {
+        position: inherit;
+    }
+    #block-system-main {
+        .content {
+            display: none;
+        }
+    }
+}
+#block-bean-simplifier-bean {
+    width: 65.4%;
+    margin-top: 120px;
+    padding: 2em;
+    padding: 1.5em;
+    border: 1px solid #cccccc;
+    color: #666666;
+    background-color: #ffffff;
+    h2 {
+        font-size: 1.5em;
+        top: 92px;
+        text-transform: uppercase;
+        left: 8%;
+        font-weight: bold;
+        position: absolute;
+        color: white;
+    }
+}
+    .view-nos-propositions-teasers {
+        .views-field-addtoany-link {
+            width: 13%;
+            margin-right: 14px;
+            float: left;
+            margin-top: 27px;
+            min-height: 86px;
+        }
+    }
+.view-nos-propositions-teasers {
+    width: 65.4%;
+    margin-top: -400px;
+    padding: 1.5em;
+    border-left: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+    color: #666666;
+    background-color: #ffffff;
+}
+#block-addtoany-addtoany-button {
+    margin-top: 40px;
+}

@@ -1,0 +1,5 @@
+name = Sunrun Us Map
+description = SVG map of USA
+core = 7.x
+package = Sunrun
+version = 7.x-1.0

@@ -1,0 +1,125 @@
+.main {
+  background-color: $c-off-white;
+}
+
+.content-top {
+  @include stagecenter();
+  @extend %clearfix;
+}
+
+.front .region-content-top{
+  @include breakpoint($bp-small){
+    display: flex;
+  }
+}
+
+// .front .region-content {
+//   @extend %visuallyhidden;
+// }
+
+.main-content {
+  @include stagecenter();
+}
+
+.main-content .node .content h2 {
+  @include fontsize(32);
+  @extend %helvetica;
+  @extend %light;
+  color: $c-black;
+}
+
+.content-bottom-content {
+  @include stagecenter();
+}
+
+.title {
+  @include fontsize(42);
+  @extend %helvetica;
+  @extend %light;
+  color: $c-blue;
+  text-align: center;
+}
+
+.titletext {
+  @extend %titletext;
+}
+
+.region-content .block-system > .content {
+  padding: 1.5em;
+  border: 1px solid $c-light-grey;
+  color: $c-dark-grey;
+  background-color: $c-white;
+
+  .front &{
+    display: none;
+  }
+}
+
+.full-page-block {
+  @extend %full-page-feature;
+}
+
+.half-page-left-block {
+  @extend %half-page-feature;
+  @extend %half-page-margin-right;
+}
+
+.half-page-right-block {
+  @extend %half-page-feature;
+  @extend %half-page-margin-left;
+}
+
+.bluebtn {
+  @extend %bluebtn;
+}
+
+.top-block {
+  @extend %full-page-feature;
+  margin-bottom: 0;
+  .content {
+    padding-bottom: 0;
+    border-bottom: none;
+    & > p {
+      margin-top: 0;
+    }
+  }
+}
+
+.bottom-block {
+  @extend %full-page-feature;
+  margin-top: 0;
+  .content {
+    padding-top: 0;
+    border-top: none;
+  }
+  h2 {
+    @include fontsize(32);
+    @extend %helvetica;
+    @extend %light;
+    padding: 0 0 0 1em;
+    //border-left: 1px solid $c-light-grey;
+    //border-right: 1px solid $c-light-grey;
+    margin: 0;
+    text-align: left;
+    color: $c-black;
+    background-color: $c-white;
+  }
+}
+
+.page-node-129391,
+.page-node-129943,
+.page-node-129953,
+.page-node-130151,
+.page-node-130166,
+.page-node-130175,
+.page-node-129244 {
+  .block-system .content {
+    display: none;
+  }
+}
+
+.page-node-130152 {
+  .find-your-representatives-block {
+    width: 100%;
+  }
+}

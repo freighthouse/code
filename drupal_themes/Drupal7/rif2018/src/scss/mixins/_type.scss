@@ -1,0 +1,70 @@
+@mixin fs($fs) {
+  font-size: $fs;
+  font-range: $font-range;
+}
+
+@mixin resource-title {
+  font-family: $ff-sans;
+  @include fs($fs-25);
+  line-height: 1.2em;
+  margin: 0;
+  text-transform: none;
+  a {
+    color: $blue-light;
+    &:hover {
+      color: $blue-medium;
+      h3 {
+        color: $blue-medium;
+      }
+    }
+    h3 {
+      color: $blue-light;
+    }
+  }
+}
+
+@mixin resource-title-small {
+  font-family: $ff-sans;
+  @include fs($fs-10);
+  line-height: 1.2em;
+  margin: 0;
+  text-transform: none;
+  a {
+    color: $blue-light;
+    &:hover {
+      color: $blue-medium;
+      h3 {
+        color: $blue-medium;
+      }
+    }
+    h3 {
+      color: $blue-light;
+    }
+  }
+}
+
+@mixin author {
+  color: $gray-dark;
+  font-family: $ff-sans;
+  font-weight: $fw-regular;
+  @include fs($fs-00);
+  margin-bottom: $spacing-small;
+  margin-top: 0;
+}
+
+@mixin description {
+  color: $black;
+  font-family: $ff-sans;
+  @include fs($fs-body-xsmall);
+  line-height: 1.25em;
+  font-weight: $fw-regular;
+  margin-bottom: 0;
+}
+
+@mixin grade-level {
+  color: $gray-medium;
+  font-family: $ff-sans;
+  font-weight: $fw-bold;
+  margin: 0;
+  margin-top: $spacing-small;
+}

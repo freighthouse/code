@@ -1,0 +1,127 @@
+; The name, description and screenshot used for this theme on the Appearance
+; page at admin/appearance.
+
+screenshot  = screenshot.png
+name        = CallFire Theme
+description = A custom theme created for CallFire
+
+
+; This theme is compatible with Drupal 7 core.
+
+core        = 7.x
+engine		  = phptemplate
+
+; First we remove the system's menu styling since Zen has its own.
+stylesheets[all][] = system.menus.css
+
+; Stylesheets
+
+;Reset stylesheet
+stylesheets[all][] = css/reset.css
+
+;Tabs for content editing
+stylesheets[all][] = css/tabs.css
+
+;Plug-in stylesheets
+stylesheets[all][] = plugins/select2-3.1/select2.css
+stylesheets[all][] = css/rainbow.css
+
+;Drupal base styles
+stylesheets[all][] = css/views.css
+
+;CF styles
+stylesheets[all][] = css/cf.css
+stylesheets[all][] = css/form.css
+stylesheets[all][] = css/glyphicons.css
+stylesheets[all][] = css/sprites.css
+stylesheets[all][] = css/block.css
+stylesheets[all][] = css/comments.css
+stylesheets[all][] = css/careers.css
+stylesheets[all][] = css/help.css
+stylesheets[all][] = css/blog.css
+stylesheets[all][] = css/book.css
+stylesheets[all][] = css/glossary_term.css
+stylesheets[all][] = css/industries.css
+stylesheets[all][] = css/landing_page.css
+stylesheets[all][] = css/press.css
+stylesheets[all][] = css/product_page.css
+stylesheets[all][] = css/404_error.css
+stylesheets[all][] = css/pricing.css
+stylesheets[all][] = css/tour.css
+stylesheets[all][] = css/case_study.css
+stylesheets[all][] = css/area_code.css
+stylesheets[print][] = css/print.css
+
+; JavaScripts
+
+scripts[] = plugins/select2-3.1/select2.min.js
+scripts[] = js/rainbow-custom.min.js
+scripts[] = js/jquery.placeholder.min.js
+scripts[] = js/script.js
+
+
+; This section lists the regions defined in Zen's default page.tpl.php and
+; maintenance-page.tpl.php files. The name in brackets is the machine name of
+; the region. The text after the equals sign is a descriptive text used on the
+; admin/structure/blocks page.
+;
+; In the page.tpl, the contents of the region are output with a
+; $page['MACHINE-NAME'] variable and, in the maintenance-page.tpl, the region is
+; output with a $MACHINE-NAME variable. For example, with this line in the .info
+; file:
+;   regions[header_top] = Header top
+; You'll use this variable in page.tpl.php:
+;   <?php print render($page['header_top']); ?>
+; And you'll use this variable in maintenance-page.tpl.php:
+;   <?php print $header_top; ?>
+
+regions[header]         = Header
+regions[highlighted]    = Highlighted
+regions[help]           = Help
+regions[content]        = Content
+regions[content_top]    = Content Top
+regions[content_bottom] = Content Bottom
+regions[sidebar_first]  = First sidebar
+regions[sidebar_second] = Second sidebar
+regions[footer_links]		= Footer Links
+regions[footer]         = Footer
+
+
+; The page_top and page_bottom regions are hidden, which means they will not
+; show up on the blocks administration page. But they are required in order for
+; the html.tpl.php to work properly, so do not delete them.
+
+regions[page_top]       = Page top
+regions[page_bottom]    = Page bottom
+
+
+; Various page elements output by the theme can be toggled on and off. The
+; "features" control which of these check boxes display on the
+; admin/appearance config page. This is useful for suppressing check boxes
+; for elements not used by your sub-theme. To suppress a check box, omit the
+; entry for it below. See the Drupal 7 Theme Guide for more info:
+; http://drupal.org/node/171205#features
+
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = favicon
+features[] = main_menu
+features[] = secondary_menu
+
+settings[callfire_breadcrumb]           = yes
+settings[callfire_breadcrumb_separator] = ' › '
+settings[callfire_breadcrumb_home]      = 1
+settings[callfire_breadcrumb_trailing]  = 1
+settings[callfire_breadcrumb_title]     = 0
+settings[callfire_layout]               = callfire-responsive-sidebars
+settings[callfire_skip_link_anchor]     = main-menu
+settings[callfire_skip_link_text]       = Jump to navigation
+settings[callfire_html5_respond_meta][] = respond
+settings[callfire_html5_respond_meta][] = html5
+settings[callfire_html5_respond_meta][] = meta
+settings[callfire_rebuild_registry]     = 0
+settings[callfire_wireframes]           = 0
+settings[callfire_under_maintenance_text] = Site Under Maintenance

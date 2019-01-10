@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the apigee_account_feature feature.
+ */
+
+include_once 'apigee_account_feature.features.inc';

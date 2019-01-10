@@ -1,0 +1,97 @@
+.section-border {
+  .section-left,
+  .section-right,
+  .section-middle {
+    display: none;
+    visibility: hidden;
+  }
+}
+
+.panel-pane.header,
+.panel-pane.header:first-child + .panel-separator + .panel-pane {
+
+.section-border-container {
+//  position: relative;
+//  height: 0;
+//  pointer-events: none;
+}
+.section-border {
+//  position: absolute;
+//  top: -12px;
+//  display: table;
+//  width: 100%;
+//  z-index: 1;
+  top: 0;
+  display: block;
+
+  .section-left,
+  .section-right,
+  .section-middle {
+//    display: table-cell;
+//    width: 33.3333333%;
+//    height: 50px;
+//    vertical-align: top;
+      display: none;
+      visibility: hidden;
+  }
+  // .section-left,
+  // .section-right {
+  //   display: none;
+  //   visibility: hidden;
+  // }
+  .section-middle {
+//    position: relative;
+//    width: 400px;
+//    height: 50px;
+//    overflow: hidden;
+    // display: block;
+    // visibility: visible;
+    // height: 60px;
+    // width: 190px;
+    // margin-left: auto;
+    // margin-right: auto;
+    // background-image: url('../img/title-container-bookwing.svg');
+    // background-repeat: no-repeat;
+    // background-position: 50% 0;
+    // background-size: auto 100%;
+
+    // @media (max-width: 991px) {
+    //   height: 30px;
+    // }
+  }
+  .fill-color {
+//    position: absolute;
+//    top: 0;
+//    left: 50%;
+//    margin-left: -15px;
+//    width: 30px;
+//    height: 20px;
+//    background-color: @light-grey;
+  }
+  svg {
+//    position: absolute;
+//    top: 0;
+//    left: 50%;
+//    width: 1200px;
+//    height: 37px;
+//    margin-left: -600px;
+//    fill: @rif-yellow;
+    display: none;
+    visibility: hidden;
+
+    &.shadow {
+//      -webkit-filter: drop-shadow( 0px 5px 5px rgba(0,0,0,0.05));
+//      filter: drop-shadow( 0px 5px 5px rgba(0,0,0,0.05) );
+    }
+  }
+  .line {
+//    position: relative;
+//    width: 100%;
+//    height: 12px;
+//    background-color: @rif-yellow;
+//    .box-shadow (0px 5px 5px 0px rgba(0,0,0,0.05));
+    display: none;
+    visibility: hidden;
+  }
+}
+}

@@ -1,0 +1,85 @@
+.advocacy-toolkit-block {
+  display: table;
+}
+
+.advocacy-toolkit-block.issue-page {
+  @extend %half-page-feature;
+  @extend %half-page-margin-left;
+  .content {
+    padding: 1em;
+    @include breakpoint($bp-tiny) {
+      padding: 2em;
+    }
+  }
+}
+
+.node-type-issue .advocacy-toolkit-block.issue-page {
+  @extend %half-page-feature;
+  @extend %half-page-margin-left;
+}
+
+.advocacy-toolkit-block .content {
+  padding-bottom: 0;
+}
+
+.advocacy-toolkit-wrapper {
+  @extend %clearfix;
+  position: relative;
+  border-bottom: 1px solid $c-light-grey;
+  margin-bottom: 1em;
+  padding-bottom: 1em;
+  .views-row-last & {
+    border: none;
+  }
+}
+
+.advocacy-toolkit-link {
+  display: block;
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    .advocacy-toolkit-read-article {
+      @include transition(background .3s ease);
+      color: $c-medium-grey;
+    }
+  }
+
+}
+
+.advocacy-toolkit-icon,
+.advocacy-toolkit-title,
+.advocacy-toolkit-read-article {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.advocacy-toolkit-read-article {
+  vertical-align: bottom;
+}
+
+.advocacy-toolkit-icon {
+  &:before {
+    @extend %document;
+    @include fontsize(32);
+    color: $c-dark-grey;
+    margin-right: 1em;
+    display: block;
+    line-height: 2;
+  }
+}
+
+.advocacy-toolkit-title {
+  @include fontsize(24);
+  @extend %helvetica;
+  color: $c-off-black;
+  padding-right: 1em;
+}
+
+.advocacy-toolkit-read-article {
+  @extend %learn-more-link;
+  border: none;
+  padding: 0;
+  &:after {
+    line-height: 1.5;
+  }
+}

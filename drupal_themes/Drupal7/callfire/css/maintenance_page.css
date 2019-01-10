@@ -1,0 +1,44 @@
+/*------------------------------------------------------------------
+[Maintenance Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+#maintenance {
+	border-radius: 6px;
+	background-color: #fff6c5;
+	padding: 5px;
+	margin-top: 45px;
+}
+#maintenance #content{
+	background: #222 url('../images/404.png') 15px 25px no-repeat;
+	border-radius: 6px;
+	color: #fff6c5;
+	padding: 30px 20px;
+}
+
+#maintenance h1#page-title {
+	color: #ffe44f;
+	margin: 0 0 20px;
+}
+
+#maintenance .footer {
+	text-align: center;
+	margin-top: 50px;
+}
+
+#maintenance a {
+	color: #4DA3EA;
+}
+
+#maintenance a:hover {
+	color: #4DA3EA;
+	text-decoration: underline;
+}
+
+.maintenance-page #block-system-main-menu .menu {
+	width: 192px;
+}

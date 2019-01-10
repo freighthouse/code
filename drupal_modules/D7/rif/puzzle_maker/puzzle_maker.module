@@ -1,0 +1,932 @@
+<?php
+	/**
+	 * Implements hook_permission()
+	 */
+	function puzzle_maker_permission() {
+		return array(
+			'administer site games' => array(
+				'title' => t('Administer Site Games'),
+				'description' => t('Administer games that can be used by search and internal systems'),
+			),
+			'administer private games' => array(
+				'title' => t('Administer Private Games'),
+				'description' => t('View and Manage all Games disregarding if they are private or not'),
+			),
+		);
+	}
+
+	/**
+	 * Implements hook_menu().
+	 */
+	function puzzle_maker_menu() {
+		// No New Menu Endpoints Yet
+	}
+
+	/**
+	 * Implements hook_block_info().
+	 *
+	 * This hook defines blocks to be recognized by the system
+	 */
+	function puzzle_maker_block_info() {
+		// Define the Puzzle Maker Callout
+		$blocks['puzzle_maker_my_puzzles_table'] = array(
+			'info' => t('My Puzzles'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_PER_USER,
+		);
+		return $blocks;
+	}
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function puzzle_maker_block_view($delta = '') {
+		switch($delta) {
+			case 'puzzle_maker_my_puzzles_table' :
+				$block['subject'] = t('My Puzzles');
+				$block['content'] = _puzzle_maker_get_my_puzzles_table();
+				break;
+		}
+
+		return $block;
+	}
+
+	/**
+	 * Implements hook_form_BASE_FORM_ID_alter().
+	 *
+	 * @param $form
+	 * @param $form_state
+	 */
+	function puzzle_maker_form_crossword_puzzle_node_form_alter(&$form, &$form_state) {
+		// Check if a user can manage games for the whole site
+		if(user_access('administer site games')){
+			// If they can manage system games, then update the form for them
+		} else {
+			// If they can't manage system games, then limit the form a little.
+
+			$form['#attributes']['class'][] = 'preview-form-to-move';
+
+			//Add the are you sure popup js
+			$form['#attached']['js'][] = drupal_get_path('module', 'puzzle_maker') . '/unsaved-popup.js';
+			if($form_state['triggering_element']['#value'] == 'edit') {
+				$form['#attributes']['class'][] = 'unsaved-persistent';
+				$form['#attributes']['class'][] = 'unsaved';
+			}
+
+			// Add an after build function that is needed to remove the format access
+			$form['#after_build'][] = 'disable_text_format_node_form_after_build';
+
+			// Provide additional wrapper and classes to the form actions
+			$form['actions']['#prefix'] = '<div class="col-sm-offset-3 col-sm-9">';
+			$form['actions']['#suffix'] = '</div>';
+
+			$form['actions']['preview']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['submit']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+
+			);
+			$form['actions']['delete']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['cancel'] = array(
+				'#type' => 'submit',
+				'#value' => t('Back to Puzzle Creator'),
+				'#attributes' => array(
+					'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+					//'onclick' => 'if(!confirm("Really Delete?")){return false;}'
+				),
+				'#submit' => array('puzzle_maker_edit_game_cancel'),
+				'#limit_validation_errors' => array(),
+			);
+
+			$form['field_is_user_game']['und']['#default_value'] = TRUE;
+			$form['field_is_user_game']['#access'] = FALSE;
+			$form['actions']['delete']['#access'] = FALSE;
+
+			global $base_url;
+			$path = $base_url;
+
+			$form['shareable_link'] = array(
+				'#type' => 'hidden',
+				'#attributes' => array(
+					'class' => array('form-control'),
+				),
+				'#disabled' => TRUE,
+				'#title' => t('Shareable Link'),
+				'#size' => 60,
+				'#weight' => 50,
+				'#maxlength' => 128,
+				'#default_value' => $path .'/'. drupal_get_path_alias('node/'.$form['nid']['#value']),
+				'#states' => array(
+					// Hide the settings when the cancel notify checkbox is disabled.
+					'visible' => array(
+						':input[name="field_shared[und]"]' => array('checked' => TRUE),
+					),
+				),
+			);
+
+			if($form_state['node_preview']) {
+				// The node is being previewed so:
+				// Check for errors
+//				dsm($form);
+//				dsm($form_state);
+				$crossword_definitions = _parse_crossword_definitions($form_state['values']['field_definitions']['und'][0]['value']);
+
+				// Hide the preview and delete buttons
+				$form['actions']['preview']['#access'] = FALSE;
+
+				// Do some error checking
+				$error_message = '';
+				$error_lines = array_filter($crossword_definitions['errors'], function($value) {
+					return !ctype_space($value) && !empty($value);
+				});
+				$lengthy_words = array_filter($crossword_definitions['words'], function($value) {
+					$word_size_limit = 15;
+					return strlen($value) > $word_size_limit;
+				});
+
+				if(sizeof($error_lines) > 0) {
+					$error_message .= '
+						<li>The following lines found in your definition list have errors</li>
+						<em>'. theme('item_list', array('items' => $error_lines, 'type' => 'ul')) .'</em>
+					';
+				}
+				if(sizeof($lengthy_words) > 0) {
+					$error_message .= '
+						<li>The following words exceed the 15 letter size limit.</li>
+						 <em>'. theme('item_list', array('items' => $lengthy_words, 'type' => 'ul')) .'</em>
+					';
+				}
+
+				// Check if we found some basic errors
+				if($error_message) {
+					// create the error display
+					$form['errors'] = array(
+						'#markup' => '
+							<div>It looks like your puzzle needs some tweaking to render correctly. Here are some tips:
+								<ul>
+									<li>Make sure each line is formatted correctly. Each line should follow this format: [ <em>Question or hint to show : word</em> ]</li>
+									'. $error_message .'
+								</ul>
+							</div>
+						',
+						'#prefix' => '<div class="panel-push-down"><div class="panel panel-default"><div class="panel-body">',
+						'#suffix' => '</div></div></div>',
+					);
+
+					// Disable the save button
+					$form['actions']['submit']['#disabled'] = TRUE;
+					// Hide the node preview
+					$form['#prefix'] = '';
+				}
+
+				// Add the edit
+				$form['actions']['edit'] = array(
+					'#access' => true,
+					'#type' => 'submit',
+					'#value' => 'edit',
+					'#weight' => '10',
+					'#submit' => array('puzzle_maker_edit_from_preview'),
+					'#attributes' => array(
+						'class' => array('btn', 'btn-yellow-rif', 'blue-border')
+					),
+				);
+				//				$form['actions']['randomize'] = array(
+				//					'#access' => true,
+				//					'#type' => 'submit',
+				//					'#value' => 'randomize',
+				//					'#validate' => array('puzzle_maker_randomize_validate'),
+				//					'#weight' => '11',
+				//					'#submit' => array('puzzle_maker_randomize_from_preview'),
+				//					'#attributes' => array(
+				//						'class' => array('btn', 'btn-yellow-rif', 'blue-border')
+				//					),
+				//				);
+
+				// Hide the fields that we don't want to show
+				$form['title']['#access'] = FALSE;
+				$form['body']['#access'] = FALSE;
+				$form['field_definitions']['#access'] = FALSE;
+				$form['field_disable_word_bank']['#access'] = FALSE;
+				$form['field_random_seed']['#access'] = FALSE;
+				$form['field_is_user_game']['#access'] = FALSE;
+				$form['field_shared']['#access'] = FALSE;
+				$form['shareable_link']['#access'] = FALSE;
+				$form['actions']['cancel']['#access'] = FALSE;
+			} else {
+				// The node is in its edit mode so lets wrap it in some divs
+
+				if($form['nid']['#value'] == NULL) {
+					$game_header = 'Create Criss Cross Puzzle';
+				} else {
+					$game_header = 'Edit Criss Cross Puzzle';
+				}
+				$form['game_fields'] = array(
+					'#type' => 'fieldset',
+					'#title' => t($game_header),
+					'#description' => '<p style="margin-left: 8px; margin-bottom:30px;">'.t('Please fill out the fields below to create your puzzle and click preview to try it out.').'</p>',
+					'#collapsible' => FALSE,
+					'#collapsed' => FALSE,
+					'#weight' => 18,
+				);
+
+				// Hiding Seed... Cause the client wants it this way
+				$form['field_random_seed']['#access'] = FALSE;
+
+				$form['game_fields']['title'] = $form['title'];
+				$form['game_fields']['body'] = $form['body'];
+				$form['game_fields']['field_definitions'] = $form['field_definitions'];
+				$form['game_fields']['field_disable_word_bank'] = $form['field_disable_word_bank'];
+				$form['game_fields']['field_random_seed'] = $form['field_random_seed'];
+				$form['game_fields']['field_is_user_game'] = $form['field_is_user_game'];
+				$form['game_fields']['field_shared'] = $form['field_shared'];
+				$form['game_fields']['shareable_link'] = $form['shareable_link'];
+				$form['game_fields']['actions'] = $form['actions'];
+
+				unset($form['title']);
+				unset($form['body']);
+				unset($form['field_definitions']);
+				unset($form['field_disable_word_bank']);
+				unset($form['field_random_seed']);
+				unset($form['field_is_user_game']);
+				unset($form['field_shared']);
+				unset($form['shareable_link']);
+				unset($form['actions']);
+			}
+
+		}
+//		dsm('$form');
+//		dsm($form);
+//		dsm('$form_state');
+//		dsm($form_state);
+	}
+
+	function puzzle_maker_form_word_matching_node_form_alter(&$form, &$form_state) {
+		// Check if a user can manage games for the whole site
+		if(user_access('administer site games')){
+			// If they can manage system games, then update the form for them
+		} else {
+			// If they can't manage system games, then limit the form a little.
+
+			$form['#attributes']['class'][] = 'preview-form-to-move';
+			//Add the are you sure popup js
+			$form['#attached']['js'][] = drupal_get_path('module', 'puzzle_maker') . '/unsaved-popup.js';
+			if($form_state['triggering_element']['#value'] == 'edit') {
+				$form['#attributes']['class'][] = 'unsaved-persistent';
+				$form['#attributes']['class'][] = 'unsaved';
+			}
+
+			// Add an after build function that is needed to remove the format access
+			$form['#after_build'][] = 'disable_text_format_node_form_after_build';
+
+			// Provide additional wrapper and classes to the form actions
+			$form['actions']['#prefix'] = '<div class="col-sm-offset-3 col-sm-9">';
+			$form['actions']['#suffix'] = '</div>';
+
+			$form['actions']['preview']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['submit']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['delete']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['cancel'] = array(
+				'#type' => 'submit',
+				'#value' => t('Back to Puzzle Creator'),
+				'#attributes' => array('class' => array('btn', 'btn-yellow-rif', 'blue-border')),
+				'#submit' => array('puzzle_maker_edit_game_cancel'),
+				'#limit_validation_errors' => array(),
+			);
+
+			$form['field_is_user_game']['und']['#default_value'] = TRUE;
+			$form['field_is_user_game']['#access'] = FALSE;
+			$form['actions']['delete']['#access'] = FALSE;
+
+			global $base_url;
+			$path = $base_url;
+
+			$form['shareable_link'] = array(
+				'#type' => 'hidden',
+				'#attributes' => array(
+					'class' => array('form-control'),
+				),
+				'#disabled' => TRUE,
+				'#title' => t('Shareable Link'),
+				'#size' => 60,
+				'#weight' => 50,
+				'#maxlength' => 128,
+				'#default_value' => $path .'/'. drupal_get_path_alias('node/'.$form['nid']['#value']),
+				'#states' => array(
+					// Hide the settings when the cancel notify checkbox is disabled.
+					'visible' => array(
+						':input[name="field_shared[und]"]' => array('checked' => TRUE),
+					),
+				),
+			);
+
+			if($form_state['node_preview']) {
+				// The node is being previewed so:
+
+				// Hide the preview and delete buttons
+				$form['actions']['preview']['#access'] = FALSE;
+
+				// Calculate the amount of words
+				$words = explode("\n", $form_state['values']['field_words']['und'][0]['value']);
+				$words = array_map('trim', $words);
+				$words = array_map('strtoupper', $words);
+				$word_count_to_pull = $form_state['values']['field_choose_x_words_randomly']['und'][0]['value'];
+
+				//dsm($form_state);
+
+				// Do some error checking
+				$error_message = '';
+
+				$word_bank_size = sizeof($words);
+				$longWords = array_filter($words, function($word) {
+					return strlen($word) > 10;
+				});
+
+				if($longWords) {
+					$error_message .= '<li>Change or replace these words that are over the 10 character maximum.<ul>';
+					foreach($longWords as $longWord) {
+						$error_message .= '<li>'.$longWord.'</li>';
+					}
+					$error_message .= '</ul></li>';
+				}
+				if($word_count_to_pull > $word_bank_size){
+					$error_message .= '<li>You have selected your puzzle to randomly choose '.$word_count_to_pull. ' words from a word bank that has only '. $word_bank_size .' words. Please decrease the number of words to choose from to be '.$word_bank_size.' or less.</li><li>You can also add '. ($word_count_to_pull-$word_bank_size) .' extra word(s) in your word bank if you still want your puzzle to have '. $word_count_to_pull. ' words to be matched.</li>';
+				}
+
+				// Check if we found some basic errors
+				if($error_message) {
+					// create the error display
+					$form['errors'] = array(
+						'#markup' => '
+							<div>It looks like your puzzle needs some tweaking to render correctly. Here are some tips:
+								<ul>
+									'. $error_message .'
+								</ul>
+							</div>
+						',
+						'#prefix' => '<div class="panel-push-down"><div class="panel panel-default"><div class="panel-body">',
+						'#suffix' => '</div></div></div>',
+					);
+
+					// Disable the save button
+					$form['actions']['submit']['#disabled'] = TRUE;
+					// Hide the node preview
+					$form['#prefix'] = '';
+				}
+
+				// Add the edit
+				$form['actions']['edit'] = array(
+					'#access' => true,
+					'#type' => 'submit',
+					'#value' => 'edit',
+					'#weight' => '10',
+					'#submit' => array('puzzle_maker_edit_from_preview'),
+					'#attributes' => array(
+						'class' => array('btn', 'btn-yellow-rif', 'blue-border')
+					),
+				);
+//				$form['actions']['randomize'] = array(
+//					'#access' => true,
+//					'#type' => 'submit',
+//					'#value' => 'randomize',
+//					'#validate' => array('puzzle_maker_randomize_validate'),
+//					'#weight' => '11',
+//					'#submit' => array('puzzle_maker_randomize_from_preview'),
+//					'#attributes' => array(
+//						'class' => array('btn', 'btn-yellow-rif', 'blue-border')
+//					),
+//				);
+
+				// Hide the fields that we don't want to show
+				$form['title']['#access'] = FALSE;
+				$form['body']['#access'] = FALSE;
+				$form['field_words']['#access'] = FALSE;
+				$form['field_random_seed_matching']['#access'] = FALSE;
+				$form['field_is_user_game']['#access'] = FALSE;
+				$form['field_choose_x_words_randomly']['#access'] = FALSE;
+				$form['field_shared']['#access'] = FALSE;
+				$form['shareable_link']['#access'] = FALSE;
+				$form['actions']['cancel']['#access'] = FALSE;
+			} else {
+				// The node is in its edit mode so lets wrap it in some divs
+				if($form['nid']['#value'] == NULL) {
+					$game_header = 'Create Memory Matching Puzzle';
+				} else {
+					$game_header = 'Edit Memory Matching Puzzle';
+				}
+				$form['game_fields'] = array(
+					'#type' => 'fieldset',
+					'#title' => t($game_header),
+					'#description' => '<p style="margin-left: 8px; margin-bottom:30px;">'.t('Please fill out the fields below to create your puzzle and click preview to try it out.').'</p>',
+					'#collapsible' => FALSE,
+					'#collapsed' => FALSE,
+					'#weight' => 18,
+				);
+
+				// Hiding Seed... Cause the client wants it this way
+				$form['field_random_seed_matching']['#access'] = FALSE;
+
+				$form['game_fields']['title'] = $form['title'];
+				$form['game_fields']['body'] = $form['body'];
+				$form['game_fields']['field_words'] = $form['field_words'];
+				$form['game_fields']['field_random_seed_matching'] = $form['field_random_seed_matching'];
+				$form['game_fields']['field_is_user_game'] = $form['field_is_user_game'];
+				$form['game_fields']['field_choose_x_words_randomly'] = $form['field_choose_x_words_randomly'];
+				$form['game_fields']['field_shared'] = $form['field_shared'];
+				$form['game_fields']['shareable_link'] = $form['shareable_link'];
+				$form['game_fields']['actions'] = $form['actions'];
+
+				unset($form['title']);
+				unset($form['body']);
+				unset($form['field_words']);
+				unset($form['field_random_seed_matching']);
+				unset($form['field_is_user_game']);
+				unset($form['field_choose_x_words_randomly']);
+				unset($form['field_shared']);
+				unset($form['shareable_link']);
+				unset($form['actions']);
+			}
+		}
+	}
+
+	function puzzle_maker_form_wordfind_node_form_alter(&$form, &$form_state) {
+		// Check if a user can manage games for the whole site
+		if(user_access('administer site games')){
+			// If they can manage system games, then update the form for them
+		} else {
+
+			$form['#attributes']['class'][] = 'preview-form-to-move';
+			//Add the are you sure popup js
+			$form['#attached']['js'][] = drupal_get_path('module', 'puzzle_maker') . '/unsaved-popup.js';
+
+			if($form_state['triggering_element']['#value'] == 'edit') {
+				$form['#attributes']['class'][] = 'unsaved-persistent';
+				$form['#attributes']['class'][] = 'unsaved';
+			}
+
+			//dsm($form);
+			$default_puzzle_size  = 0;
+			$height = $form['field_wordfind_height']['und'][0]['value']['#default_value'];
+			$width = $form['field_wordfind_width']['und'][0]['value']['#default_value'];
+			if($height == $width){
+				$default_puzzle_size = $height;
+				if($default_puzzle_size > 12) {
+					$default_puzzle_size = 0;
+				}
+			}
+			$form['wordfind_size'] = array(
+				'#type' => 'select',
+				'#title' => t('Puzzle Size'),
+				'#options' => array(
+					4 => t('4x4         '),
+					5 => t('5x5         '),
+					6 => t('6x6 (Easy)  '),
+					7 => t('7x7         '),
+					8 => t('8x8         '),
+					9 => t('9x9 (Medium)'),
+					10 => t('10x10       '),
+					11 => t('11x11       '),
+					12 => t('12x12 (Hard)'),
+					0 => t('Custom Size'),
+				),
+				'#weight' => 34,
+				'#default_value' => $default_puzzle_size,
+				'#description' => t('Select the minimum size of your puzzle. <em>NOTE: Your puzzle may be larger than this depending on the words in your word bank.</em>'),
+			);
+			$form['wordfind_custom_size'] = array(
+				'#type' => 'fieldset',
+				'#title' => t('Custom Size'),
+				'#attributes' => array(
+					'class' => array('wordfind-custom-input')
+				),
+				'#weight' => 34,
+				'#description' => t('<em>NOTE: Your puzzle may be larger than this depending on the words in your word bank.</em>'),
+				'#states' => array(
+					'visible' => array(
+						'#edit-wordfind-size' => array('value' => 0),
+					),
+				),
+				'#prefix' => '<div class="col-sm-offset-3 col-sm-9">',
+				'#suffix' => '</div>'
+			);
+
+			$form['wordfind_custom_size']['custom_width'] = array(
+				'#type' => 'select',
+				'#title' => t('Width'),
+				'#options' => array(
+					4 => 4,
+					5 => 5,
+					6 => 6,
+					7 => 7,
+					8 => 8,
+					9 => 9,
+					10 => 10,
+					11 => 11,
+					12 => 12,
+					13 => 13,
+					14 => 14,
+					15 => 15,
+					16 => 16,
+					17 => 17,
+					18 => 18,
+					19 => 19,
+					20 => 20
+				),
+				'#default_value' => $form['field_wordfind_width']['und'][0]['value']['#default_value']
+			);
+			$form['wordfind_custom_size']['custom_markup'] = array(
+				'#type' => 'markup',
+				'#markup' => '<div class="form-group form-item"><i class="fa fa-close"></i></div>',
+			);
+			$form['wordfind_custom_size']['custom_height'] = array(
+				'#type' => 'select',
+				'#title' => t('Height'),
+				'#options' => array(
+					4 => 4,
+					5 => 5,
+					6 => 6,
+					7 => 7,
+					8 => 8,
+					9 => 9,
+					10 => 10,
+					11 => 11,
+					12 => 12,
+					13 => 13,
+					14 => 14,
+					15 => 15,
+					16 => 16,
+					17 => 17,
+					18 => 18,
+					19 => 19,
+					20 => 20
+				),
+				'#default_value' => $form['field_wordfind_height']['und'][0]['value']['#default_value']
+			);
+
+			// If they can't manage system games, then limit the form a little.
+			// Add an after build function that is needed to remove the format access
+			$form['#after_build'][] = 'disable_text_format_node_form_after_build';
+
+			// Provide additional wrapper and classes to the form actions
+			$form['actions']['#prefix'] = '<div class="col-sm-offset-3 col-sm-9">';
+			$form['actions']['#suffix'] = '</div>';
+
+			$form['actions']['preview']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['preview']['#validate'][] = 'puzzle_maker_special_size_getter';
+			$form['actions']['submit']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+
+			);
+			$form['actions']['delete']['#attributes'] = array(
+				'class' => array('btn', 'btn-yellow-rif', 'blue-border'),
+			);
+			$form['actions']['cancel'] = array(
+				'#type' => 'submit',
+				'#value' => t('Back to Puzzle Creator'),
+				'#attributes' => array('class' => array('btn', 'btn-yellow-rif', 'blue-border')),
+				'#submit' => array('puzzle_maker_edit_game_cancel'),
+				'#limit_validation_errors' => array(),
+			);
+
+			$form['field_is_user_game']['und']['#default_value'] = TRUE;
+			$form['field_is_user_game']['#access'] = FALSE;
+			$form['actions']['delete']['#access'] = FALSE;
+
+			$form['field_wordfind_width']['#access'] = FALSE;
+			$form['field_wordfind_height']['#access'] = FALSE;
+
+			global $base_url;
+			$path = $base_url;
+
+			$form['shareable_link'] = array(
+				'#type' => 'hidden',
+				'#attributes' => array(
+					'class' => array('form-control'),
+				),
+				'#disabled' => TRUE,
+				'#title' => t('Shareable Link'),
+				'#size' => 60,
+				'#weight' => 50,
+				'#maxlength' => 128,
+				'#default_value' => $path .'/'. drupal_get_path_alias('node/'.$form['nid']['#value']),
+				'#states' => array(
+					// Hide the settings when the cancel notify checkbox is disabled.
+					'visible' => array(
+						':input[name="field_shared[und]"]' => array('checked' => TRUE),
+					),
+				),
+			);
+
+			if($form_state['node_preview']) {
+				// The node is being previewed so:
+
+				// Hide the preview and delete buttons
+				$form['actions']['preview']['#access'] = FALSE;
+
+				// Check if we found some basic errors
+//				if(sizeof($error_lines) > 0) {
+//					// create the error display
+//					$form['errors'] = array(
+//						'#markup' => '
+//							<div>It looks like your puzzle needs some tweaking to render correctly. Here are some tips:
+//								<ul>
+//									<li>Make sure each line is formatted correctly. Each line should follow this format: [ <em>Question or hint to show : word</em> ]</li>
+//									<li>The following lines found in your definition list have errors</li>
+//									<em>'. theme('item_list', array('items' => $error_lines, 'type' => 'ul')) .'</em>
+//								</ul>
+//							</div>
+//						',
+//						'#prefix' => '<div class="panel-push-down"><div class="panel panel-default"><div class="panel-body">',
+//						'#suffix' => '</div></div></div>',
+//					);
+//
+//					// Disable the save button
+//					$form['actions']['submit']['#disabled'] = TRUE;
+//					// Hide the node preview
+//					$form['#prefix'] = '';
+//				}
+
+				// Add the edit
+				$form['actions']['edit'] = array(
+					'#access' => true,
+					'#type' => 'submit',
+					'#value' => 'edit',
+					'#weight' => '10',
+					'#submit' => array('puzzle_maker_edit_from_preview'),
+					'#attributes' => array(
+						'class' => array('btn', 'btn-yellow-rif', 'blue-border')
+					),
+				);
+//				$form['actions']['randomize'] = array(
+//					'#access' => true,
+//					'#type' => 'submit',
+//					'#value' => 'randomize',
+//					'#validate' => array('puzzle_maker_randomize_validate'),
+//					'#weight' => '11',
+//					'#submit' => array('puzzle_maker_randomize_from_preview'),
+//					'#attributes' => array(
+//						'class' => array('btn', 'btn-yellow-rif', 'blue-border')
+//					),
+//				);
+
+				// Hide the fields that we don't want to show
+				$form['title']['#access'] = FALSE;
+				$form['body']['#access'] = FALSE;
+				$form['field_words_wordfind']['#access'] = FALSE;
+				$form['field_random_seed_wordfind']['#access'] = FALSE;
+				$form['field_is_user_game']['#access'] = FALSE;
+				$form['field_shared']['#access'] = FALSE;
+				$form['field_wordfind_orientations']['#access'] = FALSE;
+				$form['wordfind_size']['#access'] = FALSE;
+				$form['wordfind_custom_size']['#access'] = FALSE;
+				$form['shareable_link']['#access'] = FALSE;
+				$form['actions']['cancel']['#access'] = FALSE;
+			} else {
+				// The node is in its edit mode so lets wrap it in some divs
+				if($form['nid']['#value'] == NULL) {
+					$game_header = 'Create Word Search Puzzle';
+				} else {
+					$game_header = 'Edit Word Search Puzzle';
+				}
+				$form['game_fields'] = array(
+					'#type' => 'fieldset',
+					'#title' => t($game_header),
+					'#description' => '<p style="margin-left: 8px; margin-bottom:30px;">'.t('Please fill out the fields below to create your puzzle and click preview to try it out.').'</p>',
+					'#collapsible' => FALSE,
+					'#collapsed' => FALSE,
+					'#weight' => 18,
+				);
+
+				// Hiding Seed... Cause the client wants it this way
+				$form['field_random_seed_wordfind']['#access'] = FALSE;
+
+				$form['game_fields']['title'] = $form['title'];
+				$form['game_fields']['body'] = $form['body'];
+				$form['game_fields']['field_words_wordfind'] = $form['field_words_wordfind'];
+				$form['game_fields']['field_random_seed_wordfind'] = $form['field_random_seed_wordfind'];
+				$form['game_fields']['field_is_user_game'] = $form['field_is_user_game'];
+				$form['game_fields']['field_shared'] = $form['field_shared'];
+				$form['game_fields']['field_wordfind_orientations'] = $form['field_wordfind_orientations'];
+				$form['game_fields']['wordfind_size'] = $form['wordfind_size'];
+				$form['game_fields']['wordfind_custom_size'] = $form['wordfind_custom_size'];
+				$form['game_fields']['shareable_link'] = $form['shareable_link'];
+				$form['game_fields']['actions'] = $form['actions'];
+
+				unset($form['title']);
+				unset($form['body']);
+				unset($form['field_words_wordfind']);
+				unset($form['field_random_seed_wordfind']);
+				unset($form['field_is_user_game']);
+				unset($form['field_shared']);
+				unset($form['field_wordfind_orientations']);
+				unset($form['wordfind_size']);
+				unset($form['wordfind_custom_size']);
+				unset($form['shareable_link']);
+				unset($form['actions']);
+			}
+		}
+	}
+
+	function puzzle_maker_form_node_delete_confirm_alter(&$form, &$form_state, $form_id) {
+		if (arg(0) == 'node' && is_numeric(arg(1)) && arg(2) == 'delete') {
+			$node = node_load(arg(1));
+			$puzzle_types = array("word_matching", "wordfind", "crossword_puzzle");
+			if(in_array($node->type, $puzzle_types)) {
+
+				$form['#prefix'] = '<div class="container panel-push-down"><div class="panel panel-default"><div class="panel-body">';
+				$form['#suffix'] = '</div></div></div>';
+				$form['actions']['submit']['#attributes'] = array(
+					'class' => array('btn', 'btn-yellow-rif', 'blue-border', 'form-submit'),
+				);
+				$form['actions']['cancel']['#attributes'] = array(
+					'class' => array('btn', 'btn-yellow-rif', 'blue-border', 'form-submit'),
+				);
+			}
+		}
+	}
+
+	// Submit Handler to interpret the special wordfind size field
+	function puzzle_maker_special_size_getter($form, &$form_state) {
+//		dsm("VALIDATE");
+		if($form_state['values']['wordfind_size'] == 0) {
+			$form_state['values']['field_wordfind_width']['und'][0]['value'] = $form_state['values']['custom_height'];
+			$form_state['values']['field_wordfind_height']['und'][0]['value'] = $form_state['values']['custom_width'];
+		} else {
+			$form_state['values']['field_wordfind_width']['und'][0]['value'] = $form_state['values']['wordfind_size'];
+			$form_state['values']['field_wordfind_height']['und'][0]['value'] = $form_state['values']['wordfind_size'];
+		}
+	}
+
+	// Submit Handler to go back from previewing to editing
+	function puzzle_maker_edit_from_preview($form, &$form_state) {
+		unset($form_state['node_preview']);
+		$form_state['rebuild'] = TRUE;
+	}
+
+	// Unused Submit Handler for randomizing the Seed for a puzzle
+	function puzzle_maker_randomize_from_preview($form, &$form_state) {
+		//$node = node_form_submit_build_node($form, $form_state);
+		$form_state['node_preview'] = node_preview($form_state['node']);
+		$form_state['rebuild'] = TRUE;
+	}
+
+	// Unused Validation Handler for randomizing the seed for a puzzle
+	function puzzle_maker_randomize_validate($form, &$form_state) {
+		//dsm($form_state);
+		$rand_value = mt_rand(1000000,9999999);
+		//dsm($rand_value);
+		$form_state['node']->field_random_seed['und'][0]['value'] = $rand_value;
+		$form_state['input']['field_random_seed']['und'][0]['value'] = $rand_value;
+		$form_state['values']['field_random_seed']['und'][0]['value'] = $rand_value;
+		$form_state['build_info']['args'][0]->field_random_seed['und'][0]['value'] = $rand_value;
+//		$form_state['values']['field_random_seed']['und'][0]['value'] = $rand_value;
+		$form_state['complete form']['field_random_seed']['und'][0]['value']['#value'] = $rand_value;
+//		$form['field_random_seed']['und'][0]['value']['#value'] = $rand_value;
+//		$form['field_random_seed']['und'][0]['value']['#default_value'] = $rand_value;
+//		8134525
+//		3141898
+	}
+
+	function disable_text_format_node_form_after_build($form) {
+		$form['game_fields']['body']['und']['0']['format']['#access'] = FALSE;
+		return $form;
+	}
+
+	function _puzzle_maker_get_my_puzzles_table(){
+		global $user;
+		$game_types = array('crossword_puzzle', 'word_matching', 'wordfind');
+		$rows = array();
+
+		$query = new EntityFieldQuery;
+		$result = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('status', 1)
+			->propertyCondition('type', $game_types, 'IN')
+			->propertyCondition('uid', $user->uid)
+			->execute();
+
+		$headers = array('Date', 'Name', 'Type', 'Actions');
+		if(!$result) {
+			$rows[] = array(
+					array(
+						'data'=>'You do not have any puzzle games to display.',
+						'colspan' => 4
+					),
+				);
+		} else {
+			$bundle_data = entity_get_info('node');
+			foreach($result['node'] as $nid => $item) {
+				$emw_node = entity_metadata_wrapper('node', $nid);
+
+				// Set up table values
+				$created_date = date('m/d/y', $emw_node->created->value());
+				$puzzle_name = $emw_node->label();
+				$game_type = $bundle_data['bundles'][$emw_node->getBundle()]['label'];
+
+				$nodeID = $emw_node->getIdentifier();
+				//$shareable = $emw_node->field_shareable->value();
+				// Set up the Actions Dropdown
+				global $base_url;
+				//global $base_root;
+				// This next line is a little hacky but it rewords the share url to be more accurate
+				$magic_url = str_replace('prod','www',$base_url);
+				$node_actions = '
+					<div class="dropdown dropdown-table">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="fa fa-sort pull-right"></i>Select Action...</span></button>
+					 	<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+							<li><a href="/' . drupal_get_path_alias('node/'.$nodeID) . '" target="_blank">View</a></li>
+							<li><a href="/node/'.$nodeID.'/edit?destination='.request_path().'">Edit</a></li>
+							<li><a href="/print/' . drupal_get_path_alias('node/'.$nodeID) . '" target="_blank">Print</a></li>
+							<li><a href="/node/'.$nodeID.'/delete?destination='.request_path().'">Delete Puzzle</a></li>
+							<li><a class="share-action" data-shareable-link="' . $magic_url . '/'. drupal_get_path_alias('node/'.$nodeID) . '" href="#">Shareable URL</a></li>
+					 	</ul>
+					</div>
+				';
+
+				$rows[] = array($created_date, $puzzle_name, $game_type, $node_actions);
+			}
+		}
+
+		$modalHTML = '<div class="modal fade modal-shareable-url" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fa fa-close"></i></button>
+                <h4 class="modal-title">Shareable URL</h4>
+            </div>
+            <div class="modal-body">
+      	         <h5 class="shareable-title">Copy this URL to share your puzzle with students and friends.</h5>
+            	<div class="well">
+                	<p class="shareable-link"></p>
+            	</div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->';
+
+		$JSHTML = '<script>
+    $ = jQuery;
+    $(function() {
+        $(\'.share-action\').click(function(e) {
+            e.preventDefault();
+            $(\'.modal-shareable-url\')
+                    .modal(\'show\')
+                    .find(\'.shareable-link\').html($( this ).attr(\'data-shareable-link\'));
+        })
+    });
+</script>';
+
+
+		$table = array(
+			'header' => $headers,
+			'rows' => $rows,
+			'sticky' => FALSE,
+			'attributes' => array('class' => array('table', 'table-responsive', 'table-bordered', 'table-styled')),
+		);
+
+		$table_output = theme('table', $table);
+		$output = '
+		<div class="container">
+			<h3>My Puzzles</h3>
+			<div class="panel panel-default">
+			' . $table_output . '
+			</div>
+		</div>
+		';
+		$output .= $modalHTML;
+		$output .= $JSHTML;
+		return $output;
+	}
+
+	function _parse_crossword_definitions($definitions){
+		$lines = explode("\n", $definitions);
+		$words = [];
+		$clues = [];
+		$errors = [];
+		foreach ($lines as $line) {
+			$matched = preg_match('/^((\d+).)?\s*([^:]+):(.*)$/', $line, $matches);
+			if ($matched) {
+				$words[] = trim($matches[4]);
+				$clues[] = trim($matches[3]);
+			} else {
+				$errors[] = $line;
+			}
+		}
+		return array('words'=>$words, 'clues' => $clues, 'errors' => $errors);
+	}
+
+	function puzzle_maker_edit_game_cancel(&$form, &$form_state) {
+		$url = $_GET['destination'] ? $_GET['destination'] : 'literacy-central/puzzle-creator';
+		drupal_goto($url);
+	}

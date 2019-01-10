@@ -1,0 +1,52 @@
+.announcement-wrapper.hidden,
+.announcement-wrapper.seen {
+  display: none;
+}
+
+.announcement-wrapper {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $c-blue;
+  color: $c-white;
+  text-align: center;
+  .announcement-content {
+    @include stagecenter();
+    @extend %clearfix;
+    position: relative;
+  }
+  .announcement-text {
+    margin: 0 2em;
+  }
+  a {
+    color: $c-off-white;
+    text-decoration: underline;
+  }
+  p {
+    margin: 0;
+    padding: 1em 0;
+  }
+  .announcement-close-wrapper {
+    position: absolute;
+    right: 0;
+    top: 1em;
+  }
+  .announcement-close {
+    text-align: right;
+    text-decoration: none;
+    &:hover {
+      @include transition();
+      color: $c-red;
+    }
+    &:before {
+      @extend %close;
+    }
+  }
+}
+
+.magenta {
+  .announcement-wrapper {
+    background-color: $c-magenta;
+  }
+}

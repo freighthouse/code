@@ -1,0 +1,64 @@
+/*------------------------------------------------------------------
+[Area Code Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Description: Styles for sprites used across multiple pages, you can
+add icons to the sprites, but do not alter the order of them
+Last change:  4/18/13 
+Last edited by: Cathy
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. AREA CODES
+  A. BENEFITS
+  B. REFERENCES
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @AREA CODES
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @BENEFITS
+/*------------------------------------------------------------------*/
+.area-codes .benefits .benefit {
+	margin-bottom: 10px;
+}
+
+.area-codes .benefits .glyphicons {
+	width: 50px;
+	height: 50px;
+	background-color: orange;
+	padding: 15px;
+	float: left;
+	margin-right: 20px;
+	margin-bottom: 50px;
+}
+
+.area-codes .benefits .glyphicons i:before {
+	font-size: 50px;
+	padding: 15px;
+	color: white;
+}
+
+.area-codes .benefit p {
+	padding-left: 100px;
+}
+
+.area-codes #landing-page-sign-up .callfire-benefits {
+    padding: 10px 15px 0;
+}
+/*------------------------------------------------------------------*/
+/* @REFERENCES
+/*------------------------------------------------------------------*/
+
+.area-codes .references ul {
+	font-size: 13px;
+}
+
+http://10.0.1.73/drupal/api-documentation/version/area-code

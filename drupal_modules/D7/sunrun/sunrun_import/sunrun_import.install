@@ -1,0 +1,9 @@
+<?php
+
+/**
+ * Implements hook_disable().
+ */
+function sunrun_import_disable() {
+	Migration::deregisterMigration('SunrunCities');
+  Migration::deregisterMigration('SunrunPressReleases');
+}

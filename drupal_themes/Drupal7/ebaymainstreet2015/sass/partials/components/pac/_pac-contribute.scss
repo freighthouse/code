@@ -1,0 +1,118 @@
+.charities.accordian {
+  @extend %clearfix;
+  margin: 0;
+  padding: 0;
+
+  li {
+    list-style-type: none;
+  }
+
+  h3 {
+    @include fontsize(18);
+    @extend %helvetica;
+    display: block;
+    border-bottom: 1px solid $c-light-grey;
+    padding: 1.25em 0 0.75em 0;
+    margin: 0;
+    width: 100%;
+    color: $c-blue;
+
+    &:before {
+      @include fontsize(15);
+      @extend %plus-icon;
+      display: inline-block;
+      margin-right: 0.5em;
+    }
+
+    &.open {
+      &:before {
+        @extend %minus-icon;
+      }
+    }
+  }
+
+  .charity-info {
+    @include transition();
+    height: 0;
+    overflow: hidden;
+
+    &.open {
+      min-height: 50px;
+      height: auto;
+      margin-left: 1.25em;
+    }
+  }
+}
+
+.webform-client-form {
+  .form-type-radio label {
+    display: inline;
+  }
+
+  .webform-container-inline label {
+    display: block;
+  }
+
+  input[type="submit"] {
+    width: 100%;
+  }
+
+  .webform-component-checkboxes {
+    padding-top: 1em;
+    label {
+      display: inline;
+    }
+  }
+
+  textarea,
+  select,
+  input[type="date"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="email"],
+  input[type="month"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="text"],
+  input[type="time"],
+  input[type="url"],
+  input[type="week"] {
+    width: 100%;
+  }
+
+  #webform-component-contribution-amount {
+
+    label {
+      @extend %clearfix;
+    }
+
+    .field-prefix {
+      float: left;
+      width: 3%;
+      top: 0.5em;
+      position: relative;
+    }
+
+    .form-text {
+      float: left;
+      width: 97%;
+    }
+
+    .form-item .description {
+      @extend %clearfix;
+      float: none;
+      display: block;
+    }
+  }
+
+}
+
+.contribution-amounts .content h2 {
+  @include fontsize(32);
+  @extend %helvetica;
+  @extend %light;
+  text-align: left;
+  text-transform: initial;
+}

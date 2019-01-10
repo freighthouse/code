@@ -1,0 +1,5 @@
+smartystreets.admin_settings_form:
+  route_name: smartystreets.admin_settings_form
+  title: 'SmartyStreets'
+  description: 'Provides integration with the SmartyStreets API.'
+  parent: system.admin_config_services

@@ -1,0 +1,79 @@
+// Default
+//
+// Style Guide: Modules.Sliders.Default
+.slick-slider.slider-related-resources {
+//  display: none;
+//  margin: 0 auto;
+//  height: 180px;
+//  width: 1026px;
+//  border: none;
+//  background: none;
+height: auto;
+// height: 240px;
+
+  &.slick-initialized {
+//    display: block;
+  }
+  .slide {
+//    height: 180px;
+//    .border-radius (4px);
+//    overflow: hidden;
+    height: 240px;
+    height: auto;
+    .slide-container {
+//      position: relative;
+//      margin: 0 7.5px;
+//      height: 180px;
+//      color: #ffffff;
+//      background-color: #383838;
+//      -webkit-border-radius: 4px;
+//      -moz-border-radius: 4px;
+//      border-radius: 4px;
+//      -moz-background-clip: padding;
+//      -webkit-background-clip: padding-box;
+//      background-clip: padding-box;
+//      overflow: hidden;
+      background-color: transparent;
+      height: 240px;
+      height: auto;
+      margin: 0 15px;
+    }
+  }
+  .slick-arrow {
+//    position: absolute;
+//    top: 50%;
+//    margin: -21px 0 0;
+//    width: 30px;
+//    height: 42px;
+//    color: @white;
+//    opacity: .5;
+    color: $blue-light;
+    opacity: 1;
+    transition: color .15s linear;
+
+    &:hover,
+    &:focus {
+//      opacity: 1;
+      color: $blue-medium;
+    }
+    &.slick-prev {
+//      left: -60px;
+    }
+    &.slick-next {
+//      right: -60px;
+    }
+    @media (max-width: 767px) {
+//      display: none !important;
+    }
+  }
+
+  @media (max-width: 1199px) {
+//    width: 825px;
+  }
+  @media (max-width: 991px) {
+//    width: 606px;
+  }
+  @media (max-width: 767px) {
+//    width: 100%;
+  }
+}

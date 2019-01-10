@@ -1,0 +1,119 @@
+// Book Resource: Teaser
+//
+// Markup: book-resource-teaser.html
+//
+// Style Guide: Nodes.Book Resource.Teaser
+.node-book-resource {
+  &.node-search-results {
+      .search-result-container {
+//          padding: 8px;
+//          margin: auto;
+//          margin-top: 22px;
+//          height: auto;
+//          color: @black; 
+//          background-color: @off-white;
+        background-color: transparent;
+        margin: 0;
+        margin-bottom: $spacing-large;
+        padding: 0;
+          
+          .search-results-image {
+//              max-width:400px;
+//              position: relative;
+//              margin: 0 auto;
+//              height: 124px;
+//              color: @white;
+//              background-color: @dark-grey;
+//              .border-radius (4px);
+//              overflow: hidden;
+                height: auto;
+              background: none;
+              border-radius: 0;
+              margin-bottom: $spacing-medium;
+              > a {
+                border-radius: 3px;
+                display: block;
+                overflow: hidden;
+                height: 0;
+                padding-bottom: 60%;
+              }
+              img {
+//                  width: 100%;
+//                  height: auto;
+//                  .border-radiuses (4px, 0, 0, 4px);
+//                  display: block;
+              }
+          }
+          .text-information {
+//              position: relative;
+//              bottom: 0;
+//              left: 0;
+//              right: 0;
+//              padding: 2px;
+//              //background-color: darken(@dark-grey, 5%);
+//              .border-radiuses (0, 4px, 4px, 0);
+              border-radius: 0;              
+              padding: 0;
+
+              .title {
+                a {
+                  color: $blue-light;
+                  display: block;
+                  &:hover {
+                    color: $blue-medium;
+                  }
+                }
+                  h3 {
+//                      font-family: @default-font-family;
+//                      font-size: @default-font-size - 4;
+//                      font-weight: 900;
+//                      line-height: 16px;
+//                      text-overflow: ellipsis;  
+//                      color: @dark-blue;
+//                      margin-bottom: 5px;
+//                      text-transform: uppercase; 
+                    @include resource-title-small;
+                    color: $blue-light;
+                  }
+
+                  &:hover {
+                    h3 {
+                      color: $blue-medium;
+                    }
+                  }
+              }
+              .author {
+//                  font-family: @default-font-family;
+//                  font-size: @default-font-size - 4;
+//                  //font-weight: 700;
+//                  line-height: 16px;
+//                  text-overflow: ellipsis;
+//                  white-space: wrap;
+//                  overflow: hidden;
+//                  color: @black;
+//                  top: -6px;
+                @include author;
+              }
+
+              .text {
+//                  font-family: @default-font-family;
+//                  font-size: @default-font-size - 4;
+//                  line-height: @default-line-height - 4;
+                @include description;
+              }
+              .grade-level {
+//                  font-family: @default-font-family;
+//                  font-size: @default-font-size - 4;
+//                  font-weight: 700;
+//                  line-height: @default-line-height + 4;
+//                  text-overflow: ellipsis;
+//                  white-space: nowrap;
+//                  overflow: hidden;
+//                  color: @grey;
+//                  text-transform: uppercase; 
+                @include grade-level;
+              }
+          }
+      }
+  }
+}

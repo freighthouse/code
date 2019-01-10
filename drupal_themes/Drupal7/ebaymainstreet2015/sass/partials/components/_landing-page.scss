@@ -1,0 +1,313 @@
+.node-type-landing-page {
+  h1.title {
+    display: none;
+  }
+  .region-content .block-system > .content {
+    padding: 0;
+    border: none;
+  }
+  .region-content-bottom .content {
+    padding: 0;
+    border: none;
+  }
+  .landing-page-wrapper {
+    @extend %clearfix;
+    @include stagecenter();
+    position: relative;
+    display: grid;
+    background-color: $lp-blue;
+    min-height: 300px;
+    overflow: hidden;
+    @include breakpoint($bp-small) {
+      display: flex;
+      max-height: 400px;
+    }
+  }
+  .landing-page-summary {
+    margin: 1em;
+    @include breakpoint($bp-small) {
+      margin: 3em 5em;
+    }
+  }
+
+  .landing-page-wrapper-top {
+    @include breakpoint($bp-small) {
+      margin-top: 0;
+    }
+  }
+
+  .landing-page-text-wrapper {
+    padding: 2em 2.5em;
+    width: 100%;
+    @include breakpoint($bp-small) {
+      display: flex;
+      width: 35%;
+      padding: 0;
+    }
+  }
+
+  .landing-page-text {
+    @extend %clearfix;
+    @include breakpoint($bp-large) {
+      display: inline-grid;
+      padding:2em 2.5em;
+    }
+  }
+
+  .landing-page-title {
+    color: $lp-teal;
+    margin: 0;
+    line-height: 1.15em;
+    @include fontsize(28);
+    @include breakpoint($bp-med) {
+      @include fontsize(42);
+    }
+    @extend %helvetica-semibold;
+  }
+
+
+  .landing-page-title-top {
+    @include breakpoint($bp-small) {
+      text-align: center;
+    }
+  }
+
+  .landing-page-description {
+    color: $lp-teal;
+    @include fontsize(16);
+    @extend %sans-serif;
+    padding: 0 1em;
+    &:first-child {
+      margin-top: 0;
+    }
+    @include breakpoint($bp-med) {
+      @include fontsize(18);
+    }
+    @include breakpoint($bp-small) {
+      padding: 0;
+      margin-right: 1em;
+    }
+    h2 {
+      margin-top: 0;
+    }
+  }
+
+  .landing-page-image {
+    display: inline-block;
+    @include breakpoint($bp-small) {
+      display: flex;
+      width: 65%;
+    }
+    .field-name-field-landing-page-image {
+      overflow: hidden;
+      max-height: 300px;
+      @include breakpoint($bp-small) {
+        max-height: 400px;
+      }
+      img {
+        display: flex;
+        width: 100%;
+        height: auto;
+        @include breakpoint($bp-small) {
+          height: 100%;
+          overflow: hidden;
+        }
+      }
+    }
+  }
+  // Blocks
+  .block {
+    h2 {
+      //margin-bottom: 1em;
+      //margin-top: 2em;
+    }
+  }
+
+  .full-page-block.full-page-block-new {
+    @include breakpoint($bp-small) {
+      display: table-cell;
+      width: 50%;
+      padding: 0 1em;
+    }
+  }
+  #block-elected-officials-new, #block-election-info-new {
+    .content {
+      padding: 0;
+      border: none;
+    }
+  }
+  .block-image-new {
+    display: block;
+    width: 100%;
+
+  }
+  .block-text-wrapper-new {
+    padding: 2em;
+    .block-text-new {
+
+    }
+    .block-button-new {
+      margin: 15px 0 0;
+      a {
+        @extend %newbluebutton;
+      }
+    }
+  }
+  .block-ebay-custom-ebay_custom_join-instance, .front-blog-feature, .policy-papers-block {
+    h2 {
+      margin-bottom: 1.5em;
+      margin-top: 1.5em;
+    }
+  }
+  //.ebay-custom-join-text-wrapper {
+  //  background-color: $lp-blue;
+  //  @include breakpoint($bp-small) {
+  //    float: left;
+  //    width: 55%;
+  //    padding: 2em;
+  //    margin-right: 0;
+  //  }
+  //  .ebay-custom-join-title, .ebay-custom-join-description {
+  //    color: $lp-teal;
+  //  }
+  //}
+  //.ebay-custom-join-form-wrapper {
+  //  @include breakpoint($bp-small) {
+  //    width: 30%;
+  //    padding: 2em;
+  //    background: $lp-teal;
+  //    color: $lp-blue;
+  //  }
+  //}
+  //.ebay-custom-join-form-wrapper .form-submit:hover, .ebay-custom-join-form-wrapper .form-submit:focus {
+  //  a {
+  //    @extend %newbluebutton;
+  //  }
+  //
+  //}
+  //.ebay-custom-join-form-wrapper {
+  //  #edit-submit--2 {
+  //    @extend %newbluebutton;
+  //  }
+  //}
+  .block-ebay-custom-ebay_custom_join-instance {
+    .content{
+      padding: 0;
+      border: none;
+
+      @include breakpoint($bp-small){
+        display: flex;
+      }
+    }
+
+    .ebay-custom-join-text-wrapper{
+      float: none;
+      width: auto;
+      padding: 40px;
+      background: $new-dark-blue;
+      color: $new-light-green;
+      margin: 0;
+
+      @include breakpoint($bp-small){
+        width: 65%;
+      }
+    }
+
+    .ebay-custom-join-form-wrapper{
+      width: auto;
+      float: none;
+      padding: 40px;
+      background: $new-light-green;
+      color: $new-dark-blue;
+
+      @include breakpoint($bp-small){
+        width: 35%;
+      }
+
+      form{
+        padding: 0;
+      }
+
+      .form-type-select{
+        color: $new-dark-blue;
+
+        label{
+          color: $new-dark-blue;
+          display: block;
+          @include fontsize(13);
+
+          span{
+            @include fontsize(19);
+            display: block;
+          }
+        }
+      }
+
+      .form-select{
+        width: 80%;
+        color: $new-dark-blue;
+        border: 1px solid $new-dark-blue;
+        background-color: transparent;
+        height: 32px;
+        margin: 0;
+      }
+
+      .form-submit{
+        margin: 0;
+        float: right;
+        background: $new-dark-blue;
+        color: $new-light-green;
+        border-radius: 0;
+        border: none;
+        text-transform: none;
+        @include fontsize(12);
+        padding: 3px 0;
+        border: 1px solid $new-dark-blue;
+        width: 20%;
+      }
+    }
+
+    .ebay-custom-join-title{
+      color: $new-light-green;
+    }
+
+    .ebay-custom-join-description p{
+      color: $new-light-green;
+      @include fontsize(14);
+    }
+
+    .ebay-custom-join-form-title{
+      color: $new-dark-blue;
+      @include fontsize(36);
+      text-transform: none;
+    }
+  }
+  .featured-issue-block, .featured-issues-wrapper {
+    @include breakpoint($bp-small){
+      h2 {
+        margin-bottom: 1.5em;
+        margin-top: 1.5em;
+      }
+    }
+    .featured-issue-title {
+      a {
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+    //padding-bottom: 1.5em;
+    //margin-top: 3em;
+  }
+  .view-display-id-front_page_news {
+    .content {
+      padding: 0px;
+      .view-content {
+        border-bottom: 1px solid #cccccc;
+        > div {
+          padding: 2em;
+        }
+      }
+    }
+  }
+}

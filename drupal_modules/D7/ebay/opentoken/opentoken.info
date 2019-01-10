@@ -1,0 +1,5 @@
+name = eBay SSO - OpenToken
+description = Enables eBay SSO for internal users using PingFederate OpenToken
+core = 7.x
+package = Custom
+files[] = opentoken.module

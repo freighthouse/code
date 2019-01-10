@@ -1,0 +1,5 @@
+name = eBay Mainstreet Mobile Commons Validation
+description = Provides client-side validates for phone numbers on Mobile Commons forms used in campaigns
+package = Custom
+core = 7.x
+configure = admin/config/system/ebay_mc

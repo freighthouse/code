@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Sunrun import base module file
+ */
+
+/**
+ * Implement hook_menu().
+ */
+function sunrun_import_menu() {
+    $items = array();
+
+    $items['admin/sunrun/import'] = array(
+        'title' => 'Sunrun Import Settings',
+        'description' => 'Configure Sunrun Import',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('sunrun_import_settings_admin'),
+        'access arguments' => array('administer site configuration'),
+        'type' => MENU_NORMAL_ITEM,
+        'file' => 'sunrun_import.admin.inc',
+    );
+    return $items;
+}

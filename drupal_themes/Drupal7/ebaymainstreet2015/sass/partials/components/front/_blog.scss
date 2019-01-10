@@ -1,0 +1,130 @@
+.region-content-front{
+  @include stagecenter();
+  display: flex;
+}
+
+.news-page-side-block {
+  .news-items {
+    margin: 0;
+    padding: 0;
+  }
+  .news-item {
+    list-style-type: none;
+  }
+  .views-field-title {
+    margin: 0;
+  }
+}
+
+.front-blog-feature {
+  .content {
+    padding: 0;
+  }
+
+  .more-link{
+    text-align: right;
+    margin: 1em 2em;
+
+    a {
+      display: inline-block;
+      @extend %newbluebutton;
+    }
+  }
+  &:after {
+    clear: both;
+  }
+}
+
+.front-page-news-wrapper {
+  @extend %clearfix;
+  border-bottom: 1px solid $c-light-grey;
+  padding:   1.5em 0;
+  .view-display-id-page & {
+    padding-bottom: 1em;
+  }
+}
+
+.front-page-news-link {
+  @extend %clearfix;
+  display: block;
+  margin-left: 2em;
+  margin-right: 2em;
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.front-page-news-wrapper {
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    .front-page-news-read-article-link {
+      @include transition(background .3s ease);
+      color: $c-medium-grey;
+    }
+  }
+}
+
+.front-page-news-date {
+  @include fontsize(12);
+  @extend %sans-serif;
+  color: $c-blue;
+  p {
+    margin: 0 0 3px;
+  }
+}
+
+.front-page-news-photo {
+  float: left;
+  width: 22%;
+  margin-right: 3%;
+
+  @include breakpoint($bp-small) {
+    width: 32%;
+  }
+}
+
+.front-page-news-text {
+  float: left;
+  width: 75%;
+  @include breakpoint($bp-small) {
+    width: 65%;
+  }
+  &.no-photo {
+    width: 100%;
+  }
+}
+
+.front-page-news-title {
+  @include fontsize(20);
+  @extend %helvetica;
+  color: $new-dark-blue;
+}
+
+.front-page-news-description {
+  @include fontsize(14);
+  @extend %sans-serif;
+  color: $c-dark-grey;
+  padding-bottom: 5px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.front-page-news-regions {
+  @include fontsize(14);
+  @extend %helvetica;
+  color: $c-dark-grey;
+  clear: both;
+}
+
+.front-page-news-read-article-link {
+  @extend %learn-more-link;
+  border: none;
+  padding-bottom: 0;
+  &:after {
+    line-height: 1.5;
+  }
+}

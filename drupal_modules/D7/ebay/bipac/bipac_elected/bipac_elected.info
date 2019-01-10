@@ -1,0 +1,5 @@
+name = BIPAC Elected
+description = Utilizes the BIPAC APIs to Find Representatives
+core = 7.x
+package = BIPAC
+dependencies[] = bipac_api

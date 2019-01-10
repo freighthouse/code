@@ -1,0 +1,137 @@
+.header-megamenu {
+  position: absolute;
+  z-index: 900;
+  width: 100%;
+  height: auto;
+  color: $c-white;
+  background-color: $c-dark-grey;
+
+  .header-megamenu-content {
+    @include stagecenter();
+
+    @include breakpoint($bp-small) {
+      padding: 0 1%;
+      width: 98%;
+    }
+    @include breakpoint($bp-med) {
+      padding: 0;
+    }
+
+
+  }
+
+  .mega-menu-container {
+    padding: 2.5em 0 2em 0;
+  }
+
+  .hidden {
+    height: 0;
+    display: none;
+  }
+
+  ul {
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    list-style-type: none;
+  }
+
+  .leaf {
+    @extend %megamenu-link;
+  }
+}
+
+.header-main-menu {
+
+  .selected {
+    border-top: 3px solid $c-blue;
+    color: $c-blue;
+    text-decoration: none;
+    padding-top: 0.65em;
+  }
+
+}
+
+.issues-menu {
+  .view-empty h2,
+  .view-header h2 {
+    margin-top: 0;
+    margin-bottom: 0;
+    a {
+      @include fontsize(20);
+      @extend %helvetica;
+      @extend %light;
+      color: $c-white;
+      text-transform: uppercase;
+      &:after {
+        @include fontsize(12);
+        @extend %chevron-right;
+        text-decoration: none;
+        margin-left: 1em;
+        display: inline-block;
+      }
+    }
+  }
+  .view-content {
+    .views-field-title {
+      @extend %megamenu-link;
+      a {
+        border: none;
+      }
+    }
+    .views-field-created .field-content {
+      @include fontsize(12);
+      @extend %italic;
+      color: $c-medium-grey;
+    }
+  }
+  .news-megamenu-section .view-content {
+    .views-row {
+      margin: 1em 0;
+      border-bottom: 1px solid $c-medium-dark-grey;
+    }
+    .views-field.views-field-created {
+      margin-bottom: -0.5em;
+    }
+  }
+}
+
+.policy-papers-megamenu-section .view-header h2 {
+  margin-bottom: 1.1em;
+}
+
+.news-megamenu-section .view-header h2 {
+  margin-top: 0em;
+}
+
+.issues-megamenu-section {
+  float: left;
+  width: 70%;
+  .views-field-title a {
+    @extend %clearfix;
+    float: left;
+    width: 40%;
+    max-width: 12em;
+    margin-right: 10%;
+    @include breakpoint($bp-med) {
+      max-width: 17.25em;
+    }
+  }
+}
+
+.news-megamenu-section,
+.policy-papers-megamenu-section {
+  float: left;
+  width: 30%;
+}
+
+.policy-papers-megamenu-section .view-content .views-row-3,
+.news-megamenu-section .view-content .views-row-3,
+.issues-megamenu-section .view-content .views-row-17,
+.issues-megamenu-section .view-content .views-row-18 {
+  .views-field-title a {
+    border: 0;
+  }
+}

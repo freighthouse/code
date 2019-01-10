@@ -1,0 +1,920 @@
+<?php
+/**
+ * @file
+ */
+
+/**
+ * Implement hook_install().
+ */
+function sunrun_deploy_install() {
+    // Run all updates on install
+    for ($i = 7001; $i < 8000; $i++) {
+        $candidate = 'sunrun_deploy_update_' . $i;
+        if (function_exists($candidate)) {
+            $candidate();
+        }
+    }
+}
+
+/**
+ * Enable new modules and features
+ */
+function sunrun_deploy_update_7001() {
+    $modules =
+        array(
+            'diff',
+            'acquia_spi',
+            'acquia_search',
+            'apachesolr_search',
+            'acquia_ftr_config',
+            'sunrun_ftr_roles_and_permissions',
+            'sunrun_ftr_config',
+            'sunrun_ftr_basic_page',
+            'sunrun_ftr_hero_banner',
+            'sunrun_ftr_city',
+            'sunrun_ftr_states',
+        );
+
+    module_enable($modules);
+}
+
+/**
+ * Enable sunrun_ftr_common module
+ */
+function sunrun_deploy_update_7002() {
+    module_enable(array('sunrun_ftr_common'));
+}
+
+/**
+ * Enable sunrun_ftr_faqs
+ */
+function sunrun_deploy_update_7003() {
+    module_enable(array('sunrun_ftr_faqs'));
+}
+
+/**
+ * Enable environment, fast_404, stage_file_proxy, environment
+ */
+function sunrun_deploy_update_7004() {
+    $modules = array(
+        'environment',
+        'stage_file_proxy',
+        'memcache',
+        'fast_404',
+    );
+
+    module_enable($modules);
+    // Disable apache solr
+    module_disable(array('apachesolr'));
+    drupal_uninstall_modules(array('apachesolr'));
+}
+
+/**
+ * Disable boxes and hero banner
+ */
+function sunrun_deploy_update_7005() {
+    $modules = array(
+        'boxes',
+        'sunrun_hero_blocks',
+        'sunrun_ftr_hero_banner'
+    );
+
+    module_disable($modules);
+    drupal_uninstall_modules($modules);
+    // delete the footnotes field
+    field_delete_field('field_footnotes');
+    field_delete_field('field_content_distributio');
+}
+
+
+/**
+ * Enable entity view mode
+ */
+function sunrun_deploy_update_7006() {
+    $modules = array(
+        'sunrun_ftr_hero_banner',
+        'entity_view_mode',
+        'sunrun_ftr_partner',
+        'sunrun_ftr_state_taxonomy',
+    );
+
+    module_enable($modules);
+}
+
+/**
+ * Enabled taxonomy field menu and NEW FAQ feature
+ */
+function sunrun_deploy_update_7007() {
+    module_disable(array('sunrun_ftr_faq'));
+    module_enable(array('taxonomy_field_menu', 'sunrun_ftr_faq'));
+}
+
+/**
+ * Enabled entity token api module
+ */
+function sunrun_deploy_update_7008() {
+    module_enable(array('entity_token'));
+}
+
+/**
+ * Disable old state landing page feature
+ */
+function sunrun_deploy_update_7009() {
+    module_disable(array('sunrun_ftr_states_landing_page'));
+}
+
+/**
+ * Disabled sharethis module
+ */
+function sunrun_deploy_update_7010() {
+    db_delete('variable')
+        ->condition('name', db_like('sharethis_') . '%', 'LIKE')
+        ->execute();
+    cache_clear_all('variables', 'cache');
+    module_disable(array('sharethis'));
+}
+
+/**
+ * Enabled sunrun common feature
+ */
+function sunrun_deploy_update_7011() {
+    module_enable(array('sunrun_ftr_common'));
+}
+
+/**
+ * Enabled sunrun common feature
+ */
+function sunrun_deploy_update_7012() {
+    module_enable(array('path_breadcrumbs'));
+}
+
+/**
+ * Enabled content admin tree module.
+ */
+function sunrun_deploy_update_7013() {
+    module_enable(array('content_admin_tree', 'search_api'));
+}
+
+/**
+ * Enabled views load more module
+ */
+function sunrun_deploy_update_7014() {
+    module_enable(array('views_load_more'));
+}
+
+/**
+ * Update allowed values list for content location in hero banner
+ */
+function sunrun_deploy_update_7015() {
+    $info = field_info_field('field_content_location');
+
+    // Get a reference to the values
+    $values = &$info['settings']['allowed_values'];
+
+    // Manipulate the values in some way, e.g.
+    $values['split'] = 'Split 50%';
+    $values['full'] = 'Full Width Background';
+
+    // Save the field
+    field_update_field($info);
+}
+
+/**
+ * Disable Sunrun Common
+ */
+function sunrun_deploy_update_7016() {
+    $modules = array(
+        'sunrun_common',
+    );
+    module_disable($modules);
+    drupal_uninstall_modules($modules);
+}
+
+/**
+ * Disable Sunrun States and Sunrun Test module
+ */
+function sunrun_deploy_update_7017() {
+    $modules = array(
+        'sunrun_states',
+        'sunrun_test'
+    );
+    module_disable($modules);
+    drupal_uninstall_modules($modules);
+}
+
+/**
+ * Enable seckit
+ */
+function sunrun_deploy_update_7018() {
+    $modules = array(
+        'seckit',
+        'password_policy',
+        'username_enumeration_prevention',
+    );
+    module_disable($modules);
+    drupal_uninstall_modules($modules);
+}
+
+/**
+ * Enable menu_admin_per_menu module
+ */
+function sunrun_deploy_update_7019() {
+    module_enable(array('menu_admin_per_menu'));
+}
+
+/**
+ * Change the path of custom modules and features from sites/all to sites/default and change some features names.
+ */
+function sunrun_deploy_update_7020(&$sandbox) {
+  db_query("UPDATE {system} SET filename = REPLACE (filename, 'sites/all/modules/custom/', 'sites/default/modules/custom/') WHERE filename LIKE '%sites/all/modules/custom/%'");
+  db_query("UPDATE {system} SET filename = REPLACE (filename, 'sites/all/modules/features/', 'sites/default/modules/features/') WHERE filename LIKE '%sites/all/modules/features/%'");
+  db_query("UPDATE {system} SET filename = REPLACE (filename, 'sites/all/themes/', 'sites/default/themes/') WHERE filename LIKE '%sites/all/themes/%'");
+  // Some path to PHP classes are stored on this table.
+  db_query("UPDATE {registry} SET filename = REPLACE (filename, 'sites/all/modules/custom/', 'sites/default/modules/custom/') WHERE filename LIKE '%sites/all/modules/custom/%'");
+  db_query("UPDATE {registry} SET filename = REPLACE (filename, 'sites/all/modules/features/', 'sites/default/modules/features/') WHERE filename LIKE '%sites/all/modules/features/%'");
+  db_query("UPDATE {registry} SET filename = REPLACE (filename, 'sites/all/themes/', 'sites/default/themes/') WHERE filename LIKE '%sites/all/themes/%'");
+  // Flush cache "manually" because we won't be able to flush cache after the update of the modules path
+  db_query("TRUNCATE {cache}");
+  db_query("TRUNCATE {cache_admin_menu}");
+  db_query("TRUNCATE {cache_apachesolr}");
+  db_query("TRUNCATE {cache_block}");
+  db_query("TRUNCATE {cache_bootstrap}");
+  db_query("TRUNCATE {cache_field}");
+  db_query("TRUNCATE {cache_filter}");
+  db_query("TRUNCATE {cache_form}");
+  db_query("TRUNCATE {cache_image}");
+  db_query("TRUNCATE {cache_libraries}");
+  db_query("TRUNCATE {cache_menu}");
+  db_query("TRUNCATE {cache_metatag}");
+  db_query("TRUNCATE {cache_page}");
+  db_query("TRUNCATE {cache_panels}");
+  db_query("TRUNCATE {cache_path}");
+  db_query("TRUNCATE {cache_smart_ip}");
+  db_query("TRUNCATE {cache_token}");
+  db_query("TRUNCATE {cache_update}");
+  db_query("TRUNCATE {cache_views}");
+  db_query("TRUNCATE {cache_views_data}");
+  db_query("TRUNCATE {cache_visitor_actions}");
+}
+
+/**
+ * Enable views litepager and security modules
+ */
+function sunrun_deploy_update_7021() {
+    $modules = array(
+        'seckit',
+        'password_policy',
+        'username_enumeration_prevention',
+        'views_litepager',
+    );
+    module_enable($modules);
+}
+
+/**
+ * Delete solar resources field on City content type
+ */
+function sunrun_deploy_update_7022() {
+  $instance = field_info_instance('node', 'field_solar_resources', 'city');
+  field_delete_instance($instance);
+}
+
+/**
+ * Delete state content type
+ */
+function sunrun_deploy_update_7023() {
+  node_type_delete('state');
+}
+
+/**
+ * Enable sunrun panels module
+ */
+function sunrun_deploy_update_7024() {
+    module_enable(array('sunrun_panels'));
+}
+
+/**
+ * Enable geofield module
+ */
+function sunrun_deploy_update_7025() {
+    module_enable(array('geofield'));
+}
+
+/**
+ * Enable shield module
+ */
+function sunrun_deploy_update_7026() {
+    module_enable(array('shield'));
+    // Setting up user/password
+    variable_set('shield_user', 'sunrun');
+    variable_set('shield_pass', 'sunrun2015!');
+    variable_set('shield_print', 'Hello, please use your user and password.');
+}
+
+/**
+ * Enable smart trim module
+ */
+function sunrun_deploy_update_7027() {
+    module_enable(array('smart_trim'));
+}
+
+/**
+ * Enable Fast Permissions module
+ */
+function sunrun_deploy_update_7028() {
+    module_enable(array('fpa'));
+}
+
+/**
+ * Enable Path Redirect Import module
+ */
+function sunrun_deploy_update_7029() {
+    module_enable(array('path_redirect_import'));
+}
+
+/**
+ * Enable site_map module
+ */
+function sunrun_deploy_update_7030() {
+    module_enable(array('site_map'));
+}
+/**
+ * Enable taxonomy_menu module
+ */
+function sunrun_deploy_update_7031() {
+    module_enable(array('taxonomy_menu'));
+}
+
+/**
+ * Enable SVG Embed Module
+ */
+function sunrun_deploy_update_7032() {
+    module_enable(array('svg_embed'));
+}
+
+/**
+ * Enable Sunrun US Map Module
+ */
+function sunrun_deploy_update_7033() {
+    module_enable(array('sunrun_usmap'));
+}
+
+/**
+ * Adding breadcrumb to panelized articles
+ */
+function sunrun_deploy_update_7034() {
+  $pane = panels_new_pane('page_breadcrumb', 'page_breadcrumb');
+
+  $sql = "SELECT
+                    p.did
+                FROM node n
+                LEFT JOIN panelizer_entity p ON (p.entity_id = n.nid)
+                JOIN (
+                    SELECT panels_pane.did
+                    FROM panels_pane
+                    WHERE panels_pane.panel = 'top' AND panels_pane.type <> 'page_breadcrumb'
+                    GROUP BY panels_pane.did
+                ) pp ON (p.did = pp.did)
+                WHERE
+                    (n.type = 'article')
+                    AND p.did <> 0 AND p.did IS NOT NULL";
+  $query = db_query($sql);
+
+  $entries = $query->fetchAllAssoc('did', PDO::FETCH_ASSOC);
+
+  foreach($entries as $entry){
+      $display = panels_load_display($entry['did']);
+      $display->add_pane($pane, 'top');
+      panels_save_display($display);
+  }
+}
+
+/**
+ * Adding breadcrumb to panelized pages of basic page content type
+ */
+function sunrun_deploy_update_7035() {
+    $pane = panels_new_pane('page_breadcrumb', 'page_breadcrumb');
+
+    $sql = "SELECT
+                    p.did
+                FROM node n
+                LEFT JOIN panelizer_entity p ON (p.entity_id = n.nid)
+                LEFT JOIN panels_display pd ON (pd.did = p.did)
+                JOIN (
+                    SELECT panels_pane.did
+                    FROM panels_pane
+                    WHERE panels_pane.panel = 'top' AND panels_pane.type <> 'page_breadcrumb'
+                    GROUP BY panels_pane.did
+                ) pp ON (p.did = pp.did)
+                WHERE
+                    (n.type = 'page')
+                    AND p.did <> 0 AND p.did IS NOT NULL
+                    AND pd.layout = 'two_cols_top_bottom_sidebar_right'";
+    $query = db_query($sql);
+
+    $entries = $query->fetchAllAssoc('did', PDO::FETCH_ASSOC);
+
+    foreach($entries as $entry){
+        $display = panels_load_display($entry['did']);
+        $display->add_pane($pane, 'top');
+        panels_save_display($display);
+    }
+}
+
+/**
+ * Update CTA field_links by modifying the absolute url's and
+ * making them relative
+ */
+function sunrun_deploy_update_7036() {
+    db_query("UPDATE {field_data_field_link} SET field_link_url = REPLACE(field_link_url, 'http://www.sunrun.com/', '')");
+    db_query("UPDATE {field_revision_field_link} SET field_link_url = REPLACE(field_link_url, 'http://www.sunrun.com/', '')");
+
+    db_query("UPDATE {field_data_field_link} SET field_link_url = REPLACE(field_link_url, 'http://sunrun.prod.acquia-sites.com/', '')");
+    db_query("UPDATE {field_revision_field_link} SET field_link_url = REPLACE(field_link_url, 'http://sunrun.prod.acquia-sites.com/', '')");
+}
+
+/**
+ * Install void_menu module
+ */
+function sunrun_deploy_update_7037() {
+  module_enable(array('void_menu'));
+}
+
+/**
+ * Delete field_gmap field on field_hero_banner_collection
+ */
+function sunrun_deploy_update_7038() {
+  $instance = field_info_instance('field_collection_item', 'field_gmap', 'field_hero_banner_collection');
+  field_delete_instance($instance);
+}
+
+/**
+ * Update content_location field of field collections for city content types
+ */
+function sunrun_deploy_update_7039() {
+  // retrieve all city related field collection bundles that don't
+  // have the field_content_location selected
+  $sql = "SELECT c.entity_id
+               FROM field_data_field_hero_banner_collection c
+               LEFT JOIN field_data_field_content_location loc ON (loc.entity_id = c.field_hero_banner_collection_value)
+               WHERE c.bundle = 'city' AND loc.entity_id IS NULL";
+  $query = db_query($sql);
+
+  $nodeids = $query->fetchAllAssoc('entity_id', PDO::FETCH_ASSOC);
+
+  foreach($nodeids as $nodeid) {
+    // Load the node
+    $node = node_load($nodeid['entity_id']);
+    $eid = $node->field_hero_banner_collection[LANGUAGE_NONE][0]['value'];
+
+    // Load the field collection with the ID from above
+    $entity = entity_load_single('field_collection_item', array($eid));
+
+    // Wrap the loaded field collection which makes setting/getting much easier
+    $node_wrapper = entity_metadata_wrapper('field_collection_item', $entity);
+
+    $node_wrapper->field_content_location->set('split');
+    $node_wrapper->save(true);
+  }
+}
+
+/**
+ * Fix machine name of webforms
+ */
+function sunrun_deploy_update_7040() {
+  db_update('webform')->fields(array('machine_name' => 'purls_code'))->condition('nid', 17)->execute();
+  db_update('webform_component')->fields(array('machine_name' => 'purls_code__code'))->condition('form_key', 'purl_code')->execute();
+}
+
+/**
+ * Enabled Migrate and Press Release (feature) modules
+ */
+function sunrun_deploy_update_7041() {
+  module_enable(array('sunrun_import', 'migrate', 'sunrun_ftr_press_release'));
+}
+
+/**
+ * Drop the purl_codes table from the main database.
+ */
+function sunrun_deploy_update_7042() {
+  db_drop_table('purl_codes');
+}
+
+/**
+ * Migrate all data from the field_map_url field to the NEW field_location_url
+ */
+function sunrun_deploy_update_7043() {
+  // retrieve all city field_map_url data
+  $sql = "SELECT f.entity_id
+               FROM field_data_field_map_url f
+              WHERE bundle = 'city'";
+  $query = db_query($sql);
+
+  $nodes = $query->fetchAllAssoc('entity_id', PDO::FETCH_ASSOC);
+
+  foreach($nodes as $n) {
+    // Load the node with the ID from above
+    $entity = entity_load_single('node', $n['entity_id']);
+
+    // Wrap the loaded field collection which makes setting/getting much easier
+    $node_wrapper = entity_metadata_wrapper('node', $entity);
+
+    $mapUrl = $node_wrapper->field_map_url->value();
+    $node_wrapper->field_location_url->set($mapUrl['url']);
+    $node_wrapper->save(true);
+  }
+}
+
+/**
+ * Delete solar resources field on City content type
+ */
+function sunrun_deploy_update_7044() {
+  $instance = field_info_instance('node', 'field_solar_resources', 'city');
+  field_delete_instance($instance);
+}
+
+/**
+ * Enable taxonomy_tools modules
+ */
+function sunrun_deploy_update_7045() {
+    $modules = array(
+        'taxonomy_tools',
+        'taxonomy_tools_publisher',
+    );
+    module_enable($modules);
+}
+
+/**
+ * Delete field_map_url field on City content type
+ */
+function sunrun_deploy_update_7046() {
+  $instance = field_info_instance('node', 'field_map_url', 'city');
+  field_delete_instance($instance);
+}
+
+/**
+ * Alter srcustom table structure
+ */
+function sunrun_deploy_update_7047() {
+  db_set_active('srcustom');
+  $alter_sql = "ALTER TABLE purl_codes
+                           CHANGE `code` `code` CHAR(15) NOT NULL,
+                           CHANGE `first` `first` VARCHAR(20) NOT NULL,
+                           CHANGE `last` `last` VARCHAR(20) NOT NULL,
+                           CHANGE `phone` `phone` CHAR(20) NOT NULL,
+                           CHANGE `email` `email` CHAR(50) NOT NULL,
+                           CHANGE `address` `address` VARCHAR(50) NOT NULL,
+                           CHANGE `city` `city` VARCHAR(25) NOT NULL,
+                           CHANGE `state` `state` CHAR(2) NOT NULL,
+                           CHANGE `zip` `zip` MEDIUMINT(10) UNSIGNED NOT NULL,
+                           CHANGE `utility` `utility` CHAR(20) NOT NULL,
+                           CHANGE `bill` `bill` CHAR(20)";
+  db_query($alter_sql);
+  db_set_active();
+}
+
+/**
+ * Add indexes to purls_code table
+ */
+function sunrun_deploy_update_7048() {
+  db_set_active('srcustom');
+
+  if(db_table_exists('purl_codes')) {
+    db_add_index('purl_codes', 'idx_code', array('code'));
+    db_add_index('purl_codes', 'idx_addr_city_state_zip', array('address', 'city', 'state', 'zip'));
+  }
+
+  db_set_active();
+}
+
+/**
+ * Allow null values on purl_codes table
+ */
+function sunrun_deploy_update_7049() {
+  db_set_active('srcustom');
+
+  $sql = "ALTER TABLE {purl_codes}
+    CHANGE COLUMN `phone` `phone` CHAR(20) NULL DEFAULT NULL ,
+    CHANGE COLUMN `email` `email` CHAR(50) NULL DEFAULT NULL ,
+    CHANGE COLUMN `utility` `utility` CHAR(20) NULL DEFAULT NULL ;";
+
+  db_query($sql);
+  db_set_active();
+}
+
+/**
+ * Enable securepages modules
+ */
+function sunrun_deploy_update_7050() {
+  module_enable(array('securepages'));
+}
+
+/**
+ * Bulk update cache settings on panelized nodes
+ */
+function sunrun_deploy_update_7051() {
+  $results = db_query('SELECT * FROM (
+                        SELECT * FROM {panelizer_entity} ORDER BY `revision_id` DESC
+                      ) as pe WHERE `did` <> 0 GROUP BY `entity_id`');
+  foreach ($results as $row) {
+    // Load display
+    $display = panels_load_display($row->did);
+    // Adding cache options
+    $display->cache = array(
+      'method'   => 'simple',
+      'settings' => array(
+        'lifetime'    => 28800,
+        'granularity' => 'args',
+      ),
+    );
+    // Save display
+    panels_save_display($display);
+  }
+}
+
+/**
+ * Enable advagg contrib module
+ */
+function sunrun_deploy_update_7052() {
+  module_enable(array('advagg', 'advagg_js_compress', 'advagg_css_compress', 'advagg_mod'));
+}
+
+/**
+ * Enable cacheexclude contrib module
+ */
+function sunrun_deploy_update_7053() {
+  module_enable(array('cacheexclude'));
+}
+
+/**
+ * Enable imageapi_optimize contrib module
+ */
+function sunrun_deploy_update_7054() {
+  module_enable(array('imageapi_optimize'));
+}
+
+/**
+ * Enable newton feed feature and create schema for newton jobs
+ */
+function sunrun_deploy_update_7055() {
+
+  $schema['newton_jobs'] =  array(
+    'description' => 'Stores job listing information retrieved from Newton software',
+    'fields' => array(
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique identifier provided by Newton software',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Title of job',
+      ),
+      'link' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'description' => 'Link to this jobs location provided by Newton software',
+      ),
+      'category' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Category that this job belongs to',
+      ),
+      'imported' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'unsigned' => TRUE,
+        'description' => 'Timestamp when this source was imported last.',
+      )
+    ),
+    'primary key' => array('id'),
+  );
+
+  // set active database to the custom database
+  db_set_active('srcustom');
+
+  if(! db_table_exists('newton_jobs')) {
+    db_create_table('newton_jobs', $schema['newton_jobs']);
+  }
+
+  // reset active database to default database
+  db_set_active();
+
+  module_enable(array('sunrun_ftr_job', 'views_database_connector'));
+}
+
+/**
+ * Enable xmlsitemap contrib module
+ */
+function sunrun_deploy_update_7056() {
+  module_enable(array('xmlsitemap', 'xmlsitemap_menu'));
+}
+
+/**
+ * Disable rdf contrib module
+ */
+function sunrun_deploy_update_7057() {
+  module_disable(array('rdf'));
+}
+
+/**
+ * Enable ziptool module
+ */
+function sunrun_deploy_update_7058() {
+  module_enable(array('sunrun_ziptool'));
+}
+
+/**
+ * Enable Rename Admin Paths module
+ */
+function sunrun_deploy_update_7059() {
+  module_enable(array('rename_admin_paths'));
+}
+
+/**
+ * Disable Personalize modules
+ */
+function sunrun_deploy_update_7060() {
+  $modules = [
+    'personalize',
+    'personalize_blocks',
+    'personalize_elements'
+  ];
+
+  module_disable($modules);
+}
+
+/**
+ * Add location and state fields to newton_jobs table.
+ */
+function sunrun_deploy_update_7061() {
+  db_set_active('srcustom');
+  db_add_field( 'newton_jobs', 'location', array(
+                    'type' => 'varchar',
+                    'description' => "location",
+                    'length' => 30,
+                    'not null' => TRUE,
+                    'default' => '',
+                  ));
+  db_set_active('srcustom');
+  db_add_field( 'newton_jobs', 'state', array(
+                    'type' => 'varchar',
+                    'description' => "state",
+                    'length' => 2,
+                    'not null' => TRUE,
+                    'default' => '',
+                  ));
+    db_set_active();
+}
+
+/**
+ * Enable sunrun_ftr_blog module
+ */
+function sunrun_deploy_update_7062() {
+    module_enable(array('sunrun_ftr_blog'));
+}
+
+/**
+ * Disable Sunrun GeoContent and Sunrun Geo Content (Settings)
+ */
+function sunrun_deploy_update_7063() {
+    $modules = array(
+        'sunrun_ftr_geocontent',
+        'sunrun_geocontent'
+    );
+    module_disable($modules);
+}
+/**
+ * Enable Sunrun chat
+ */
+function sunrun_deploy_update_7064() {
+    $modules = array(
+        'sunrun_chat'
+    );
+    module_enable($modules);
+}
+/**
+ * Enable Sunrun share
+ */
+function sunrun_deploy_update_7065() {
+    $modules = array(
+        'variable',
+        'easy_social',
+        'sunrun_share'
+    );
+    module_enable($modules);
+}
+
+/**
+ * Enable Media Internet Sources & Media: oEmbed
+ */
+function sunrun_deploy_update_7066() {
+    $modules = array(
+        'media_internet',
+        'media_oembed'
+    );
+    module_enable($modules);
+}
+
+/**
+ * Enable Video Sitemap
+ */
+function sunrun_deploy_update_7067() {
+    $modules = array(
+        'video_sitemap'
+    );
+    module_enable($modules);
+}
+
+/**
+ * Uninstall modules that were disabled and had their
+ * files removed, but never actually uninstalled.  This
+ * will leave whatever variables that were set/created in place
+ * since the uninstall process will not use the hook for said module.
+ */
+function sunrun_deploy_update_7068() {
+  $modules = [
+    'apachesolr',
+    'apachesolr_search',
+    'boxes',
+    'marketo_ma',
+    'marketo_ma_user',
+    'page_theme',
+    'sharethis',
+    'termstatus',
+  ];
+  
+  db_delete('system')
+    ->condition('name', $modules, 'IN')
+    ->execute();
+}
+
+/**
+ * Enable Lift Module
+ */
+function sunrun_deploy_update_7069() {
+  module_enable(array('acquia_lift'));
+}
+
+
+/**
+ * Enable Views Infinite Scroll and Addtoany modules
+ */
+function sunrun_deploy_update_7070() {
+  module_enable(array('views_infinite_scroll','addtoany'));
+}
+
+/**
+ * Disable Sunrun Chat
+ */
+function sunrun_deploy_update_7071() {
+    $modules = array(
+        'sunrun_chat',
+    );
+    module_disable($modules);
+    drupal_uninstall_modules($modules);
+}
+
+/**
+ * Enable Webform Clear module
+*/
+function sunrun_deploy_update_7072() {
+  module_enable(array('webform_clear'));
+}
+
+/**
+ * Enable Content Hub module
+*/
+function sunrun_deploy_update_7073() {
+  module_enable(array('content_hub'));
+}
+
+/**
+ * Disable & uninstall content admin tree module.
+ */
+function sunrun_deploy_update_7074() {
+      $modules = array('content_admin_tree');
+       module_disable($modules);
+       drupal_uninstall_modules($modules);
+}
+
+/**
+ * Enable Acquia Purge
+*/
+function sunrun_deploy_update_7075() {
+  module_enable(array('acquia_purge'));
+}
+
+/**
+ * Enable Acquia Purge Cloudflare
+ */
+function sunrun_deploy_update_7076() {
+  module_enable(array('acquia_purge_cloudflare'));
+}

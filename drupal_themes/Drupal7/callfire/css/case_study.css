@@ -1,0 +1,96 @@
+/*------------------------------------------------------------------
+[Case Study Node Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Description: Generic styles for Case Study page type
+Last change:  4/18/13
+Last edited by: Nels
+-------------------------------------------------------------------*/
+.node-type-case-study .all-content {
+	border-radius: 0 0;
+}
+
+.view-case-study {
+	margin: 0 10px;
+}
+
+#case-study-header {
+	border-radius: 6px 6px 0 0;
+	position: relative;
+	height: 280px;
+}
+
+#case-study-header img {
+	border-radius: 6px 6px 0 0;
+}
+
+.node-type-case-study #page #page-title {
+	margin: 0;
+	padding: 0 30px 15px;
+	position: absolute;
+	bottom: 0;
+	color: #fff;
+	text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+	background: rgba(0,0,0,0.3);
+}
+
+	.node-type-case-study h1 span {
+		font-size: 40%;
+	}
+
+.node-type-case-study .tag-line {
+	font-size: 30px;
+	font-family: Georgia, "Times New Roman", serif;
+	line-height: 1.2;
+	color: #666;
+	margin-bottom: 30px;
+}
+
+.node-type-case-study .sidebar img {
+	display: block;
+	margin-bottom: 20px;
+	width: 220px;
+}
+
+.node-type-case-study .sidebar ul {
+	list-style: none;
+	color: #666;
+	font-size: 15px;
+	margin-bottom: 20px;
+}
+
+	.node-type-case-study .sidebar li {
+		margin-bottom: 10px;
+	}
+
+	.node-type-case-study .sidebar ul h3 {
+		color: #444;
+	}
+
+	.node-type-case-study .sidebar ul p {
+		margin-bottom: 0;
+	}
+
+	.node-type-case-study .sidebar .button {
+		display: block;
+	}
+
+.page-case-studies .views-row .views-field-field-case-study-image {
+	display: none;
+}
+
+	.page-case-studies .views-row-1 .views-field-field-client-logo a,
+	.page-case-studies .views-row-1 .views-field-field-client-logo a img {
+		display: block;
+		width: 100%;
+		height: auto;
+	}
+
+.page-case-studies .view-content .views-row:nth-child(3n+1),
+.lt-ie9 .view-content .views-row-4,
+.lt-ie9 .view-content .views-row-7,
+.lt-ie9 .view-content .views-row-10 {
+	clear: left;
+}
+

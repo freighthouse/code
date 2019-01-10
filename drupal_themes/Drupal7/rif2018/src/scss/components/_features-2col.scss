@@ -1,0 +1,45 @@
+.paragraphs-item-layout-two-column {
+
+  @media (max-width: 991px) {
+    .col-md-6 + .col-md-6 {
+      margin-top: $spacing-xlarge;
+    } 
+  }
+
+  .feature__image {
+    margin-bottom: 30px;
+  }
+
+  .feature__title {
+    font-size: 36px;
+    line-height: 36px;
+    margin: 0 0 12px;
+
+    img {
+      height: auto;
+      max-width: 240px;
+    }
+  }
+
+  .field-name-field-feature-url {
+    margin-top: 30px;
+  }
+
+  &.component--color-green {
+    .feature__title {
+      color: $green-dark;
+    }
+  }
+
+  &.component--color-blue {
+    .feature__title {
+      color: $blue-dark;
+    }
+  }
+
+  &.component--color-red {
+    .feature__title {
+      color: $red-dark;
+    }
+  }
+}

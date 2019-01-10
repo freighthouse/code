@@ -1,0 +1,7 @@
+body {
+  background-color: $c-off-white;
+  color: $c-dark-grey;
+  .no-mediaqueries & {
+    min-width: 1080px;
+  }
+}

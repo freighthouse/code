@@ -1,0 +1,13 @@
+momentum.config:
+  title: 'Momentum'
+  route_name: momentum.config
+  description: 'Administer Momentum'
+  parent: system.admin_config_services
+  weight: 99
+
+momentum.dashboard:
+  title: 'Momentum'
+  route_name: momentum.dashboard
+  description: 'Momentum'
+  parent: system.admin
+  weight: 99

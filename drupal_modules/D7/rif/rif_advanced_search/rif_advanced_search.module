@@ -1,0 +1,351 @@
+<?php
+
+	/* *******************************************************
+	 * Indexing Magic to merge grades
+	 * ******************************************************* */
+
+	/**
+	 * Implements hook_entity_property_info_alter().
+	 */
+	function rif_advanced_search_entity_property_info_alter(&$info)
+	{
+		$info['node']['properties']['supported_grades'] = array(
+			'type' => 'list<taxonomy_term>',
+			'label' => t('Supported Grades'),
+			'description' => t("Full Grade Level list that this resource has."),
+			'sanitized' => TRUE,
+			'getter callback' => 'rif_advanced_search_get_supported_grades_callback',
+		);
+		$info['node']['properties']['lexile_range'] = array(
+			'type' => 'taxonomy_term',
+			'label' => t('Lexile Range'),
+			'description' => t("Full Grade Level list that this resource has."),
+			'sanitized' => TRUE,
+			'getter callback' => 'rif_advanced_search_tag_lexile_range',
+		);
+	}
+
+	function rif_advanced_search_get_supported_grades_callback($item)
+	{
+		return _get_grades_in_range($item);
+	}
+
+	function rif_preprocess_views_view(&$vars) {
+		if (in_array($vars['name'], ['search', 'site_search'])) {
+			$vars['foo'] = 'bar';
+			$myPager = $vars['view']->query->pager;
+			if(isset($myPager)){
+				$total_items = $myPager->total_items;
+			} else {
+				$total_items = 0;
+			}
+			if ($total_items > 0) {
+				$start_value = $myPager->current_page * $myPager->options['items_per_page'] + 1;
+				$end_value = $start_value + count($vars['view']->result) - 1;
+			} else {
+				$start_value = 0;
+				$end_value = 0;
+			}
+
+			$raw_filters = $vars['view']->exposed_input;
+
+			$query_string = NULL;
+			$converted_filters = [];
+			$filter_array = [];
+
+			foreach ($raw_filters as $raw_filter => $filter_value) {
+				switch ($raw_filter) {
+					case 'query':
+						if (!empty($filter_value)) {
+							$query_string = '<span class="query-string">"' . $filter_value . '</span>"';
+						}
+						break;
+					case 'f':
+						foreach ($filter_value as $pos => $facet_filter) {
+							$temp_array = explode(':', $facet_filter);
+							$converted_filters[] = $temp_array[1];
+						}
+						break;
+					default :
+						if ($filter_value == 'All' || $raw_filter == 'sort' || $raw_filter == 'order') {
+							break;
+						}
+						if(is_array($filter_value)){
+							break;
+						}
+						$converted_filters[] = $filter_value;
+						break;
+				}
+			}
+
+			foreach ($converted_filters as $key => $value) {
+				if (is_numeric($value)) {
+					// If the value is a number then lets assume that this is a taxonomy reference
+					$term = taxonomy_term_load($value);
+					$name = $term->name;
+					if($term->vid == '22') {
+						$name = 'Lexile Range '.$name;
+					}
+					$filter_array[] = $name;
+				} else {
+					$name = str_replace('_', ' ', $value);
+					$name = str_replace('-', ' ', $name);
+					$filter_array[] = $name;
+				}
+			}
+
+			$filter_array = array_unique($filter_array);
+
+			// Make the query string always appear last in the filter string
+			if ($query_string) {
+				$filter_array[] = $query_string;
+			}
+
+			if (!empty($filter_array)) {
+				$filter_string = implode(" : ", $filter_array);
+			} else {
+				$filter_string = 'All Resources';
+			}
+
+			$vars['total_items'] = $total_items;
+			$vars['search_summary'] = '<em>' . $start_value . '-' . $end_value . '</em> of <em>' . $total_items . '</em> results for <strong class="filter-string">' . $filter_string . '</strong>';
+		}
+
+		$filter_blocks = array();
+		if ($vars['name'] = 'site_search') {
+			$filter_blocks[] = block_load('facetapi', 'z6Wjr2TadBlDXgc69PMdVYgU6r1E0uSB');
+		}
+		if ($vars['name'] = 'search') {
+			$filter_blocks[] = block_load('facetapi', '1aipo0jcauh08r7iogveogai1vg4odzg');
+			$filter_blocks[] = block_load('facetapi', 'xdjiklg44mt4qrtjpz6ahtm9mm4powtf');
+			$filter_blocks[] = block_load('facetapi', 'qwc0me21eqpvjq1jsa3lom6yal1denw7');
+			$filter_blocks[] = block_load('facetapi', 'E6s9tKaGKlVVI0PAZ670o3y5PUPeFX1O');
+			$filter_blocks[] = block_load('facetapi', '9szq8gmy6ggu1ljrq0krc7wmxhxopwet');
+			$filter_blocks[] = block_load('facetapi', 'oybfl0uzwtcthjik0pgdm4pnr3x0ykat');
+		}
+		$vars['filters'] = NULL;
+		if (!empty($filter_blocks)) {
+			$vars['filters'] = _block_get_renderable_array(_block_render_blocks($filter_blocks));
+		}
+	}
+
+	/**
+	 * Get list of grade level tids given a max and min grade
+	 *
+	 * @param
+	 * $node: A node object
+	 *
+	 * @return array
+	 * array of grade level tids that this resource contains using the grade min and max fields
+	 */
+	function _get_grades_in_range($node)
+	{
+		$emw_node = entity_metadata_wrapper('node', $node->nid);
+//		dsm($node);
+		if (!empty($emw_node->field_grade_level_min) && !empty($emw_node->field_grade_level_max)) {
+			$min_grade = $emw_node->field_grade_level_min->value();
+			$max_grade = $emw_node->field_grade_level_min->value();
+//			dsm($min_grade);
+//			dsm($max_grade);
+			if (!isset($min_grade) || !isset($max_grade) || !isset($min_grade->tid) || !isset($max_grade->tid)) {
+//				dsm('Grade Level Min or(Inclusive) Max Was Empty!!');
+				return array();
+			} else {
+				$possible_grade_levels = array(
+					2063,        // Pre-K
+					71,        // K
+					243,        // 1st
+					65,        // 2nd
+					72,        // 3rd
+					449,        // 4th
+					244,        // 5th
+					554,        // 6th
+					769,        // 7th
+					2130,        // 8th
+					1458,        // 9th
+					2367,        // 10th
+					2225,        // 11th
+					1192,        // 12th
+				);
+				$min_tid = $emw_node->field_grade_level_min->value()->tid;
+				$max_tid = $emw_node->field_grade_level_max->value()->tid;
+				$grade_levels_to_return = array();
+				$foundEnd = FALSE;
+				foreach ($possible_grade_levels as $pos => $current_tid) {
+					if ($current_tid == $min_tid || sizeof($grade_levels_to_return) > 0) {
+						$grade_levels_to_return[] = $current_tid;
+					}
+					if ($current_tid == $max_tid) {
+						$foundEnd = TRUE;
+						break;
+					}
+				}
+				//dsm($grade_levels_to_return);
+
+				if ($foundEnd) {
+					return $grade_levels_to_return;
+					//return array($emw_node->field_grade_level_min->value()->tid, $emw_node->field_grade_level_min->value()->tid);
+				} else {
+					return array();
+				}
+
+			}
+		} else {
+//			dsm('No Grade Level Set Here!!');
+			return array();
+		}
+	}
+
+	function rif_advanced_search_tag_lexile_range($item) {
+		$emw_node = entity_metadata_wrapper('node', $item);
+		if(isset($emw_node->field_lexile)) {
+			$lexileLevel = $emw_node->field_lexile->value();
+		} elseif(isset($emw_node->field_lexile_txt)) {
+			$lexileLevel = $emw_node->field_lexile_txt->value();
+		} else {
+			return null;
+		}
+		if(empty($lexileLevel)){
+			return null;
+		}
+
+		$convertedLevel = _convert_lexile_string($lexileLevel);
+		$lexileRange = _get_lexile_range($convertedLevel);
+		$tempTerms = taxonomy_get_term_by_name($lexileRange, 'lexile_range');
+		$lexileTax = key($tempTerms);
+
+		//$rows[] = array($nid, $lexileLevel, $convertedLevel, $lexileTax, $emw_node->getBundle());
+		return $lexileTax;
+	}
+
+	function _convert_lexile_string($string){
+		if (strpos($string, 'NP') !== false) {
+			return 'Non-Prose';
+		}
+		$numeric_value = preg_replace('~\D~', '', $string);
+		if($numeric_value == '0') {
+			return 'Beginning Reader';
+//		} elseif($numeric_value >= 1200) {
+//			return '1200+';
+		} else {
+			return $numeric_value;
+		}
+	}
+
+	function _get_lexile_range($lexile_value) {
+		if(is_numeric($lexile_value)){
+			if($lexile_value <= 500){
+				return '0-500';
+			} elseif($lexile_value <= 900){
+				return '501-900';
+			} elseif($lexile_value <= 1200){
+				return '901-1200';
+			} else {
+				return '1201+';
+			}
+		} else {
+			return $lexile_value;
+		}
+	}
+	/**
+	 * Implements hook_block_info().
+	 *
+	 * This hook defines blocks to be recognized by the system
+	 */
+	function rif_advanced_search_block_info() {
+		// Define the Puzzle Maker Callout
+		$blocks['rif_advanced_search_playground'] = array(
+			'info' => t('RAS Playground'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		return $blocks;
+	}
+
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function rif_advanced_search_block_view($delta = '') {
+		$block = null;
+		switch($delta) {
+			case 'rif_advanced_search_playground' :
+				$block['subject'] = t('RAS Playground');
+				$block['content'] = _rif_advanced_search_get_playground();
+				break;
+		}
+
+		return $block;
+	}
+
+	function _rif_advanced_search_get_playground() {
+
+		$table_output = '';
+
+		$query = new EntityFieldQuery;
+		$search_types = array('book_resource', 'support_material');
+		$result = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('status', 1)
+			->propertyCondition('type', $search_types, 'IN')
+			->execute();
+
+		if($result) {
+			$rows = array();
+			$headers = array('NID', 'Lexile Level', 'Converted Level', 'Final Range Tag', 'type');
+
+			foreach($result['node'] as $nid => $item) {
+				$emw_node = entity_metadata_wrapper('node', $nid);
+				$type = 'unknown';
+				if(isset($emw_node->field_lexile)) {
+					$lexileLevel = $emw_node->field_lexile->value();
+				} elseif(isset($emw_node->field_lexile_txt)) {
+					$lexileLevel = $emw_node->field_lexile_txt->value();
+				} else {
+					continue;
+				}
+				if(empty($lexileLevel)){
+					continue;
+				}
+
+				$convertedLevel = _convert_lexile_string($lexileLevel);
+				$lexileRange = _get_lexile_range($convertedLevel);
+				$tempTerms = taxonomy_get_term_by_name($lexileRange, 'lexile_range');
+				$lexileTax = key($tempTerms);
+
+				$rows[] = array($nid, $lexileLevel, $convertedLevel, $lexileTax, $emw_node->getBundle());
+			}
+
+			$table = array(
+				'header' => $headers,
+				'rows' => $rows,
+				'sticky' => FALSE,
+				'attributes' => array('class' => array('table', 'table-responsive', 'table-bordered', 'table-styled')),
+			);
+
+			$table_output = theme('table', $table);
+		}
+
+		return '<div class="container">
+    <div class="col-xs-12">
+			'.$table_output.'
+    </div>
+</div>
+		';
+	}
+
+	function rif_advanced_search_form_alter(&$form, &$form_state, $form_id) {
+	  if ($form_id == 'views_exposed_form' && $form['#action'] == '/search') {
+	  	$result = db_query('select ind.machine_name, count(item.item_id) as cnt from search_api_item item inner join search_api_index ind on ind.id = item.index_id group by ind.machine_name')->fetchAllKeyed();
+	  	variable_set('search_counts', $result);
+	  }
+	}
+
+	function rif_advanced_search_init() {
+		$args = explode('/', drupal_get_path_alias());
+		if (in_array($args[0], ['literacy-central', 'literacy-network']) && $args[1] != 'search') {
+			$setting = ['rif_advanced_search' => ['site_section' => $args[0]]];
+			user_cookie_save(['site_section' => $args[0]]);
+		}
+	}

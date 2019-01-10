@@ -1,0 +1,22 @@
+.has-sidebar {
+  .region-content .block.block-system > .content {
+    float: left;
+    width: 64.3%;
+    margin-right: 1%;
+  }
+  .content-sidebar .region-sidebar {
+    .block {
+      > h2 {
+        @extend %titletext;
+      }
+      > .content {
+        @extend %clearfix;
+        background-color: $c-white;
+        border: 1px solid $c-light-grey;
+        padding: 1.5em;
+      }
+    }
+    float: left;
+    width: 30%;
+  }
+}

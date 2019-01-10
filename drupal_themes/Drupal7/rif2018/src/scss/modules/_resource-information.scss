@@ -1,0 +1,101 @@
+
+.resource-information {
+  margin-bottom: $spacing-xlarge;
+  .modal & {
+//    margin-top: 30px;
+//    margin-bottom: 0;
+
+    .panel {
+//      margin: 0;
+    }
+  }
+  h3 {
+//    margin: 0 0 15px;
+//    font-family: @default-font-family;
+//    font-size: @default-font-size + 2;
+//    font-weight: 900;
+//    line-height: @default-line-height + 10;
+//    color: @grey;
+  }
+  .panel {
+//    .border-radius (4px);
+//    border-color: darken(@off-white, 5%);
+
+    .panel-body {
+//      padding: 0;
+    }
+    .table {
+//      margin: 0;
+//      border-collapse: inherit;
+//      border-spacing: 0;
+//      border: none;
+//      background-color: @white;
+//      .border-radius (4px);
+      border: 1px solid $gray-light;
+      overflow: hidden;
+
+      & > tbody {
+
+        & > tr {
+
+          &:first-child {
+
+            td {
+//              border-top: 0;
+            }
+          }
+          td {
+//            border-color: darken(@white, 15%);
+//            padding: 15px;
+//            vertical-align: middle;
+            border-color: mix($gray-light, $gray-white, 75%);
+            vertical-align: top;
+
+            &:nth-of-type(odd) {
+              background-color: $gray-white;
+//              background-color: darken(@white, 10%);
+//              text-align: right;
+//              font-family: @alt-sans-serif-font-family;
+//              font-size: @default-font-size - 2;
+//              line-height: @default-line-height - 2;
+//              font-weight: 700;
+              font-family: $ff-sans;
+                @include fs($fs-body-xsmall);
+
+              .modal & {
+//                font-size: @default-font-size;
+//                line-height: @default-line-height;
+              }
+            }
+            &:nth-of-type(even) {
+//              font-size: @default-font-size - 2;
+//              line-height: @default-line-height - 2;
+//              background-color: @white;
+                @include fs($fs-body-xsmall);
+
+              .modal & {
+//                font-size: @default-font-size;
+//                line-height: @default-line-height;
+              }
+            }
+          }
+        }
+      }
+    }
+    h3 {
+//      margin: 15px 0 0;
+//      font-size: @default-font-size + 2;
+//      color: @blue;
+    }
+    h4 {
+//      margin: 0 0 15px;
+//      font-family: @alt-sans-serif-font-family;
+//      font-size: @default-font-size;
+//      color: @dark-grey;
+    }
+    .text {
+//      padding: 0 15px 0 0;
+//      font-weight: 500;
+    }
+  }
+}

@@ -1,0 +1,7 @@
+name: 'Momentum Reports'
+type: module
+description: 'Provides the ability to generate reports based on Momentum API data.'
+core: 8.x
+package: 'Momentum'
+dependencies:
+  - momentum

@@ -1,0 +1,55 @@
+//
+// @file
+// Utilities to help with creating CSS transitions.
+
+//
+// Sets default transition options that aren't being overriden.
+//
+@function transition-set-defaults($values: null, $defaults: $trans-settings) {
+  // If we have all values overrode, pass them through.
+  @if length($values) == length($defaults) { @return $values; }
+
+  @each $property, $setting in $defaults {
+    // Get index of current map item.
+    $index: index(map-keys($defaults), $property);
+
+    // If values is null, we set the 'all' property and all the other items.
+    @if $values == null {
+      $values: $setting;
+    }
+
+    // If the index is less than or equal to the passed value length, we skip
+    // as we don't want to override the value.
+    @else if $index > length($values) {
+      $values: append($values, $setting, "space");
+    }
+  }
+
+  // Return our values as a string. Lists do weird things.
+  @return inspect($values);
+}
+
+//
+// Write transitions properties for styles.
+//
+@mixin transitions($transitions...) {
+  $values: null;
+
+  @if length($transitions) > 0 {
+    @each $transition in $transitions {
+      $value: transition-set-defaults($transition);
+
+      @if $values {
+        $values: append($values, $value, "comma");
+      }
+      @else {
+        $values: $value;
+      }
+    }
+  }
+  @else {
+    $values: transition-set-defaults();
+  }
+
+  transition: $values;
+}

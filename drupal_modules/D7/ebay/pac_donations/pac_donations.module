@@ -1,0 +1,146 @@
+<?php
+
+/**
+ * @file
+ *   Create a form for entering thermometer data
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function pac_donations_permission() {
+  return array(
+    'pac donation configure' => array(
+      'title' => t('PAC Donation'),
+      'description' => t('Set donation values'),
+    )
+  );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function pac_donations_menu() {
+  $items = array();
+  $items['admin/config/system/pac_donations'] = array(
+    'title' => 'PAC Donations',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('pac_donations_load_form'),
+    'description' => t('Enter max and current for PAC donation thermometer'),
+    'type' => MENU_LOCAL_TASK,
+    'access arguments' => array('pac donation configure'),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_theme()
+ */
+function pac_donations_theme() {
+  return array(
+    'pac_donations' => array(
+      'template' => 'pac_donations',
+      'variables' => array('percentage' => NULL, 'current' => NULL, 'raw_percentage' => NULL, 'max' => NULL,
+      ),
+    ),
+    'pac_contributions' => array(
+      'template' => 'pac_contributions',
+      'variables' => array('percentage' => NULL, 'max' => NULL, 'current' => NULL, 'raw_percentage' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info()
+ */
+function pac_donations_block_info() {
+  $blocks = array();
+  $blocks['pac_contributions'] = array(
+    'info' => 'PAC Contributions',
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['pac_donations'] = array(
+    'info' => 'PAC Donations',
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view()
+ */
+function pac_donations_block_view($block_name = '') {
+  if($block_name == 'pac_donations') {
+    $current = variable_get('pac_donations_current', 0);
+    $max = variable_get('pac_donations_max', 100000);
+    $raw_perc = $current / $max;
+    $percentage = sprintf("%.2f%%", $raw_perc * 100);
+    return array(
+      'subject' => t('Total Donations'),
+      'content' => theme('pac_donations',
+        array('current' => $current, 'percentage' => $percentage, 'raw_percentage' => $raw_perc, 'max' => $max)),
+    );
+  }
+  if($block_name == 'pac_contributions') {
+    $current = variable_get('pac_contributions_current', 0);
+    $max = variable_get('pac_contributions_max', 100000);
+    // if ($current > $max) {
+    //   $current = $max;
+    // }
+    $raw_perc = $current / $max;
+    $percentage = sprintf("%.2f%%", $raw_perc * 100);
+    return array(
+      'subject' => t('Total Contributions'),
+      'content' => theme('pac_contributions',
+        array('current' => $current, 'max' => $max, 'percentage' => $percentage, 'raw_percentage' => $raw_perc)),
+    );
+  }
+}
+
+/**
+ * Form that allows administrators to enter thermometer values
+ * @return
+ *   array  form (Drupal system)
+ */
+function pac_donations_load_form() {
+  $form['donations'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Donations'),
+    '#collapsible' => FALSE,
+  );
+  $form['donations']['pac_donations_current'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Charitable Matches Current Value'),
+    '#default_value' => variable_get('pac_donations_current', 0),
+    '#required' => TRUE,
+    '#description' => t('Numerical dollar value'),
+  );
+  $form['donations']['pac_donations_max'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Charitable Matches Goal Amount'),
+    '#default_value' => variable_get('pac_donations_max', 0),
+    '#required' => TRUE,
+    '#description' => t('Numerical dollar value'),
+  );
+  $form['contributions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Contributions'),
+    '#collapsible' => FALSE,
+  );
+  $form['contributions']['pac_contributions_current'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Contributions Current Value'),
+    '#default_value' => variable_get('pac_contributions_current', 0),
+    '#required' => TRUE,
+    '#description' => t('Numerical dollar value'),
+  );
+  $form['contributions']['pac_contributions_max'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Contributions Goal Amount'),
+    '#default_value' => variable_get('pac_contributions_max', 0),
+    '#required' => TRUE,
+    '#description' => t('Numerical dollar value'),
+  );
+  return system_settings_form($form);
+}

@@ -1,0 +1,502 @@
+<?php
+
+use IterableApi\IterableApi;
+
+function iterable_ms_menu() {
+
+  $items = array();
+
+  $items['admin/config/iterable-manage-subscription'] = array(
+    'title' => 'Iterable Manage Subscription Form',
+    'description' => 'Configuration for the Iterable Manage Subscription Form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('iterable_ms_form'),
+    'access arguments' => array('access administration pages'),
+  );
+
+  $items['iterable/get/ajax/subscription/%'] = array(
+    'page callback' => 'iterable_ms_subscription_ajax_get_form',
+    'page arguments' => array(4),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+    'delivery callback' => 'iterable_ms_subscription_ajax_callback',
+  );
+
+  $items['manage-subscription'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => t('Manage Subscription'),
+    'page callback' => 'iterable_ms_manage_subscription_page',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+  );
+
+  return $items;
+
+}
+
+function iterable_ms_form($form, &$form_state) {
+
+  $form['labels'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Labels'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,  
+  );
+
+  $form['hide'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Hide'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,  
+  );
+
+  $form['phone'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Phone'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,  
+  );
+
+  $form['email'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Email'),
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,  
+  );
+
+  $form['labels']['iterable_ms_form_email_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email field label'),
+    '#description' => t(''),
+    '#default_value' => variable_get('iterable_ms_form_email_label', 'Email')
+  );
+
+  $form['labels']['iterable_ms_form_sub_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subscriptions field label'),
+    '#description' => t(''),
+    '#default_value' => variable_get('iterable_ms_form_sub_label', 'Subscriptions')
+  );
+
+  $form['labels']['iterable_ms_form_phone_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone field label'),
+    '#description' => t(''),
+    '#default_value' => variable_get('iterable_ms_form_phone_label', 'Phone')
+  );
+
+  $form['hide']['iterable_ms_ignore_types'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ignore message types'),
+    '#description' => t('Example: 12345, 23456, 34567'),
+    '#default_value' => variable_get('iterable_ms_ignore_types', '')
+  );
+
+  $form['phone']['iterable_ms_phone_ids'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone channel ids'),
+    '#description' => t('If all the below types are unchecked, then these channels are unsubscribed. Example: 12345, 23456, 34567'),
+    '#default_value' => variable_get('iterable_ms_phone_ids', '')
+  );
+
+  $form['phone']['iterable_ms_phone_types'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone related types'),
+    '#description' => t('If these types are unchecked then the phone field is hidden. If any of the above channels are unsubscribed these are shown as unchecked. Example: 12345, 23456, 34567'),
+    '#default_value' => variable_get('iterable_ms_phone_types', '')
+  );
+
+  $form['email']['iterable_ms_email_ids'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email channel ids'),
+    '#description' => t('If all the below types are unchecked, then these channels are unsubscribed. Example: 12345, 23456, 34567'),
+    '#default_value' => variable_get('iterable_ms_email_ids', '')
+  );
+
+  $form['email']['iterable_ms_email_types'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email related types'),
+    '#description' => t('If any of the above channels are unsubscribed these are shown as unchecked. Example: 12345, 23456, 34567'),
+    '#default_value' => variable_get('iterable_ms_email_types', '')
+  );
+
+  return system_settings_form($form);
+
+}
+
+function iterable_ms_manage_subscription_page() {
+
+  $content = array(
+    '#markup' => '<div id="content-iterable-ms-manage-subscription">' . t('Loading...') . '</div>',
+    '#attached' => array(
+      'css' => array(
+        drupal_get_path('module', 'iterable_ms') . '/css/iterableForm.css',
+      ),
+      'js' => array(
+        'https://js.iterable.com/iterableUtils.js',
+        drupal_get_path('module', 'iterable_ms') . '/js/iterableForm.js',
+      ),
+    ),
+  );
+
+  return $content;
+
+}
+
+function iterable_ms_block_info() {
+
+  $blocks['manage_subscription'] = array(
+    'info' => t('Iterable: Manage Subscription'),
+  );
+
+  return $blocks;
+
+}
+
+function iterable_ms_block_view($delta = '') {
+
+  $block = array();
+
+  switch ($delta) {
+    case 'manage_subscription':
+      $block['subject'] = t('Manage Subscription');
+      $block['content'] = array(
+        '#markup' => '<div id="content-iterable-ms-manage-subscription">' . t('Loading...') . '</div>',
+        '#attached' => array(
+          'css' => array(
+            drupal_get_path('module', 'iterable_ms') . '/css/iterableForm.css',
+          ),
+          'js' => array(
+            'https://js.iterable.com/iterableUtils.js',
+            drupal_get_path('module', 'iterable_ms') . '/js/iterableForm.js',
+          ),
+        ),
+      );
+      break;
+  }
+
+  return $block;
+
+}
+
+function iterable_ms_subscription_ajax_get_form($email) {
+
+  $vars = array('email' => $email);
+  return drupal_get_form('iterable_ms_manage_subscription', $vars);
+
+}
+
+function iterable_ms_subscription_ajax_callback($page_callback_result) {
+
+  print drupal_render($page_callback_result);
+
+}
+
+function iterable_ms_manage_subscription($form, &$form_state, $vars) {
+
+  // ignored types
+
+  $ignore = variable_get('iterable_ms_ignore_types', '');
+  $ignore = explode(', ', $ignore);
+
+  // phone types
+
+  $type_phone = variable_get('iterable_ms_phone_types', '');
+  $type_phone = ($type_phone == '') ? array():explode(', ', $type_phone);
+
+  // email types
+
+  $type_email = variable_get('iterable_ms_email_types', '');
+  $type_email = ($type_email == '') ? array():explode(', ', $type_email);
+
+  // get current user and all message types
+
+  $iterable = new IterableApi(API_KEY);
+
+  $email = $vars['email'];
+  $user = $iterable->getUserData($email);
+  $types = $iterable->getMessageTypes();
+
+  watchdog('iterable', 'loading user type preferences for ' . $email);
+
+  if ($user and $types){
+
+    // get user settings and types
+
+    $prefs = array();
+    $ch_prefs = array();
+    $phone = '';
+
+    if (isset($user->phoneNumber)){
+      $phone = $user->phoneNumber;
+    }
+
+    if (isset($user->unsubscribedMessageTypeIds)){
+      $prefs = $user->unsubscribedMessageTypeIds;
+    }
+
+    if (isset($user->unsubscribedChannelIds)){
+      $ch_prefs = $user->unsubscribedChannelIds;
+    }
+
+    // phone types and channels
+  
+    $channel_phone = variable_get('iterable_ms_phone_ids', '');
+    $channel_phone = ($channel_phone == '') ? array():explode(', ', $channel_phone);
+  
+    $type_phone = variable_get('iterable_ms_phone_types', '');
+    $type_phone = ($type_phone == '') ? array():explode(', ', $type_phone);
+  
+    // email types and channels
+  
+    $channel_email = variable_get('iterable_ms_email_ids', '');
+    $channel_email = ($channel_email == '') ? array():explode(', ', $channel_email);
+  
+    $type_email = variable_get('iterable_ms_email_types', '');
+    $type_email = ($type_email == '') ? array():explode(', ', $type_email);
+
+    // channel off then type off
+
+    $off = array();
+
+    foreach ($channel_phone as $id) {
+      if (in_array($id, $ch_prefs)) {
+        foreach ($type_phone as $id) {
+          $off[] = $id;
+        }
+      }
+    }
+
+    foreach ($channel_email as $id) {
+      if (in_array($id, $ch_prefs)) {
+        foreach ($type_email as $id) {
+          $off[] = $id;
+        }
+      }
+    }
+    
+    // form fields
+
+    $form['email'] = array(
+      '#type' => 'textfield',
+      '#title' => t(variable_get('iterable_ms_form_email_label', 'Email')),
+      '#default_value' => t($email),
+      '#disabled' => true,
+      '#weight' => 1
+    );
+
+    $form['types'] = array(
+      '#type' => 'item',
+      '#tree' => true,
+      '#title' => t(variable_get('iterable_ms_form_sub_label', 'Subscriptions')),
+      '#weight' => 2
+    );
+
+    $n = 0;
+    foreach ($types as $ty) {
+      if (!in_array($ty->id, $ignore)) {
+
+        $field = array(
+          '#type' => 'checkbox',
+          '#title' => t($ty->name),
+          '#options' => array(1),
+          '#value' => 0,
+          '#weight' => $n++
+        );
+
+        if (!in_array($ty->id, $prefs) and !in_array($ty->id, $off)) {
+          $field['#value'] = 1;
+        }
+
+        if (in_array($ty->id, $type_email)) {
+          $field['#weight'] += 100;
+          $field['#attributes'] = array(
+            'class' => array('email-checkbox')
+          );
+        }
+
+        if (in_array($ty->id, $type_phone)) {
+          $field['#weight'] += 200;
+          $field['#attributes'] = array(
+            'class' => array('phone-checkbox')
+          );
+        }
+
+        $form['types'][$ty->id] = $field;
+
+      }
+    }
+
+    if (preg_match('/^\+1(\d{3})(\d{3})(\d{4})$/', $phone, $matches)) {
+      $phone = $matches[1] . '-' .$matches[2] . '-' . $matches[3];
+    }
+
+    $form['phone'] = array(
+      '#type' => 'textfield',
+      '#title' => t(variable_get('iterable_ms_form_phone_label', 'Phone')),
+      '#default_value' => t($phone),
+      '#weight' => 3
+    );
+
+    $form['user'] = array(
+      '#type' => 'hidden',
+      '#value' => $email,
+      '#weight' => 4
+    );
+
+    // submit button
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Update'),
+      '#weight' => 5
+    );
+
+    $form['#attributes'] = array(
+      'class' => array('iterable-manage-subscription')
+    );
+
+    return $form;
+
+  } else {
+  
+    print t('No subscription found.');
+    return array();
+
+  }
+
+}
+
+function iterable_ms_manage_subscription_validate($form, &$form_state) {
+
+  $phone = $form_state['input']['phone'];
+  if (!empty($phone)) {
+
+    // numbers only
+    $phone = preg_replace('/\D+/', '', $phone);
+
+    // verify phone number is 10 or more numbers
+    if (strlen($phone) < 10) {
+      form_set_error('phone', t('Please enter a valid phone number.'));
+      drupal_goto($_SERVER['HTTP_REFERER']);
+    }
+
+  }
+
+}
+
+function iterable_ms_manage_subscription_submit($form, &$form_state) {
+
+  $iterable = new IterableApi(API_KEY);
+
+  $input = $form_state['input'];
+  $field = $form_state['values'];
+
+  $email = $field['user'];
+  $phone = $input['phone'];
+
+  // phone types and channels
+
+  $channel_phone = variable_get('iterable_ms_phone_ids', '');
+  $channel_phone = ($channel_phone == '') ? array():explode(', ', $channel_phone);
+
+  $type_phone = variable_get('iterable_ms_phone_types', '');
+  $type_phone = ($type_phone == '') ? array():explode(', ', $type_phone);
+
+  // email types and channels
+
+  $channel_email = variable_get('iterable_ms_email_ids', '');
+  $channel_email = ($channel_email == '') ? array():explode(', ', $channel_email);
+
+  $type_email = variable_get('iterable_ms_email_types', '');
+  $type_email = ($type_email == '') ? array():explode(', ', $type_email);
+
+  // load current type and channel prefs
+
+  $user = $iterable->getUserData($email);
+  $prefs = array();
+  $ch_prefs = array();
+
+  if (isset($user->unsubscribedMessageTypeIds)) {
+    $prefs_array = $user->unsubscribedMessageTypeIds;
+    foreach($prefs_array as $id) {
+      $prefs[$id] = 0;
+    }
+  }
+
+  if (isset($user->unsubscribedChannelIds)) {
+    $ch_prefs_array = $user->unsubscribedChannelIds;
+    foreach($ch_prefs_array as $id) {
+      $ch_prefs[$id] = 0;
+    }
+  }
+
+  // merge selected type prefs
+
+  foreach($field['types'] as $id => $value) {
+    if (isset($input['types'][$id])) {
+      unset($prefs[$id]);
+    } else {
+      $prefs[$id] = 0;
+    }
+  }
+  $prefs_array = array_keys($prefs);
+
+  // merge selected channel prefs
+
+  $unsub_phone = true;
+  foreach ($type_phone as $id) {
+    if (!in_array($id, $prefs_array)) {
+      $unsub_phone = false;
+    }
+  }
+  if ($unsub_phone) {
+    foreach($channel_phone as $id) {
+      $ch_prefs[$id] = 0;
+    }
+  } else {
+    foreach($channel_phone as $id) {
+      unset($ch_prefs[$id]);
+    }
+  }
+
+  $unsub_email = true;
+  foreach ($type_email as $id) {
+    if (!in_array($id, $prefs_array)) {
+      $unsub_email = false;
+    }
+  }
+  if ($unsub_email) {
+    foreach($channel_email as $id) {
+      $ch_prefs[$id] = 0;
+    }
+  } else {
+    foreach($channel_email as $id) {
+      unset($ch_prefs[$id]);
+    }
+  }
+
+  $ch_prefs_array = array_keys($ch_prefs);
+
+  // update type prefs
+
+  $response = $iterable->updateUserMessageTypes($email, $prefs_array);
+  watchdog('iterable', 'updating user type preferences for ' . $email);
+
+  // update channel prefs
+  
+  $response = $iterable->updateUserChannels($email, $ch_prefs_array);
+  watchdog('iterable', 'updating user channel preferences for ' . $email);
+
+  // update phone number
+
+  $phone = preg_replace('/\D+/', '', $phone);
+  if (!empty($phone)) {
+    $response = $iterable->updateUserPhone($email, $phone);
+    watchdog('iterable', 'updating user phone number for ' . $email);
+  }
+
+  drupal_set_message(t('Your subscription preferences have been updated.'), 'status');
+  drupal_goto($_SERVER['HTTP_REFERER']);
+
+}

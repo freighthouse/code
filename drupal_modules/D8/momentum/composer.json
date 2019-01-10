@@ -1,0 +1,22 @@
+{
+    "name": "drupal/momentum",
+    "type": "drupal-module",
+    "description": "Momentum advocacy feature enabling users to send correspondence to elected government personnel.",
+    "keywords": ["Drupal"],
+    "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "Jeremy Michael Cerda",
+            "email": "jcerda@repequity.com",
+            "homepage": "https://www.repequity.com",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://www.drupal.org/project/momentum",
+    "minimum-stability": "dev",
+    "support": {
+    "issues": "https://www.drupal.org/project/issues/momentum",
+    "source": "http://cgit.drupalcode.org/momentum"
+    },
+    "require": { }
+}

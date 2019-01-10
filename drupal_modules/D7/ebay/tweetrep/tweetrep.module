@@ -1,0 +1,666 @@
+<?php
+
+/**
+ * @file
+ *   Tweet your Representative functions
+ */
+
+/**
+ * Implements hook_theme()
+ */
+function tweetrep_theme() {
+  return array(
+    'tweetrep_show' => array(
+      'template' => 'tweetrep_show',
+      'variables' => array('senators' => NULL, 'representatives' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implements hook_block_info()
+ */
+function tweetrep_block_info() {
+  $blocks = array();
+  $blocks['tweetrep_form'] = array(
+    'info' => 'Tweet Your U.S. Elected Officials',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+ /* $blocks['tweetrep_form_2'] = array(
+    'info' => 'Tweet Your U.S. Elected Officials',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['tweetrep_response'] = array(
+    'info' => 'Tweet Your U.S. Elected Officials Response',
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  $blocks['tweetrep_response_2'] = array(
+    'info' => 'Tweet Your U.S. Elected Officials Response',
+    'cache' => DRUPAL_NO_CACHE,
+  );*/
+  $blocks['tweetrep_response_data'] = array(
+		'info' => t('Tweet Your Elected Officials Response.'),
+		'title' => t('Tweet Your Elected Officials Response.'),
+		'region' => 'content-bottom',
+		'visibility'=>BLOCK_VISIBILITY_LISTED,
+		'pages' => 'action-center/tweet',
+		'cache' => DRUPAL_NO_CACHE,
+		'status' => 1,
+	);
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view()
+ */
+function tweetrep_block_view($block_name = '') {
+	$blocks = array();
+	switch($block_name) {
+		case 'tweetrep_form' :
+			$content = _tweetrep_prepare_form();
+			return array(
+			  'subject' => t('Find Your U.S. Elected Officials'),
+			  'content' => $content,
+			);
+		break;
+		case 'tweetrep_response_data' :
+			$blocks['content'] = _tweetrep_prepare_response();
+		break;
+	}
+  	return $blocks;
+
+}
+function _tweetrep_prepare_response(){
+	 $content='<div id="error_msg"></div><div id="tweeter_representatives"> </div>';
+  return $content;
+
+}
+
+function tweetrep_build_tweets($sens, $rep, $sen_tweet, $rep_tweets, $state = 'my state', $city = 'my city') {
+  $senator_tweets = array();
+  $representative_tweets = array();
+  /**
+   * We have one tweet for two senators
+   */
+  foreach ($sens as $senator) {
+    $sen_tweet = str_replace('|city|', $city, $sen_tweet);
+    $sen_tweet = str_replace('|state|', $state, $sen_tweet);
+    $handle = '@' . $senator;
+    $senator_tweets[] = str_replace('|@|', $handle, $sen_tweet);
+  }
+
+  /**
+   * And two tweets for one representative
+   */
+  $rep_handle = !empty($rep[0]) ? '@' . $rep[0] : NULL;
+  //dsm($rep_handle);
+  if (!empty($rep_handle)) {
+	   // dsm($rep_tweets);
+	  if($rep_tweets!=""){
+		foreach ($rep_tweets as $tweet) {
+		  $tweet = str_replace('|city|', $city, $tweet);
+		  $tweet = str_replace('|state|', $state, $tweet);
+		  $representative_tweets[] = str_replace('|@|', $rep_handle, $tweet);
+		}
+	  }
+  }
+
+  // Mind blown.
+  return array('senators' => $senator_tweets, 'representatives' => $representative_tweets);
+}
+
+function tweetrep_tweets_get() {
+  $senator_tweet = array();
+  $rep_tweets = array();
+  //Assigned to the campaign
+
+  if ((isset($_GET['campaign_id'])) && (is_numeric($_GET['campaign_id']))) {
+    $nid = $_GET['campaign_id'];
+  }
+ /* elseif ((arg(0) == 'node') && (is_numeric(arg(1)))) {
+    // I don't think this is in use
+    $nid = arg(1);
+  }
+  elseif ((request_path() == 'action-center/tweet') && ($nid = bipac_session('campaign_id'))) {
+    // In this case, the campaign_id has been stripped from the URL somehow
+  }*/
+  else {
+    return;
+  }
+  $node = node_load($nid);
+
+  if ((isset($node->type) && ($node->type == 'bipac_campaign'))) {
+    bipac_session('campaign_id', $nid);		// Cache the last in case it gets dropped
+
+    $senator_tweet_array = field_get_items('node', $node, 'field_bipac_camp_tweet');
+	//dsm($senator_tweet_array,"Senator array");
+    if (!empty($senator_tweet_array)) {
+      $senator_first = reset($senator_tweet_array);
+      $senator_tweet = $senator_first['value'];
+    }
+    $rep_tweet_array = field_get_items('node', $node, 'field_bipac_camp_rep_tweet');
+	//dsm($rep_tweet_array,"Rep array");
+    if (!empty($rep_tweet_array)) {
+      foreach ($rep_tweet_array as $tweet) {
+        $rep_tweets[] = $tweet['value'];
+      }
+    }
+
+	 $sen_st_tweet_array = field_get_items('node', $node, 'field_bipac_camp_st_sen_twt');
+	//dsm($senator_tweet_array,"Senator array");
+    if (!empty($sen_st_tweet_array)) {
+      $senator_first = reset($sen_st_tweet_array);
+      $senator_st_tweet = $senator_first['value'];
+    }
+    $rep_st_tweet_array = field_get_items('node', $node, 'field_bipac_camp_st_rep_twt');
+	//dsm($rep_tweet_array,"Rep array");
+    if (!empty($rep_st_tweet_array)) {
+      foreach ($rep_st_tweet_array as $tweet) {
+        $rep_st_tweets[] = $tweet['value'];
+      }
+    }
+  }
+  else
+  {return array();}
+  //GETS THE DEFAULT VALUE FOR THE TWEET
+  $rep_tweets = empty($rep_tweets[0]) ? array(variable_get('tweetrep_default_rep', "")) : $rep_tweets;
+  $senator_tweet = empty($senator_tweet) ? variable_get('tweetrep_default_sen', "") : $senator_tweet;
+  $rep_st_tweet_array = empty($rep_st_tweet_array[0]) ? array(variable_get('tweetrep_default_rep', "")) : $rep_tweets;
+  $sen_st_tweet_array = empty($sen_st_tweet_array) ? variable_get('tweetrep_default_sen', "") : $senator_tweet;
+  //dsm($rep_tweets,"default");
+  return array('senators' => $senator_tweet, 'representatives' => $rep_tweets,'st_senator' => $sen_st_tweet_array,'st_rep' => $rep_st_tweet_array);
+}
+
+function tweetrep_get($data) {
+  $senators = array();
+  $rep = array();
+  $st_senators = array();
+  $st_rep = array();
+  $strip = array('http://twitter.com/', 'https://twitter.com/', 'http://www.twitter.com/', 'https://www.twitter.com', '@', '!', '#', '/');
+  if (!empty($data)) {
+	  foreach($data as $type){
+		if (is_array($type) || is_object($type)){
+			foreach($type as $official){
+				if(isset($official['social']['Twitter'])){
+				switch($official['position']['title']){
+					case "US Senator":
+						$senators[] = str_replace($strip, '', $official['social']['Twitter']);
+						break;
+					case "US Representative":
+						$rep[] = str_replace($strip, '', $official['social']['Twitter']);
+						break;
+					case "State Senator":
+						$st_senators[] = str_replace($strip, '', $official['social']['Twitter']);
+						break;
+					case "State Representative":
+						$st_rep[] = str_replace($strip, '', $official['social']['Twitter']);
+						break;
+				}
+				}
+			}
+		}
+	  }
+
+    /*foreach ($data['us_govement'] as $official) {
+
+
+
+      if (!empty($official['Twitter'])) {
+        if ((!empty($official['DistrictName'])) && ($official['DistrictName'] == 'U.S. Senate')) {
+          // This is a senator
+          $senators[] = str_replace($strip, '', $official['Twitter']);
+        }
+        if ($official['Type'] == '1') {
+          // This is a rep
+          $rep = str_replace($strip, '', $official['Twitter']);
+        }
+      }
+    }*/
+  }
+  return array('senators' => $senators, 'representatives' => $rep,'st_senators' => $st_senators, 'st_representatives' => $st_rep);
+}
+
+/**
+ * Initiate address lookup for Rep form
+ *
+ * @return
+ *   Drupal form
+ */
+ //sets the values for user stored in the session
+function _tweetrep_prepare_form() {
+  $address = bipac_session('address');
+  $city = bipac_session('city');
+	$state = bipac_session('state');
+  $zip = bipac_session('zip');
+
+  //creates the form
+  return drupal_get_form('tweetrep_form', $address, $city, $state, $zip);
+}
+
+/**
+ * Implements hook_form()
+ */
+function tweetrep_form($form, &$form_state, $address, $city, $state, $zip) {
+//  drupal_add_js(drupal_get_path('module', 'tweetrep') . '/tweetrep.js');
+ drupal_add_css(drupal_get_path('module', 'tweetrep') . '/tweetrep.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+	$form = array();
+  $form['address'] = array(
+    '#title' => t('Enter Your Address to Retrieve Your Officials'),
+    '#required' => TRUE,
+    '#type' => 'textfield',
+    '#default_value' => $address,
+  );
+  $form['city'] = array(
+    '#title' => t('City'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => $city,
+  );
+  $form['state'] = array(
+    '#type' => 'select',
+    '#title' => t('State'),
+    '#options' => _bipac_campaigns_states_array(),
+    '#required' => TRUE,
+    '#default_value' => $state,
+  );
+  $form['zip'] = array(
+    '#title' => t('Zip Code'),
+    '#required' => TRUE,
+    '#type' => 'textfield',
+    '#default_value' => $zip,
+  );
+  $form['submit'] = array(
+		'#type' => 'submit',
+		'#attributes' => array('onclick' => 'findOfficials(); return false;'),
+    '#value' => t('Find Officials'),
+	);
+
+	$form['#attached']['js'] = array(
+		drupal_get_path('module', 'tweetrep') . '/tweetrep.js' => array(
+			'type' => 'file',
+		)
+	);
+  return $form;
+}
+
+function tweetrep_form_validate($form, $form_state) {
+  if((!empty($form_state['values']['zip'])) && (!is_numeric(trim(str_replace('-', '', $form_state['values']['zip']))))) {
+    form_set_error('zip', t('Zip must be numeric (##### or #####-####)'));
+  }
+}
+
+/*function tweetrep_form_submit($form, $form_state) {
+	//depricated
+ drupal_add_js(drupal_get_path("module","momentum_api").'/tweetrep.js', 'file');
+ drupal_add_css(drupal_get_path("module","momentum_api").'/tweetrep.css');
+  $address = isset($form_state['values']['address']) ? trim($form_state['values']['address']) : NULL;
+  $city = isset($form_state['values']['city']) ? trim($form_state['values']['city']) : NULL;
+  $state = isset($form_state['values']['state']) ? trim($form_state['values']['state']) : NULL;
+  $zip = isset($form_state['values']['zip']) ? trim($form_state['values']['zip']) : NULL;
+
+//omentum API
+	//$url="https://mplatform.io/";
+	//$group="ebay";
+	//$apikey="755d2aba10d6d2e967fb5634f8606488";
+	//include(drupal_get_path("module","momentum_api").'/momentum.class.php');
+	$api_momentum = momentum_object();
+
+	if ($api_momentum === FALSE) {
+		drupal_set_message('bipac_campaigns '.t('Problem with the API object.  Are the group and key set?'),"error");
+		return;
+	}
+  	//dsm($api_momentum,"API momentum");
+	$data['address_1']=$address;
+    $data['city']=$city;
+    $data['state']=$state;
+    $data['zip']=$zip;
+    $data['latitude']=NULL;
+    $data['longitude']=NULL;
+    $data['plus_4']=NULL;
+	$chambers=array("us_senate","us_house","state_senate","state_house");
+    $levels=array();
+
+  	$momentum_search=$api_momentum->officials($data, $chambers, $levels);
+
+	if($momentum_search){
+		bipac_session('officials', $momentum_search);
+		bipac_session('city', $city);
+		bipac_session('state', $state);
+		bipac_session('zip', $zip);
+		bipac_session('address', $address);
+	}
+}
+*/
+/**
+ * Implements hook_menu()
+ */
+ function tweetrep_init() {
+  if (current_path() == 'tweet_API/tweetreps') {
+    drupal_page_is_cacheable(FALSE);
+  }
+}
+function tweetrep_permission() {
+  return array(
+    'tweet_configure' => array(
+      'title' => t('administrator tweet_configure'),
+      'description' => t('Set configuration options for Call Center module'),
+    ),
+    'tweet_access' => array(
+      'title' => t('Use Call tweet_configure'),
+      'description' => t('Use the Call Center module to locate drug assistance for clients'),
+    ),
+  );
+}
+function tweetrep_menu() {
+  $items = array();
+  $items['admin/config/system/tweetreps'] = array(
+    'page arguments' => array('tweetrep_config_form'),
+    'title' => 'Tweet Representatives',
+    'description' => t('Customize default tweet content'),
+    'page callback' => 'drupal_get_form',
+    'access arguments' => array('tweet_configure'),
+  );
+
+  $items['tweet_API/tweetreps'] = array(
+      'title' => 'Tweet Representatives',
+	  'description' => t('Tweet Representatives'),
+      'page callback' => '_tweetrep_get_tweets',
+      'access arguments' => array('tweet_access'),
+      'type' => MENU_NORMAL_ITEM,
+    );
+
+  return $items;
+}
+
+/**
+ * Systems form for tweetrep defaults
+ */
+function tweetrep_config_form() {
+  $form = array();
+  $form['tweetrep_default_rep'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Representative Default'),
+    '#description' => t('Use |@| to indicate where the handles should appear.'),
+    '#default_value' => variable_get('tweetrep_default_rep', ''),
+    '#maxlength' => 144,
+    '#size' => 80,
+  );
+  $form['tweetrep_default_sen'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Senator Default'),
+    '#description' => t('Use |@| to indicate where the handles should appear.'),
+    '#default_value' => variable_get('tweetrep_default_sen', ''),
+    '#maxlength' => 144,
+    '#size' => 80,
+  );
+  return system_settings_form($form);
+}
+
+function _tweetrep_get_tweets(){
+	$address = $_GET['address'];
+	$city = $_GET['city'];
+	$state = $_GET['state'];
+	$zip = $_GET['zip'];
+
+	if ((isset($_GET['campaign_id'])) && (is_numeric($_GET['campaign_id']))) {
+		$nid = $_GET['campaign_id'];
+	}
+	else {
+		return drupal_json_output("No campaign found");
+	}
+
+	$node = node_load($nid);
+
+	$senator_tweet_array = field_get_items('node', $node, 'field_bipac_camp_tweet');
+	if (!empty($senator_tweet_array)) {
+	  foreach ($senator_tweet_array as $tweet) {
+		$sen_tweets = $tweet['value'];
+	  }
+	}
+    $rep_tweet_array = field_get_items('node', $node, 'field_bipac_camp_rep_tweet');
+    if (!empty($rep_tweet_array)) {
+      foreach ($rep_tweet_array as $tweet) {
+        $rep_tweets = $tweet['value'];
+      }
+    }
+
+	$sen_st_tweet_array = field_get_items('node', $node, 'field_bipac_camp_st_sen_twt');
+    if (!empty($sen_st_tweet_array)) {
+      foreach ($sen_st_tweet_array as $tweet) {
+        $sen_st_tweets = $tweet['value'];
+      }
+    }
+    $rep_st_tweet_array = field_get_items('node', $node, 'field_bipac_camp_st_rep_twt');
+    if (!empty($rep_st_tweet_array)) {
+      foreach ($rep_st_tweet_array as $tweet) {
+        $rep_st_tweets = $tweet['value'];
+      }
+    }
+
+	$type_officials_array = field_get_items('node', $node, 'field_bipac_recipient_types');
+    if (!empty($type_officials_array)) {
+      foreach ($type_officials_array as $type_official) {
+        $type_officials[] = $type_official['value'];
+      }
+    }
+
+	//watchdog("momentum","tipo:<pre>".print_r($type_officials_array,true)."</pre>");
+	//0 U.S. Senators
+	//1 U.S. Representatives
+	//2 State Senators
+	//3 State Representatives
+	//7 governor
+
+ //Todo: ADD the state
+
+//momentum API
+	//$url="https://mplatform.io/";
+	//$group="ebay";
+	//$apikey="755d2aba10d6d2e967fb5634f8606488";
+
+
+	//include(drupal_get_path("module","momentum_api").'/momentum.class.php');
+	try{$api_momentum = momentum_object();
+
+	if ($api_momentum === FALSE) {
+		drupal_set_message('bipac_campaigns '.t('Problem with the API object.  Are the group and key set?'),"error");
+		return;
+	}
+  	//dsm($api_momentum,"API momentum");
+	$data['address_1']=$address;
+    $data['city']=$city;
+    $data['state']=$state;
+    $data['zip']=$zip;
+    $data['latitude']=NULL;
+    $data['longitude']=NULL;
+    $data['plus_4']=NULL;
+
+	/*
+	foreach ($type_officials as $type_official){
+		switch($type_official){
+		case '0':
+			$chambers[]="us_senate";
+			break;
+		case '1':
+			$chambers[]="us_house";
+			break;
+		case '2':
+			$chambers[]="state_senate";
+			break;
+		case '3':
+			$chambers[]="state_house";
+			break;
+
+		case '7':
+			$chambers[]="state_governor";
+			break;
+
+		case '8':
+			$chambers[]="state_senate";
+			$chambers[]="state_house";
+			break;
+		case '9':
+			$chambers[]="us_senate";
+			$chambers[]="us_house";
+			break;
+		case '10':
+			$chambers[]="us_senate";
+			$chambers[]="us_house";
+			$chambers[]="state_senate";
+			$chambers[]="state_house";
+			break;
+		case '11':
+			$chambers[]="us_senate";
+			$chambers[]="us_house";
+			$chambers[]="state_senate";
+			$chambers[]="state_house";
+			$chambers[]="state_governor";
+			break;
+		}
+
+	}	*/
+    $levels=array();
+  	$momentum_search=$api_momentum->officials($data, $type_officials, $levels);
+	//watchdog("momentum","Search:<pre>".print_r($momentum_search,true)."</pre>");
+	$default_tweet=variable_get("tweetrep_default_rep","");
+	$us_government=array();
+	$state_government=array();
+	$strip = array('http://twitter.com/', 'https://twitter.com/', 'http://www.twitter.com/', 'https://www.twitter.com', '@', '!', '#', '/');
+	foreach($momentum_search as $type =>$data){
+		switch ($type){
+			case "us_government":
+					$i=0;
+					if(!is_array($data)){break;};
+					foreach($data as $official){
+
+						if(isset($official['social']['Twitter'])){
+
+							$twitter=str_replace($strip, '', $official['social']['Twitter']);
+							$position=$official['position']['title'];
+
+							//if the record contains twitter account
+							if($twitter!=""){
+								if(($position=="US Senator"&&in_array('us_senate',$type_officials)) || ($position=="US Representative"&&in_array('us_house',$type_officials))){
+
+									$us_government[$i]['type']=$official['position']['title'];
+									$us_government[$i]['name']=$official['personal']['full_name'];
+									$us_government[$i]['twitter']=$twitter;
+
+									if($position=="US Senator"){
+										$tweet=$sen_tweets;
+									}else{
+										$tweet=$rep_tweets;
+									}
+									$tweet = str_replace('|city|', $city, $tweet);
+									$tweet = str_replace('|state|', $state, $tweet);
+									$handle = '@' . $twitter;
+									$tweet = str_replace('|@|', $handle, $tweet);
+
+									$us_government[$i]['tweet']=$tweet;
+								}
+								else
+								{
+									$tweet=$default_tweet;
+									$tweet = str_replace('|city|', $city, $tweet);
+									$tweet = str_replace('|state|', $state, $tweet);
+									$handle = '@' . $twitter;
+									$tweet = str_replace('|@|', $handle, $tweet);
+
+									$us_government[$i]['type']=$official['position']['title'];
+									$us_government[$i]['name']=$official['personal']['full_name'];
+									$us_government[$i]['tweet']=$tweet;
+								}
+							}
+						}
+						else
+						{
+							$us_government[$i]['type']=$official['position']['title'];
+							$us_government[$i]['name']=$official['personal']['full_name'];
+							$us_government[$i]['tweet']="No Twitter account available";
+
+						}
+						$i++;
+					}
+				break;
+			case "state_government":
+				$i=0;
+				if(!is_array($data)){break;};
+				foreach($data as $official){
+					 if(isset($official['social']['Twitter'])){
+						$twitter=str_replace($strip, '', $official['social']['Twitter']);
+						if($twitter!=""){
+								if(($official['position']['title']=="State Senator"&&in_array('state_senate',$type_officials)) ||
+								($official['position']['title']=="State Delegate"&&in_array('state_house',$type_officials))||
+								($official['position']['title']=="State Representative")
+								|| ($official['position']['title']=="Governor"&&in_array('state_governor',$type_officials))){
+
+									$state_government[$i]['type']=$official['position']['title'];
+									$state_government[$i]['name']=$official['personal']['full_name'];
+									$state_government[$i]['twitter']=$twitter;
+									if($official['position']['title']=="State Senator"){
+										$tweet=$sen_st_tweets;
+									}else{
+										$tweet=$rep_st_tweets;
+									}
+									$tweet = str_replace('|city|', $city, $tweet);
+									$tweet = str_replace('|state|', $state, $tweet);
+									$handle = '@' . $twitter;
+									$tweet = str_replace('|@|', $handle, $tweet);
+
+									$state_government[$i]['tweet']=$tweet;
+								}
+								else
+								{
+									$state_government[$i]['type']=$official['position']['title'];
+									$state_government[$i]['name']=$official['personal']['full_name'];
+									$state_government[$i]['twitter']=$twitter;
+									$tweet=$default_tweet;
+									$tweet = str_replace('|city|', $city, $tweet);
+									$tweet = str_replace('|state|', $state, $tweet);
+									$handle = '@' . $twitter;
+									$tweet = str_replace('|@|', $handle, $tweet);
+
+									$state_government[$i]['tweet']=$tweet;
+								}
+							}
+						else
+						{
+							$state_government[$i]['type']=$official['position']['title'];
+							$state_government[$i]['name']=$official['personal']['full_name'];
+							$state_government[$i]['tweet']="No Twitter account available";
+						}
+					 }
+					$i++;
+				}
+			break;
+			case "local_government":
+			break;
+		}
+	}
+
+$tweets=array(
+	'us_government'=> $us_government,
+	'state_government'=>$state_government,
+    'city'=> $city,
+    'state'=> $state,
+    'zip'=> $zip,
+    'address'=> $address);
+
+return drupal_json_output($tweets);
+	}catch(Exception $ex){
+		watchdog("momentum_error","Search:<pre>".print_r($ex,true)."</pre>");
+		}
+}
+
+function _get_state_from_campaign_id(){
+	if ((isset($_GET['campaign_id'])) && (is_numeric($_GET['campaign_id']))) {
+		$nid = $_GET['campaign_id'];
+
+		$node = node_load($nid);
+
+		$selected_states = isset($node->field_bipac_recipient_states['und'])?$node->field_bipac_recipient_states['und']:$default;
+
+  	return $selected_states;
+  }
+}

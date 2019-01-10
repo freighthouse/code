@@ -1,0 +1,51 @@
+/*------------------------------------------------------------------
+[Press Node Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Description: Generic styles for Press (which is a view)
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+[class^="icon-press-"],
+[class*="icon-press-"] {
+  display: block;
+  width: auto;
+  height: 60px;
+  padding-left: 70px;
+  line-height: 14px;
+  vertical-align: middle;
+  margin-bottom: 20px;
+  background: url("../images/sprites/sprite-press.png") no-repeat;
+}
+
+.icon-press-webinar             { background-position: 0 -70px; }
+.icon-press-inc500              { background-position: 0 -142px; }
+.icon-press-callfire-politics   { background-position: 0 -214px; }
+.icon-press-about               { background-position: 0 -284px; }
+.icon-press-small-flyer         { background-position: 0 -356px; }
+.icon-press-info-card           { background-position: 0 -428px; }
+.icon-press-full-flyer          { background-position: 0 -500px; }
+
+.press-kit h3 {
+  padding-top: 8px;
+  margin-bottom: 5px;
+}
+
+.press-kit .icon-press-callfire-politics h3 {
+  padding-top: 3px;
+}
+
+.press-kit a {
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.view-press .views-field-field-press-date {
+    color: #666666;
+    font-size: 14px;
+}
+.view-press .views-row {
+    margin-bottom: 10px;
+}

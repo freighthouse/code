@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains momentum_candidates.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function momentum_candidates_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the momentum_candidates module.
+    case 'help.page.momentum_candidates':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Provides the ability to find officials based on location using the Momentum Candidates API.') . '</p>';
+      return $output;
+
+    default:
+  }
+}

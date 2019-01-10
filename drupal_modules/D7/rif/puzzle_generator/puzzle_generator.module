@@ -1,0 +1,1024 @@
+<?php
+	/**
+	 * Implements hook_permission()
+	 */
+	function puzzle_generator_permission() {
+		return array(
+			'administer puzzle generator metadata' => array(
+				'title' => t('Administer backend puzzle generator metadata'),
+				'description' => t('only give this permission to highest admin levels who want to see the raw metadata fields for puzzle sets.'),
+			)
+		);
+	}
+
+	/**
+	 * Implements hook_menu().
+	 */
+	function puzzle_generator_menu() {
+		// No New Menu Endpoints Yet
+	}
+
+	/**
+	 * Implements hook_block_info().
+	 *
+	 * This hook defines blocks to be recognized by the system
+	 */
+	function puzzle_generator_block_info() {
+		// Define the Puzzle Maker Callout
+		$blocks['puzzle_maker_my_puzzles_table'] = array(
+			'info' => t('Puzzle Sets'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_PER_USER,
+		);
+		return $blocks;
+	}
+
+	function puzzle_generator_menu_alter(&$items) {
+		$myVar = '';
+//		$items['node/add/puzzle-set']['theme callback'] = '_add_node_theme_callback';
+//		$items['node/%node/edit']['theme callback'] = '_edit_node_theme_callback';
+//		$items['node/%node/edit']['theme arguments'] = array(1);
+	}
+
+	function _add_node_theme_callback() {
+		return 'rif';
+	}
+
+	function _edit_node_theme_callback($node) {
+		$type = $node->type;
+		if($type == 'puzzle_set'){
+			return 'rif';
+		}
+	}
+
+	function puzzle_generator_custom_theme() {
+		$admin_theme = variable_get('admin_theme', '0');
+	}
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function puzzle_generator_block_view($delta = '') {
+		switch($delta) {
+			case 'puzzle_maker_my_puzzles_table' :
+				$block['subject'] = t('Puzzle Sets');
+				$block['content'] = _get_generated_puzzles_table();
+				break;
+		}
+
+		return $block;
+	}
+
+	/* Helper Functions
+	 * **************** */
+	function _get_generated_puzzles_table() {
+		$content_types = array('puzzle_set');
+		$rows = array();
+
+		$query = new EntityFieldQuery;
+		$result = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('status', 1)
+			->propertyCondition('type', $content_types, 'IN')
+			->propertyOrderBy('created', 'DESC')
+			->execute();
+
+		$headers = array('Node ID', 'Title');
+		if(!$result) {
+			$rows[] = array(
+				array(
+					'data'=>'You do not have any puzzle games to display.',
+					'colspan' => 4
+				),
+			);
+		} else {
+			foreach($result['node'] as $nid => $item) {
+				$emw_node = entity_metadata_wrapper('node', $nid);
+
+				//get node title linking to node
+				$linked_title = '<a href="'.$emw_node->url->value().'">'.$emw_node->label().'</a>';
+				$rows[] = array($nid, $linked_title);
+			}
+		}
+
+		$table = array(
+			'header' => $headers,
+			'rows' => $rows,
+			'sticky' => FALSE,
+			'attributes' => array('class' => array('table', 'table-responsive', 'table-bordered', 'table-styled')),
+		);
+
+		$table_output = theme('table', $table);
+
+		$output = '
+		<div class="container">
+			<h3>Puzzle Sets</h3>
+			<div class="panel panel-default">
+			' . $table_output . '
+			</div>
+		</div>
+		';
+		return $output;
+	}
+
+	function puzzle_generator_form_alter(&$form, &$form_state) {
+		//dsm($form);
+	}
+
+	function puzzle_generator_form_puzzle_set_node_form_alter(&$form, &$form_state) {
+		//return;
+		// dsm($form);
+		// dsm($form_state);
+
+		/* Get Form JSON Meta Data
+		 * *********************** */
+		$criss_cross_meta = _decode_criss_cross_meta($form_state);  			// Get Criss Cross Data
+
+		/* Update Base Form Vars
+		 * ****************** */
+		$form['#tree'] = TRUE;
+		$form['#validate'][] = 'puzzle_generator_puzzle_set_node_validate';
+		$form['#submit'][] = 'puzzle_generator_puzzle_set_node_submit';
+		$form['#attached']['css'] = array(
+			drupal_get_path('module', 'puzzle_generator') . '/puzzle_generator_admin.css',
+		);
+
+		/* Create Fieldsets
+		 * **************** */
+		$form['words_and_clues'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Words and Clues'),
+			'#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+			'#weight' => 50,
+			'#tree' => FALSE
+		);
+
+		$form['criss_cross_fields'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Criss Cross Generator'),
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
+			'#weight' => 101,
+			'#states' => array(
+				// Hide the fieldset when the generate word_search is not checked
+				'visible' => array(
+					':input[name="field_generate_criss_cross[und]"]' => array('checked' => TRUE),
+				),
+			)
+		);
+		$form['word_search_fields'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Word Search Generator'),
+			'#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+			'#weight' => 111,
+			'#states' => array(
+				// Hide the fieldset when the generate word_search is not checked
+				'visible' => array(
+					':input[name="field_generate_word_search[und]"]' => array('checked' => TRUE),
+				),
+			),
+		);
+		$form['memory_matching_fields'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('Memory Matching Generator'),
+			'#collapsible' => TRUE,
+			'#collapsed' => FALSE,
+			'#weight' => 120,
+			'#states' => array(
+				// Hide the fieldset when the generate memory_matching is not checked
+				'visible' => array(
+					':input[name="field_generate_memory_matching[und]"]' => array('checked' => TRUE),
+				),
+			),
+		);
+
+		/* Reorganize words and clues
+		 * ************************** */
+		$form['words_and_clues']['field_ps_words'] = $form['field_ps_words'];
+		unset($form['field_ps_words']);
+
+		$form['words_and_clues']['field_ps_clues'] = $form['field_ps_clues'];
+		unset($form['field_ps_clues']);
+
+		$form['word_search_fields']['field_ps_word_search_types'] = $form['field_ps_word_search_types'];
+		$form['word_search_fields']['field_ps_word_search_types']['#weight'] = 0;
+		$form['field_ps_word_search_types']['#access'] = false;
+
+		$form['memory_matching_fields']['field_ps_memory_matching_types'] = $form['field_ps_memory_matching_types'];
+		$form['memory_matching_fields']['field_ps_memory_matching_types']['#weight'] = 0;
+		$form['field_ps_memory_matching_types']['#access'] = false;
+
+
+		/* Reorganize Criss Cross
+		 * ********************** */
+		$form['criss_cross_fields']['title'] = array(
+			'#type' => 'textfield',
+			'#title' => 'Criss Cross Title',
+			'#weight' => 1,
+			'#default_value' => $criss_cross_meta->title,
+		);
+		$form['criss_cross_fields']['description'] = array(
+			'#type' => 'textarea',
+			'#title' => 'Criss Cross Description',
+			'#weight' => 2,
+			'#default_value' => $criss_cross_meta->description,
+		);
+
+		/* Reorganize Word Search
+		 * ********************** */
+		_get_word_search_form_array($form, array('Easy', 'Medium', 'Hard', 'Custom 1', 'Custom 2'));
+
+		// Override set default values to current pointer node values
+		$word_search_meta = _decode_word_search_meta($form_state);
+
+		foreach($word_search_meta as $key => $nid) {
+			if(!$nid) continue;
+			$temp_emw_node = entity_metadata_wrapper('node', $nid);
+			// Sanity Check that the node wasn't deleted manually by someone
+			if($temp_emw_node->getBundle() == null){
+				continue;
+			}
+			$form['word_search_fields'][$key]['title']['#default_value'] = $temp_emw_node->label();
+			$form['word_search_fields'][$key]['description']['#default_value'] = $temp_emw_node->body->value()['value'];
+			$form['word_search_fields'][$key]['width']['#default_value'] = $temp_emw_node->field_wordfind_width->value();
+			$form['word_search_fields'][$key]['height']['#default_value'] = $temp_emw_node->field_wordfind_height->value();
+			$form['word_search_fields'][$key]['orientations']['#default_value'] = $temp_emw_node->field_wordfind_orientations->value();
+		}
+
+		// Update Custom Options for Word Search forms
+		$form['word_search_fields']['word_search_easy']['width']['#options'] = array('6');
+		$form['word_search_fields']['word_search_easy']['width']['#default_value'] = 6;
+		$form['word_search_fields']['word_search_easy']['width']['#disabled'] = TRUE;
+		$form['word_search_fields']['word_search_easy']['height']['#options'] = array('6');
+		$form['word_search_fields']['word_search_easy']['height']['#default_value'] = 6;
+		$form['word_search_fields']['word_search_easy']['height']['#disabled'] = TRUE;
+		$form['word_search_fields']['word_search_easy']['orientations']['#disabled'] = TRUE;
+		// TODO: Set orientations for easy
+
+		$form['word_search_fields']['word_search_medium']['width']['#options'] = array('9');
+		$form['word_search_fields']['word_search_medium']['width']['#default_value'] = 9;
+		$form['word_search_fields']['word_search_medium']['width']['#disabled'] = TRUE;
+		$form['word_search_fields']['word_search_medium']['height']['#options'] = array('9');
+		$form['word_search_fields']['word_search_medium']['height']['#default_value'] = 9;
+		$form['word_search_fields']['word_search_medium']['height']['#disabled'] = TRUE;
+		$form['word_search_fields']['word_search_medium']['orientations']['#disabled'] = TRUE;
+		// TODO: Set orientations for medium
+
+		$form['word_search_fields']['word_search_hard']['width']['#options'] = array('12');
+		$form['word_search_fields']['word_search_hard']['width']['#default_value'] = 12;
+		$form['word_search_fields']['word_search_hard']['width']['#disabled'] = TRUE;
+		$form['word_search_fields']['word_search_hard']['height']['#options'] = array('12');
+		$form['word_search_fields']['word_search_hard']['height']['#default_value'] = 12;
+		$form['word_search_fields']['word_search_hard']['height']['#disabled'] = TRUE;
+		// TODO: Set orientations for hard
+
+		/* Reorganize Memory Matching
+		 * ********************** */
+		_get_memory_matching_form_array($form, array('Easy', 'Medium', 'Hard', 'Custom 1', 'Custom 2'));
+		// Set Default values
+		$form['memory_matching_fields']['memory_matching_easy']['field_choose_x_words_randomly']['#default_value'] = 3;
+		$form['memory_matching_fields']['memory_matching_medium']['field_choose_x_words_randomly']['#default_value'] = 6;
+		$form['memory_matching_fields']['memory_matching_hard']['field_choose_x_words_randomly']['#default_value'] = 10;
+
+		// Override set default values to current pointer node values
+		$memory_matching_meta = _decode_memory_matching_meta($form_state);
+
+		foreach($memory_matching_meta as $key => $nid) {
+			if(!$nid) continue;
+			$temp_emw_node = entity_metadata_wrapper('node', $nid);
+			// Sanity Check that the node wasn't deleted manually by someone
+			if($temp_emw_node->getBundle() == null){
+				continue;
+			}
+			$form['memory_matching_fields'][$key]['title']['#default_value'] = $temp_emw_node->label();
+			$form['memory_matching_fields'][$key]['description']['#default_value'] = $temp_emw_node->body->value()['value'];
+			$form['memory_matching_fields'][$key]['field_choose_x_words_randomly']['#default_value'] = $temp_emw_node->field_choose_x_words_randomly->value();
+			$form['memory_matching_fields'][$key]['field_alternate_case']['#default_value'] = $temp_emw_node->field_alternate_case->value();
+		}
+
+		/* Set up actions
+		 * ********************** */
+		// TODO: Change Save to Generate if node is being edited
+//		$form['actions']['generate'] = array(
+//			'#type' => 'submit',
+//			'#value' => t('Generate'),
+//			//'#submit' => array('_puzzle_generator_generate')
+//		);
+		$form['actions']['#weight'] = 190;
+
+		/* Reorganize Additional Settings
+		 * ****************************** */
+		$form['field_generate_criss_cross']['#weight'] = 100;
+		$form['field_generate_word_search']['#weight'] = 110;
+		$form['field_generate_memory_matching']['#weight'] = 120;
+		$form['additional_settings']['#weight'] = 200;
+
+		//Hide Meta Data
+		if(true || !user_access('administer puzzle generator metadata')){
+			$form['field_ps_criss_cross_meta']['#access'] = FALSE;
+			$form['field_ps_word_search_meta']['#access'] = FALSE;
+			$form['field_ps_memory_matching_meta']['#access'] = FALSE;
+		}
+	}
+
+	/* ****************
+	 * Puzzle Validator
+	 * **************** */
+	function puzzle_generator_puzzle_set_node_validate($form, &$form_state) {
+		$form_values = $form_state['values'];
+
+		// Set up validation vars
+		// **********************
+		$gen_criss_cross 	= $form_values['field_generate_criss_cross']['und'][0]['value'];
+		$gen_word_search 	= $form_values['field_generate_word_search']['und'][0]['value'];
+		$gen_word_matching 	= $form_values['field_generate_memory_matching']['und'][0]['value'];
+
+		$words = _parse_words($form_values);
+		$clues = _parse_clues($form_values);
+		//$clues = _parse_clues($form_values);
+
+		$words_size = count($words);
+		$clues_size = count($clues);
+
+		$criss_cross_title = $form_values['criss_cross_fields']['title'];
+		$criss_cross_description = $form_values['criss_cross_fields']['description'];
+
+		$list_of_ws_game_types = array();
+		foreach($form_values['word_search_fields']['field_ps_word_search_types'][LANGUAGE_NONE] as $key => $item) {
+			if($item['value'] != NULL){
+				$list_of_ws_game_types[] = $item['value'];
+			}
+		}
+
+		$list_of_mm_game_types = array();
+		foreach($form_values['memory_matching_fields']['field_ps_memory_matching_types'][LANGUAGE_NONE] as $key => $item) {
+			if($item['value'] != NULL){
+				$list_of_mm_game_types[] = $item['value'];
+			}
+		}
+
+		// Validation checks
+		// **********************
+
+		// Check that at least one of the available games is checked
+		if(!$gen_criss_cross && !$gen_word_search && !$gen_word_matching) {
+			form_set_error('generate_checks', "In order to generate puzzles at least one puzzle type must be checked");
+		}
+
+		// Criss Cross Checks
+		if($gen_criss_cross) {
+			// Check Crossword can generate
+			if($clues_size < 2) {
+				form_set_error('field_ps_clues', 'Please provide at least 2 clues when generating a Criss Cross.');
+			}
+
+			// Check Crossword has a word for each given clue
+			if($clues_size > $words_size) {
+				form_set_error('field_ps_words', 'Please provide more words to match your number of clues.');
+			}
+
+			// Make sure Title and description are set for Criss Cross
+			if(empty($criss_cross_title)){
+				form_set_error('criss_cross_fields][title', 'Please provide a title for your Criss Cross.');
+			}
+			if(empty($criss_cross_description)){
+				form_set_error('criss_cross_fields][description', 'Please provide a description for your Criss Cross.');
+			}
+		}
+
+		// Word Search Checks
+		if($gen_word_search) {
+			// Check Word Searches can generate
+			if($words_size < 1){
+				form_set_error('field_ps_words', 'Please add at least 1 word for you word search games.');
+			}
+
+			// Check if gen word search is checked that at least one word search is set to be generated
+			if(count($list_of_ws_game_types) <= 0) {
+				form_set_error('word_search_fields][field_ps_word_search_types', 'Please select at least one word search game type or un-select the Generate Word Search option');
+			}
+
+			// Check Word Search Types have title, description and orientations set
+			if(count($list_of_ws_game_types) > 0) {
+				foreach($list_of_ws_game_types as $key => $item){
+					if(empty($form_values['word_search_fields'][$item]['title'])){
+						form_set_error('word_search_fields]['.$item.'][title', 'Please provide a title for '.$item);
+					}
+					if(empty($form_values['word_search_fields'][$item]['description'])){
+						form_set_error('word_search_fields]['.$item.'][description', 'Please provide a description for '.$item);
+					}
+					if(!array_filter(array_values($form_values['word_search_fields'][$item]['orientations']), '_remove_zeros')){
+						form_set_error('word_search_fields]['.$item.'][orientations', 'Please provide at least one orientation for '. $item);
+					}
+				}
+			}
+
+		}
+
+		// Memory Matching checks
+		if($gen_word_matching) {
+			// Check Memory Matching can generate
+			if($words_size < 2){
+				form_set_error('field_ps_words', 'Please add at least 2 words for your memory matching games.');
+			}
+
+			// Check Memory Matching types have at least one option checked
+			if(count($list_of_mm_game_types) <= 0) {
+				form_set_error('memory_matching_fields][field_ps_memory_matching_types', 'Please select at least one memory matching game type or un-select the Generate Memory Matching option');
+			}
+
+			// Check that the title and description is set for any generated memory matching games
+			// Check that number of words to use is set and is smaller than or equal to amount of words provided
+			if(count($list_of_mm_game_types) > 0) {
+				foreach($list_of_mm_game_types as $key => $item){
+					if(empty($form_values['memory_matching_fields'][$item]['title'])){
+						form_set_error('memory_matching_fields]['.$item.'][title', 'Please provide a title for '.$item);
+					}
+					if(empty($form_values['memory_matching_fields'][$item]['description'])){
+						form_set_error('memory_matching_fields]['.$item.'][description', 'Please provide a description for '.$item);
+					}
+					if(empty($form_values['memory_matching_fields'][$item]['field_choose_x_words_randomly'])){
+						form_set_error('memory_matching_fields]['.$item.'][field_choose_x_words_randomly', 'Please provide the number of words to use for '.$item);
+					} else if($form_values['memory_matching_fields'][$item]['field_choose_x_words_randomly'] > $words_size){
+						form_set_error('memory_matching_fields]['.$item.'][field_choose_x_words_randomly', 'The number of words to use for '.$item.' is greater than the number of words provided.');
+					}
+				}
+			}
+		}
+
+		// Error out Validation for Debugging
+		// **********************************
+
+		//form_set_error('title', 'Debug Error');
+	}
+
+	/*
+	 * When this function is called it is assumed that all server side validation has already been performed.
+	 */
+	function puzzle_generator_puzzle_set_node_submit($form, &$form_state) {
+		$form_values = $form_state['values'];
+
+		drupal_set_message("Updating Puzzle Set:");
+		drupal_set_message(" ");
+
+		// The goal for this submission function is for each function call to generate a set of puzzles
+		if($form_state['values']['field_generate_criss_cross'][LANGUAGE_NONE][0]['value']){
+			_generate_criss_cross($form, $form_state);
+			drupal_set_message(" ");
+		}
+		if($form_state['values']['field_generate_word_search'][LANGUAGE_NONE][0]['value']) {
+			_generate_word_searches($form, $form_state);
+			drupal_set_message(" ");
+		}
+		if($form_state['values']['field_generate_memory_matching'][LANGUAGE_NONE][0]['value']) {
+			_generate_memory_matching($form, $form_state);
+			drupal_set_message(" ");
+		}
+	}
+
+	/* Game Type Form Building functions
+	 * **************************** */
+	function _get_word_search_form_array(&$form, $array_of_games) {
+		// Given an array of Game Sub types this returns form elements to be attached to a fieldset
+		foreach($array_of_games as $key => $game_name){
+			$game_machine_name = strtolower(str_replace(' ', '_', $game_name));
+			$form['word_search_fields']['word_search_'.$game_machine_name] = array(
+				'#type' => 'fieldset',
+				'#title' => t('Word Search '.$game_name),
+				'#collapsible' => TRUE,
+				'#collapsed' => TRUE,
+				'#weight' => $key+4,
+				'title' => array(
+					'#type' => 'textfield',
+					'#title' => $game_name . ' Word Search Title',
+					'#weight' => 1
+				),
+				'description' => array(
+					'#type' => 'textarea',
+					'#title' => $game_name . ' Word Search Description',
+					'#weight' => 2
+				),
+				'width' => array(
+					'#type' => 'select',
+					'#title' => t('Width'),
+					'#weight' => 3,
+					'#options' => array(
+						4 => 4,
+						5 => 5,
+						6 => 6,
+						7 => 7,
+						8 => 8,
+						9 => 9,
+						10 => 10,
+						11 => 11,
+						12 => 12,
+						13 => 13,
+						14 => 14,
+						15 => 15,
+						16 => 16,
+						17 => 17,
+						18 => 18,
+						19 => 19,
+						20 => 20
+					),
+					'#default_value' => 4
+				),
+				'height' => array(
+					'#type' => 'select',
+					'#title' => t('Height'),
+					'#weight' => 4,
+					'#options' => array(
+						4 => 4,
+						5 => 5,
+						6 => 6,
+						7 => 7,
+						8 => 8,
+						9 => 9,
+						10 => 10,
+						11 => 11,
+						12 => 12,
+						13 => 13,
+						14 => 14,
+						15 => 15,
+						16 => 16,
+						17 => 17,
+						18 => 18,
+						19 => 19,
+						20 => 20
+					),
+					'#default_value' => 4
+				),
+				'orientations' => array(
+					'#type' => 'checkboxes',
+					'#title' => 'Orientations',
+					'#weight' => 5,
+					'#description' => 'The various orientations the words can be placed - this determines the difficulty.',
+					'#default_value' => array('horizontal', 'vertical'),
+					'#options' => array(
+						'horizontal' => 'Horizontal',
+						'vertical' => 'Vertical',
+						'horizontalBack' => 'horizontalBack',
+						'verticalUp' => 'verticalUp',
+						'diagonal' => 'diagonal',
+						'diagonalUp' => 'diagonalUp',
+						'diagonalBack' => 'diagonalBack',
+						'diagonalUpBack' => 'diagonalUpBack'
+					),
+				),
+				'#states' => array(
+					// Hide the fieldset when the generate word_search is not checked
+					'visible' => array(
+						':input[name="word_search_fields[field_ps_word_search_types][und][word_search_'.$game_machine_name.']"]' => array('checked' => TRUE),
+					),
+				),
+			);
+		}
+	}
+
+	function _get_memory_matching_form_array(&$form, $array_of_games) {
+		// Given an array of Game Sub types this returns form elements to be attached to a fieldset
+		foreach($array_of_games as $key => $game_name){
+			$game_machine_name = strtolower(str_replace(' ', '_', $game_name));
+			$form['memory_matching_fields']['memory_matching_'.$game_machine_name] = array(
+				'#type' => 'fieldset',
+				'#title' => t('Memory Matching '.$game_name),
+				'#collapsible' => TRUE,
+				'#collapsed' => TRUE,
+				'#weight' => $key+4,
+				'title' => array(
+					'#type' => 'textfield',
+					'#title' => $game_name . ' Memory Matching Title',
+					'#weight' => 1
+				),
+				'description' => array(
+					'#type' => 'textarea',
+					'#title' => $game_name . ' Memory Matching Description',
+					'#weight' => 2
+				),
+				'field_choose_x_words_randomly' => array(
+					'#type' => 'textfield',
+					'#title' => $game_name . ' Number of Words to Use',
+					'#weight' => 3
+				),
+				'field_alternate_case' => array(
+					'#type' => 'checkbox',
+					'#title' => $game_name . ' Alternate Case',
+					'#weight' => 4
+				),
+				'#states' => array(
+					// Hide the fieldset when the generate word_search is not checked
+					'visible' => array(
+						':input[name="memory_matching_fields[field_ps_memory_matching_types][und][memory_matching_'.$game_machine_name.']"]' => array('checked' => TRUE),
+					),
+				),
+			);
+		}
+	}
+
+	/* Game Generator Functions
+	 * **************************** */
+
+	/*
+	 * Generates the correct number of criss cross functions and return an array of node ids of the created criss cross games
+	 */
+	function _generate_criss_cross($form, &$form_state) {
+		// Only 1 criss cross can be created so this is a little easier than the other ones.
+
+		$oldCrissCross = _decode_criss_cross_meta($form_state);
+		$form_values = $form_state['values'];
+
+		$emw_node = null;
+
+		if($oldCrissCross->nid){
+			// Setup the emw for updating
+			$emw_node = entity_metadata_wrapper('node', $oldCrissCross->nid);
+			drupal_set_message("Updated Criss Cross Puzzle: ". $emw_node->label());
+			if($emw_node->getBundle() == null) {
+				dsm("Error loading Node so we will have to make a new one.");
+				$emw_node = null;
+			}
+		}
+
+		if($emw_node == null) {
+			drupal_set_message("Created Criss Cross: ".$form_values['criss_cross_fields']['title']);
+			global $user;
+			// entity_create replaces the procedural steps we might do otherwise
+			// creating a new object $node and setting its 'type' and uid property
+			$values = array(
+				'type' => 'crossword_puzzle',
+				'uid' => $user->uid,
+				'status' => 1,
+				'comment' => 0,
+				'promote' => 0,
+			);
+			$entity = entity_create('node', $values);
+
+			// The entity is now created, but we have not yet simplified use of it.
+			// Now create an entity_metadata_wrapper around the new node entity
+			// to make getting and setting values easier
+			$emw_node = entity_metadata_wrapper('node', $entity);
+		}
+
+		// Set up the rest of the criss cross emw
+		$emw_node->title->set($form_values['criss_cross_fields']['title']);
+		$emw_node->body = array(
+			'value' => $form_values['criss_cross_fields']['description'],
+			'format' => 'filtered_html',
+		);
+		$emw_node->field_disable_word_bank->set($form_values['field_ps_disable_word_bank'][LANGUAGE_NONE][0]['value']);
+		$emw_node->field_definitions->set(_get_criss_cross_definitions($form_values));
+		// This saves the generated criss cross node
+		$emw_node->save();
+
+
+		// Convert Criss Cross Data to Json to put in meta data json field
+		$criss_cross_object = new stdClass();
+		$criss_cross_object->id = 0;
+		$criss_cross_object->nid = $emw_node->getIdentifier();
+		$criss_cross_object->title = $form_values['criss_cross_fields']['title'];
+		$criss_cross_object->description = $form_values['criss_cross_fields']['description'];
+
+		// Set the criss cross meta data for ease of use when loading
+		$criss_cross_json = json_encode($criss_cross_object);
+		form_set_value($form['field_ps_criss_cross_meta'], array(LANGUAGE_NONE => array(0 => array('value' => $criss_cross_json))), $form_state);
+
+		//dsm(_wrapper_debug($emw_node));
+	}
+
+	function _generate_word_searches($form, &$form_state) {
+		// Up to 5 word searches can be created (3 of easy, med, hard) and (2 custom)
+		$form_values = $form_state['values'];
+
+		$array_of_emw_nodes = _decode_word_search_meta($form_state);
+
+		$word_search_object = new stdClass();
+		global $user;
+
+		$updatedNodes = [];
+		$generatedNodes = [];
+		$status = null;
+
+		$list_of_games_types = array();
+		foreach($form_values['word_search_fields']['field_ps_word_search_types'][LANGUAGE_NONE] as $key => $item) {
+			$list_of_games_types[] = $item['value'];
+		}
+
+		foreach($array_of_emw_nodes as $key => $nid){
+			$create_game_of_this_type = (in_array($key, $list_of_games_types));
+			$node_load_failed = false;
+
+			// If Create game of this type == false
+			//      then unpublish node if nid = value
+			//      do nothing if nid = false
+
+			// If create game of this type == true
+			//      Update node if nid = value
+			//      Create node if nid = false or updating failed for some reason.
+
+			if($create_game_of_this_type) {
+				// Load previous node to update
+				if($nid){
+					$temp_emw_node = entity_metadata_wrapper('node', $nid);
+					$node_load_failed = ($temp_emw_node->getBundle() == null);
+					$status = 'Updated Word Search: ';
+				}
+				// Create new node
+				if(!$nid || $node_load_failed) {
+					// Setup node to create
+					$values = array(
+						'type' => 'wordfind', 'uid' => $user->uid, 'status' => 1, 'comment' => 0, 'promote' => 0,
+					);
+					$entity = entity_create('node', $values);
+					// The entity is now created
+					$temp_emw_node = entity_metadata_wrapper('node', $entity);
+					$status = 'Created Word Search: ';
+				}
+
+				// The proper node has been either loaded or created so let's update the emw_values
+				$temp_emw_node->title = $form_values['word_search_fields'][$key]['title'];
+				$temp_emw_node->body = array(
+					'value' => $form_values['word_search_fields'][$key]['description'],
+					'format' => 'filtered_html',
+				);
+				$temp_emw_node->field_wordfind_width = $form_values['word_search_fields'][$key]['width'];
+				$temp_emw_node->field_wordfind_height = $form_values['word_search_fields'][$key]['height'];
+				$temp_emw_node->field_wordfind_orientations = array_filter(array_values($form_values['word_search_fields'][$key]['orientations']), '_remove_zeros');
+				$temp_emw_node->field_words_wordfind->set(implode('
+',_parse_words($form_values)));
+				$temp_emw_node->status->set(1);
+
+				// We should now have completely updated the values so let's save the node.
+				$temp_emw_node->save();
+				$status .= $temp_emw_node->label().' ('.$temp_emw_node->getIdentifier().').';
+				// Update the array of nodes for saving to meta data later
+				$array_of_emw_nodes[$key] = $temp_emw_node->getIdentifier();
+				$word_search_object->$key = new stdClass();
+				$word_search_object->$key->nid = $temp_emw_node->getIdentifier();
+			} else { // If we are not to create a game of this type.
+				if($nid) {
+					$temp_emw_node = entity_metadata_wrapper('node', $nid);
+					$node_load_failed = ($temp_emw_node->getBundle() == null);
+					if($node_load_failed){
+						$status = 'A node was deleted manually that was created by the puzzle generator.';
+					} else {
+						$temp_emw_node->status->set(0);//$temp_emw_node->status->set(($create_game_of_this_type ? 1 : 0));
+						$temp_emw_node->save();
+						$status = 'Unpublished Word Search: '.$temp_emw_node->label().' ('.$nid.').';
+						$word_search_object->$key = new stdClass();
+						$word_search_object->$key->nid = $temp_emw_node->getIdentifier();
+					}
+				}
+				if(!$nid || $node_load_failed) {
+					// Do Nothing
+					$status = 'The game type ['.$key.'] was not created for Word Search';
+				}
+			}
+			drupal_set_message($status);
+		}
+
+		// Update the Word Search meta data field.
+		$word_search_json = json_encode($word_search_object);
+		form_set_value($form['field_ps_word_search_meta'], array(LANGUAGE_NONE => array(0 => array('value' => $word_search_json))), $form_state);
+
+		// Sneakily Bypass the Tree attribute
+		form_set_value($form['field_ps_word_search_types'], $form_values['word_search_fields']['field_ps_word_search_types'], $form_state);
+
+		//dsm($form_state);
+	}
+
+	function _generate_memory_matching($form, &$form_state) {
+		// Up to 5 Memory Matching Games can be created (3 of easy, med, hard) and (2 custom)
+		$form_values = $form_state['values'];
+
+		$array_of_emw_nodes = _decode_memory_matching_meta($form_state);
+
+		$memory_matching_object = new stdClass();
+		global $user;
+
+		$updatedNodes = [];
+		$generatedNodes = [];
+		$status = null;
+
+		$list_of_games_types = array();
+		foreach($form_values['memory_matching_fields']['field_ps_memory_matching_types'][LANGUAGE_NONE] as $key => $item) {
+			$list_of_games_types[] = $item['value'];
+		}
+
+		foreach($array_of_emw_nodes as $key => $nid){
+			$create_game_of_this_type = (in_array($key, $list_of_games_types));
+			$node_load_failed = false;
+
+			// If Create game of this type == false
+			//      then unpublish node if nid = value
+			//      do nothing if nid = false
+
+			// If create game of this type == true
+			//      Update node if nid = value
+			//      Create node if nid = false or updating failed for some reason.
+
+			if($create_game_of_this_type) {
+				// Load previous node to update
+				if($nid){
+					$temp_emw_node = entity_metadata_wrapper('node', $nid);
+					$node_load_failed = ($temp_emw_node->getBundle() == null);
+					$status = 'Updated Memory Match: ';
+				}
+				// Create new node
+				if(!$nid || $node_load_failed) {
+					// Setup node to create
+					$values = array(
+						'type' => 'word_matching', 'uid' => $user->uid, 'status' => 1, 'comment' => 0, 'promote' => 0,
+					);
+					$entity = entity_create('node', $values);
+					// The entity is now created
+					$temp_emw_node = entity_metadata_wrapper('node', $entity);
+					$status = 'Created Memory Match: ';
+				}
+
+				// The proper node has been either loaded or created so let's update the emw_values
+				$temp_emw_node->title = $form_values['memory_matching_fields'][$key]['title'];
+				$temp_emw_node->body = array(
+					'value' => $form_values['memory_matching_fields'][$key]['description'],
+					'format' => 'filtered_html',
+				);
+				$temp_emw_node->field_choose_x_words_randomly = $form_values['memory_matching_fields'][$key]['field_choose_x_words_randomly'];
+				$temp_emw_node->field_alternate_case = $form_values['memory_matching_fields'][$key]['field_alternate_case'];
+				$temp_emw_node->field_words->set(implode('&#10;',_parse_words($form_values)));
+				$temp_emw_node->status->set(1);
+
+				// We should now have completely updated the values so let's save the node.
+				$temp_emw_node->save();
+				$status .= $temp_emw_node->label().' ('.$temp_emw_node->getIdentifier().').';
+				// Update the array of nodes for saving to meta data later
+				$array_of_emw_nodes[$key] = $temp_emw_node->getIdentifier();
+				$memory_matching_object->$key = new stdClass();
+				$memory_matching_object->$key->nid = $temp_emw_node->getIdentifier();
+			} else { // If we are not to create a game of this type.
+				if($nid) {
+					$temp_emw_node = entity_metadata_wrapper('node', $nid);
+					$node_load_failed = ($temp_emw_node->getBundle() == null);
+					if($node_load_failed){
+						$status = 'A node was deleted manually that was created by the puzzle generator.';
+					} else {
+						$temp_emw_node->status->set(0);//$temp_emw_node->status->set(($create_game_of_this_type ? 1 : 0));
+						$temp_emw_node->save();
+						$status = 'Unpublished Word Search: '.$temp_emw_node->label().' ('.$nid.').';
+						$memory_matching_object->$key = new stdClass();
+						$memory_matching_object->$key->nid = $temp_emw_node->getIdentifier();
+					}
+				}
+				if(!$nid || $node_load_failed) {
+					// Do Nothing
+					$status = 'The game type ['.$key.'] was not created for Memory Match';
+				}
+			}
+			drupal_set_message($status);
+		}
+
+		// Update the Word Search meta data field.
+		$memory_matching_json = json_encode($memory_matching_object);
+		form_set_value($form['field_ps_memory_matching_meta'], array(LANGUAGE_NONE => array(0 => array('value' => $memory_matching_json))), $form_state);
+
+		// Sneakily Bypass the Tree attribute
+		form_set_value($form['field_ps_memory_matching_types'], $form_values['memory_matching_fields']['field_ps_memory_matching_types'], $form_state);
+
+		//dsm($form_state);
+	}
+
+	/* Decoding Meta Data Functions
+	 * **************************** */
+	function _decode_criss_cross_meta($form_state) {
+		$field = field_get_items('node', $form_state['node'], 'field_ps_criss_cross_meta');
+		$toReturn = json_decode($field[0]['value']);
+		// TODO: Maybe: We can technically grab the title and description based on the node ID instead of storing it in the metadata filed... Not sure if it is worth moving it.
+		// Technically it will be cleaner code but it would be a little slower as well.
+		if(!isset($toReturn->title)){
+			$toReturn->title = '';
+		}
+		if(!isset($toReturn->description)){
+			$toReturn->description = '';
+		}
+		if(!isset($toReturn->nid)){
+			$toReturn->nid = null;
+		}
+		return $toReturn;
+	}
+
+	function _decode_word_search_meta($form_state) {
+		$toReturn = array(
+			'word_search_easy' => false,
+			'word_search_medium' => false,
+			'word_search_hard' => false,
+			'word_search_custom_1' => false,
+			'word_search_custom_2' => false
+		);
+
+		$field = field_get_items('node', $form_state['node'], 'field_ps_word_search_meta');
+		if($field && $field[0]['value'] != '{}') {
+			$toReturn = _decode_word_search_meta_from_json($field[0]['value']);
+		}
+		return $toReturn;
+	}
+	function _decode_word_search_meta_from_json($json_string) {
+		$node_objects = json_decode($json_string);
+		$toReturn = array(
+			'word_search_easy' => false,
+			'word_search_medium' => false,
+			'word_search_hard' => false,
+			'word_search_custom_1' => false,
+			'word_search_custom_2' => false
+		);
+		foreach($node_objects as $key => $node_object) {
+			$toReturn[$key] = $node_object->nid;
+		}
+		return $toReturn;
+	}
+
+	function _decode_memory_matching_meta($form_state) {
+		$toReturn = array(
+			'memory_matching_easy' => false,
+			'memory_matching_medium' => false,
+			'memory_matching_hard' => false,
+			'memory_matching_custom_1' => false,
+			'memory_matching_custom_2' => false
+		);
+
+		$field = field_get_items('node', $form_state['node'], 'field_ps_memory_matching_meta');
+		if($field && $field[0]['value'] != '{}') {
+			$toReturn = _decode_memory_matching_meta_from_json($field[0]['value']);
+		}
+		return $toReturn;
+	}
+	function _decode_memory_matching_meta_from_json($json_string) {
+		$node_objects = json_decode($json_string);
+		$toReturn = array(
+			'memory_matching_easy' => false,
+			'memory_matching_medium' => false,
+			'memory_matching_hard' => false,
+			'memory_matching_custom_1' => false,
+			'memory_matching_custom_2' => false
+		);
+		foreach($node_objects as $key => $node_object) {
+			$toReturn[$key] = $node_object->nid;
+		}
+		return $toReturn;
+	}
+
+	/*
+	 * Taking Form Values this function outputs a formatted string of [clues:words]
+	 */
+	function _get_criss_cross_definitions($form_values) {
+//		dsm(_convert_unlimited_form_value_to_array($form_values['field_ps_words']));
+//		dsm(_convert_unlimited_form_value_to_array($form_values['field_ps_clues']));
+		$debug_value = _connect_arrays(_parse_clues($form_values), _parse_words($form_values));
+		return $debug_value;
+	}
+
+	function _connect_arrays($array1, $array2){
+		$toReturn = '';
+
+		for($i = 0; $i < min(count($array1), count($array2)); $i++) {
+			$toReturn .= $array1[$i]. ':'.$array2[$i].'
+';
+		}
+
+		return $toReturn;
+	}
+
+	/* General Helper functions
+	 * ************************ */
+	function _convert_unlimited_form_value_to_array($form_value){
+		$toReturn = array();
+
+		foreach($form_value['und'] as $key => $value){
+			if(!is_numeric($key)){
+				continue;
+			}
+			if(!empty($value['value'])) {
+				$toReturn[] = $value['value'];
+			}
+		}
+
+		return $toReturn;
+	}
+	function _wrapper_debug($w) {
+		$values = array();
+		foreach ($w->getPropertyInfo() as $key => $val) {
+			$values[$key] = $w->$key->value();
+		}
+		return $values;
+	}
+	function _remove_zeros($item) {
+		return ($item !== 0);
+	}
+	function _parse_words($form_values) {
+		$word_array = explode("\n", $form_values['field_ps_words']['und'][0]['value']);
+		return $word_array;
+	}
+	function _parse_clues($form_values) {
+		$clue_array = explode("\n", $form_values['field_ps_clues']['und'][0]['value']);
+		return $clue_array;
+	}

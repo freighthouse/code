@@ -1,0 +1,59 @@
+.pac-annual-report {
+  .content {
+    padding-bottom: 1em;
+  }
+}
+
+.annual-report {
+  a:hover,
+  a:focus {
+    text-decoration: none;
+    .annual-report-link {
+      @include transition();
+      color: $c-medium-grey;
+      text-decoration: underline;
+    }
+  }
+}
+
+.annual-report-title {
+  @include fontsize(24);
+  @extend %helvetica;
+  color: $c-off-black;
+}
+
+.annual-report-content {
+  @extend %clearfix;
+  @include fontsize(14);
+  border-bottom: 1px solid $c-light-grey;
+}
+
+.annual-report-image {
+  float: left;
+  width: 35%;
+}
+
+.annual-report-description {
+  float: left;
+  padding-top: 1em;
+  width: 65%;
+  color: $c-dark-grey;
+}
+
+.annual-report-link {
+  @include fontsize(14);
+  @extend %helvetica;
+  float: right;
+  padding-top: 1em;
+  color: $c-blue;
+  text-transform: uppercase;
+  &:after {
+    @extend %chevron-right;
+    @include fontsize(19);
+    @extend %chevron-right;
+    position: relative;
+    top: 4px;
+    margin-left: 1em;
+    display: inline-block;
+  }
+}

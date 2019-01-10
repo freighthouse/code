@@ -1,0 +1,85 @@
+.bean-homepage-hero-2017{
+  @include stagecenter();
+  @include breakpoint($bp-small){
+    display: block;
+  }
+  .hero-container {
+    display: block;
+    @include breakpoint($bp-small) {
+      min-width: 100%;
+      display: flex;
+    }
+  }
+  .embedded-video{
+    margin: 0;
+  }
+
+  .content{
+    background: $new-light-blue;
+    color: $new-dark-blue;
+    @include fontsize(18);
+
+    @include breakpoint($bp-small){
+      display: flex;
+      width: 30%;
+
+      .node-type-bipac-campaign &{
+        width: 50%;
+      }
+    }
+
+    .inner-content{
+      align-self: center;
+      padding: 20px 40px;
+
+      .node-type-bipac-campaign &{
+        padding: 40px;
+      }
+    }
+
+    h2, h1 {
+      @extend %sans-serif;
+      color: $new-dark-blue;
+      margin: 0 0 10px;
+      font-size: 2rem;
+      font-weight: 300;
+    }
+
+    .field-name-field-link{
+      margin: 15px 0 0;
+
+      a{
+        @extend %newbluebutton;
+        display: inline-block;
+      }
+    }
+  }
+
+
+  .video,
+  .homepage-hero-slider{
+    display: block;
+    @include breakpoint($bp-small){
+      display: flex;
+      width: 70%;
+
+      .node-type-bipac-campaign &{
+        width: 50%;
+      }
+
+      .field-name-field-hero-image img {
+        display: block;
+      }
+    }
+  }
+  .homepage-hero-description {
+    display: block;
+    padding: 2em 5em;
+    border: 1px solid #cccccc;
+    color: #666666;
+    background-color: #ffffff;
+    @include breakpoint($bp-small) {
+      //margin: 3em 5em;
+    }
+  }
+}

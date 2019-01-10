@@ -1,0 +1,6 @@
+name: Momentum SmartyStreets
+type: module
+description: Provides Momentum integration with the SmartyStreets API.
+package: Momentum
+configure: smartystreets.admin_settings_form
+core: 8.x

@@ -1,0 +1,5 @@
+name = Find Representatives
+description = Utilizes the BIPAC JSON APIs to Find Representatives
+core = 7.x
+package = BIPAC
+dependencies[] = bipac_campaigns

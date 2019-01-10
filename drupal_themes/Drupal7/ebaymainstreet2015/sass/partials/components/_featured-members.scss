@@ -1,0 +1,230 @@
+.front-featured-member{
+  @include breakpoint($bp-small){
+    display: flex;
+    flex-flow: column;
+  }
+  .content{
+    padding: 0;
+  }
+
+  .views-field-field-member-photo{
+    img{
+      display: block;
+      width: 100%;
+    }
+  }
+
+  .all-fields-wrapper{
+    background-size: cover;
+    background-position: center center;
+    width: 100%;
+
+    .text-fields{
+      background: $new-light-blue;
+
+      .content{
+        padding: 15px;
+      }
+    }
+  }
+
+  .views-field-nothing{
+    margin: 15px 0 0;
+  }
+}
+
+.page-featured-members .region-content .block-system > .content {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.views-row .featured-member-listing-wrapper {
+  @extend %clearfix;
+  background-color: $c-white;
+  border: 1px solid $c-light-grey;
+  padding: 2em;
+  text-align: center;
+  margin-bottom: 1.5em;
+  min-height: 550px;
+  p {
+    margin: 0;
+  }
+}
+
+.featured-members-page .views-row-odd {
+  @extend %half-page-feature;
+  @extend %half-page-margin-right;
+  @include breakpoint($bp-small) {
+    clear: left;
+  }
+}
+
+.featured-members-page .views-row-even {
+  @extend %half-page-feature;
+  @extend %half-page-margin-left;
+  @include breakpoint($bp-small) {
+    clear: right;
+  }
+}
+
+.member-wrapper,
+.featured-member-wrapper {
+  margin-bottom: 1.5em;
+}
+
+.member-wrapper {
+  @extend %clearfix;
+  padding: 1em;
+}
+
+.featured-member-link {
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}
+
+.member-photo img,
+.featured-member-photo img {
+  border-radius: 50%;
+  margin: 1em 0 1.5em 0;
+}
+
+.featured-member-title,
+.views-field-title {
+  @include fontsize(32);
+  @extend %univers;
+  @extend %bold;
+  color: $new-dark-blue;
+}
+
+.member-business,
+.member-info .member-business h2,
+.featured-member-business,
+.views-field-field-member-business-name {
+  @include fontsize(24);
+  @extend %univers;
+  @extend %light;
+  color: $new-dark-blue;
+  text-transform: uppercase;
+  margin: 0.3em 0 0.5em 0;
+}
+
+.featured-member-business-location {
+  @include fontsize(18);
+}
+
+.featured-member-location,
+.views-field-field-member-business-location {
+  @include fontsize(18);
+  @extend %univers;
+  color: $new-dark-blue;
+}
+
+.featured-member-view-more a {
+  @extend %newbluebutton;
+}
+
+.member-highlights {
+  p {
+    margin: 0;
+  }
+  text-align: left;
+}
+
+.node-member .member-wrapper {
+  .member-info {
+    @include breakpoint($bp-small) {
+      float: left;
+      width: 40%;
+      margin: 0 5%;
+    }
+    .member-name h2 {
+      @include fontsize(32);
+      @extend %univers;
+      @extend %bold;
+      margin-bottom: 0;
+      color: $c-blue;
+    }
+    .member-business {
+      border-bottom: 1px solid $c-light-grey;
+      padding-bottom: 1.25em;
+      h2 {
+        margin-top: 0;
+      }
+    }
+  }
+  .member-description {
+    @include breakpoint($bp-small) {
+      float: left;
+      width: 50%;
+    }
+    .field-name-body {
+      text-align: left;
+    }
+    blockquote {
+      text-align: left;
+    }
+  }
+}
+
+.member-highlights {
+  margin-top: 2em;
+  text-align: center;
+  word-break: break-word;
+  .member-icon {
+    @extend %clearfix;
+    margin-bottom: 2em;
+    @include breakpoint($bp-small) {
+      float: left;
+      width: 40%;
+      max-width: 155px;
+      padding: 0 5%;
+    }
+    &:before {
+      content: '';
+      display: block;
+      clear: both;
+      margin: 0 auto;
+      width: 36px;
+      height: 36px;
+      background: url('../images/member-sprites.png') 0 0 no-repeat;
+    }
+    &.icon-odd {
+      clear: left;
+    }
+    &.icon-even {
+      clear: right;
+    }
+  }
+
+  $icon-position: -36px;
+  .member-comm-involvement:before {
+    background-position: 0 0; // hands
+  }
+  .member-brick-mortar:before {
+    background-position: 0 (1 * $icon-position); // building
+  }
+  .member-employees:before {
+    background-position: 0 (2 * $icon-position); // people
+  }
+  .member-exports:before {
+    background-position: 0 (3 * $icon-position); // globe
+  }
+  .member-twitter:before {
+    background-position: 0 (4 * $icon-position); // twitter
+  }
+  .member-accomplishments:before {
+    background-position: 0 (5 * $icon-position); // star
+  }
+  .member-web-presence:before {
+    background-position: 0 (6 * $icon-position); // pointer
+  }
+  .member-growth:before {
+    background-position: 0 (7 * $icon-position); // up arrow
+  }
+  .member-facebook:before {
+    background-position: 0 (8 * $icon-position); // facebook
+  }
+}

@@ -1,0 +1,7 @@
+name: 'Momentum Social'
+type: module
+description: 'Enables "Tweet your officials" and social sharing for Momentum campaigns.'
+core: 8.x
+package: 'Momentum'
+dependencies:
+  - momentum

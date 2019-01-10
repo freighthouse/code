@@ -1,0 +1,3 @@
+name = RIF Advanced Search
+description = Extends the solr search functionality to provide custom search mechanisims for RIF.
+core = 7.x

@@ -1,0 +1,38 @@
+
+.resource-cover {
+
+  img {
+//    display: block;
+//    height: auto;
+//    margin: 0 auto;
+//    .border-radius(4px);
+
+    @media (max-width: 991px) {
+//      max-width: 75%;
+//      margin: 0 auto 30px;
+    }
+    @media (max-width: 767px) {
+
+//      max-width: 90%;
+    }
+  }
+  &.book-cover {
+      margin-top: -($spacing-xlarge + 150px);
+      
+      img {
+//          max-height: 450px;
+//          width: auto;
+//          max-width: 100%;
+            background-color: $white;
+      }
+  }
+  &.support-cover {
+//    border: 1px solid #a4d8fb;
+//    background-color: #edf7fe;
+
+    img {
+//      margin: 30px auto;
+//      max-width: 75%;
+    }
+  }
+}

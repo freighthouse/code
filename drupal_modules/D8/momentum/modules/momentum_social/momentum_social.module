@@ -1,0 +1,35 @@
+<?php
+
+/**
+ * @file
+ * Contains momentum_social.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function momentum_social_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the momentum_social module.
+    case 'help.page.momentum_social':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Enables &#039;Tweet your officials&#039; and social sharing for Momentum campaigns.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function momentum_social_theme() {
+  return [
+    'momentum_social' => [
+      'render element' => 'children',
+    ],
+  ];
+}

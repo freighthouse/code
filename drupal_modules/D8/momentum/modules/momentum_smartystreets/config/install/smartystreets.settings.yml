@@ -1,0 +1,7 @@
+hostname_us_street_address: 'api.smartystreets.com'
+hostname_us_zip_code: 'us-zipcode.api.smartystreets.com'
+hostname_us_autocomplete: 'autocomplete-api.smartystreets.com'
+auth_id: ''
+auth_token: ''
+api_classname: 'Drupal\smartystreets\SmartyStreetsAddressLookup'
+test_mode: FALSE

@@ -1,0 +1,249 @@
+<?php
+
+/**
+ * @file
+ *   This module provides a BIPAC Vote Block
+ */
+
+/**
+ *  hook_theme
+ */
+function bipac_vote_theme() {
+  $items = array();
+  $items['bipac_vote_response'] = array(
+    'variables' => array('data' => NULL, 'dates' => NULL),
+    'template' => 'bipac_vote_response',
+  );
+  return $items;
+}
+
+/**
+ * hook_block_info
+ */
+function bipac_vote_block_info() {
+  $blocks['bipac_vote_block'] = array(
+    'info' => t('BIPAC Vote Submission Form'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  $blocks['bipac_vote_response'] = array(
+    'info' => t('BIPAC Vote Response Data'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/*
+ * hook_block_view
+ */
+function bipac_vote_block_view($delta = NULL) {
+  switch ($delta) {
+    case 'bipac_vote_response':
+      $data = bipac_session('vote');
+      $dates = bipac_session('vote_dates');
+      $block['subject'] = t('BIPAC Vote Response');
+      if ((!empty($data)) || (!empty($dates))) {
+        $block['content'] = theme('bipac_vote_response', array('data' => $data, 'dates' => $dates));
+      }
+      else {
+        $block['content'] = NULL;
+      }
+      break;
+    case 'bipac_vote_block':
+      $block['subject'] = t('Your Voting Information');
+      $block['content'] = _bipac_vote_block();
+  }
+  return $block;
+}
+
+function _bipac_vote_block() {
+  $zip = bipac_session('zip');
+  return drupal_get_form('_bipac_vote_form', $zip);
+}
+
+function _bipac_vote_form($form, &$form_state, $zip) {
+  $data = bipac_session('vote');
+  $dates = bipac_session('vote_dates');
+  $form_class = 'vote-no-data';
+  if ((!empty($data)) || (!empty($dates))) {
+    $form_class = 'vote-data';
+  }
+
+  $form['#attributes']['class'][] = $form_class;
+
+  $form['zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enter your zip code to start'),
+    '#required' => TRUE,
+    '#default_value' => $zip,
+  );
+  /** Spam catcher field that will be hidden from view using CSS **/
+  $form['notes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Notes'),
+    '#required' => FALSE,
+    '#attributes' => array('class' => array('sc-notes-field')),
+    '#description' => t('Anything else you would like to tell us'),
+    '#prefix' => '<div class = "sc-notes-field">',
+    '#suffix' => '</div>',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Go!'),
+    '#attributes' => array('class' => array('btn', 'sign')),
+  );
+  return $form;
+}
+
+function _bipac_vote_form_validate($form, &$form_state) {
+  $zip = trim(str_replace('-', '', $form_state['values']['zip']));
+  if ((is_numeric($zip)) && (strlen($zip) > 4)) {
+    // All is good
+  }
+  else {
+    form_set_error('zip', t('There might be a problem with your zip code.  Please check and retry.'));
+  }
+
+}
+
+function _bipac_vote_form_submit($form, &$form_state) {
+  // If content in the notes field, discard submission.  This field is only used to catch spambots.
+  if(!empty($form_state['values']['notes'])) {
+    drupal_set_message('Thank you for your submission.');
+    return;
+  }
+
+  $zip = $form_state['values']['zip'];
+
+  bipac_session('zip', $zip);	// This loads the 'zip' key with $zip.  For posterity.
+
+  $object = bipac_object();
+
+  $json = _bipac_vote($zip, $object);
+  $dates = _bipac_dates($zip, $object);
+  /**
+   * If these API calls return false, we clear
+   * any existing session data (because this is a new submission).
+   * If true, we load the session with the new data and send the
+   * user along.
+   */
+  if ((!empty($json)) && (!empty($dates))) {
+    bipac_session('vote', $json);
+    bipac_session('vote_dates', $dates);
+    if ($page = variable_get('bipac_vote_results', NULL)) {
+      drupal_goto($page);
+    }
+    // Else, we assume we want to keep the user on the same page
+  }
+  else {
+    bipac_session('vote', NULL, TRUE);		// This clears the 'vote' key
+    bipac_session('vote_dates', NULL, TRUE);
+    $error = variable_get('bipac_vote_error', t('No results for the entered zip'));
+    drupal_set_message($error, 'warning');
+  }
+
+}
+
+function _bipac_dates($zip, &$object) {
+  if ($success = $object->FromZIPListElections($zip)) {
+    $data = $object->FromZIPListElections_data;
+  }
+  else {
+    // Done broke
+  }
+
+  $output = array();
+  if (!empty($data)) {
+    // Now we deal with API weirdness
+    foreach ($data as $chunk) {
+      if ((!empty($chunk['ElectionName'])) && ($chunk['ElectionName'] == 'General')) {
+        $output = $chunk;
+      }
+      // Here we need to check for the primary date chunk and add that to our output array
+      if ((!empty($chunk['ElectionName'])) && ($chunk['ElectionName'] == 'Primary') && (!empty($chunk['PrimaryDate']))) {
+        $output['PrimaryDate'] = $chunk['PrimaryDate'];		// Note, this is guesswork. Hasn't been added to API yet.
+      }
+    }
+  }
+  return $output;
+}
+
+function _bipac_vote($zip, &$object) {
+  $object = bipac_object();
+  if ($success = $object->FromZIPListGOTV($zip)) {
+    $json = $object->FromZIPListGOTV_data;
+  }
+  else {
+    // Done broke
+  }
+
+  // Now we deal with API weirdness
+  if (isset($json[0])) {
+    $data = $json[0];
+    _bipac_vote_fix($data);
+    return $data;
+  }
+  return $data;
+}
+
+function _bipac_request($zip, $bipac_url) {
+  if(!$key = variable_get('bipac_api_api_key', NULL)) {
+    watchdog('BIPAC', 'Please set your BIPAC API key in configuration.', NULL, WATCHDOG_WARNING);
+    return;
+  }
+
+  if(!$g = variable_get('bipac_api_parent', NULL)) {
+    watchdog('BIPAC', 'Please set your BIPAC Org Parent in configuration', NULL, WATCHDOG_WARNING);
+    return;
+  }
+
+  $post_data = array('zip' => $zip, 'g' => $g, 'apikey' => $key);
+
+  $options = array(
+    'method' => 'POST',
+    'data' => http_build_query($post_data),
+    'timeout' => 30,
+    'headers' => array('Content-Type' => 'application/x-www-form-urlencoded'),
+  );
+
+  $result = drupal_http_request($bipac_url, $options);
+  if ((isset($result->code)) && ($result->code == 200) && (isset($result->data))) {
+    $json = json_decode($result->data, TRUE);
+    return $json;
+  }
+  return NULL;
+}
+
+/**
+ * Bipac sends through a lot of empty strings
+ * This removes those fields to ease theming
+ */
+function _bipac_vote_fix(&$data) {
+  foreach ($data as $a => $b) {
+    if (strlen($b) == 0) {
+      unset($data[$a]);
+    }
+    elseif (preg_match("/<[^<]+>/", $b, $m) != 0) {
+      $content = str_replace('</p>.</p>', '</p>', $b);
+      $data[$a] = $content;
+    }
+  }
+}
+
+/**
+ * Add field to system information settings
+ */
+function bipac_vote_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'system_site_information_settings') {
+    $form['bipac']['bipac_vote_results'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bipac Vote Results Page'),
+      '#default_value' => variable_get('bipac_vote_results', 'vote'),
+    );
+    $form['bipac']['bipac_vote_error'] = array(
+      '#type' => 'textfield',
+      '#title' => t('No Vote Results'),
+      '#description' => t('If no results, display this error.'),
+      '#default_value' => variable_get('bipac_vote_error', t('No results for the entered zip')),
+    );
+  }
+}

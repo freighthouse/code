@@ -1,0 +1,85 @@
+.campaign-form {
+  @extend %full-page-feature;
+  .content {
+    padding-right: 0.75em;
+  }
+  #edit-letter.form-wrapper {
+    @include breakpoint($bp-small) {
+      width: 65%;
+      float: right;
+      margin-left: 1%;
+    }
+    #edit-body-display {
+      @extend %serif;
+    }
+  }
+  .personal-info {
+    width: 100%;
+    input[type="submit"] {
+      width: 100%;
+      @include breakpoint($bp-small) {
+        width: auto;
+      }
+    }
+    .form-item-silverpop {
+      padding-top: 1em;
+      label {
+        @include fontsize(14);
+        font-weight: normal;
+      }
+    }
+    @include breakpoint($bp-small) {
+      width: 28%;
+      float: left;
+      margin-left: 1%;
+    }
+  }
+}
+
+.node-type-bipac-campaign .block-system {
+  //@extend %half-page-feature;
+  @extend %half-page-margin-right;
+  .no-take-action & {
+    margin: 0;
+    width: 100%;
+  }
+  > .content {
+    border: none;
+    padding: 0;
+  }
+
+  .node-bipac-campaign{
+    .content{
+      padding: 0;
+      border: none;
+
+      .field-name-body{
+        padding: 1.5em;
+        border: 1px solid $c-light-grey;
+      }
+    }
+  }
+}
+
+.node-type-bipac-campaign .block-bipac-campaigns.campaign-form {
+  .form-wrapper {
+    border: none;
+  }
+  .fieldset-legend {
+    @extend %titletext;
+  }
+}
+
+.view-employee-campaign-issues {
+  .take-action-group-wrapper .content {
+    border: none;
+    padding: 0;
+  }
+  .featured-issue-take-action {
+    @extend %clearfix;
+    clear: both;
+  }
+  .views-row-first.views-row-last .featured-issue-take-action {
+    clear: none;
+  }
+}

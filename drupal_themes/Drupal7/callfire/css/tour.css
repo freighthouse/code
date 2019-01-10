@@ -1,0 +1,304 @@
+/*------------------------------------------------------------------
+[Tour Stylesheet]
+
+Project:  CallFire
+Version:  1.0
+Last change:  11/12/12 
+Last edited by: Nels
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------
+[Table of Contents]
+
+# To search for these elements, include '@' before the search       #
+
+I. PRODUCT MENU
+II. CLIENTS & VIDEO
+III. CONTENT LAYOUT
+
+-------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @PRODUCT MENU
+/*------------------------------------------------------------------*/
+
+#product-menu {
+  margin: 0 -20px;
+  padding: 10px 30px;
+  background: url('../images/tour/bg-product-menu.jpg') 0 0 repeat-x;
+  width: 940px;
+  list-style: none;
+  box-shadow: 0 4px 4px rgba(0,0,0,0.3);
+}
+
+.lt-ie9 #product-menu { 
+  z-index: 5000000;
+}
+
+  #product-menu li {
+    float: left;
+  }
+
+  #product-menu a {
+    width: 109px;
+    display: block;
+    line-height: 15px;
+    padding-left: 55px;
+    text-transform: uppercase;
+    color: #2f2f2f;
+    font-size: 13px;
+    font-weight: bold;
+    background: url('../images/sprites/callfire-features.png') 0 0 no-repeat;
+  }
+
+  #product-menu .text-messaging {
+    padding-left: 48px;
+    background-position: 0 -40px;
+  }
+
+  #product-menu .call-tracking {
+    padding-left: 45px;
+    background-position: 0 -80px;
+    width: 94px;
+  }
+
+  #product-menu .cloud-call-center {
+    padding-left: 52px;
+    background-position: 0 -120px;
+    width: 112px;
+  }
+
+  #product-menu .interactive-voice-response {
+    padding-left: 47px;
+    background-position: 0 -160px;
+    width: 144px;
+  }
+
+  #product-menu .developer-api {
+    padding-left: 40px;
+    background-position: 0 -200px;
+    width: 85px;
+  }
+
+/*------------------------------------------------------------------*/
+/* END PRODUCT MENU
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @CLIENTS & VIDEO
+/*------------------------------------------------------------------*/
+
+#video-and-clients {
+  background: #0D4582 url("../images/bg-product-slider.jpg") 0 0 repeat;
+  box-shadow: 0 0 250px #000000 inset;
+  margin: 0 -20px;
+  padding: 20px;
+  color: #fff;
+}
+
+.lt-ie9 #video-and-clients {
+  z-index: 0;
+  position: relative;
+}
+
+.lt-ie8 #video-and-clients,
+.lt-ie8 .section-tour .product {
+  width: 960px;
+}
+
+#clients div {
+  float: left;
+  height: 92px;
+  width: 92px;
+  background-color: #fff;
+  background: url('../images/sprites/client-logos.jpg') 0 0 no-repeat;
+  margin: 0 12px 12px 0;
+}
+
+.lt-ie8 .grid-2#clients,
+.lt-ie9 .grid-2#clients {
+  width: 310px;
+  margin-right: 0px;
+}
+
+.lt-ie8 #clients div,
+.lt-ie9 #clients div {
+  margin: 0 10px 10px 0;
+}
+
+  #clients div:nth-child(3n+1) {
+    margin-right: 0;
+  }
+
+  #clients .democrats {
+    background-position: 0 -736px;
+  }
+
+  #clients .home-depot {
+    background-position: 0 -644px;
+  }
+
+  #clients .golds-gym {
+    background-position: 0 -552px;
+  }
+
+  #clients .boy-scouts {
+    background-position: 0 -460px;
+  }
+
+  #clients .republicans {
+    background-position: 0 -368px;
+  }
+
+  #clients .curves {
+    background-position: 0 -276px;
+  }
+
+  #clients .sprint {
+    background-position: 0 -184px;
+  }
+
+  #clients .fedex {
+    background-position: 0 -92px;
+  }
+
+/*------------------------------------------------------------------*/
+/* END CLIENTS & VIDEO
+/*------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------*/
+/* @CONTENT LAYOUT
+/*------------------------------------------------------------------*/
+
+.section-tour .product {
+  padding: 50px 20px;
+  margin: 0 -20px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+  .section-tour .product p {
+    margin-bottom: 15px;
+  }
+
+  .section-tour .product ul {
+    margin: 0 0 30px 20px;
+  }
+
+  .section-tour #developer-api {
+    padding-bottom: 0;
+    border-bottom: 0;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff)); /* Chrome,Safari4+ */
+    background-image: -webkit-linear-gradient(top, #eee 0%, #fff 5%);   
+    background-image:    -moz-linear-gradient(top, #eee 0%, #fff 5%); 
+    background-image:     -ms-linear-gradient(top, #eee 0%, #fff 5%); 
+    background-image:      -o-linear-gradient(top, #eee 0%, #fff 5%); 
+    background-image:         linear-gradient(to bottom, #eee 0%, #fff 5%);  /* current standard, but unimplemented */  
+  }
+
+  .section-tour a.button {
+    -webkit-appearance: none;
+  }
+
+  #text-messaging,
+  #cloud-call-center {
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff), color-stop(95%,#fff), color-stop(100%,#eee)); /* Chrome,Safari4+ */
+    background-image: -webkit-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);   
+    background-image:    -moz-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+    background-image:     -ms-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+    background-image:      -o-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+    background-image:         linear-gradient(to bottom, #eee 0%, #fff 5%, #fff 95%, #eee 100%);  /* current standard, but unimplemented */  
+  }
+
+.section-tour #content h2 {
+  font-size: 24px;
+  line-height: 30px;
+  margin-bottom: 15px;
+  color: inherit;
+  font-weight: bold;
+}
+
+.section-tour #content h3 {
+  font-size: 16px;
+  line-height: 24px;
+  margin-bottom: 0;
+}
+
+/* background images */
+.section-tour #voice-broadcast {
+  background: url('../images/tour/voice-broadcast.jpg') right bottom no-repeat;
+}
+
+.section-tour #text-messaging {
+  background: url('../images/tour/text-messaging.jpg'),
+              -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff), color-stop(95%,#fff), color-stop(100%,#eee)); /* Chrome,Safari4+ */
+  background: url('../images/tour/text-messaging.jpg'),
+              -webkit-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);   
+  background: url('../images/tour/text-messaging.jpg'),
+              -moz-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: url('../images/tour/text-messaging.jpg'),
+              -ms-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);
+  background: url('../images/tour/text-messaging.jpg')
+              -o-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: url('../images/tour/text-messaging.jpg')
+              linear-gradient(to bottom, #eee 0%, #fff 5%, #fff 95%, #eee 100%);  /* current standard, but unimplemented */  
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+  .lt-ie10 .section-tour #text-messaging {
+    background: url('../images/tour/text-messaging.jpg') left center no-repeat;
+  }
+
+.section-tour #call-tracking {
+  background: url('../images/tour/call-tracking.jpg') right bottom no-repeat;
+}
+
+.section-tour #cloud-call-center {
+  background: url('../images/tour/cloud-call-center.jpg'),
+              -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff), color-stop(95%,#fff), color-stop(100%,#eee)); /* Chrome,Safari4+ */
+  background: url('../images/tour/cloud-call-center.jpg'),
+              -webkit-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);   
+  background: url('../images/tour/cloud-call-center.jpg'),
+              -moz-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: url('../images/tour/cloud-call-center.jpg'),
+              -ms-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%);
+  background: url('../images/tour/cloud-call-center.jpg')
+              -o-linear-gradient(top, #eee 0%, #fff 5%, #fff 95%, #eee 100%); 
+  background: url('../images/tour/cloud-call-center.jpg')
+              linear-gradient(to bottom, #eee 0%, #fff 5%, #fff 95%, #eee 100%);  /* current standard, but unimplemented */  
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+  .lt-ie10 .section-tour #cloud-call-center {
+    background: url('../images/tour/cloud-call-center.jpg') left center no-repeat;
+  }
+
+.section-tour #hosted-ivr {
+  background: url('../images/tour/ivr.jpg') right center no-repeat;
+}
+
+.section-tour #developer-api {
+  background: url('../images/tour/api.png'),
+              -webkit-gradient(linear, left top, left bottom, color-stop(0,#eee), color-stop(5%,#fff)); /* Chrome,Safari4+ */
+  background: url('../images/tour/api.png'),
+              -webkit-linear-gradient(top, #eee 0%, #fff 5%);   
+  background: url('../images/tour/api.png'),
+              -moz-linear-gradient(top, #eee 0%, #fff 5%); 
+  background: url('../images/tour/api.png'),
+              -ms-linear-gradient(top, #eee 0%, #fff 5%);
+  background: url('../images/tour/api.png')
+              -o-linear-gradient(top, #eee 0%, #fff 5%); 
+  background: url('../images/tour/api.png')
+              linear-gradient(to bottom, #eee 0%, #fff 5%);  /* current standard, but unimplemented */  
+  background-position: left bottom;
+  background-repeat: no-repeat;
+}
+
+  .lt-ie10 .section-tour #developer-api {
+    background: url('../images/tour/api.png') left bottom no-repeat;
+  }
+
+/*------------------------------------------------------------------*/
+/* END CONTENT LAYOUT
+/*------------------------------------------------------------------*/

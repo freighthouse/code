@@ -1,0 +1,13 @@
+.page-literacy-network-volunteer {
+  .get-involved-text-box {
+    .btn-blue-rif {
+      text-align: center;
+    }
+    @media (min-width: 768px) {
+      .btn-blue-rif {
+        bottom: 3em;
+        position: absolute;
+      }
+    }
+  }
+}

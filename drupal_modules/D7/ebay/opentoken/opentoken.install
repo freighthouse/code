@@ -1,0 +1,15 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: neemehta
+ * Date: 4/6/14
+ * Time: 5:13 PM
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function opentoken_uninstall() {
+  variable_del('opentoken_config_agent');
+  variable_del('opentoken_sso_url');
+}

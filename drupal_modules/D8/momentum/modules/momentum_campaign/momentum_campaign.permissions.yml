@@ -1,0 +1,30 @@
+add campaign entities:
+  title: 'Create new Campaign entities'
+
+administer campaign entities:
+  title: 'Administer Campaign entities'
+  description: 'Allow to access the administration form to configure Campaign entities.'
+  restrict access: true
+
+delete campaign entities:
+  title: 'Delete Campaign entities'
+
+edit campaign entities:
+  title: 'Edit Campaign entities'
+
+view published campaign entities:
+  title: 'View published Campaign entities'
+
+view unpublished campaign entities:
+  title: 'View unpublished Campaign entities'
+
+view all campaign revisions:
+  title: 'View all Campaign revisions'
+
+revert all campaign revisions:
+  title: 'Revert all Campaign revisions'
+  description: 'Role requires permission <em>view Campaign revisions</em> and <em>edit rights</em> for campaign entities in question or <em>administer campaign entities</em>.'
+
+delete all campaign revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Campaign revisions</em> and <em>delete rights</em> for campaign entities in question or <em>administer campaign entities</em>.'

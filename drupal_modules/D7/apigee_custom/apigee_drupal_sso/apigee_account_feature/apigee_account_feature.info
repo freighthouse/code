@@ -1,0 +1,9 @@
+name = apigee_account_feature
+core = 7.x
+package = Features
+dependencies[] = apigee_sso_ui
+dependencies[] = context
+dependencies[] = ctools
+features[context][] = apigee_account
+features[ctools][] = context:context:3
+features[features_api][] = api:2

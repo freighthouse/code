@@ -1,0 +1,1726 @@
+<?php
+
+	/* ****************************************
+	 * 			Set up permissions
+	 * **************************************** */
+	/**
+	 * Implements hook_permission()
+	 */
+	function content_bundles_permission() {
+		return array(
+			'administer Content Bundles' => array(
+				'title' => t('Administer My Content Bundles'),
+				'description' => t('Perform Administration Tasks for the Content Bundles'),
+			),
+			'configure popup modals' => array(
+				'title' => t('Configure Popup Modals'),
+				'description' => t('Configure Popup Modals'),
+			)
+		);
+	}
+
+	/* ****************************************
+	 * 		Create Menu Endpoints
+	 * **************************************** */
+	/**
+	 * Implements hook_menu().
+	 */
+	function content_bundles_menu() {
+		$items = array();
+
+		$items['content-bundles/about'] = array(
+			'title' => 'About My Favorites',
+			'page callback' => 'content_bundles_about',
+			'access arguments' => array('access content')
+		);
+
+		$items['admin/config/content/default_campaign'] = array (
+			'title' => 'Default Content Campaign',
+			'description' => t('Configure the default content campaign to be used on the site.'),
+			'page callback' => 'drupal_get_form',
+			'page arguments' => array('default_campaign_form'),
+			'access arguments' => array('administer Content Bundles'),
+			'file' => 'content_bundles.config.inc',
+		);
+
+		$items['admin/config/content/pop-up-modals'] = array(
+			'title' => 'Pop Up Modals',
+			'description' => t('Configure the auto pop up modal for the home page'),
+			'page callback' => 'drupal_get_form',
+			'page arguments' => array('config_pop_up_modal_form'),
+			'access arguments' => array('configure popup modals'),
+			'file' => 'content_bundles.config.inc',
+		);
+
+		return $items;
+	}
+
+	function content_bundles_preprocess_page(&$vars) {
+		$paths_to_show_popup = array();
+		$vars['auto_popup_message'] = NULL;
+
+		if(variable_get('content_bundles_popup_modal_toggle')) {
+			$current_path = current_path();
+			if(variable_get('content_bundles_popup_modal_show_on_rif_home')){
+				$paths_to_show_popup[] = 'home';
+			}
+			if(variable_get('content_bundles_popup_modal_show_on_literacy_network_home')){
+				$paths_to_show_popup[] = 'literacy-network';
+			}
+			if(variable_get('content_bundles_popup_modal_show_on_literacy_central_home')){
+				$paths_to_show_popup[] = 'literacy-central';
+			}
+//			dsm($paths_to_show_popup);
+//			dsm($current_path);
+			if(in_array($current_path, $paths_to_show_popup)) {
+				$vars['auto_popup_message'] = check_markup(variable_get('content_bundles_popup_modal_body_text')['value'], variable_get('content_bundles_popup_modal_body_text')['format']);
+				$vars['auto_popup_message_footer'] = check_markup(variable_get('content_bundles_popup_modal_footer_text')['value'], variable_get('content_bundles_popup_modal_footer_text')['format']);
+			}
+		}
+	}
+
+	/* ****************************************
+	 * 			Page Definitions
+	 * **************************************** */
+	function content_bundles_about() {
+		$content = array();
+		$content['raw_markup'] = array(
+			'#type' => 'markup',
+			'#markup' => '<p>A Content Bundle allows admin users to schedule content to display throughout the site.</p>'
+		);
+		return $content;
+	}
+
+	/* ****************************************
+	 * 		Define Themeable elements
+	 * **************************************** */
+	function content_bundles_theme() {
+		return array(
+			'featured_destinations' => array(
+				'variables' => array('items' => NULL),
+//				'template' => 'content-bundle-featured-destinations',
+			),
+			'featured_resources' => array(
+				'variables' => array('items' => NULL),
+			),
+			'featured_banners' => array(
+				'variables' => array('items' => NULL),
+			),
+			'featured_welcome_dropdown' => array(
+				'variables' => array('items' => NULL),
+			),
+			'rif_sliders' => array(
+				'variables' => array('items' => NULL),
+			),
+			'ln_sliders' => array(
+				'variables' => array('items' => NULL),
+			),
+			'lc_sliders' => array(
+				'variables' => array('items' => NULL),
+			),
+			'lc_piler' => array(
+				'variables' => array('items' => NULL),
+			),
+			'navigation_layout' => array(
+				'variables' => array('nav_sections' => NULL),
+			),
+		);
+	}
+
+	function theme_rif_sliders($variables) {
+		$output = '';
+		$output .= '<div class="slick-slider slick-slider-literacy-central-banners slick-slider-rif-home-page-banners">';
+		foreach($variables['items'] as $pos => $item) {
+			$output .= '	<div class="slide'.($pos == 0 ? ' slide-active' : '') .'">';
+			$node_to_load = node_view($item);
+			$output .= drupal_render($node_to_load);
+			$output .= '	</div>';
+		}
+		$output .= '</div>';
+
+		return $output;
+	};
+
+	/**
+	 * @param $variables
+	 * $variables (array):
+	 * - header_nav
+	 * - persistent_nav
+	 * - logo_html
+	 * - main_nav
+	 * - sub_nav
+	 *
+	 * @return string
+	 */
+	function theme_navigation_layout($variables) {
+		//dsm($variables['nav_sections']);
+		$output = '';
+		$output .= '<div class="rif-banner">
+
+	<div class="container-fluid">
+
+		<div class="container">
+
+			<nav class="navbar">
+				<div class="container-fluid">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#rif-navigation" aria-expanded="false">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						<div class="btn-group visible-xs visible-sm top-mobile-button-group" role="group">
+							' . $variables['nav_sections']['persistent_nav'] . '
+						</div>
+						' . $variables['nav_sections']['logo_html'] . '
+					</div>
+					<div class="no-collapse">
+						<ul class="nav navbar-nav navbar-right">
+							' . $variables['nav_sections']['main_nav'] . '
+							<li>
+								<div class="btn-group hidden-xs hidden-sm" role="group">
+								' . $variables['nav_sections']['persistent_nav'] . '
+								</div>
+							</li>
+						</ul>
+						<ul class="nav navbar-nav navbar-right sub-nav">
+							' . $variables['nav_sections']['sub_nav'] . '
+						</ul>
+						<p class="navbar-text">
+							' . $variables['nav_sections']['header_nav'] . '
+						</p>
+					</div>
+
+					<div class="collapse navbar-collapse" id="rif-navigation">
+						<ul class="nav navbar-nav navbar-right student-hide">
+						' . $variables['nav_sections']['main_nav'] . '
+						</ul>
+						<ul class="nav navbar-nav navbar-right sub-nav">
+							' . $variables['nav_sections']['sub_nav'] . '
+						</ul>
+						<p class="navbar-text">
+							' . $variables['nav_sections']['header_nav'] . '
+						</p>
+
+					</div>
+
+				</div>
+
+			</nav>
+
+		</div>
+
+	</div>
+
+</div>';
+		return $output;
+	}
+
+	function theme_ln_sliders($variables) {
+		$output = '';
+		$output .= '<div class="slick-slider slick-slider-literacy-central-banners slick-slider-ln-home-page-banners">';
+		foreach($variables['items'] as $pos => $item) {
+			$output .= '	<div class="slide'.($pos == 0 ? ' slide-active' : '') .'">';
+			$node_to_load = node_view($item);
+			$output .= drupal_render($node_to_load);
+			$output .= '	</div>';
+		}
+		$output .= '</div>';
+
+		return $output;
+	};
+	function theme_lc_sliders($variables) {
+		$output = '';
+		$output .= '<div class="slick-slider slick-slider-literacy-central-banners slick-slider-ln-home-page-banners">';
+		foreach($variables['items'] as $pos => $item) {
+			$output .= '	<div class="slide'.($pos == 0 ? ' slide-active' : '') .'">';
+			$node_to_load = node_view($item);
+			$output .= drupal_render($node_to_load);
+			$output .= '	</div>';
+		}
+		$output .= '</div>';
+
+		return $output;
+	};
+	function theme_lc_piler($variables) {
+		$output = '';
+		foreach($variables['items'] as $pos => $item) {
+			$node_to_load = node_view($item);
+			$output .= drupal_render($node_to_load);
+		}
+		return $output;
+	};
+
+	function theme_featured_banners($variables) {
+		$output = '';
+		$output .= '<div class="slick-slider slick-slider-literacy-central-banners">';
+		foreach($variables['items'] as $pos => $item) {
+			$output .= '	<div class="slide'.($pos == 0 ? ' slide-active' : '') .'">';
+			$node_to_load = node_view($item);
+			$output .= drupal_render($node_to_load);
+			$output .= '	</div>';
+		}
+		$output .= '</div>';
+
+		return $output;
+	}
+	function theme_featured_destinations($variables) {
+		$colors_array = ['blue','yellow','red','green'];
+
+		$output = '';
+		$output .= '<div class="featured-destination-block">';
+		$output .= '	<div class="container">';
+		$output .= '		<div class="row">';
+		foreach($variables['items'] as $pos => $item) {
+			$output .= '		<div class="col-xs-12 col-sm-6 col-md-3">';
+			$node_to_load = node_view(node_load($item->nid));
+			$node_to_load['#node']->field_color = $colors_array[$pos];
+			$output .= render($node_to_load);
+			$output .= '		</div>';
+		}
+		$output .= '		</div>';
+		$output .= '	</div>';
+		$output .= '</div>';
+
+		return $output;
+	}
+	function theme_featured_resources($variables) {
+		$output = '';
+		$output .= '<div class="brand-container">';
+		$output .= '	<svg class="svg" xmlns="http://www.w3.org/2000/svg" width="261.406" height="31" viewBox="0 0 261.406 31" fill="#ededed">';
+		$output .= '		<path d="M469,1208h58.953c64.047,0,60.953,30,72,30s8.047-30,71.012-30H729v-1H469v1Z" transform="translate(-468.906 -1207)"/>';
+		$output .= '	</svg>';
+		$output .= '	<h3>Featured Resources</h3>';
+		$output .= '		<div class="container">';
+		$output .= '			<div class="row">';
+		foreach($variables['items'] as $item) {
+			$output .= '			<div class="col-xs-12 col-sm-6 col-md-3">';
+			$node_to_load = node_view(node_load($item->nid), 'teaser');
+			$output .= render($node_to_load);
+			$output .= '			</div>';
+		}
+		$output .= '			</div>';
+		$output .= '		</div>';
+		$output .= '	</div>';
+//		$output = 'Loop Over Items and print them here';
+
+		return $output;
+	}
+	function theme_featured_welcome_dropdown($variables) {
+		$output = '';
+
+		$dropdownMenu = theme('links',array('links' => $variables['items'], 'attributes' => array('class'=>'dropdown-menu')));
+
+		$activeItemHTML = 'unknown';
+
+		foreach($variables['items'] as $pos => $item) {
+			if(empty($item['attributes'])) continue;
+			if(in_array('active-trail', $item['attributes']['class'])) {
+				$activeItemHTML = $item['title'];
+			}
+		}
+
+		$output .= '<div class="dropdown">
+						<button class="btn dropdown-toggle btn-lg" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+						  '.$activeItemHTML.'
+						  <span class="caret"></span>
+						</button>
+						'.$dropdownMenu.'
+						<!--<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+						  <li><a href="landing-teachers.html">Educators</a></li>
+						  <li class="active"><a href="#">Parents</a></li>
+						  <li><a href="landing-community.html">Community</a></li>
+						</ul>-->
+					</div>';
+		return $output;
+	}
+
+	/* ****************************************
+	 * 		Menu Hooks
+	 * **************************************** */
+
+	/* ****************************************
+	 * 		Add Custom Block Hooks
+	 * **************************************** */
+	/**
+	 * Implements hook_block_info().
+	 */
+	function content_bundles_block_info() {
+		/* ****************************
+		 * Literacy Central Blocks
+		 * **************************** */
+		// Define Featured Banners
+		$blocks['featured_banners_educators'] = array(
+			'info' => t('Featured Banners Educators'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['featured_banners_parents'] = array(
+			'info' => t('Featured Banners Parents'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['featured_banners_community'] = array(
+			'info' => t('Featured Banners Community'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		// Define Featured Welcome Header
+		$blocks['featured_welcome_header'] = array(
+			'info' => t('Featured Welcome Header'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		// Define Featured Destinations
+		$blocks['featured_destinations_educators'] = array(
+			'info' => t('Featured Destinations Educators'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['featured_destinations_parents'] = array(
+			'info' => t('Featured Destinations Parents'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['featured_destinations_community'] = array(
+			'info' => t('Featured Destinations Community'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		// Define Featured Resources
+		$blocks['featured_resources_educators'] = array(
+			'info' => t('Featured Resources Educators'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['featured_resources_parents'] = array(
+			'info' => t('Featured Resources Parents'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['featured_resources_community'] = array(
+			'info' => t('Featured Resources Community'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		/* ****************************
+		 * RIF Campaign Blocks
+		 * **************************** */
+		$blocks['rif_home_sliders'] = array(
+			'info' => t('RIF Home Page Sliders'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+
+		/* ****************************
+		 * General Content Blocks
+		 * **************************** */
+		// Define Admin Block
+		$blocks['admin_current_campaign'] = array(
+			'info' => t('Current Campaign'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		// Define Top Nav Blocks
+		$blocks['rif_top_navigation'] = array(
+			'info' => t('RIF Top Navigation'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['lc_top_navigation'] = array(
+			'info' => t('LC Top Navigation'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+		$blocks['ln_top_navigation'] = array(
+			'info' => t('LN Top Navigation'), // The name that will appear in the block list.
+			'cache' => DRUPAL_NO_CACHE,
+		);
+
+		// Define Rif Separator
+		$blocks['rif_panel_separator'] = array(
+			'info' => t('rif_panel_separator'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+		$blocks['rif_back_nav'] = array(
+			'info' => t('RIF Back Nav'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+
+		// Define Rif Content Campaign Blocks
+		$blocks['ln_home_sliders'] = array(
+			'info' => t('LN Home Page Sliders'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+		$blocks['lc_home_sliders'] = array(
+			'info' => t('LC Home Page Sliders'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+		$blocks['lc_home_piler'] = array(
+			'info' => t('LC Piler'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+
+		// Define My Profile Block
+		$blocks['ln_my_profile'] = array(
+			'info' => t('My Profile'), // The name that will appear in the block list.
+			'cache' => DRUPAL_CACHE_GLOBAL,
+		);
+		return $blocks;
+	}
+
+	/**
+	 * Implements hook_block_view().
+	 *
+	 * This hook generates the contents of the blocks themselves.
+	 */
+	function content_bundles_block_view($delta = '') {
+		// The $delta parameter tells us which block is being requested.
+		$block = [];
+		switch ($delta) {
+			/* Literacy Central Campaign Blocks */
+			case 'featured_welcome_header':
+				$block['subject'] = t('Featured Welcome Header'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta);
+				break;
+
+			case 'featured_banners_educators':
+				$block['subject'] = t('Featured Banners Educators'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta , 'educators');
+				break;
+			case 'featured_banners_parents':
+				$block['subject'] = t('Featured Banners Parents'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'parents');
+				break;
+			case 'featured_banners_community':
+				$block['subject'] = t('Featured Banners Parents'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'community');
+				break;
+
+			case 'featured_destinations_educators':
+				$block['subject'] = t('Featured Destination Block Educators'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'educators');
+				break;
+			case 'featured_destinations_parents':
+				$block['subject'] = t('Featured Destination Block Parents'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'parents');
+				break;
+			case 'featured_destinations_community':
+				$block['subject'] = t('Featured Destination Block Parents'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'community');
+				break;
+
+			case 'featured_resources_educators':
+				$block['subject'] = t('Featured Resources Educators'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'educators');
+				break;
+			case 'featured_resources_parents':
+				$block['subject'] = t('Featured Resources Parents'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'parents');
+				break;
+			case 'featured_resources_community':
+				$block['subject'] = t('Featured Resources Parents'); // We are expecting this to get overridden
+				$block['content'] = get_featured_block_contents($delta, 'community');
+				break;
+
+			/* RIF Campaign Blocks */
+			case 'rif_home_sliders':
+				$block['subject'] = t('RIF Home Page Sliders');
+				$block['content'] = _get_rif_home_page_sliders($delta);
+				break;
+
+			/* Literacy Network Campaign Blocks */
+			case 'ln_home_sliders':
+				$block['subject'] = t('LN Home Page Sliders');
+				$block['content'] = _get_ln_home_page_sliders($delta);
+				break;
+
+			/* General Content Blocks */
+			case 'admin_current_campaign':
+				$block['subject'] = t('Admin Current Campaign');
+				$block['content'] = get_admin_block_contents($delta);
+				break;
+
+			case 'rif_top_navigation':
+				$block['subject'] = t('RIF top Navigation');
+				$block['content'] = _get_navigation('_get_rif_top_nav');
+				break;
+			case 'lc_top_navigation':
+				$block['subject'] = t('LC top Navigation');
+				$block['content'] = _get_navigation('_get_lc_top_nav');
+				break;
+			case 'ln_top_navigation':
+				$block['subject'] = t('LN top Navigation');
+				$block['content'] = _get_navigation('_get_ln_top_nav');
+				break;
+
+			case 'rif_panel_separator':
+				$block['subject'] = t('RIF Panel Separator');
+				$block['content'] = _get_rif_panel_separator($delta);
+				break;
+			case 'rif_back_nav':
+				$block['subject'] = t('RIF Back Nav');
+				$block['content'] = _get_rif_back_nav($delta);
+				break;
+			case 'lc_home_sliders':
+				$block['subject'] = t('LC Home Page Sliders');
+				$block['content'] = _get_lc_home_page_sliders($delta);
+				break;
+			case 'lc_home_piler':
+				$block['subject'] = t('LC Piler');
+				$block['content'] = _get_lc_home_page_piler($delta);
+				break;
+
+			/* My Profile Shenanigans */
+			case 'ln_my_profile':
+				$block['subject'] = t('My Profile');
+				$block['content'] = _get_ln_my_profile_data($delta);
+				break;
+		}
+		return $block;
+	}
+
+	/* Set Home Page Blocks
+	 * ---------------------------------------- */
+	function _get_rif_home_page_sliders($delta = '') {
+
+		$default_nid = variable_get('content_bundles_rif_default_campaign');
+
+		$current_campaign = _get_rif_campaign_node_to_use();
+
+		if($default_nid) {
+			$emw_campaign = entity_metadata_wrapper('node', $current_campaign);
+
+			if($emw_campaign->field_rif_homepage_sliders->count() == 0) {
+				$emw_campaign = entity_metadata_wrapper('node', $default_nid);
+				if($emw_campaign->field_rif_homepage_sliders->count() == 0) {
+					watchdog('content_bundles', "The default rif campaign is missing required fields NID: %default_nid", array('%default_nid' => $default_nid), WATCHDOG_ERROR);
+				}
+			}
+
+			$slider_array = $emw_campaign->field_rif_homepage_sliders->value();
+		} else {
+			$slider_array = [node_load(399), node_load(3395), node_load(3480), node_load(3388), node_load(3543)]; //This was the old hardcoded values delete this once we are happy with our deployment.
+		}
+
+		$slider_markup = theme('rif_sliders', array('items' => $slider_array));
+		$result = array(
+			'#markup' => $slider_markup
+		);
+
+		return $result;
+	}
+	function _get_ln_home_page_sliders($delta = '') {
+		$default_nid = variable_get('content_bundles_ln_default_campaign');
+
+		if(!$default_nid) {
+			// IF there is no default nid and then lets assume we are still using the hardcoded vars
+			$slider_array = [node_load(384), node_load(394), node_load(3395)];
+		} else {
+			// otherwise, lets dynamically build the slider array
+			$current_campaign = _get_ln_campaign_node_to_use();
+			if(!$current_campaign) {
+				watchdog('content_bundles', "Default campaign was found but was not set as the current campaign.", NULL, WATCHDOG_ERROR);
+			}
+			$emw_campaign = entity_metadata_wrapper('node', $current_campaign);
+
+			if($emw_campaign->field_ln_homepage_sliders->count() == 0) {
+				$emw_campaign = entity_metadata_wrapper('node', $default_nid);
+				if($emw_campaign->field_ln_homepage_sliders->count() == 0) {
+					watchdog('content_bundles', "The default ln campaign is missing required fields NID: %default_nid", array('%default_nid' => $default_nid), WATCHDOG_ERROR);
+				}
+			}
+
+			$slider_array = $emw_campaign->field_ln_homepage_sliders->value();
+		}
+
+		$slider_markup = theme('ln_sliders', array('items' => $slider_array));
+
+		$result = array(
+			'#markup' => $slider_markup
+		);
+		return $result;
+	}
+	function _get_lc_home_page_sliders($delta = '') {
+		$default_nid = variable_get('content_bundles_default_campaign');
+
+		if(!$default_nid) {
+			// IF there is no default nid and then lets assume we are still using the hardcoded vals
+			$slider_array = [node_load(3386),node_load(5688),node_load(5683), node_load(3406), node_load(3407)];
+		} else {
+			// otherwise, lets dynamically build the slider array
+			$current_campaign = _get_lc_campaign_node_to_use();
+
+
+			if(!$current_campaign) {
+				watchdog('content_bundles', "Default campaign was found but was not set as the current campaign.", NULL, WATCHDOG_ERROR);
+			}
+			$emw_campaign = entity_metadata_wrapper('node', $current_campaign);
+
+			if(!$emw_campaign->__isset('field_lc_homepage_sliders')) {
+				// The field we are looking for doesn't exist so we assume we are still using the hardcoded vals
+				$slider_array = [node_load(3386),node_load(5688),node_load(5683), node_load(3406), node_load(3407)];
+			} else {
+				if($emw_campaign->field_lc_homepage_sliders->count() == 0) {
+					$emw_campaign = entity_metadata_wrapper('node', $default_nid);
+					if ($emw_campaign->field_lc_homepage_sliders->count() == 0) {
+						watchdog('content_bundles', "The default lc campaign is missing required fields NID: %default_nid", array('%default_nid' => $default_nid), WATCHDOG_ERROR);
+					}
+				}
+				$slider_array = $emw_campaign->field_lc_homepage_sliders->value();
+			}
+		}
+
+		$slider_markup = theme('lc_sliders', array('items' => $slider_array));
+		//$campaign_wrapper = entity_metadata_wrapper('node', $campaign_node);
+		//$featured_banner_array = $campaign_wrapper->{'field_banner_bucket_'.$userType}->value();
+		$result = array(
+			'#markup' => $slider_markup
+			//'#markup' => "LN HOME PAGE"
+		);
+		return $result;
+	}
+	function _get_lc_home_page_piler($delta = '') {
+		$slider_array = [node_load(3289), node_load(3292), node_load(3293)];
+//		$hard_coded_node = node_load(384);
+//		$node_html = node_view($hard_coded_node);
+		$slider_markup = theme('lc_piler', array('items' => $slider_array));
+		//$campaign_wrapper = entity_metadata_wrapper('node', $campaign_node);
+		//$featured_banner_array = $campaign_wrapper->{'field_banner_bucket_'.$userType}->value();
+		$result = array(
+			'#markup' => $slider_markup,
+			//'#markup' => "LN HOME PAGE"
+		);
+		return $result;
+	}
+
+	/* Set Top Navigation Blocks
+	 * ---------------------------------------- */
+	function _get_navigation($type = '_get_rif_top_nav') {
+
+		// Banner switching
+		$is_search = (arg(0) == 'search' || (arg(0) == 'literacy_central' && arg(1) == 'search'));
+		if ($is_search && isset($_COOKIE['Drupal_visitor_site_section'])) {
+			switch ($_COOKIE['Drupal_visitor_site_section']) {
+				case 'literacy-central':
+					$type = '_get_lc_top_nav';
+					break;
+				case 'literacy-network':
+					$type = '_get_ln_top_nav';
+					break;
+				default:
+					$type = '_get_rif_top_nav';
+			}
+		}
+
+		$nav_sections = $type();
+
+		$slider_markup = theme('navigation_layout', array('nav_sections' => $nav_sections));
+		$result = array(
+			'#markup' => $slider_markup
+		);
+
+		return $result;
+	}
+
+	function _get_rif_top_nav() {
+		// Set Logo
+	 	//----------------------------------------
+		$nav_sections['logo_html'] = '<a class="navbar-brand navbar-brand-rif" href="/">Reading is Fundamental</a>';
+
+		// Set Header Nav
+		//----------------------------------------
+		$header_menu = menu_tree('menu-social-media-header-menu');
+		$nav_sections['header_nav'] = '<a href="/newsletter-signup">Sign up for our newsletter!</a>' . render($header_menu);
+
+		// Set Main Nav
+		//----------------------------------------
+		$menu = menu_tree('menu-rif-top-nav');
+		$nav_sections['main_nav'] = render($menu);
+
+		// Set Persistent Nav
+		//----------------------------------------
+		$persistent_menu = menu_tree('menu-persistent-menu');
+		if(!empty($persistent_menu[2382])) {
+			$persistent_menu[2382]['#href'] .= '&s_src=main_button';
+		}
+		$nav_sections['persistent_nav'] = render($persistent_menu);
+
+		// Set Sub Nav
+		//----------------------------------------
+		$sub_menu = menu_tree('menu-root-menu');
+		$nav_sections['sub_nav'] = render($sub_menu);
+		return $nav_sections;
+	}
+
+	function _get_ln_top_nav($delta = '') {
+		// Set Logo
+		//----------------------------------------
+		$nav_sections['logo_html'] = '
+			<div class="logo-wrapper logo-wrapper-ln">
+				<a href="/" class="logo-rif-link"><img class="logo-rif" src="'.'/sites/all/themes/custom/rif2018/build/img/logo-rif-lg.png'.'" alt="Literacy Network" /></a>
+				<img class="logo-divider" src="'.'/sites/all/themes/custom/rif2018/build/img/logo-rif-divider.png'.'" alt="" />
+				<a href="/literacy-network" class="logo-rif-ln-link"><img class="logo-ln" src="'.'/sites/all/themes/custom/rif2018/build/img/logo-rif-literacy-network.png'.'" alt="Literacy Network" /></a>
+			</div>';
+
+		// Set Header Nav
+		//----------------------------------------
+		$header_menu = menu_tree('menu-social-media-header-menu');
+		$nav_sections['header_nav'] = _get_top_welcome_message() . render($header_menu);
+
+		// Set Main Nav
+		//----------------------------------------
+		$menu = menu_tree('menu-ln-top-nav');
+		$nav_sections['main_nav'] = render($menu);
+
+		// Set Persistent Nav
+		//----------------------------------------
+		$persistent_menu = menu_tree('menu-persistent-menu');
+		if(!empty($persistent_menu[2382])) {
+			$persistent_menu[2382]['#href'] .= '&s_src=literacy_network';
+		}
+		$nav_sections['persistent_nav'] = render($persistent_menu);
+
+		// Set Sub Nav
+		//----------------------------------------
+		$sub_menu = menu_tree('menu-ln-user-menu');
+		$nav_sections['sub_nav'] = _get_ln_quick_link_html() . render($sub_menu);
+		return $nav_sections;
+	}
+	function _get_lc_top_nav($delta = '') {
+
+		// Set Logo
+		//----------------------------------------
+		$nav_sections['logo_html'] = '<div class="logo-wrapper logo-wrapper-lc">
+				<a href="/" class="logo-rif-link"><img class="logo-rif" src="'.'/sites/all/themes/custom/rif2018/build/img/logo-rif-lg.png'.'" alt="Literacy Network" /></a>
+				<img class="logo-divider" src="'.'/sites/all/themes/custom/rif2018/build/img/logo-rif-divider.png'.'" alt="" />
+				<a href="/literacy-central" class="logo-rif-lc-link"><img class="logo-lc" src="'.'/sites/all/themes/custom/rif2018/build/img/logo-rif-literacy-central.png'.'" alt="Literacy Central" /></a>
+			</div>';
+
+		// Set Header Nav
+		//----------------------------------------
+		$header_menu = menu_tree('menu-social-media-header-menu');
+		$nav_sections['header_nav'] = _get_top_welcome_message() . render($header_menu);
+
+		// Set Main Nav
+		//----------------------------------------
+		$tools_menu = menu_tree('menu-literacy-tools');
+    $nav_sections['main_nav'] = render($tools_menu);
+
+    // Set Persistent Nav
+		//----------------------------------------
+		$persistent_menu = menu_tree('menu-persistent-menu');
+		if(!empty($persistent_menu[2382])){
+			$persistent_menu[2382]['#href'] .= '&s_src=literacy_central';
+		}
+		$nav_sections['persistent_nav'] = render($persistent_menu);
+
+		// Set Sub Nav
+		//----------------------------------------
+		$sub_menu = menu_tree('user-menu');
+		$nav_sections['sub_nav'] = render($sub_menu);
+		return $nav_sections;
+	}
+
+	function _get_ln_footer($delta = '') {
+
+	}
+
+	/* Set Temp Program Tracking Node
+	 * ---------------------------------------- */
+	function _get_ln_my_profile_data() {
+		$markup = '';
+		global $user;
+
+		$type = 'literacy_network';
+		$profile = profile2_load_by_user($user->uid);
+
+//		$ln_role = user_role_load_by_name('Community Member');
+//		$has_ln_role = user_has_role($ln_role->rid);
+		$has_ln_role = _user_has_LN_account($user);
+
+		if(empty($profile[$type])) {
+			//dsm("No LC Profile Found");
+			$profile[$type] = profile_create(array('type' => $type, 'uid' => $user->uid));
+		}
+
+		// If user doesn't have a Community Member Role then jump out of this form
+		if(!$has_ln_role) {
+			return;
+		}
+
+		if (!$profile[$type]->field_community_user_type) {
+			dsm("The system encountered an unexpected error while accessing your account. Please contact your site administrator for more information.");
+			watchdog('rif_registration', "A user (%email) has a LN profile but doesn't have a community_user_type set.", array('%email' => $user->mail), WATCHDOG_ERROR);
+			return;
+		}
+
+		$community_user_type = $profile[$type]->field_community_user_type;
+
+		//Sort out the types of this user has identified as
+		$selected_type_names = [];
+		foreach($community_user_type['und'] as $pos => $item) {
+			$emw_term = entity_metadata_wrapper('taxonomy_term', $item['tid']);
+			$selected_type_names[] = $emw_term->name->value();
+		}
+
+		if(empty($selected_type_names)) {
+			return;
+		}
+
+
+		if(in_array('Volunteer', $selected_type_names)) {
+			$has_volunteer_type = true;
+			$markup .= '<strong>Volunteer Options</strong><ul><li><a href="/literacy-network/submit-volunteer-hours">Manage Volunteer Hours</a></li></ul>';
+		}
+
+		// Check if there is a partnership-profile that I am the author of
+		if(in_array('Partner', $selected_type_names)) {
+			$has_partner_type = true;
+			$type = 'partnership_profile';
+			$query = new EntityFieldQuery;
+			$result = $query
+				->entityCondition('entity_type', 'node')
+				//->propertyCondition('status', 1)
+				->propertyCondition('type', $type)
+				->propertyCondition('uid', $user->uid)
+				->execute();
+
+			$partnership_account_markup = '<strong>Partner Profile</strong>';
+			$partnership_account_markup .= '<ul>';
+			if($result) {
+				//If they do have a result than give the link here...
+				foreach($result['node'] as $nid => $item) {
+					$emw_partnership_node = entity_metadata_wrapper('node', $nid);
+					if($emw_partnership_node->status->value()) {
+						$partnership_account_markup .= '<li><a href="'.$emw_partnership_node->url->value().'">'.$emw_partnership_node->label().'</a></li>';
+					} else {
+						$partnership_account_markup .= '<li><a href="/node/'.$nid.'/edit">'.$emw_partnership_node->label().'</a></li>';
+					}
+				}
+			} else {
+				// Otherwise, provide a link for them to create their own account.
+				$partnership_account_markup .= '<li>You have not yet created your partner profile. <a href="/node/add/partnership-profile">Click here to create one now</a>.</li>';
+			}
+			$partnership_account_markup .= '</ul>';
+			$markup .= $partnership_account_markup;
+		}
+
+		if(in_array('Single Site', $selected_type_names)) {
+			$has_single_site_type = true;
+			$single_site_account_markup = '<p><strong>Single Site Profile</strong></p>';
+
+			// Check if there exists a Single Site that user is the author of (That is also not part of a multi-site)
+			$type = 'site_profile';
+			$result = FALSE;
+			$query = new EntityFieldQuery;
+			$result = $query
+				->entityCondition('entity_type', 'node')
+				->propertyCondition('type', $type)
+				->propertyCondition('uid', $user->uid)
+				->execute();
+
+			if($result) {
+				$single_site_account_markup .= '<ul>';
+				foreach($result['node'] as $nid => $item) {
+
+					$emw_site_node = entity_metadata_wrapper('node', $nid);
+					if($emw_site_node->status->value()) {
+						$single_site_account_markup .= '
+							<li><a href="'.$emw_site_node->url->value().'">'.$emw_site_node->field_site_name->value().'</a></li>
+						';
+					} else {
+						$single_site_account_markup .= '
+							<li><a href="/literacy-network/site-profile/edit/'.$nid.'">'.$emw_site_node->field_site_name->value().'</a></li>
+						';
+					}
+
+				}
+				//$single_site_account_markup .= '<li><a href="/node/add/site-profile">Add another stand alone site.</a></li>'; // This was removed for phase 1
+				$single_site_account_markup .= '</ul>';
+			} else {
+				// There was no single site assigned to this user even though they chose single site as a user type.
+				// provide a link for them to create their own account.
+				$single_site_account_markup .= '<ul><li>You have not created your site profile yet - <a href="/node/add/site-profile">Click here to create one now</a>.</li></ul>';
+			}
+			$markup .= $single_site_account_markup;
+		}
+
+		// Check if the user has the multi site user type
+		if(in_array('Multi Site', $selected_type_names)) {
+			$has_multi_site_type = true;
+			$multi_site_account_markup = '<p><strong>Multi-Site Profile</strong></p>';
+			$type = 'multi_site_profile';
+			$query = new EntityFieldQuery;
+			$result = $query
+				->entityCondition('entity_type', 'node')
+				->propertyCondition('type', $type)
+				->propertyCondition('uid', $user->uid)
+				->execute();
+
+			$multi_site_account_markup .= '<ul>';
+			// Check if there is a multi-site that I am the author of
+			if($result) {
+				// If so and they have a multi-site profile to their account then show the link to the account
+				foreach($result['node'] as $nid => $item) {
+					$emw_site_node = entity_metadata_wrapper('node', $nid);
+					if($emw_site_node->status->value()) {
+						$multi_site_account_markup .= '
+							<li><a href="'.$emw_site_node->url->value().'">'.$emw_site_node->field_site_name->value().'</a></li>';
+					} else {
+						$multi_site_account_markup .= '
+							<li><a href="/node/'.$nid.'/edit">'.$emw_site_node->field_site_name->value().'</a></li>';
+					}
+				}
+			} else {
+				// Otherwise, provide a link for them to create their own account.
+				$multi_site_account_markup .= '<li>You have not yet created your multi-site profile. <a href="/node/add/multi-site-profile">Click here to create one now</a>.</li>';
+			}
+			$multi_site_account_markup .= '</ul>';
+			$markup .= $multi_site_account_markup;
+		}
+
+		//Check if user has RIF Of profile
+		if(in_array('RIF Of', $selected_type_names)) {
+			$has_rif_of_type = true;
+			$rif_of_account_markup = '<p><strong>RIF Of Profile</strong></p>';
+			$type = 'rif_of';
+			$query = new EntityFieldQuery;
+			$result = $query
+				->entityCondition('entity_type', 'node')
+				->propertyCondition('type', $type)
+				->propertyCondition('uid', $user->uid)
+				->execute();
+
+			$rif_of_account_markup .= '<ul>';
+			// Check if there is a RIF Of that I am the author of
+			if($result) {
+				// If so and they have a RIF Of profile to their account then show the link to the account
+				foreach($result['node'] as $nid => $item) {
+					$emw_site_node = entity_metadata_wrapper('node', $nid);
+					if($emw_site_node->status->value()) {
+						$rif_of_account_markup .= '<li><a href="'.$emw_site_node->url->value().'">'.$emw_site_node->field_site_name->value().'</a></li>';
+					} else {
+						$rif_of_account_markup .= '<li><a href="/node/'.$nid.'/edit">'.$emw_site_node->field_site_name->value().'</a></li>';
+					}
+				}
+			} else {
+				// Otherwise, provide a link for them to create their own account.
+				$rif_of_account_markup .= '<li>You have not yet created your RIF Of profile. <a href="/node/add/rif-of">Click here to create one now</a>.</li>';
+			}
+			$rif_of_account_markup .= '</ul>';
+			$markup .= $rif_of_account_markup;
+		}
+
+//		$markup = '<div class="container">'.$markup.'</div>';
+		$result = array(
+			'#markup' => $markup
+		);
+		return $result;
+	}
+
+	/* Set Random Items
+	 * ---------------------------------------- */
+	function _get_rif_panel_separator($delta = '') {
+		$markup = '
+	<div class="section-border-container">
+		<div class="section-border">
+
+			<div class="section-left">
+
+			  <div class="line"></div>
+
+			</div>
+			<div class="section-middle">
+			  <svg class="shadow" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+				<path fill-rule="evenodd" d="M1200.000,-0.000 C1200.000,-0.000 674.943,-0.000 645.000,-0.000 C615.057,-0.000 601.397,11.991 600.000,12.000 C598.603,12.009 585.000,-0.000 555.000,-0.000 C551.434,-0.000 -0.000,-0.000 -0.000,-0.000 L-0.000,11.960 C-0.000,11.960 525.000,11.960 555.000,11.960 C591.000,11.960 594.795,37.920 600.000,37.960 C605.205,38.000 609.000,11.960 645.000,11.960 C674.661,11.960 1200.000,11.960 1200.000,11.960 L1200.000,-0.000 Z"/>
+			  </svg>
+			</div>
+			<div class="section-right">
+
+			  <div class="line"></div>
+
+			</div>
+      </div>
+	</div>
+		';
+		$result = array(
+			'#markup' => $markup
+		);
+
+		return $result;
+	}
+	function _get_rif_back_nav($delta = '') {
+		$markup = '<div class="rif-back-nav"></div>';
+
+		$result = array(
+			'#markup' => $markup
+		);
+
+		return $result;
+	}
+	function get_admin_block_contents($which_block) {
+		$itemsToReturn = array();
+		$default_nid = variable_get('content_bundles_default_campaign');
+
+		switch ($which_block) {
+			case 'admin_current_campaign':
+				$results = db_select('node','n')
+					->fields('n', array('nid'))
+					->condition('type', 'content_campaign_lc')
+					->condition('status', 1)
+					->execute()
+					->fetchCol();
+
+				$campaign_nodes = node_load_multiple($results);
+
+				$defaultCampaign = NULL;
+				$currentCampaigns = [];
+				$otherCampaigns = [];
+
+				$now = strtotime('now');
+				foreach($campaign_nodes as $pos => $campaign) {
+					$emw_campaign = entity_metadata_wrapper('node', $campaign);
+					if($emw_campaign->getIdentifier() == $default_nid) {
+						$defaultCampaign = $emw_campaign;
+						continue;
+					}
+					$campaign_start_date = strtotime($emw_campaign->field_date_range->value()['value']);
+					$campaign_end_date = strtotime($emw_campaign->field_date_range->value()['value2'] . ' +1 day');
+
+					if($campaign_start_date <= $now && $campaign_end_date >= $now) {
+						$currentCampaign[] = $emw_campaign;
+						continue;
+					}
+					$otherCampaigns[] = $emw_campaign;
+				}
+
+				if(!empty($currentCampaign)) {
+					foreach($currentCampaign as $pos => $item) {
+						$itemsToReturn[] = '<strong>Current Campaign</strong>: <a href="/node/' . $item->getIdentifier() . '/edit">' . $item->label() . ' (' . $item->getIdentifier() . ')</a>';
+					}
+				}
+				if($defaultCampaign) {
+					$itemsToReturn[] = '<strong>Default Campaign</strong>: <a href="/node/' . $defaultCampaign->getIdentifier() . '/edit">' . $defaultCampaign->label() . ' (' . $defaultCampaign->getIdentifier() . ')</a>';
+				}
+				if(!empty($otherCampaigns)) {
+					foreach($otherCampaigns as $pos => $item) {
+						$itemsToReturn[] = '<strong>Other Campaign ['.($pos + 1).']</strong>: <a href="/node/' . $item->getIdentifier() . '/edit">' . $item->label() . ' (' . $item->getIdentifier() . ')</a>';
+					}
+				}
+				$itemsToReturn[] = '<strong>New Campaign: </strong><a href="/node/add/content-campaign-lc">Make a New Campaign</a>';
+				break;
+
+		}
+
+		$result = array(
+//			'#markup' => 'test',
+			'#items' => $itemsToReturn,
+			'#theme' => 'item_list',
+		);
+		return $result;
+	}
+
+	/**
+	 * A module-defined block content function.
+	 */
+	function get_featured_block_contents($which_block, $userType=NULL) {
+		$default_nid = variable_get('content_bundles_default_campaign');
+		$default_node_wrapper = NULL; //This will be loaded later
+
+		$current_campaign_nid = $default_nid; // For now assume there is no overriding campaign so we use the default
+
+		//Set up the query
+		$query = db_select('node','n')
+			->fields('n', array('nid'))
+			->condition('type', 'content_campaign_lc')
+			->condition('status', 1);
+
+		//Get the nodes from the query results
+		$results = $query->execute()->fetchCol();
+		$campaign_nodes = node_load_multiple($results);
+		$campaign_node = NULL;
+
+		//Go through each node checking the date range to see if the campaign is currently running
+		$now = strtotime('now');
+		foreach($campaign_nodes as $pos => $campaign) {
+			$emw_campaign = entity_metadata_wrapper('node', $campaign);
+			if($emw_campaign->getIdentifier() == $default_nid) {
+				$default_node_wrapper = $emw_campaign;
+				continue;
+			}
+			$campaign_start_date = strtotime($emw_campaign->field_date_range->value()['value']);
+			$campaign_end_date = strtotime($emw_campaign->field_date_range->value()['value2'] . ' +1 day');
+
+			if($campaign_start_date <= $now && $campaign_end_date >= $now) {
+				$campaign_node = $campaign;
+				$current_campaign_nid = $emw_campaign->getIdentifier();
+//				dsm("Valid Campaign Found!");
+//				dsm($campaign_node);
+			}
+		}
+
+		if($default_node_wrapper == NULL) {
+			watchdog('content_bundles', "No Default Campaign found",array(), WATCHDOG_ERROR);
+		}
+
+		if($campaign_node == NULL) {
+			//dsm("No campaign was found... Set campaign to the default");
+			$campaign_node = $default_node_wrapper;
+		}
+
+		$campaign_wrapper = entity_metadata_wrapper('node', $campaign_node);
+
+
+		//Now that we:
+		// - Have the node of the current campaign (default or overridden)
+		// - Know that there is data for this content
+		// ...We can build our block
+
+		$toReturn = '';
+
+		switch ($which_block) {
+			case 'featured_welcome_header':
+				$pageArg = arg(1); // I use switch statements because arg 1 can be injected.
+				$featured_welcome_message = '';
+				switch ($pageArg) {
+					case 'parents':
+						$featured_welcome_message = $campaign_wrapper->field_welcome_message_parents->value();
+						break;
+					case 'educators' :
+						$featured_welcome_message = $campaign_wrapper->field_welcome_message_educators->value();
+						break;
+					case 'community' :
+						$featured_welcome_message = $campaign_wrapper->field_welcome_message_community->value();
+						break;
+				}
+
+				// Almost done getting the proper nid of the campaign that has the data we need.
+				// Even if there is an overridding campaign it may not have data set for these fields
+				// so we check that now.
+				if($current_campaign_nid != $default_nid) {
+					// We are using an overridden campaign so check if the campaign actually has data to override
+					if(empty($featured_welcome_message)) {
+						// Good thing we checked, the campaign overriding the default doesn't have content
+						// Lets go back and use the content set in the default
+						switch ($pageArg) {
+							case 'parents':
+								$featured_welcome_message = $default_node_wrapper->field_welcome_message_parents->value();
+								break;
+							case 'educators' :
+								$featured_welcome_message = $default_node_wrapper->field_welcome_message_educators->value();
+								break;
+							case 'community' :
+								$featured_welcome_message = $default_node_wrapper->field_welcome_message_community->value();
+								break;
+						}
+					}
+				}
+
+				if(sizeof($featured_welcome_message) == 0) {
+					//The default campaign is empty! This is no Bueno
+					watchdog('content_bundles', "Empty Content Source for Campaign: Featured Destinations",array(), WATCHDOG_ERROR);
+				}
+
+				$svgHtml = '<svg class="svg" xmlns="http://www.w3.org/2000/svg" width="261.406" height="31" viewBox="0 0 261.406 31">
+					  			<path d="M469,1208h58.953c64.047,0,60.953,30,72,30s8.047-30,71.012-30H729v-1H469v1Z" transform="translate(-468.906 -1207)"/>
+							</svg>';
+//				dsm(menu_tree('menu-literacy-central-user-types'));
+//				dsm(menu_navigation_links('menu-literacy-central-user-types'));
+
+				$welcome_message_dropdown_HTML = theme('featured_welcome_dropdown', array('items' => menu_navigation_links('menu-literacy-central-user-types')));
+
+				$welcomeMessageHTML = $featured_welcome_message;
+
+				$toReturn = '
+					<div class="welcome-banner">
+					' . $svgHtml . '
+						<div class="container">
+							<div class="row">
+								<div class="welcome-content">
+									<div class="title">
+										<h2>Browse Resources for</h2>
+									</div>
+									<div class="selector">
+										' . $welcome_message_dropdown_HTML . '
+									</div>
+								</div>
+						  </div>
+						</div>
+					</div>
+					';
+				break;
+
+			case 'featured_banners_educators':
+			case 'featured_banners_parents':
+			case 'featured_banners_community':
+				$featured_banner_array = $campaign_wrapper->{'field_banner_bucket_'.$userType}->value();
+
+				if($current_campaign_nid != $default_nid) {
+					if(sizeof($featured_banner_array) == 0) {
+						$campaign_node = node_load($default_nid);
+						$campaign_wrapper = entity_metadata_wrapper('node', $campaign_node);
+						$featured_banner_array = $campaign_wrapper->{'field_banner_bucket_'.$userType}->value();
+					}
+				}
+
+				if(sizeof($featured_banner_array) == 0) {
+					watchdog('content_bundles', "Empty Content Source for Campaign: Featured Banners",array(), WATCHDOG_ERROR);
+					return array('#markup' => $toReturn);
+				}
+
+				$toReturn = theme('featured_banners', array('items' => $featured_banner_array));
+				break;
+
+			case 'featured_destinations_educators' :
+			case 'featured_destinations_parents' :
+			case 'featured_destinations_community' :
+
+				$featured_destination_array = $campaign_wrapper->{'field_fd_bucket_'.$userType}->value();
+				if($current_campaign_nid != $default_nid) {
+					if(sizeof($featured_destination_array) == 0) {
+						$campaign_node = node_load($default_nid);
+						$campaign_wrapper = entity_metadata_wrapper('node', $campaign_node);
+						$featured_destination_array = $campaign_wrapper->{'field_fd_bucket_'.$userType}->value();
+					}
+				}
+
+				if(sizeof($featured_destination_array) == 0) {
+					//The default campaign is empty! This is no Bueno
+					watchdog('content_bundles', "Empty Content Source for Campaign: Featured Destinations",array(), WATCHDOG_ERROR);
+					return array('#markup' => $toReturn);
+				}
+
+				$toReturn = theme('featured_destinations', array('items' => $featured_destination_array));
+				break;
+
+			case 'featured_resources_educators':
+			case 'featured_resources_parents':
+			case 'featured_resources_community':
+				$featured_resources_array = $campaign_wrapper->{'field_fr_bucket_'.$userType}->value();
+
+				if($current_campaign_nid != $default_nid) {
+					if(sizeof($featured_resources_array) == 0) {
+						$campaign_node = node_load($default_nid);
+						$campaign_wrapper = entity_metadata_wrapper('node', $campaign_node);
+						$featured_resources_array = $campaign_wrapper->{'field_fr_bucket_'.$userType}->value();
+					}
+				}
+
+				if(sizeof($featured_resources_array) == 0) {
+					watchdog('content_bundles', "Empty Content Source for Campaign: Featured Resources",array(), WATCHDOG_ERROR);
+					return array('#markup' => $toReturn);
+				}
+
+				$toReturn = theme('featured_resources', array('items' => $featured_resources_array));
+				break;
+		}
+
+		$result = array(
+			'#markup' => $toReturn,
+		);
+		return $result;
+	}
+
+	function _get_campaign_node_to_use($field_to_check) {
+
+	}
+
+	function _get_rif_campaign_node_to_use() {
+		$default_nid = variable_get('content_bundles_rif_default_campaign');
+
+		$query = new EntityFieldQuery();
+		$related_multi_sites = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('type', 'content_campaign_rif')
+			->propertyCondition('status',1);
+
+		$result = $query->execute();
+
+		$nids = array_keys($result['node']);
+		//remove the default nid from the list
+		$nids_to_check = array_diff($nids, array($default_nid));
+
+		//Go through each node checking the date range to see if the campaign is currently running
+		$now = strtotime('now');
+		$current_campaign_nid = $default_nid;
+		foreach($nids_to_check as $pos => $campaign) {
+			$emw_campaign = entity_metadata_wrapper('node', $campaign);
+			$campaign_start_date = strtotime($emw_campaign->field_date_range->value()['value']);
+			$campaign_end_date = strtotime($emw_campaign->field_date_range->value()['value2'] . ' +1 day');
+
+			if($campaign_start_date <= $now && $campaign_end_date >= $now) {
+				$current_campaign_nid = $emw_campaign->getIdentifier();
+			}
+		}
+		return $current_campaign_nid;
+	}
+
+	function _get_ln_campaign_node_to_use() {
+		$default_nid = variable_get('content_bundles_ln_default_campaign');
+		if(!$default_nid) { return FALSE; }
+
+		$query = new EntityFieldQuery();
+		$related_multi_sites = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('type', 'content_campaign_ln')
+			->propertyCondition('status',1);
+
+		$result = $query->execute();
+
+		$nids = array_keys($result['node']);
+		//remove the default nid from the list
+		$nids_to_check = array_diff($nids, array($default_nid));
+
+		//Go through each node checking the date range to see if the campaign is currently running
+		$now = strtotime('now');
+		$current_campaign_nid = $default_nid;
+		foreach($nids_to_check as $pos => $campaign) {
+			$emw_campaign = entity_metadata_wrapper('node', $campaign);
+			$campaign_start_date = strtotime($emw_campaign->field_date_range->value()['value']);
+			$campaign_end_date = strtotime($emw_campaign->field_date_range->value()['value2'] . ' +1 day');
+
+			if($campaign_start_date <= $now && $campaign_end_date >= $now) {
+				$current_campaign_nid = $emw_campaign->getIdentifier();
+			}
+			// It is known that if multiple campaigns are running simultaneously then the last created campaign is chosen.
+		}
+		return $current_campaign_nid;
+	}
+
+	function _get_lc_campaign_node_to_use() {
+		$default_nid = variable_get('content_bundles_default_campaign');
+
+		$query = new EntityFieldQuery();
+		$related_multi_sites = $query
+			->entityCondition('entity_type', 'node')
+			->propertyCondition('type', 'content_campaign_lc')
+			->propertyCondition('status',1);
+
+		$result = $query->execute();
+
+		$nids = array_keys($result['node']);
+		//remove the default nid from the list
+		$nids_to_check = array_diff($nids, array($default_nid));
+
+		//Go through each node checking the date range to see if the campaign is currently running
+		$now = strtotime('now');
+		$current_campaign_nid = $default_nid;
+		foreach($nids_to_check as $pos => $campaign) {
+			$emw_campaign = entity_metadata_wrapper('node', $campaign);
+			$campaign_start_date = strtotime($emw_campaign->field_date_range->value()['value']);
+			$campaign_end_date = strtotime($emw_campaign->field_date_range->value()['value2'] . ' +1 day');
+
+			if($campaign_start_date <= $now && $campaign_end_date >= $now) {
+				$current_campaign_nid = $emw_campaign->getIdentifier();
+			}
+			// It is known that if multiple campaigns are running simultaneously then the last created campaign is chosen.
+		}
+		return $current_campaign_nid;
+	}
+
+	function _get_ln_quick_link_html($account = NULL) {
+
+		// Check if we should use the currently logged in user of was one specified
+		if($account == NULL) {
+			global $user;
+			$account = $user;
+		}
+
+		// If the user is not logged in then this shouldn't appear anything.
+		if($account->uid === 0) {
+			return '';
+		}
+
+		// Check if the user has a literacy network account
+		$has_ln_role = _user_has_LN_account($account);
+
+		// If the user doesn't have an LN account then just show a my account button linking to my-account page
+		if(!$has_ln_role) {
+			return '<li class="first last leaf"><a href="/literacy-network/my-account">My Account</a></li>';
+		}
+
+		// If the user does have an LN account then we need to create our cool little drop down.
+		$my_account_drop_down = '';
+
+		// Set up some vars we need
+		$profile = profile2_load_by_user($user->uid);
+		$type = 'literacy_network';
+
+		// Quick sanity Check
+		if (!$profile[$type]->field_community_user_type) {
+			dsm("The system encountered an unexpected error while accessing your account. Please contact your site administrator for more information.");
+			watchdog('rif_registration', "A user (%email) has a LN profile but doesn't have a community_user_type set.", array('%email' => $user->mail), WATCHDOG_ERROR);
+			return;
+		}
+
+		$has_user_type = _get_ln_user_type_array($account); // returns array of user types this user has
+
+		/*// Get an array of LN user types this user has
+		$community_user_type = $profile[$type]->field_community_user_type;
+		$selected_type_names = [];
+		foreach($community_user_type['und'] as $pos => $item) {
+			$emw_term = entity_metadata_wrapper('taxonomy_term', $item['tid']);
+			$selected_type_names[] = $emw_term->name->value();
+		}
+
+		// Get boolean list of has types
+		$has_volunteer = in_array('Volunteer', $selected_type_names);
+		$has_single_site = in_array('Single Site', $selected_type_names);
+		$has_multi_site = in_array('Multi Site', $selected_type_names);
+		$has_rif_of = in_array('RIF Of', $selected_type_names);
+		$has_partner = in_array('Partner', $selected_type_names);*/
+
+		if($has_user_type['has_volunteer']) {
+			$my_account_drop_down .= '<li><a href="/literacy-network/submit-volunteer-hours">Volunteer Tracking</a></li>';
+		}
+
+		// Build the My Profile link depending on the users profile options.
+		$profile_tracking_accounts = $has_user_type['has_single_site'] + $has_user_type['has_multi_site'] + $has_user_type['has_rif_of'];
+		$profile_type_accounts = $profile_tracking_accounts + $has_user_type['has_partner'];
+
+		/**
+		 * Type					| 	Link
+		 * ----------------------------------------------------
+		 * site_profile			|	site-profile
+		 * multi_site_profile	| 	multi-site-profile
+		 * rif_of				| 	rif-of
+		 * partnership_profile	| 	partnership-profile
+		 *
+		 */
+
+		$type = array();
+		//'site_profile','multi_site_profile','rif_of','partnership_profile'
+		if ($has_user_type['has_single_site']) { $type[] = 'site_profile'; }
+		if ($has_user_type['has_multi_site']) { $type[] = 'multi_site_profile'; }
+		if ($has_user_type['has_rif_of']) { $type[] = 'rif_of'; }
+		if ($has_user_type['has_partner']) { $type[] = 'partnership_profile'; }
+
+		/**
+		 * Paths for Quick Links
+		 * 1. I have 0 User types												-> Don't show any profile option
+		 * 2. I have 1 User type that has no profile created 					-> Link = Add page of that node type
+		 * 3. I have 1 User type has has a profile drafted 						-> Link = Edit Page of that node
+		 * 4. I have 1 User type that has a completed profile 					-> Link = View Page of that node
+		 * 5. I have 1 User type that has more than one profile in any state 	-> Link = Bridge Page
+		 * 6. I have 2 or More User types 										-> Link = Bridge Page
+		 */
+		if($type) {
+
+			$result = FALSE;
+			$query = new EntityFieldQuery;
+			$result = $query
+				->entityCondition('entity_type', 'node')
+				//->propertyCondition('status', 1) // NOTE: Unpublished nodes should still be found
+				->propertyCondition('type', $type, 'IN')
+				->propertyCondition('uid', $user->uid)
+				->execute();
+
+			$profiles = _sort_query_results_by_type($result);
+
+			if (sizeof($type) > 1 || sizeof($profiles) > 1 || sizeof(reset($profiles)) > 1) {
+				// If The user has more than 1 profile type or if the user has more than one profile
+				// then show the bridge page
+				//$my_account_drop_down .= '<li><a href="/literacy-network/my-profile">My Profile</a></li>';
+				$link = '/literacy-network/my-profile';
+			} else {
+				$site_type_url = str_replace('_','-',$type[0]);
+				if(sizeof($profiles) == 0) {
+					$link = '/node/add/'.$site_type_url;
+				} else {
+					// We have a single profile to display - so lets parse it and do some things.
+					$current_type = array_keys($profiles)[0]; // Grabs are guaranteed 1 profile
+					$current_result = $profiles[$current_type];
+					$current_nid = array_keys($current_result)[0];
+
+					$emw_current_profile_node = entity_metadata_wrapper('node', $current_nid);
+					// If node is published link to the node view page
+					if($emw_current_profile_node->status->value()) {
+						$link = $emw_current_profile_node->url->value();//'/' . drupal_get_path_alias('node/' . $current_nid);
+					} else {
+						switch($type[0]){
+							case 'site_profile':
+								$link = '/literacy-network/site-profile/edit/'.$current_nid;//'/' . drupal_get_path_alias('node/' . $current_nid);
+								break;
+							default:
+								$link = '/node/'.$current_nid.'/edit';
+						}
+					}
+				}
+			}
+			$my_account_drop_down .= '<li><a href="' . $link . '">My Profile</a></li>';
+
+			/*if ($profile_type_accounts === 1) {
+				//If the user has exactly 1 user type selected than we will take them directly to that profile page
+				$link = '/';
+				if ($has_user_type['has_single_site']) {
+					$type = 'site_profile';
+
+					$result = FALSE;
+					$query = new EntityFieldQuery;
+					$result = $query
+						->entityCondition('entity_type', 'node')
+						->propertyCondition('status', 1)
+						->propertyCondition('type', $type)
+						->propertyCondition('uid', $user->uid)
+						->execute();
+
+					if ($result) {
+						// We found the node, lets give them the link directly to the edit page
+						// Use the first result in the very rare case there is more than 1
+						$site_nid = array_values($result['node'])[0]->nid;
+						$link = '/' . drupal_get_path_alias('node/' . $site_nid);
+					} else {
+						// If no result was found that means this user hasn't filled out the form yet. Lets send them to the add page
+						$link = '/node/add/site-profile';
+					}
+				} elseif ($has_user_type['has_multi_site']) {
+					$type = 'multi_site_profile';
+
+					$result = FALSE;
+					$query = new EntityFieldQuery;
+					$result = $query
+						->entityCondition('entity_type', 'node')
+						->propertyCondition('status', 1)
+						->propertyCondition('type', $type)
+						->propertyCondition('uid', $user->uid)
+						->execute();
+
+					if ($result) {
+						//We found the node, lets give them the link directly to the edit page
+						// Use the first result in the very rare case there is more than 1
+						$site_nid = array_values($result['node'])[0]->nid;
+						$link = '/' . drupal_get_path_alias('node/' . $site_nid);
+					} else {
+						// If no result was found that means this user hasn't filled out the form yet. Lets send them to the add page
+						$link = '/node/add/multi-site-profile';
+					}
+				} elseif ($has_user_type['has_rif_of']) {
+					$type = 'rif_of';
+
+					$result = FALSE;
+					$query = new EntityFieldQuery;
+					$result = $query
+						->entityCondition('entity_type', 'node')
+						->propertyCondition('status', 1)
+						->propertyCondition('type', $type)
+						->propertyCondition('uid', $user->uid)
+						->execute();
+
+					if ($result) {
+						//We found the node, lets give them the link directly to the edit page
+						// Use the first result in the very rare case there is more than 1
+						$site_nid = array_values($result['node'])[0]->nid;
+						$link = '/' . drupal_get_path_alias('node/' . $site_nid);
+					} else {
+						// If no result was found that means this user hasn't filled out the form yet. Lets send them to the add page
+						$link = '/node/add/rif-of';
+					}
+				} elseif ($has_user_type['has_partner']) {
+					$type = 'partnership_profile';
+
+					$result = FALSE;
+					$query = new EntityFieldQuery;
+					$result = $query
+						->entityCondition('entity_type', 'node')
+						->propertyCondition('status', 1)
+						->propertyCondition('type', $type)
+						->propertyCondition('uid', $user->uid)
+						->execute();
+
+					if ($result) {
+						//We found the node, lets give them the link directly to the edit page
+						// Use the first result in the very rare case there is more than 1
+						$site_nid = array_values($result['node'])[0]->nid;
+						$link = '/' . drupal_get_path_alias('node/' . $site_nid);
+					} else {
+						// If no result was found that means this user hasn't filled out the form yet. Lets send them to the add page
+						$link = '/node/add/partnership-profile';
+					}
+				} else {
+					dsm("The system encountered an unexpected error. Please contact your site administrator if you are unable to proceed.");
+					watchdog('rif_registration', "A user (%email) apparently has at least 1 profile account but no profile type was found.", array('%email' => $user->mail), WATCHDOG_ERROR);
+
+				}
+
+				$my_account_drop_down .= '<li><a href="' . $link . '">My Profile</a></li>';
+
+			} elseif ($profile_type_accounts > 1) {
+				$my_account_drop_down .= '<li><a href="/literacy-network/my-profile">My Profile</a></li>';
+			}*/
+		}
+		// Build the My Profile link depending on the users profile options.
+// 			// Bookstore should only appear if, you have filled out the BOOK Discount SA
+//			/*if($profile_tracking_accounts >= 1) {
+//				$my_account_drop_down .= '
+//					 <li><a href="/literacy-network/program-tracking">Program Tracking</a></li>
+//					 <li><a href="http://www.rif.mykleo.com/">Bookstore</a></li>
+//				';
+//			}*/
+
+		// Every user has the Edit account option (This option was requested to always be last for every user)
+		$my_account_drop_down .= '<li><a href="/literacy-network/my-account">Edit Account</a></li>';
+
+		return '<li type="button"><a href="/" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">My Account <span class="caret"></span></a>
+				<ul class="dropdown-menu">'. $my_account_drop_down .'</ul></li>';
+	}
+
+	function _get_top_welcome_message($account = NULL) {
+		$toReturn = '';
+		// Use the current logged in user if a particular user wasn't specified
+		if($account == NULL) {
+			global $user;
+			$account = $user;
+		}
+
+		if($account->uid === 0) {
+			$toReturn = '<a href="/newsletter-signup">Sign up for our newsletter!</a>';
+		} else {
+			$emw_user = entity_metadata_wrapper('user', $user);
+
+			// Setup the correct url my account page
+			$base_url = arg(0);
+			if($base_url != 'literacy-network' && $base_url != 'literacy-central'){
+				$base_url = 'user';
+			}
+			$toReturn = '<a href="/'.$base_url.'/my-account">Welcome, '.$emw_user->field_first_name->value() .'</a>';
+		}
+
+		return $toReturn;
+	}
+
+	/* ****************************************
+	 * 			Helper Functions
+	 * **************************************** */
+	function _user_has_LN_account($account) {
+		$ln_role = user_role_load_by_name('Community Member');
+		return user_has_role($ln_role->rid, $account);
+	}
+
+	function _get_ln_user_type_array($account) {
+		$profile = profile2_load_by_user($account->uid);
+		$type = 'literacy_network';
+
+		// Get an array of LN user types this user has
+		$community_user_type = $profile[$type]->field_community_user_type;
+		$selected_type_names = [];
+		foreach($community_user_type['und'] as $pos => $item) {
+			$emw_term = entity_metadata_wrapper('taxonomy_term', $item['tid']);
+			$selected_type_names[] = $emw_term->name->value();
+		}
+
+		$toReturn = [];
+		// Get boolean list of has types
+		$toReturn['has_volunteer'] = in_array('Volunteer', $selected_type_names);
+		$toReturn['has_single_site'] = in_array('Single Site', $selected_type_names);
+		$toReturn['has_multi_site'] = in_array('Multi Site', $selected_type_names);
+		$toReturn['has_rif_of'] = in_array('RIF Of', $selected_type_names);
+		$toReturn['has_partner'] = in_array('Partner', $selected_type_names);
+
+		return $toReturn;
+	}
+
+	function _sort_query_results_by_type($results) {
+		$toReturn = [];
+		if(empty($results)) {
+			return $toReturn;
+		}
+		if(isset($results['node'])) {
+			foreach($results['node'] as $nid => $node) {
+				$toReturn[$node->type][$nid] = $node;
+			}
+		}
+		return $toReturn;
+	}

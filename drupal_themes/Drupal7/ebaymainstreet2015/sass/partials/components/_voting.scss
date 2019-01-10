@@ -1,0 +1,103 @@
+.block-bipac-vote {
+  li {
+    @include fontsize(16);
+    line-height: 1.6;
+    margin: 1em 0;
+    h5 {
+      @include fontsize(18);
+      font-weight: normal;
+      margin: 0;
+    }
+  }
+}
+
+.election-date-list {
+  @extend %clearfix;
+}
+
+.election-date-list-item {
+  margin: 0 1em;
+  display: inline;
+  float: left;
+  max-width: 200px;
+  text-align: center;
+  .election-date {
+    @include fontsize(30);
+    text-transform: uppercase;
+    background-color: $c-white;
+    color: $c-black;
+    border: solid 2px $c-blue;
+    border-top: solid 30px $c-blue;
+    padding: .5em .5em 1em .5em;
+    margin: .5em 0;
+  }
+  .election-title {
+    @include fontsize(20);
+    background-color: $c-white;
+    padding: 1em 0;
+  }
+}
+
+.vote-accordion {
+  border: 1px solid $c-light-grey;
+  padding: 0 1em;
+  .js & .vote-content{
+    @include transition();
+    overflow: hidden;
+    max-height: 0;
+    margin: 0;
+    &.is-visible {
+      max-height: 1500px;
+      margin-bottom: 1em;
+    }
+  }
+  .js & .vote-accordion-header,
+  .js & .vote-accordion-header * {
+    display: block;
+  }
+}
+
+#vote-register {
+  border-top: 4px solid $c-light-grey;
+}
+
+.vote-accordion-header {
+  @include fontsize(18);
+  a {
+    text-decoration: none;
+    &:before {
+      @extend %plus-icon;
+      color: $c-blue;
+      margin-right: 25px;
+      font-size: 20px;
+    }
+    &:hover,
+    &:focus {
+      text-decoration: none;
+    }
+    &:focus {
+      outline: 1px dotted $c-black;
+    }
+  }
+  &.is-expanded {
+    a {
+      &:before {
+        @extend %minus-icon;
+      }
+    }
+  }
+}
+
+.vote-page-logo-wrapper {
+  text-align: center;
+  @include breakpoint($bp-small) {
+    text-align: center;
+  }
+}
+.vote-page-logo {
+  float: none;
+  @include breakpoint($bp-small) {
+    float: left;
+    margin-right: 1em;
+  }
+}

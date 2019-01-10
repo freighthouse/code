@@ -1,0 +1,5 @@
+name = Puzzle Maker
+description = Adds the puzzle maker extension to the game support materials
+dependencies[] = content_bundles
+dependencies[] = rif_registration
+core = 7.x

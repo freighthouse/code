@@ -1,0 +1,10 @@
+<?php
+/**
+ * Implements hook_init().
+ */
+function mymodule_init() {
+  global $theme_key;
+  if (strpos($theme_key, 'bootstrap')===FALSE) {
+    include_once(drupal_get_path('theme', 'bootstrap') . '/theme/process.inc');
+  }
+}

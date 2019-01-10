@@ -1,0 +1,7 @@
+smartystreets.admin_settings_form:
+  path: 'admin/config/services/smartystreets'
+  defaults:
+    _title: 'SmartyStreets'
+    _form: \Drupal\smartystreets\Form\SmartyStreetsAdminSettingsForm
+  requirements:
+    _permission: 'administer SmartyStreets'

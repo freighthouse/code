@@ -1,0 +1,7 @@
+name = Smarter Streets
+description = PPA Smartystreets Integration.  Called such so as not to conflict with a contrib module of the same name.
+package = PPA2
+core = 7.x
+
+files[] = smartystreets.class.php
+configure = admin/config/system/smarterstreets

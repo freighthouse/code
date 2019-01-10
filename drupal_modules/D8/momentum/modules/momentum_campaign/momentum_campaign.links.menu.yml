@@ -1,0 +1,14 @@
+# Campaign menu items definition
+entity.campaign.collection:
+  title: 'Campaigns'
+  route_name: entity.campaign.collection
+  description: 'List Campaigns'
+  parent: momentum.dashboard
+
+
+# Campaign type menu items definition
+entity.campaign_type.collection:
+  title: 'Campaign types'
+  route_name: entity.campaign_type.collection
+  description: 'List Campaign types'
+  parent: momentum.dashboard

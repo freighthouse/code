@@ -1,0 +1,161 @@
+/*__________________________________@BLOG____________________________________*/
+.section-blog #content ul,
+.section-blog #content ol {
+  margin-left: 20px;
+  margin-bottom: 15px;
+}
+
+.page-blog .view-blog .views-row,
+.page-search-blog .view-blog-search .views-row {
+  margin: 0 0 20px;
+}
+
+.page-blog .view-blog .views-field-body,
+.page-search-blog .view-blog-search .views-field-body {
+  margin: 15px 0;
+}
+
+.page-blog .view-blog .views-field-title-1,
+.page-search-blog .view-blog-search .views-field-title-1 {
+  font-size: 14px;
+}
+
+.page-blog .submitted,
+.page-search-blog .submitted {
+  color: #666;
+}
+
+.page-blog .field-name-body h2,
+.page-search-blog .field-name-body h2 {
+  font-size: 18px;
+}
+
+.view-blog-archives,
+.view-Tags {
+    line-height: 1.4;
+    font-size: 14px;
+}
+  
+.view-blog-archives .views-row,
+.view-Tags .views-row {
+    margin-bottom: 25px;
+}
+
+.view-blog-archives .views-row .views-field-title,
+.view-Tags .views-row .views-field-title {
+    font-size: 18px;
+}
+
+.view-blog-archives .views-field-created, 
+.view-blog-archives .views-field-name,
+.view-Tags .views-field-name,
+.view-Tags .views-label-field-tags {
+    color: #666;
+}
+
+.view-blog-archives .views-field-name,
+.view-Tags .views-field-name {
+    line-height: 24px;
+}
+
+#block-views-tags-block-top-tags .view-Tags li a.active {
+  color: #E68C17;
+  font-weight: bold;
+}
+
+.view-blog-archives .month {
+  margin-left: 20px;
+}
+
+.view-blog-archives .posts {
+  margin-left: 30px;
+}
+
+#block-views-blog-archives-block .views-row {
+  margin-bottom: 5px;
+  font-size: 12px;
+  line-height: 14px;
+  display: none;
+}
+
+a.see-more-tags,
+.collapse-icon {
+  cursor: hand; 
+  cursor: pointer;
+}
+
+.views-exposed-form label {
+  font-weight: bold;
+  margin-bottom: 10px;
+  float: left;
+}
+
+.views-exposed-form .form-item{
+  clear: left;
+  float: left;
+}
+
+.views-exposed-form .views-widget-submit {
+  float: left;
+}
+
+.views-exposed-form .input-append .form-item {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+.views-exposed-form input[type="text"] {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
+     -moz-transition: border linear 0.2s, box-shadow linear 0.2s;
+       -o-transition: border linear 0.2s, box-shadow linear 0.2s;
+          transition: border linear 0.2s, box-shadow linear 0.2s;
+  height: 21px;
+  padding: 4px 6px;
+  color: #555;
+  line-height: 20px;
+  width: 125px;
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+}
+
+.views-exposed-form input[type="text"]:focus {
+  border-color: rgba(82, 168, 236, 0.8);
+  outline: 0;
+  outline: thin dotted \9;
+  /* IE6-9 */
+
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+}
+
+.views-exposed-form .button {
+  font-size: 12px;
+  vertical-align: top;
+  padding: 7px 10px;
+  margin: 0;
+}
+
+.views-exposed-form .input-append input[type="text"] {
+  display: inline-block;
+  -webkit-border-radius: 4px 0 0 4px;
+     -moz-border-radius: 4px 0 0 4px;
+          border-radius: 4px 0 0 4px;
+}
+
+.views-exposed-form .input-append input[type="text"]:focus {
+  z-index: 2;
+}
+
+.views-exposed-form .input-append .button {
+  -webkit-border-radius: 0 4px 4px 0;
+     -moz-border-radius: 0 4px 4px 0;
+          border-radius: 0 4px 4px 0;
+  margin-left: 0px;
+}

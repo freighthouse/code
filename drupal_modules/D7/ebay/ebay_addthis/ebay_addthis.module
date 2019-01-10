@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Implmentation of hook_page_alter
+ */
+function ebay_addthis_page_alter(&$page) {
+  drupal_add_js("var addthis_config = { data_ga_property: 'UA-3967571-3', data_ga_social : true };", array('scope' => 'footer', 'type' => 'inline'));
+  drupal_add_js('//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-52052d3611833e87', array('type' => 'external', 'scope' => 'footer'));
+}
+
+/**
+ * Implementation of hook_node_view
+ */
+function ebay_addthis_node_view($node, $view_mode, $langcode) {
+  if ($node->type == 'news') {
+	  $node->content['ebay_addthis_buttons'] = array(
+      '#markup' => ebay_addthis_buttons_render($node),
+      '#weight' => 10,
+    );
+	}
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function ebay_addthis_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'ebay_addthis'),
+  );
+}
+
+/**
+ * Formats and returns the addthis buttons
+ */
+function ebay_addthis_buttons_render($node) {
+	 $markup = '';
+	 if ($node) {
+	   global $base_url;
+     $markup = '<div class="addthis_toolbox" addthis:url="' . $base_url . '/' . drupal_get_path_alias('node/' . $node->nid) . '" addthis:title="' . $node->title . '">
+<a class="addthis_button_email"></a>
+<a class="addthis_button_google_plusone_share"></a>
+<a class="addthis_button_facebook_like"></a>
+<a class="addthis_button_tweet"></a>
+
+</div>';
+	 }
+	 return $markup;
+}

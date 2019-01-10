@@ -1,0 +1,17 @@
+name: 'Campaigns'
+type: module
+description: 'Provides required taxonomies, a campaign entity, and <em>basic campaign</em> bundle with integration to the Momentum API.'
+core: 8.x
+package: 'Momentum'
+dependencies:
+  - momentum
+  - entity_reference_revisions
+  - taxonomy
+  - telephone
+  - link
+  - image
+  - file
+  - datetime
+  - datetime_range
+  - options
+  - text

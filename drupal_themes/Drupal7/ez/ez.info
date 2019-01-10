@@ -1,0 +1,54 @@
+; The name, description and screenshot used for this theme on the Appearance
+; page at admin/appearance.
+
+name = Ez
+description = Template for Ez Texting
+screenshot = images/screenshot.gif
+
+; This theme is compatible with Drupal 7 core.
+
+core = "7.x"
+project = "ez"
+engine = phptemplate
+
+; Define regions
+
+regions[page_top] = Page top
+regions[header] = Header
+regions[highlight] = Highlight
+regions[help] = Help
+regions[content_top] = Content Top
+regions[content] = Content
+regions[content_bottom] = Content Bottom
+regions[sidebar_first] = First sidebar
+regions[sidebar_right] = Right sidebar
+regions[sidebar_blog] = Blog sidebar
+regions[sidebar_bottom] = Sidebar bottom
+regions[footer] = Footer
+regions[page_bottom] = Page bottom
+regions[purple_header] = Purple Header
+regions[three_column] = Three column
+
+; Stylesheets
+stylesheets[all][] = css/bootstrap.min.css
+stylesheets[all][] = css/font-awesome.min.css
+stylesheets[all][] = css/ez.css
+stylesheets[all][] = css/jquery.fancybox.css
+stylesheets[all][] = css/tooltipster.css
+stylesheets[all][] = css/prettify.css
+stylesheets[all][] = css/responsive.css
+stylesheets[all][] = css/ie.css
+stylesheets[all][] = css/override-main.css
+
+;Tabs for content editing
+stylesheets[all][] = css/tabs.css
+
+;JS for the site
+scripts[] = js/ez.js
+scripts[] = js/fontfaceobserver.js
+scripts[] = js/trunk.js
+scripts[] = js/jquery.lazyload.min.js
+scripts[] = js/prettify.js
+scripts[] = js/jquery.fancybox.min.js
+scripts[] = js/jquery.tooltipster.min.js
+scripts[] = js/override.js

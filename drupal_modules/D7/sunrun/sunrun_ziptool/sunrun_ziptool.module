@@ -1,0 +1,72 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function sunrun_ziptool_block_info()
+{
+    $blocks = array();
+
+    $blocks['ziptool_block'] = array(
+        'info' => t('Sunrun Ziptool'),
+        'cache' => DRUPAL_NO_CACHE,
+    );
+
+    $blocks['ziptool_portal_block'] = array(
+        'info' => t('Sunrun Ziptool Portal'),
+        'cache' => DRUPAL_NO_CACHE,
+    );
+
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+*/
+function sunrun_ziptool_block_view($delta='') {
+    $block = array();
+
+    switch($delta) {
+       case 'ziptool_block':
+           drupal_add_js('sites/all/libraries/sunrunzipcode/sunrunzipcode.js');
+          drupal_add_js(drupal_get_path('module', 'sunrun_ziptool') . '/assets/js/ziptool.js');
+          drupal_add_js('https://maps.googleapis.com/maps/api/js?client=gme-sunruninc1');
+          $block['subject'] = t('Ziptool');
+          $block['content'] = theme('ziptool_block');
+    			break;
+
+        case 'ziptool_portal_block':
+          $block['subject'] = t('Ziptool Portal');
+          $block['content'] = theme('ziptool_portal_block');
+          break;
+    }
+    return $block;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sunrun_ziptool_theme($existing, $type, $theme, $path) {
+	return array(
+		'ziptool_block' => array(
+			'template' => 'templates/block--ziptool',
+		),
+    'ziptool_portal_block' => array(
+			'template' => 'templates/block--ziptool-portal',
+		),
+	);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function sunrun_ziptool_preprocess_block(&$variables) {
+  $munchkin_id = variable_get('munchkin_id');
+
+  // Add settings
+  drupal_add_js(array('sunrun_ziptool' => array(
+        'zipcode' => isset($_POST['ziptool-zipcode']) ? $_POST['ziptool-zipcode'] : ''
+    ),
+  ), 'setting');
+	// dpm($variables);
+}

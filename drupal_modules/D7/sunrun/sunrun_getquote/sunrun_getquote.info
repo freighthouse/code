@@ -1,0 +1,6 @@
+name = Sunrun Get Quote
+description = Module for get quote form stuff
+core = 7.x
+package = Sunrun
+
+dependencies[] = sunrun_ftr_get_quote_form

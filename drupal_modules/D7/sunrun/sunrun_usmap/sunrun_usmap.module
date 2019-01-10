@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function sunrun_usmap_block_info() {
+  $blocks['us_map'] = array(
+    'info' => t('Sunrun: SVG Interactive Map'),
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function sunrun_usmap_block_view($delta = '') {
+  $statesArray = array(
+  	'al'=>'Alabama',
+  	'ak'=>'Alaska',
+  	'as'=>'american samoa',
+  	'az'=>'Arizona',
+  	'ar'=>'Arkansas',
+  	'ca'=>'California',
+  	'co'=>'Colorado',
+  	'ct'=>'Connecticut',
+  	'de'=>'Delaware',
+  	'dc'=>'District of Columbia',
+  	'fm'=>'federated states of micronesia',
+  	'fl'=>'Florida',
+  	'ga'=>'Georgia',
+  	'gu'=>'guam gu',
+  	'hi'=>'Hawaii',
+  	'id'=>'Idaho',
+  	'il'=>'Illinois',
+  	'in'=>'Indiana',
+  	'ia'=>'Iowa',
+  	'ks'=>'Kansas',
+  	'ky'=>'Kentucky',
+  	'la'=>'Louisiana',
+  	'me'=>'Maine',
+  	'mh'=>'marshall islands',
+  	'md'=>'Maryland',
+  	'ma'=>'Massachusetts',
+  	'mi'=>'Michigan',
+  	'mn'=>'Minnesota',
+  	'ms'=>'Mississippi',
+  	'mo'=>'Missouri',
+  	'mt'=>'Montana',
+  	'ne'=>'Nebraska',
+  	'nv'=>'Nevada',
+  	'nh'=>'New Hampshire',
+  	'nj'=>'New Jersey',
+  	'nm'=>'New Mexico',
+  	'ny'=>'New York',
+  	'nc'=>'North Carolina',
+  	'nd'=>'North Dakota',
+  	'mp'=>'northern mariana islands',
+  	'oh'=>'Ohio',
+  	'ok'=>'Oklahoma',
+  	'or'=>'Oregon',
+  	'pw'=>'palau',
+  	'pa'=>'Pennsylvania',
+  	'pr'=>'Puerto Rico',
+  	'ri'=>'Rhode Island',
+  	'sc'=>'South Carolina',
+  	'sd'=>'South Dakota',
+  	'tn'=>'Tennessee',
+  	'tx'=>'Texas',
+  	'ut'=>'Utah',
+  	'vt'=>'Vermont',
+  	'vi'=>'virgin islands',
+  	'va'=>'Virginia',
+  	'wa'=>'Washington',
+  	'wv'=>'West Virginia',
+  	'wi'=>'Wisconsin',
+  	'wy'=>'Wyoming',
+  	'ae'=>'armed forces africa \ canada \ europe \ middle east',
+  	'aa'=>'armed forces america (except canada)',
+  	'ap'=>'armed forces pacific'
+  );
+  $block = array();
+  $sunrunStates = explode(",", preg_replace('/\s+/', '', variable_get('sunrun_states')));
+  foreach ($sunrunStates as $state) {
+    $whereWeAre[$state] = $statesArray[$state];
+  }
+  switch ($delta) {
+    case 'us_map':
+      $block['content'] = theme('sunrun_us_map');
+      drupal_add_js(array(
+        'whereWeAre' => array(
+          $whereWeAre,
+        )
+      ), 'setting');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sunrun_usmap_theme($existing, $type, $theme, $path) {
+  return array(
+    'sunrun_us_map' => array(
+      'template' => 'templates/sunrun-us-map--block',
+    ),
+  );
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function sunrun_usmap_preprocess_sunrun_us_map(&$variables) {
+  drupal_add_js(drupal_get_path('module', 'sunrun_usmap') . '/js/raphael-min.js');
+  drupal_add_js(drupal_get_path('module', 'sunrun_usmap') . '/js/scale.raphael.js');
+  drupal_add_js(drupal_get_path('module', 'sunrun_usmap') . '/js/us-map-svg.js');
+  drupal_add_js(drupal_get_path('module', 'sunrun_usmap') . '/js/map-init.js');
+}
+
+/**
+ * Implement hook_menu().
+ */
+function sunrun_usmap_menu() {
+  $items = array();
+  $items['admin/sunrun/usmap'] = array(
+      'title' => 'US Map configuration',
+      'description' => 'Configure US map',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('sunrun_usmap_settings_admin'),
+      'type' => MENU_NORMAL_ITEM,
+      'access arguments' => array('administer site configuration'),
+      'file' => 'sunrun_usmap.admin.inc',
+  );
+  return $items;
+}

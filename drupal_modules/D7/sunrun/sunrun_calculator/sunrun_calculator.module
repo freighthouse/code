@@ -1,0 +1,169 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function sunrun_calculator_menu() {
+  // Admin menu
+  $items['admin/sunrun/calculator'] = [
+    'title' => 'Solar Calculator Settings',
+    'description' => 'Configuration of content blocks and settings for the Solar Calculator page',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['sunrun_calculator_settings_form'],
+    'access arguments' => ['administer site configuration'],
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'sunrun_calculator.admin.inc',
+  ];
+
+  // Ajax Callbacks
+  $items['rest/v1/savings-analysis'] = array(
+    'title' => 'Retrieve Savings Analysis',
+    'page callback' => 'sunrun_calculator_get_analysis',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'sunrun_calculator.pages.inc',
+  );
+
+  $items['rest/v1/financing-estimate'] = array(
+    'title' => 'Retrieve Financing Estimate',
+    'page callback' => 'sunrun_calculator_get_estimate',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'sunrun_calculator.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function sunrun_calculator_block_info()
+{
+    $blocks['savings_calculator'] = [
+        'info' => t('Savings calculator'),
+        'cache' => DRUPAL_NO_CACHE,
+    ];
+
+    $blocks['savings_calculator_results'] = [
+        'info' => t('Savings calculator results'),
+        'cache' => DRUPAL_NO_CACHE,
+    ];
+
+    return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function sunrun_calculator_block_view($delta = '')
+{
+    $block = [];
+
+    switch ($delta) {
+        case 'savings_calculator':
+            // Google Places
+            if (ENVIRONMENT === 'prod') {
+                drupal_add_js('https://maps.googleapis.com/maps/api/js?key=AIzaSyDjEbzVPdvddZkJBHHLdvga3suluR_JuTI&libraries=places&callback=initAutocomplete', [
+                    'type' => 'external',
+                    'scope' => 'footer',
+                    'group' => JS_THEME,
+                ]);
+            } else {
+                drupal_add_js('https://maps.googleapis.com/maps/api/js?key=AIzaSyBl4Lh27rMPgE0I1zfES7N2UVWDo-NEzGI&libraries=places&callback=initAutocomplete', [
+                    'type' => 'external',
+                    'scope' => 'footer',
+                    'group' => JS_THEME,
+                ]);
+            }
+
+            $block['content'] = theme('savings_calculator_block');
+            break;
+
+        case 'savings_calculator_results':
+            $block['content'] = theme('savings_calculator_results_block');
+            break;
+    }
+
+    return $block;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function sunrun_calculator_theme($existing, $type, $theme, $path)
+{
+    $theme = [
+        'savings_calculator_block' => [
+            'template' => 'templates/block--savings-calculator',
+        ],
+        'savings_calculator_results_block' => [
+            'template' => 'templates/block--savings-calculator-results',
+        ],
+    ];
+
+    return $theme;
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function sunrun_calculator_preprocess_savings_calculator_block(&$variables) {
+
+  $error_redirect_url = variable_get('sunrun_genability_error_redirect_url');
+
+  // Add settings
+  drupal_add_js([
+    'sunrun_calculator' => [
+      'street_number' => isset($_GET['street_number']) ? $_GET['street_number'] : '',
+      'street' => isset($_GET['route']) ? $_GET['route'] : '',
+      'city' => isset($_GET['locality']) ? $_GET['locality'] : '',
+      'state' => isset($_GET['administrative_area_level_1']) ? $_GET['administrative_area_level_1'] : '',
+      'zipcode' => isset($_GET['postal_code']) ? $_GET['postal_code'] : '',
+      'country' => isset($_GET['country']) ? $_GET['country'] : '',
+      'url_lifetime' => variable_get('sunrun_calculator_not_available_url'),
+      'url_available' => variable_get('sunrun_calculator_low_lifetime_url'),
+      'error_redirect_url' => $error_redirect_url,
+    ],
+  ], 'setting');
+
+  // rangeslider
+  drupal_add_js(drupal_get_path('theme', 'sunrun') . '/public/assets/vendor/rangeslider/dist/rangeslider.min.js');
+  // Google Maps autocomplete logic
+  drupal_add_js(drupal_get_path('theme', 'sunrun') . '/public/assets/scripts/address_autocomplete.js');
+  // debounce requests
+  drupal_add_js(drupal_get_path('theme', 'sunrun') . '/source/scripts/debounce.js');
+  // Adding accounting js
+  drupal_add_js(drupal_get_path('module', 'sunrun_calculator') . '/js/accounting.min.js');
+  // Adding main JS file
+  drupal_add_js(drupal_get_path('module', 'sunrun_calculator') . '/js/savings.calculator.js');
+  // Pageid script
+  drupal_add_js('https://www.sunruntransit.com/pageid.js?field_name=Web_User_ID__c&amp;ignore_vid=true&amp;auto_insert=false', [
+    'type' => 'external',
+    'scope' => 'footer',
+    'group' => JS_THEME,
+  ]);
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function sunrun_calculator_libraries_info() {
+  $libraries['php-curl-class'] = array(
+    'name' => 'PHP Curl Class',
+    'vendor url' => 'https://github.com/php-curl-class/php-curl-class',
+    'download url' => 'https://github.com/php-curl-class/php-curl-class',
+    'files' => array(
+      'php' => array(
+        'src/Curl/Curl.php',
+      ),
+    ),
+    'version arguments' => array(
+      'file' => 'src/Curl/Curl.php',
+      'pattern' => '/VERSION = \'(\d+\.\d+\.\d+)/',
+      'lines' => 7,
+    ),
+  );
+
+  return $libraries;
+}

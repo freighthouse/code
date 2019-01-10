@@ -1,0 +1,115 @@
+<?php
+/**
+ * Implements hook_easy_social_widget().
+ */
+
+function sunrun_share_easy_social_widget()
+{
+    return array(
+    'facebook_share' => array(
+      'name' => 'Facebook Share', // apears on admin pages only
+      'markup' => '_sunrun_share_widget_facebook_markup',
+    ),
+    'email' => array(
+      'name' => 'Email Share', // apears on admin pages only
+      'markup' => '_sunrun_share_widget_email_markup',
+    ),
+  );
+}
+/**
+ * Widget markup callback.
+ * This is where you return your widget's markup.
+ *
+ * @param string
+ *   The URL to share.
+ * @param int
+ *   The widget type (horizontal or vertical). This maps to one of the defined
+ *   constants: EASY_SOCIAL_WIDGET_HORIZONTAL or EASY_SOCIAL_WIDGET_VERTICAL.
+ * @param string
+ *   The title to share.
+ * @param string
+ *   The widget's language code. Not all widgets implement i18n so this can
+ *   be ignored and fallback to a default language.
+ * @return string
+ *   A rendered html string.
+ *
+ * @see hook_easy_social_widget()
+ */
+
+function _sunrun_share_widget_facebook_markup($url, $type, $title = null, $lang = 'en')
+{
+    $size = variable_get_value('easy_social_facebook_share_size');
+
+    return <<<HTML
+  <script>(function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.8";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));</script>
+  <div id="fb-root"></div>
+
+  <div class="fb-share-button"
+data-href="{$url}" data-layout="button" data-size="{$size}" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank">Share</a></div>
+HTML;
+}
+
+function _sunrun_share_widget_email_markup($url, $type, $title = null, $lang = 'en')
+{
+    $size = variable_get_value('easy_social_facebook_share_size');
+
+    return <<<HTML
+<a href="mailto:?subject=(Sunrun)={$title}"><i class="glyphicon glyphicon-envelope"></i></a>
+HTML;
+}
+
+function sunrun_share_menu()
+{
+    $items = array();
+    $items['admin/config/content/easy_social/widget-extra/facebook_share'] = array(
+    'title' => 'facebook_share',
+    'description' => 'Extra settings for Facebook Share',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_easy_social_admin_config_extra_facebook_share'),
+    'access arguments' => array('administer easy social'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+    return $items;
+}
+
+function sunrun_share_variable_info()
+{
+    $variables = array();
+
+    $variables['easy_social_facebook_share_size'] = array(
+    'title' => t('Size'),
+    'default' => 'small', // define your variable's default value here
+    'group' => 'easy_social',
+    'token' => false,
+  );
+
+  // repeat for any other variables you want to define
+
+  return $variables;
+}
+
+function _easy_social_admin_config_extra_facebook_share()
+{
+    $form = array();
+
+    $form['easy_social_facebook_share_size'] = array(
+    '#options' => array(
+      'small' => 'small',
+      'large' => 'large',
+    ),
+    '#title' => t('Size'),
+    '#description' => t('The button is offered in 2 sizes i.e. large and small.'),
+    '#default_value' => variable_get_value('easy_social_facebook_share_size'),
+  );
+
+  // repeat for any other variables you want to define
+
+  return $form;
+}

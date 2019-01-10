@@ -1,0 +1,63 @@
+.pac-newsletters .item-list ul {
+  margin: 0;
+  padding: 0;
+  .views-row {
+    list-style-type: none;
+    a {
+      display: block;
+      width: 100%;
+      border-bottom: 1px solid $c-light-grey;
+      margin-top: 1.5em;
+      padding-bottom: 0.5em;
+      &:after {
+        @extend %chevron-right;
+        float: right;
+      }
+    }
+  }
+}
+
+.pac-newsletters .content {
+  padding-top: 1.5em;
+  padding-bottom: 3.5em;
+}
+
+.view-pac-homepage-gallery {
+  .pac-event-title {
+    @include fontsize(32);
+    @extend %helvetica;
+    @extend %light;
+    margin: 0.25em 0;
+    color: $c-blue;
+    text-align: left;
+  }
+  p {
+    margin-top: 0;
+  }
+  .cboxElement {
+    text-align: center;
+    display: block;
+    float: left;
+    width: 98%;
+    margin: 1%;
+    @include breakpoint($bp-tiny) {
+      width: 31%;
+      margin: 1%;
+    }
+    @include breakpoint($bp-small) {
+      width: 18%;
+      margin: 1%;
+    }
+    img {
+      border: 1px solid $c-white;
+      &:hover,
+      &:focus {
+        border: 1px solid $c-blue;
+      }
+    }
+  }
+  .block-divider {
+    padding-top: 0.75em;
+    margin-bottom: 1.5em;
+  }
+}
